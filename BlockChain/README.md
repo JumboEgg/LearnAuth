@@ -1,13 +1,24 @@
-# Sample Hardhat Project
+# Blockchain Project
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a Hardhat Ignition module that deploys that contract.
+## 📦 Installed Dependencies
+This project requires the following Node.js dependencies:
 
-Try running some of the following tasks:
+| Package                          | Version  |
+|----------------------------------|----------|
+| @nomicfoundation/hardhat-toolbox | 5.0.0    |
+| @nomiclabs/hardhat-etherscan     | 3.1.8    |
+| @openzeppelin/contracts          | 5.2.0    |
+| @pinata/sdk                      | 2.1.0    |
+| ethers                           | 6.13.5   |
+| hardhat                          | 2.22.19  |
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat ignition deploy ./ignition/modules/Lock.ts
+## 🔧 Environment
+- **Node.js Version:** v20.18.3
+- **npm Version:** 10.8.2
+
+## 📥 Installation
+To install all required dependencies, run the following command:
+
+```sh
+npm install
 ```
