@@ -1,54 +1,84 @@
-# React + TypeScript + Vite
+# Frontend Project
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 📦 Installed Dependencies
 
-Currently, two official plugins are available:
+This project requires the following Node.js dependencies:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 🔹 Frontend Dependencies
 
-## Expanding the ESLint configuration
+| Package                     | Version |
+| --------------------------- | ------- |
+| @eslint/js                  | 9.22.0  |
+| @metamask/detect-provider   | 2.0.0   |
+| @openzeppelin/contracts     | 5.2.0   |
+| @pinata/sdk                 | 2.1.0   |
+| @types/react-dom            | 19.0.4  |
+| @types/react                | 19.0.10 |
+| @vitejs/plugin-react        | 4.3.4   |
+| autoprefixer                | 10.4.21 |
+| axios                       | 1.8.3   |
+| eslint-plugin-react-hooks   | 5.2.0   |
+| eslint-plugin-react-refresh | 0.4.19  |
+| eslint                      | 9.22.0  |
+| ethers                      | 6.13.5  |
+| globals                     | 15.15.0 |
+| postcss                     | 8.5.3   |
+| react-dom                   | 19.0.0  |
+| react                       | 19.0.0  |
+| tailwindcss                 | 3.0.0   |
+| typescript-eslint           | 8.26.1  |
+| typescript                  | 5.7.3   |
+| vite-plugin-pwa             | 0.21.1  |
+| vite                        | 6.2.1   |
+| zustand-persist             | 0.4.0   |
+| zustand                     | 5.0.3   |
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🔧 Environment
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- **Node.js Version:** v20.18.3
+- **npm Version:** 10.8.2
+
+## 📥 Installation
+
+To install all required dependencies, run the following command:
+
+```sh
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 📌 Installing Dependencies Individually
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+If you need to install or update specific dependencies manually, use the following commands:
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+- **Install OpenZeppelin Contracts:**
+  ```sh
+  npm install @openzeppelin/contracts
+  ```
+- **Install Ethers.js:**
+  ```sh
+  npm install ethers
+  ```
+- **Install MetaMask (ethers + MetaMask integration):**
+  ```sh
+  npm install @metamask/detect-provider
+  ```
+- **Install Pinata SDK:**
+  ```sh
+  npm install @pinata/sdk
+  ```
+- **Install React and React-DOM:**
+  ```sh
+  npm install react react-dom
+  ```
+- **Install Vite and Plugins:**
+  ```sh
+  npm install vite @vitejs/plugin-react vite-plugin-pwa
+  ```
+- **Install ESLint and Plugins:**
+  ```sh
+  npm install eslint @eslint/js eslint-plugin-react-hooks eslint-plugin-react-refresh
+  ```
+- **Install TailwindCSS and PostCSS:**
+  ```sh
+  npm install tailwindcss postcss autoprefixer
+  ```
