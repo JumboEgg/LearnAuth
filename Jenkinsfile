@@ -94,7 +94,7 @@ pipeline {
                                       -p 3306:3306 \
                                       mysql:latest
 
-                                    # 🔥 기존 컨테이너 정리
+
                                     docker stop ${DOCKER_CONTAINER} || true
                                     docker rm ${DOCKER_CONTAINER} || true
                                     docker rmi ${DOCKER_IMAGE}:latest || true
