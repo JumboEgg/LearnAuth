@@ -88,7 +88,7 @@ pipeline {
                                     docker run -d --name ${DOCKER_CONTAINER} \
                                       -p ${DOCKER_PORT}:${DOCKER_PORT} \
                                       -e SPRING_PROFILES_ACTIVE=dev \
-                                      -e SERVER_PORT=${DOCKER_PORT} \
+                                      -e PORT=${DOCKER_PORT} \
                                       -e DB_URL=${DB_URL} \
                                       -e DB_USERNAME=${DB_USERNAME} \
                                       -e DB_PASSWORD=${DB_PASSWORD} \
