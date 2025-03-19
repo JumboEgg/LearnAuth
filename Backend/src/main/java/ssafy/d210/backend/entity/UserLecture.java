@@ -10,6 +10,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Getter
@@ -40,4 +41,6 @@ public class UserLecture {
     @JoinColumn(name = "report_id")
     private Report report;
 
+    @OneToMany(mappedBy = "userlecture")
+    private List<UserLectureTime> userLectureTimeList;
 }
