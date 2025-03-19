@@ -8,6 +8,8 @@ import lombok.NonNull;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -37,4 +39,7 @@ public class SubLecture {
     private int continueWatching;
 
     private int endFlag;
+
+    @OneToMany(mappedBy = "sublecture")
+    private List<UserLectureTime> userLectureTimeList;
 }
