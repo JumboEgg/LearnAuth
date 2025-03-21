@@ -30,7 +30,7 @@ class MainFragment : Fragment() {
 
         // 예시: ViewModel 데이터 관찰
         viewModel.text.observe(viewLifecycleOwner) {
-            binding.mainFragment.text = it
+            binding.mainText.text = it
 
         }
     }
