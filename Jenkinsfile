@@ -5,13 +5,13 @@ pipeline {
         DOCKER_IMAGE = credentials('DOCKER_IMAGE')
         DOCKER_CONTAINER = credentials('DOCKER_CONTAINER')
         DOCKER_PORT = credentials('DOCKER_PORT')
-        DOCKER_PATH = '/var/lib/docker' // EC2 서버의 Docker 저장 경로
+        DOCKER_PATH = '/home/ubuntu/backend-docker' // EC2 서버의 Docker 저장 경로
 
         EC2_USER = credentials('EC2_USER')
         EC2_IP = credentials('EC2_IP')
         SSH_KEY = credentials('SSH_KEY')
 
-        SPRING_PROFILES_ACTIVE = 'prod'
+        SPRING_PROFILES_ACTIVE = 'dev'
         DB_URL = credentials('DB_URL')
         DB_USERNAME = credentials('DB_USERNAME')
         DB_PASSWORD = credentials('DB_PASSWORD')
