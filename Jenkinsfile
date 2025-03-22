@@ -81,6 +81,7 @@ pipeline {
                             sshTransfer(
                                 execCommand: """
                                     mkdir -p ${DOCKER_PATH}
+                                    mv backend-0.0.1-SNAPSHOT.tar.gz ${DOCKER_PATH}/ || true
                                     docker stop ${DOCKER_CONTAINER} || true
                                     docker rm ${DOCKER_CONTAINER} || true
                                     docker rmi ${DOCKER_IMAGE}:latest || true
