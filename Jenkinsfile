@@ -44,6 +44,11 @@ pipeline {
                 }
             }
         }
+          stage('Debug') {
+                    steps {
+                        sh 'echo "DOCKER_IMAGE value: $DOCKER_IMAGE"'
+                    }
+                }
         stage('Build Docker Image') {
             steps {
                 echo 'Building the Docker image...'
@@ -53,12 +58,6 @@ pipeline {
                 }
             }
         }
-        stage('Debug') {
-            steps {
-                sh 'echo "DOCKER_IMAGE value: $DOCKER_IMAGE"'
-            }
-        }
-
         stage('Save and Transfer Docker Image') {
             steps {
                 echo 'Saving and transferring Docker image to EC2...'
