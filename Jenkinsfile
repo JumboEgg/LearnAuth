@@ -49,10 +49,16 @@ pipeline {
                 echo 'Building the Docker image...'
                 dir('Backend') {
                     sh 'cp build/libs/backend-0.0.1-SNAPSHOT.jar .'
-                    sh 'docker build -t ${DOCKER_IMAGE}:latest .'
+                    sh "docker build -t ${DOCKER_IMAGE}:latest ."
                 }
             }
         }
+        stage('Debug') {
+            steps {
+                sh 'echo "DOCKER_IMAGE value: $DOCKER_IMAGE"'
+            }
+        }
+
         stage('Save and Transfer Docker Image') {
             steps {
                 echo 'Saving and transferring Docker image to EC2...'
