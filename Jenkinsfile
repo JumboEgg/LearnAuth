@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = credentials('DOCKER_IMAGE')
+        DOCKER_IMAGE = 'nickjo0126/spring'
         DOCKER_CONTAINER = credentials('DOCKER_CONTAINER')
         DOCKER_PORT = credentials('DOCKER_PORT')
         DOCKER_PATH = '/home/ubuntu/backend-docker' // EC2 서버의 Docker 저장 경로
