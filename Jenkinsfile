@@ -91,7 +91,7 @@ pipeline {
                                       -p ${DOCKER_PORT}:${DOCKER_PORT} \
                                       -e SPRING_PROFILES_ACTIVE=dev \
                                       -e PORT=${DOCKER_PORT} \
-                                      -e DB_URL=${DB_URL} \
+                                      -e DB_URL="${DB_URL}" \
                                       -e DB_USERNAME=${DB_USERNAME} \
                                       -e DB_PASSWORD=${DB_PASSWORD} \
                                       ${DOCKER_IMAGE}:latest
