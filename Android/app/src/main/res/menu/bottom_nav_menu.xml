@@ -6,7 +6,7 @@
         android:title="홈"/>
     <item
         android:id="@+id/nav_search"
-        android:icon="@drawable/search"
+        android:icon="@drawable/videocam_24px"
         android:title="검색"/>
     <item
         android:id="@+id/nav_cert"
