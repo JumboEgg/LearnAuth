@@ -85,7 +85,7 @@ pipeline {
                                     docker stop ${DOCKER_CONTAINER} || true
                                     docker rm ${DOCKER_CONTAINER} || true
                                     docker rmi ${DOCKER_IMAGE}:latest || true
-                                    docker load < ${DOCKER_PATH}/my-project-0.0.1-SNAPSHOT.tar.gz
+                                    docker load < ${DOCKER_PATH}/backend-0.0.1-SNAPSHOT.tar.gz
                                     docker run -d --name ${DOCKER_CONTAINER} \
                                       --network learnauth \
                                       -p ${DOCKER_PORT}:${DOCKER_PORT} \
