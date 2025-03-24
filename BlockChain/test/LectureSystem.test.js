@@ -278,49 +278,28 @@ describe("LectureSystem", function () {
   });
 
   describe("Meta Transactions", function () {
-    it("Should process a meta-transaction correctly", async function () {
-      // First, create the forward request
-      const forwarderAddress = await minimalForwarder.getAddress();
-      const forwarder = minimalForwarder.connect(owner);
-      
-      const from = student.address;
-      const to = await lectureSystem.getAddress();
-      
-      // Create participants for a lecture
-      const participants = [
-        { participantId: PARTICIPANT1_ID, settlementRatio: 60 },
-        { participantId: PARTICIPANT2_ID, settlementRatio: 40 }
-      ];
-      
-      // Create ABI-encoded function call for creating a lecture
-      const LectureSystemInterface = new ethers.Interface([
-        "function createLecture(uint16 lectureId, string memory title, tuple(uint16 participantId, uint8 settlementRatio)[] memory participants, address lectureWallet)"
-      ]);
-      
-      const data = LectureSystemInterface.encodeFunctionData(
-        "createLecture",
-        [LECTURE_ID + 1, "Meta Transaction Lecture", participants, lecturer.address]
-      );
-      
-      const nonce = await forwarder.getNonce(from);
-      
-      const req = {
-        from: from,
-        to: to,
-        value: 0,
+    it("Should allow user to mint tokens via meta-transaction", async function () {
+      const amount = ethers.parseEther("100"); // Mint 100 tokens (using parseEther for ether values)
+      const nonce = await minimalForwarder.getNonce(owner.address);
+  
+      // Build forward request
+      const data = catToken.interface.encodeFunctionData("mint", [owner.address, amount]);
+      const forwardRequest = {
+        from: owner.address,
+        to: catToken.target,
+        value: 0, // No ether sent with this meta-transaction
         gas: 1000000,
         nonce: nonce,
-        data: data
+        data: data,
       };
-      
-      // Sign the forward request - Fixed to use the proper signing method compatible with hardhat
+  
+      // Sign the forward request
       const domain = {
         name: "MinimalForwarder",
         version: "1",
-        chainId: (await ethers.provider.getNetwork()).chainId,
-        verifyingContract: forwarderAddress
+        chainId: 31337, // Local network ID
+        verifyingContract: minimalForwarder.address,
       };
-      
       const types = {
         ForwardRequest: [
           { name: "from", type: "address" },
@@ -328,37 +307,111 @@ describe("LectureSystem", function () {
           { name: "value", type: "uint256" },
           { name: "gas", type: "uint256" },
           { name: "nonce", type: "uint256" },
-          { name: "data", type: "bytes" }
-        ]
+          { name: "data", type: "bytes" },
+        ],
       };
-
-      const reqForSigning = {
-        from: req.from,
-        to: req.to,
-        value: req.value.toString(),
-        gas: req.gas.toString(),
-        nonce: req.nonce.toString(),
-        data: req.data
+  
+      const signature = await owner.signTypedData(domain, types, forwardRequest);
+  
+      // Execute the forward request via the MinimalForwarder
+      const tx = await minimalForwarder.execute(forwardRequest, signature);
+      await tx.wait();
+  
+      // Check if the minting was successful
+      const balance = await catToken.balanceOf(owner.address);
+      expect(balance).to.equal(amount);
+    });
+  
+    it("Should fail if signature is invalid", async function () {
+      const amount = ethers.parseEther("100"); // Mint 100 tokens (using parseEther for ether values)
+      const nonce = await minimalForwarder.getNonce(student.address);
+  
+      // Build forward request
+      const data = catToken.interface.encodeFunctionData("mint", [student.address, amount]);
+      const forwardRequest = {
+        from: student.address,
+        to: catToken.target,
+        value: 0, // No ether sent with this meta-transaction
+        gas: 1000000,
+        nonce: nonce,
+        data: data,
       };
-
-      const signature = await ethers.provider.send("eth_signTypedData_v4", [
-        from,
-        JSON.stringify({
-          types,
-          domain,
-          primaryType: "ForwardRequest",
-          message: reqForSigning
-        })
-      ]);
-      
-      // Execute the forward request
-      await forwarder.execute(req, signature);
-      
-      // Verify lecture was created via meta-transaction
-      const lecture = await lectureSystem.lectures(LECTURE_ID + 1);
-      expect(lecture.title).to.equal("Meta Transaction Lecture");
-      expect(lecture.lectureWallet).to.equal(lecturer.address);
-      expect(lecture.exists).to.equal(true);
+  
+      // Sign the forward request with a different address
+      const invalidSigner = lecturer;
+      const domain = {
+        name: "MinimalForwarder",
+        version: "1",
+        chainId: 31337, // Local network ID
+        verifyingContract: minimalForwarder.address,
+      };
+      const types = {
+        ForwardRequest: [
+          { name: "from", type: "address" },
+          { name: "to", type: "address" },
+          { name: "value", type: "uint256" },
+          { name: "gas", type: "uint256" },
+          { name: "nonce", type: "uint256" },
+          { name: "data", type: "bytes" },
+        ],
+      };
+  
+      const signature = await invalidSigner.signTypedData(domain, types, forwardRequest);
+  
+      // Try to execute the forward request with an invalid signature
+      await expect(minimalForwarder.execute(forwardRequest, signature)).to.be.revertedWith(
+        "MinimalForwarder: signature does not match request"
+      );
+    });
+  
+    it("Should execute a successful transfer via meta-transaction", async function () {
+      const transferAmount = ethers.parseEther("50"); // Transfer 50 tokens
+  
+      // Mint tokens to the signer to transfer
+      await catToken.mint(owner.address, ethers.parseEther("1000"));
+  
+      const nonce = await minimalForwarder.getNonce(owner.address);
+  
+      // Build forward request for token transfer
+      const data = catToken.interface.encodeFunctionData("transfer", [student.address, transferAmount]);
+      const forwardRequest = {
+        from: owner.address,
+        to: catToken.target,
+        value: 0, // No ether sent with this meta-transaction
+        gas: 1000000,
+        nonce: nonce,
+        data: data,
+      };
+  
+      // Sign the forward request
+      const domain = {
+        name: "MinimalForwarder",
+        version: "1",
+        chainId: 31337, // Local network ID
+        verifyingContract: minimalForwarder.address,
+      };
+      const types = {
+        ForwardRequest: [
+          { name: "from", type: "address" },
+          { name: "to", type: "address" },
+          { name: "value", type: "uint256" },
+          { name: "gas", type: "uint256" },
+          { name: "nonce", type: "uint256" },
+          { name: "data", type: "bytes" },
+        ],
+      };
+  
+      const signature = await owner.signTypedData(domain, types, forwardRequest);
+  
+      // Execute the forward request via the MinimalForwarder
+      const tx = await minimalForwarder.execute(forwardRequest, signature);
+      await tx.wait();
+  
+      // Check balances after transfer
+      const ownerBalance = await catToken.balanceOf(owner.address);
+      const studentBalance = await catToken.balanceOf(student.address);
+      expect(ownerBalance).to.equal(ethers.parseEther("950"));
+      expect(studentBalance).to.equal(transferAmount);
     });
   });
 });

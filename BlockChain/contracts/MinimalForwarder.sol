@@ -32,9 +32,12 @@ contract MinimalForwarder is EIP712 {
     }
 
     function verify(ForwardRequest calldata req, bytes calldata signature) public view returns (bool) {
-        address signer = _hashTypedDataV4(
-            keccak256(abi.encode(_TYPEHASH, req.from, req.to, req.value, req.gas, req.nonce, keccak256(req.data)))
-        ).recover(signature);
+        // EIP-712 표준에 따라 bytes 타입은 keccak256 해시를 사용
+        bytes32 structHash = keccak256(
+            abi.encode(_TYPEHASH, req.from, req.to, req.value, req.gas, req.nonce, keccak256(req.data))
+        );
+        bytes32 hash = _hashTypedDataV4(structHash);
+        address signer = ECDSA.recover(hash, signature);
         return _nonces[req.from] == req.nonce && signer == req.from;
     }
 
@@ -46,15 +49,13 @@ contract MinimalForwarder is EIP712 {
         require(verify(req, signature), "MinimalForwarder: signature does not match request");
         _nonces[req.from] = req.nonce + 1;
 
+        // ERC2771Context에 맞게 수정
         (bool success, bytes memory returndata) = req.to.call{gas: req.gas, value: req.value}(
             abi.encodePacked(req.data, req.from)
         );
 
-        // Validate that the relayer has sent enough gas for the call.
-        // See https://ronan.eth.limo/blog/ethereum-gas-dangers/
+        // 가스 검증 부분 (동일하게 유지)
         if (gasleft() <= req.gas / 63) {
-            // We explicitly trigger invalid opcode to consume all gas and bubble-up the effects, since
-            // we can't directly return from here.
             assembly {
                 invalid()
             }
