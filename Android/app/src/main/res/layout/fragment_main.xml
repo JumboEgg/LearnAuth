@@ -1,19 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.MainFragment">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ui.MainFragment"
+    android:background="@color/background_color">
 
     <!-- TODO: Update blank fragment layout -->
     <TextView
-        android:id="@+id/mainText"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
-    <ImageView
+        android:id="@+id/mainTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/fail_check"/>
+        android:text="러너스"
+        android:fontFamily="@font/pretendard_black"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:textColor="@color/private_color"
+        android:textSize="32dp"/>
 
-</FrameLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/uploadBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="강의 올리기"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:backgroundTint="@color/button_white_gray"
+        android:textColor="@color/button_gray"
+        android:fontFamily="@font/tmoney_round_wind_extrabold"/>
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/bannerArea"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/mainTitle"
+        android:layout_margin="16dp"/>
+
+    <TextView
+        android:id="@+id/recommendTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/bannerArea"
+        android:text="(닉네임) 님을 위한 추천 강의"
+        android:letterSpacing="-0.02"
+        android:fontFamily="@font/pretendard_bold"
+        android:textSize="20dp"
+        android:layout_marginVertical="5dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recommendList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/recommendTitle"
+        android:layout_marginVertical="5dp"/>
+
+    <TextView
+        android:id="@+id/newTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/recommendList"
+        android:text="최근 등록된 강의"
+        android:letterSpacing="-0.02"
+        android:fontFamily="@font/pretendard_bold"
+        android:textSize="20dp"
+        android:layout_marginVertical="5dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/newList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/newTitle"
+        android:layout_marginVertical="5dp"/>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

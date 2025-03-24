@@ -5,16 +5,17 @@
     
     <!--main color-->
     <color name="private_color">#3C62DD</color>
+    <color name="background_color">#F7F9FF</color>
 
     <!--강의 올리기 파트-->
-    <color name="button_white_gary">#ECECEC</color>
-    <color name="button_gary">#909090</color>
+    <color name="button_white_gray">#ECECEC</color>
+    <color name="button_gray">#909090</color>
 
     <!--카테고리 파트 -->
     <color name="button_white_blue">#dce4ff</color>
     <color name="text_white_blue">#7389d7</color>
-    <color name="text_gary">#787878</color>
-    <color name="text_white_gary">#aaaaaa</color>
+    <color name="text_gray">#787878</color>
+    <color name="text_white_gray">#aaaaaa</color>
 
     <!--수료증 컬러-->
     <color name="data">#C9F3A1</color>
