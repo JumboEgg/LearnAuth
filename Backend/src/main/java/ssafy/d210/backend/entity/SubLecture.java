@@ -30,10 +30,10 @@ public class SubLecture {
 
     @NotNull
     @Length(max=100)
-    private String lectureUrl;
+    private String subLectureUrl;
 
     @NotNull
-    private int lectureLength;
+    private int subLectureLength;
 
     @NotNull
     private int continueWatching;
