@@ -37,14 +37,14 @@
         android:backgroundTint="@color/private_color"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginHorizontal="45dp"
-        android:layout_marginVertical="20dp"/>
+        android:layout_marginBottom="30dp"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constCert"
         android:layout_width="350dp"
-        android:layout_height="350dp"
-        app:layout_constraintTop_toTopOf="@+id/textTitleCertDetail"
-        app:layout_constraintBottom_toBottomOf="@+id/btnCertSave"
+        android:layout_height="400dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:background="@color/button_white_blue">
@@ -83,6 +83,7 @@
             android:layout_marginTop="30dp"
             />
         <TextView
+            android:gravity="center"
             android:id="@+id/textDescriptionCert"
             android:layout_width="100dp"
             android:layout_height="wrap_content"
@@ -153,32 +154,15 @@
                 android:focusableInTouchMode="true"
                 android:scrollHorizontally="true"/>
         </LinearLayout>
-        <LinearLayout
-            android:id="@+id/linearAuthNumber"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layout_constraintTop_toBottomOf="@+id/linearAuthName"
-            app:layout_constraintStart_toStartOf="parent"
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            app:layout_constraintTop_toBottomOf="@id/linearAuthName"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:orientation="horizontal"
-            android:layout_marginTop="10dp">
-            <TextView
-                android:id="@+id/textWalletLecturer"
-                android:text="0xxxxxxxxxxxxx"
-                android:gravity="center"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                style="@style/heading5"/>
-            <TextView
-                android:id="@+id/textWalletStudent"
-                android:text="0xxxxxxxxxxxxx"
-                android:gravity="center"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                style="@style/heading5"/>
-        </LinearLayout>
+            app:layout_constraintStart_toStartOf="parent"
+            android:background="@color/text_gray"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
