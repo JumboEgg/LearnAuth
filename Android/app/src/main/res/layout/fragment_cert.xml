@@ -3,14 +3,87 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.CertFragment"
     android:background="@color/background_color">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:id="@+id/certText"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:background="@color/private_color">
+
+        <TextView
+            android:id="@+id/textTitleCertificate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="나의 수료증"
+            style="@style/heading2"
+            android:textColor="@color/white"
+            app:layout_constraintTop_toBottomOf="@+id/imgPencil"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="25dp" />
+
+        <ImageView
+            android:id="@+id/imgPencil"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/bgCertificate"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="25dp"
+            android:src="@drawable/ic_certificate"/>
+
+        <ImageView
+            android:id="@+id/bgCertificate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@drawable/bg_top_rounded"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:scaleType="fitXY"
+            android:layout_marginTop="180dp" />
+        
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toTopOf="@+id/bgCertificate"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+<!--            수료증이 없을 때 텍스트-->
+            <TextView
+                android:id="@+id/textNullCertification"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="아직 수료한 강의가 없습니다"
+                style="@style/body1"
+                android:textColor="@color/text_gray"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <!-- 수료증 리사이클러-->
+            <androidx.recyclerview.widget.RecyclerView
+                tools:listitem="@layout/item_certification"
+                android:id="@+id/recyclerCertifications"
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="30dp"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+            
+            
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>

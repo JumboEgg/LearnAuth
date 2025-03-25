@@ -30,7 +30,7 @@ class CertFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewModel.text.observe(viewLifecycleOwner){
-            binding.certText.text = it
+
         }
     }
 
