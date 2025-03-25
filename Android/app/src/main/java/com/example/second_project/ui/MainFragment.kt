@@ -29,10 +29,10 @@ class MainFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // 예시: ViewModel 데이터 관찰
-        viewModel.text.observe(viewLifecycleOwner) {
-            binding.mainText.text = it
-
-        }
+//        viewModel.text.observe(viewLifecycleOwner) {
+//            binding.mainText.text = it
+//
+//        }
     }
 
     override fun onDestroyView() {
