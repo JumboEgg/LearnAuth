@@ -5,7 +5,8 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.MainFragment"
-    android:background="@color/background_color">
+    android:background="@color/background_color"
+    android:padding="20dp">
 
     <!-- TODO: Update blank fragment layout -->
     <TextView
@@ -23,13 +24,14 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/uploadBtn"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:text="강의 올리기"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:backgroundTint="@color/button_white_gray"
         android:textColor="@color/button_gray"
-        android:fontFamily="@font/tmoney_round_wind_extrabold"/>
+        android:fontFamily="@font/tmoney_round_wind_extrabold"
+        android:textSize="14dp"/>
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/bannerArea"

@@ -1,12 +1,11 @@
 package com.example.second_project.ui
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.example.second_project.R
 import com.example.second_project.databinding.FragmentSearchBinding
 import com.example.second_project.viewmodel.SearchViewModel
 
@@ -27,9 +26,6 @@ class SearchFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.text.observe(viewLifecycleOwner){
-            binding.searchText.text = it
-        }
     }
 
     override fun onDestroyView() {
