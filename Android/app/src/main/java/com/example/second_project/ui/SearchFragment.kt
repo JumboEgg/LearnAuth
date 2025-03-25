@@ -6,8 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.second_project.adapter.CategoryAdapter
+import com.example.second_project.adapter.LectureAdapter
 import com.example.second_project.databinding.FragmentSearchBinding
 import com.example.second_project.viewmodel.SearchViewModel
 
@@ -39,6 +41,16 @@ class SearchFragment : Fragment() {
             adapter = categoryAdapter
             addItemDecoration(HorizontalSpacingItemDecoration(spacing))
         }
+
+        val lectureAdapter = LectureAdapter()
+        binding.lectureList.apply {
+            layoutManager = GridLayoutManager(context, 2)
+            adapter = lectureAdapter
+        }
+
+        //예시 데이터 삽입
+        val lectureList = List(10) {it}
+        lectureAdapter.submitList(lectureList)
     }
 
     override fun onDestroyView() {
