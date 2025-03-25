@@ -23,7 +23,7 @@
                 android:layout_height="wrap_content"
                 android:text="러너스"
                 android:fontFamily="@font/pretendard_black"
-                android:textColor="@color/private_color"
+                android:textColor="@color/primary_color"
                 android:textSize="32dp"
                 android:layout_marginTop="20dp"
                 android:layout_marginStart="20dp"

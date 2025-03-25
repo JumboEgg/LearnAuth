@@ -284,7 +284,7 @@
                 app:iconSize="24dp"
                 app:iconGravity="textStart"
                 app:iconPadding="0dp"
-                android:backgroundTint="@color/private_color"
+                android:backgroundTint="@color/primary_color"
                 app:cornerRadius="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -313,7 +313,7 @@
         android:layout_height="wrap_content"
         android:scrollbars="none"
         app:layout_constraintTop_toBottomOf="@id/searchContainer"
-        android:layout_marginTop="16dp">
+        android:layout_marginTop="8dp">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/categoryRecyclerView"
@@ -331,6 +331,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/categoryLayout"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="8dp"
+        android:paddingBottom="100dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
