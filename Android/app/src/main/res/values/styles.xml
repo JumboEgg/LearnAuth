@@ -103,4 +103,40 @@
         <item name="android:letterSpacing">-0.02</item>
     </style>
 
+    <style name="medium8">
+        <item name="android:textSize">8sp</item>
+        <item name="fontFamily">@font/pretendard_medium</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="medium10">
+        <item name="android:textSize">10sp</item>
+        <item name="fontFamily">@font/pretendard_medium</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="medium12">
+        <item name="android:textSize">12sp</item>
+        <item name="fontFamily">@font/pretendard_medium</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="medium14">
+        <item name="android:textSize">14sp</item>
+        <item name="fontFamily">@font/pretendard_medium</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="medium16">
+        <item name="android:textSize">16sp</item>
+        <item name="fontFamily">@font/pretendard_medium</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="medium20">
+        <item name="android:textSize">20sp</item>
+        <item name="fontFamily">@font/pretendard_medium</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
 </resources>
