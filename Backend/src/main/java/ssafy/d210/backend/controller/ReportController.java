@@ -12,9 +12,11 @@ public class ReportController {
 
     private final ReportService reportService;
 
+    // 신고 하기 @PostMapping
+
     // 신고 내역 전체 조회 @GetMapping
 
-    // 신고 상세 조회 @GetMapping("/{reportId}")
+    // 신고 자세히 보기 @GetMapping("/{reportId}")
 
-    // 신고 등록 @PostMapping
+
 }

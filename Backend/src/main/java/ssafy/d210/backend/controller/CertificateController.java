@@ -14,5 +14,7 @@ public class CertificateController {
 
     // 수료증 조회 @GetMapping
 
+    // 수료증 자세히 보기 @GetMapping("/detail")
+
     // 수료증 발급 요청 @PatchMapping("/lecture/{lectureId}/certification")
 }

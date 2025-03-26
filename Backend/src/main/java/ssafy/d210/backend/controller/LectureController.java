@@ -16,11 +16,12 @@ public class LectureController {
     //전체 강의 조회
 //    @GetMapping
 
-    //추천 강의 조회
+    //조건에 따른 강의 조회
 //    @GetMapping("/recommendation")
 
     //강의 상세 조회 @GetMapping("/{lectureId})
 
     //강의 검색 @GetMapping("/search")
 
+    //강의 구매 @PostMapping("/purchase")
 }

@@ -13,4 +13,6 @@ public class LectureManagementController {
     private final LectureManagementService lectureManagementService;
 
     // 강의 등록하기 @PostMapping
+
+    // "강의 등록 이메일 찾기" 는 "회원 가입 이메일 중복 확인"입니다.
 }
