@@ -2,7 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("androidx.navigation.safeargs.kotlin")
-    id("kotlin-parcelize")}
+    id("kotlin-parcelize")
+}
 
 android {
     namespace = "com.example.second_project"
