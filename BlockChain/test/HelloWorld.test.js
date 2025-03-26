@@ -132,8 +132,7 @@ describe("HelloWorld with LectureForwarder", function () {
  * 참고로, 이 구현은 Medium 글에서 설명한 방식과 유사합니다.
  */
 async function signMetaTxRequest(signer, forwarder, input) {
-  // 1) 도메인: forwarder.name()와 version "1" 사용
-  const domainName = await forwarder.name(); // "LectureForwarder"
+  const domainName = await forwarder.name();
   const chainId = (await signer.provider.getNetwork()).chainId;
   const domain = {
     name: domainName,
@@ -142,16 +141,8 @@ async function signMetaTxRequest(signer, forwarder, input) {
     verifyingContract: forwarder.address,
   };
 
-  // 2) on-chain nonce: forwarder.nonces(from)
   const onChainNonce = await forwarder.nonces(input.from);
-  
-  // 3) data 해싱: 서명 시에는 keccak256(rawData)를 사용
-  const dataHash = ethers.utils.keccak256(input.data);
-  
-  // 4) ForwardRequest 타입 정의 (타입명: "ForwardRequest")
-  //    필드 순서 및 타입은 ERC2771Forwarder.sol의 _FORWARD_REQUEST_TYPEHASH와 일치해야 함:
-  //      address from, address to, uint256 value, uint256 gas, uint256 nonce, uint48 deadline, bytes data
-  //    서명에는 dynamic bytes 대신 keccak256(data) 즉, bytes32를 사용합니다.
+
   const types = {
     ForwardRequest: [
       { name: "from",     type: "address" },
@@ -160,11 +151,10 @@ async function signMetaTxRequest(signer, forwarder, input) {
       { name: "gas",      type: "uint256" },
       { name: "nonce",    type: "uint256" },
       { name: "deadline", type: "uint48" },
-      { name: "data",     type: "bytes32" },
+      { name: "data",     type: "bytes" }, // ✅ 바뀐 부분
     ]
   };
 
-  // 5) 서명할 객체 생성 (nonce는 on-chain 값, data는 keccak256(data))
   const typedRequest = {
     from: input.from,
     to: input.to,
@@ -172,13 +162,11 @@ async function signMetaTxRequest(signer, forwarder, input) {
     gas: input.gas,
     nonce: onChainNonce,
     deadline: input.deadline,
-    data: dataHash,
+    data: input.data, // ✅ 원본 bytes 그대로
   };
 
-  // 6) EIP-712 서명 (ethers v5의 _signTypedData)
   const signature = await signer._signTypedData(domain, types, typedRequest);
 
-  // 7) execute() 호출 시 전달할 객체: nonce는 전달하지 않음 (forwarder가 내부적으로 nonces(from) 사용)
   return {
     request: {
       from: typedRequest.from,
@@ -186,7 +174,9 @@ async function signMetaTxRequest(signer, forwarder, input) {
       value: typedRequest.value,
       gas: typedRequest.gas,
       deadline: typedRequest.deadline,
+      data: typedRequest.data,
     },
-    signature
+    signature,
   };
 }
+
