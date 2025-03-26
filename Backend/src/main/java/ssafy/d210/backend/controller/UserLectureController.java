@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserLectureController {
 
-    private final UserLectureServiceImpl userLectureService;
+    private final UserLectureService userLectureService;
     // 내가 보유, 참여한 강의 @GetMapping
 
     // 재생 시간 업데이트 @PostMapping
