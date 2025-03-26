@@ -31,12 +31,15 @@ class ProfileFragment : Fragment() {
 
         binding.profileMenu1.setOnClickListener {
             val transaction = requireActivity().supportFragmentManager.beginTransaction()
-
-            // 네비게이션 바 숨기기
-            requireActivity().findViewById<View>(R.id.bottom_navigation)?.visibility = View.GONE
-
             transaction.replace(R.id.nav_host_fragment, MyWalletFragment())
             transaction.addToBackStack(null) // 뒤로 가기 버튼을 눌렀을 때 ProfileFragment로 돌아오도록 설정
+            transaction.commit()
+        }
+
+        binding.chargeBtn.setOnClickListener {
+            val transaction = requireActivity().supportFragmentManager.beginTransaction()
+            transaction.replace(R.id.nav_host_fragment, ChargeFragment())
+            transaction.addToBackStack(null)
             transaction.commit()
         }
     }
@@ -44,7 +47,6 @@ class ProfileFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        requireActivity().findViewById<View>(R.id.bottom_navigation)?.visibility = View.VISIBLE
     }
 
 }

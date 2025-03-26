@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.second_project.R
 import com.example.second_project.adapter.TransactionAdapter
 import com.example.second_project.databinding.FragmentMywalletBinding
 
@@ -40,6 +41,13 @@ class MyWalletFragment : Fragment() {
         binding.transactionList.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = transactionAdapter
+        }
+
+        binding.chargeBtn.setOnClickListener {
+            val transaction = requireActivity().supportFragmentManager.beginTransaction()
+            transaction.replace(R.id.nav_host_fragment, ChargeFragment())
+            transaction.addToBackStack(null)
+            transaction.commit()
         }
     }
 
