@@ -307,7 +307,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.core.widget.NestedScrollView
+                                 <androidx.core.widget.NestedScrollView
         android:id="@+id/categoryLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
