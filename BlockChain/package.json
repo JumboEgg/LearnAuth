@@ -3,20 +3,19 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy:amoy": "hardhat run ignition/modules/LectureSystem.ts --network amoi"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@nomicfoundation/hardhat-toolbox": "^1.0.1",
     "@nomiclabs/hardhat-etherscan": "^3.1.8",
-    "hardhat": "^2.22.19"
-  },
-  "dependencies": {
     "@openzeppelin/contracts": "^5.2.0",
-    "@pinata/sdk": "^2.1.0",
-    "ethers": "^6.13.5"
+    "dotenv": "^16.4.7",
+    "ethers": "^5.7.2",
+    "hardhat": "^2.22.19"
   }
 }
