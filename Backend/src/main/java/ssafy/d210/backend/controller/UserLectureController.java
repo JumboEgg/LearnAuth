@@ -17,14 +17,8 @@ import java.util.List;
 public class UserLectureController {
 
     private final UserLectureService userLectureService;
+    // 내가 보유, 참여한 강의 @GetMapping
 
-    // 다 뜯어야...
-    @GetMapping
-    public ResponseEntity<List<LectureResponse>> getUserLectures(@RequestParam Long userId) {
-        List<LectureResponse> lectures = userLectureService.getLectures(userId);
-        return ResponseEntity.ok(lectures);
-    }
+    // 재생 시간 업데이트 @PostMapping
 
-// userlecture로 시작하는 url 중 patch 하는게 있는데 의존성 추가 해야 사용 가능
-//    @patchMapping("/{userLectureId}/time")
 }

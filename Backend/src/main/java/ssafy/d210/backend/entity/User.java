@@ -57,9 +57,9 @@ public class User {
         this.email = userSignupRequest.getEmail();
         this.password = userSignupRequest.getPassword();
         this.nickname = userSignupRequest.getNickname();
-        this.wallet = userSignupRequest.getWallet();
+//        this.wallet = userSignupRequest.getWallet();
         this.name = userSignupRequest.getName();
         this.refreshToken = "";
-        this.userKey = userSignupRequest.getUserKey();
+//        this.userKey = userSignupRequest.getUserKey();
     }
 }

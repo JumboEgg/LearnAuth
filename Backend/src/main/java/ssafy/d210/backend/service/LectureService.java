@@ -15,13 +15,15 @@ public interface LectureService {
     // 전체 강의 목록 조회
     public List<LectureResponse> getAllLectures();
 
-    // 추천 강의 목록 조회
+    // 조건에 따른 강의 조회
     public List<LectureResponse> getRecommendedLectures();
 
     // 강의 상세 조회
     public LectureResponse getLectureDetail(Long lectureId, Long userId);
 
-    // 키워드 통한 강의 검색
+    // 강의 검색
     public SearchResultResponse searchLectures(String keyword, int page);
 
+    // 강의 구매
+    // 정은이 화이팅!
 }

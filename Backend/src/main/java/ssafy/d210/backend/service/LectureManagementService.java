@@ -9,7 +9,8 @@ import ssafy.d210.backend.dto.response.lecture.LectureResponse;
 @Service
 public interface LectureManagementService {
 
-    // 강의 등록 로직 구현
+    // 강의 등록하기
     public LectureResponse registerLecture(LectureRegisterRequest request);
 
+    // "강의 등록 이메일 찾기" 는 "회원 가입 이메일 중복 확인"입니다.
 }
