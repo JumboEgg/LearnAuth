@@ -22,7 +22,19 @@
     <fragment
         android:id="@+id/nav_cert"
         android:name="com.example.second_project.ui.CertFragment"
-        android:label="수료증" />
+        android:label="수료증" >
+
+        <action
+            android:id="@+id/action_certFragment_to_certDetailFragment"
+            app:destination="@id/certDetailFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/certDetailFragment"
+        android:name="com.example.second_project.ui.CertDetailFragment"
+        android:label="수료증 상세"
+        tools:layout="@layout/fragment_cert_detail" />
 
     <fragment
         android:id="@+id/nav_profile"
