@@ -13,7 +13,7 @@ import ssafy.d210.backend.dto.request.user.LoginRequest;
 import ssafy.d210.backend.dto.request.user.SignupRequest;
 import ssafy.d210.backend.dto.response.user.LoginResponse;
 import ssafy.d210.backend.dto.response.user.SignupResponse;
-import ssafy.d210.backend.service.UserServiceImpl;
+import ssafy.d210.backend.service.UserService;
 
 @RestController
 @RequestMapping("/user")
@@ -21,7 +21,7 @@ import ssafy.d210.backend.service.UserServiceImpl;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserServiceImpl userService;
+    private final UserService userService;
 
     @PostMapping("/signup")
     public ResponseEntity<ResponseSuccessDto<SignupResponse>> signup(@RequestBody @Valid SignupRequest userSignupRequest) {

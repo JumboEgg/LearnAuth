@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ssafy.d210.backend.service.QuizService;
+import ssafy.d210.backend.service.QuizServiceImpl;
 
 @RestController
 @RequestMapping("/api/lecture/{lectureId}/quiz")
