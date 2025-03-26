@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.NavGraphNavigator
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.second_project.adapter.CategoryAdapter
@@ -35,14 +37,20 @@ class SearchFragment : Fragment() {
         // dp -> px로 변환
         val spacing = dpToPx(8)
 
-        val categoryAdapter = CategoryAdapter(categoryList)
+        val categoryAdapter = CategoryAdapter(categoryList){ position ->
+            val selectedCategory = categoryList[position]
+        }
         binding.categoryRecyclerView.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
             adapter = categoryAdapter
             addItemDecoration(HorizontalSpacingItemDecoration(spacing))
         }
 
-        val lectureAdapter = LectureAdapter()
+        val lectureAdapter = LectureAdapter { lectureId ->
+            val action = SearchFragmentDirections.actionNavSearchToQuizFragment(lectureId)
+            findNavController().navigate(action)
+        }
+
         binding.lectureList.apply {
             layoutManager = GridLayoutManager(context, 2)
             adapter = lectureAdapter
