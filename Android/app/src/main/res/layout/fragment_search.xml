@@ -329,9 +329,9 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/lectureList"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@id/categoryLayout"
-        android:layout_marginTop="8dp"
-        android:paddingBottom="100dp"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="8dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

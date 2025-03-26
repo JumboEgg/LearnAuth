@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/nav_main">
 
@@ -12,7 +13,11 @@
     <fragment
         android:id="@+id/nav_search"
         android:name="com.example.second_project.ui.SearchFragment"
-        android:label="검색" />
+        android:label="검색" >
+        <action
+            android:id="@+id/action_nav_search_to_quizFragment"
+            app:destination="@id/quizFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_cert"
@@ -23,4 +28,14 @@
         android:id="@+id/nav_profile"
         android:name="com.example.second_project.ui.ProfileFragment"
         android:label="나의정보" />
+    <fragment
+        android:id="@+id/quizFragment"
+        android:name="com.example.second_project.ui.QuizFragment"
+        android:label="퀴즈"
+        tools:layout="@layout/fragment_quiz">
+        <argument
+            android:name="lectureId"
+            app:argType="integer"
+            android:defaultValue="0" />
+    </fragment>
 </navigation>

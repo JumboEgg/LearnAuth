@@ -26,7 +26,7 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel.text.observe(viewLifecycleOwner){
-            binding.profileText.text = it
+//            binding.profileText.text = it
         }
     }
 
