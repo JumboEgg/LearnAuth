@@ -6,10 +6,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CertificateDetailResponse {
-    private String name;
+//    private String name;
     private String title;
     private String teacherName;
+    private String teacherWallet;
     private int certificateDate;
-    // TODO : qrcode 어떻게 작동 되는건지 알려주세요
+    private int certificate;
     private String qrCode;
 }

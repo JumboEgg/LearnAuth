@@ -7,7 +7,7 @@ import lombok.Getter;
 @Builder
 public class LectureResponse {
     private long lectureId;
-    private String CategoryName;
+    private String categoryName;
     private String title;
     private String goal;
     private int learningRate;
