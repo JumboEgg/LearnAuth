@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 // 전체 강의 조회, 추천 강의, 상세 조회, 검색 기능
-@Service
+
 public interface LectureService {
 
     // response 이거 여기꺼 맞는지 다 확인 필요

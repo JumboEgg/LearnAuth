@@ -6,7 +6,7 @@ import ssafy.d210.backend.dto.response.certificate.CertificateResponse;
 
 import java.util.List;
 
-@Service
+
 public interface CertificateService {
 
     // 아무튼 수료증 조회

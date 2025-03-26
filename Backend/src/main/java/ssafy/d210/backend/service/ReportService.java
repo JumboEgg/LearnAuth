@@ -6,7 +6,7 @@ import ssafy.d210.backend.dto.response.report.ReportResponse;
 
 import java.util.List;
 
-@Service
+
 public interface ReportService {
 
     // 사용자 신고 내역 조회

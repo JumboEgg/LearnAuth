@@ -6,7 +6,7 @@ import ssafy.d210.backend.dto.response.quiz.QuizResponse;
 
 import java.util.List;
 
-@Service
+
 public interface QuizService {
 
     // 강의별 퀴즈 목록 조회
