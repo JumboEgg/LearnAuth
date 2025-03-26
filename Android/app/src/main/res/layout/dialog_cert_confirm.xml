@@ -43,7 +43,7 @@
             android:padding="10dp"
             android:text="발급하기"
             style="@style/heading4"
-            android:backgroundTint="@color/private_color"
+            android:backgroundTint="@color/primary_color"
             android:background="@drawable/bg_radius_20"
             android:textColor="@color/white"/>
 

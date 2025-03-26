@@ -201,7 +201,7 @@
         android:padding="15dp"
         style="@style/heading4"
         android:background="@drawable/bg_radius_20"
-        android:backgroundTint="@color/private_color"
+        android:backgroundTint="@color/primary_color"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginHorizontal="45dp"
         android:layout_marginVertical="30dp"/>

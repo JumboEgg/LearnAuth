@@ -4,8 +4,9 @@
     <color name="white">#FFFFFFFF</color>
     
     <!--main color-->
-    <color name="private_color">#3C62DD</color>
+    <color name="primary_color">#3C62DD</color>
     <color name="background_color">#F7F9FF</color>
+    <color name="sub_color">#EAECF6</color>
 
     <!--강의 올리기 파트-->
     <color name="button_white_gray">#ECECEC</color>
