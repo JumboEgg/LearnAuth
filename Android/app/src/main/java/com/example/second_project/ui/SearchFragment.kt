@@ -46,8 +46,12 @@ class SearchFragment : Fragment() {
             addItemDecoration(HorizontalSpacingItemDecoration(spacing))
         }
 
-        val lectureAdapter = LectureAdapter { lectureId ->
-            val action = SearchFragmentDirections.actionNavSearchToQuizFragment(lectureId)
+        val lectureAdapter = LectureAdapter { lectureId, lectureTitle ->
+            // NavDirections로 이동 (lectureId, lectureTitle 모두 전달)
+            val action = SearchFragmentDirections.actionNavSearchToQuizFragment(
+                lectureId = lectureId,
+                lectureTitle = lectureTitle
+            )
             findNavController().navigate(action)
         }
 

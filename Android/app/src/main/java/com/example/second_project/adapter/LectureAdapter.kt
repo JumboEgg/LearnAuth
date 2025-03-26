@@ -5,7 +5,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.second_project.databinding.ItemLectureBinding
 
-class LectureAdapter(private val onItemClick: ((Int) -> Unit)? = null) : RecyclerView.Adapter<LectureAdapter.LectureViewHolder>() {
+class LectureAdapter(
+    private val onItemClick: ((Int, String) -> Unit)? = null)
+
+    : RecyclerView.Adapter<LectureAdapter.LectureViewHolder>() {
 
     private val items = mutableListOf<Int>()  // 임시로 데이터는 Integer로 하드코딩
 
@@ -28,14 +31,15 @@ class LectureAdapter(private val onItemClick: ((Int) -> Unit)? = null) : Recycle
     override fun getItemCount(): Int = items.size
 
     class LectureViewHolder(private val binding: ItemLectureBinding,
-                            private val onItemClick: ((Int) -> Unit)?
-    )                            : RecyclerView.ViewHolder(binding.root) {
+                            private val onItemClick: ((Int, String) -> Unit)?
+    ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: Int) {
             // 예시로, 'item'을 그냥 아이템 번호로 표시 (추가적인 정보는 필요에 따라 수정)
-            binding.lectureTitle.text = "강의 $item"
+            val lectureTitle = "강의 $item"
+            binding.lectureTitle.text = lectureTitle
 
             binding.root.setOnClickListener{
-                onItemClick?.invoke(item)
+                onItemClick?.invoke(item, lectureTitle)
             }
         }
     }
