@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 // 사용자가 수강한 강의 목록 조회, 시청 시간 업데이트
-@Service
+
 public interface UserLectureService {
 
     // LectureResponse는 userlecture 말고도 쓰기 때문에 그냥 Lecture Response라 한다.
