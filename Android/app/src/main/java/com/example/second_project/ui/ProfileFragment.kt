@@ -25,9 +25,9 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.text.observe(viewLifecycleOwner){
-            binding.profileText.text = it
-        }
+//        viewModel.text.observe(viewLifecycleOwner){
+//            binding.profileText.text = it
+//        }
     }
 
     override fun onDestroyView() {
