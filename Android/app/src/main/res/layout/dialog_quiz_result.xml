@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- dialog_quiz_result.xml -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp"
+    android:background="@drawable/bg_dialog_rounded"
+    >
+
+    <!-- 다이얼로그 제목 (예: "눈 뜨고 차이는 법") -->
+<TextView
+android:id="@+id/dialogTitle"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="눈 뜨고 차이는 법"
+android:textSize="16sp"
+android:textStyle="bold"
+android:textColor="@android:color/black"
+    />
+
+    <!-- 결과 아이콘(체크 모양 등) -->
+<ImageView
+android:id="@+id/dialogImage"
+android:layout_width="96dp"
+android:layout_height="96dp"
+android:layout_marginTop="16dp"
+android:src="@drawable/pass_check"
+android:contentDescription="결과 아이콘"
+    />
+
+    <!-- 결과 메세지 (예: "3문제 중 1문제 통과 다시 시도하세요!") -->
+    <TextView
+        android:id="@+id/dialogMessage"
+        android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_marginTop="16dp"
+android:text="3문제 중 1문제 통과\n다시 시도하세요!"
+android:textSize="14sp"
+android:gravity="center"
+android:textColor="@android:color/black"
+    />
+
+    <!-- 종료하기 버튼 -->
+<Button
+android:id="@+id/dialogButton"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:layout_marginTop="24dp"
+android:text="종료하기"
+    />
+    </LinearLayout>
