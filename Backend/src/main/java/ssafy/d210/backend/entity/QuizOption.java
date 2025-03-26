@@ -20,7 +20,7 @@ public class QuizOption {
     private Quiz quiz;
 
     @NotNull
-    private String option;
+    private String optionText;
 
     @NotNull
     private int isCorrect;
