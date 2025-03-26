@@ -139,4 +139,11 @@
         <item name="android:letterSpacing">-0.02</item>
     </style>
 
+
+<!--    floating Button에서 이용하기 위한 모서리 둥근 스타일 -->
+        <style name="ShapeAppearance.MyButton" parent="Widget.MaterialComponents.Button">
+            <item name="shapeAppearanceOverlay">@drawable/bg_radius_20</item>
+        </style>
+
+
 </resources>

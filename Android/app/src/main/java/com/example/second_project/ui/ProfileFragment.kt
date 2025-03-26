@@ -28,6 +28,20 @@ class ProfileFragment : Fragment() {
 //        viewModel.text.observe(viewLifecycleOwner){
 //            binding.profileText.text = it
 //        }
+
+        binding.profileMenu1.setOnClickListener {
+            val transaction = requireActivity().supportFragmentManager.beginTransaction()
+            transaction.replace(R.id.nav_host_fragment, MyWalletFragment())
+            transaction.addToBackStack(null) // 뒤로 가기 버튼을 눌렀을 때 ProfileFragment로 돌아오도록 설정
+            transaction.commit()
+        }
+
+        binding.chargeBtn.setOnClickListener {
+            val transaction = requireActivity().supportFragmentManager.beginTransaction()
+            transaction.replace(R.id.nav_host_fragment, ChargeFragment())
+            transaction.addToBackStack(null)
+            transaction.commit()
+        }
     }
 
     override fun onDestroyView() {
