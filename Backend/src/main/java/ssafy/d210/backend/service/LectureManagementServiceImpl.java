@@ -2,6 +2,7 @@ package ssafy.d210.backend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ssafy.d210.backend.dto.request.lecture.LectureRegisterRequest;
 import ssafy.d210.backend.dto.response.lecture.LectureResponse;
 import ssafy.d210.backend.dto.response.lecture.SearchResultResponse;
 
@@ -9,24 +10,10 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class LectureManagementServiceImpl implements LectureService {
-    @Override
-    public List<LectureResponse> getAllLectures() {
-        return null;
-    }
+public class LectureManagementServiceImpl implements LectureManagementService {
 
     @Override
-    public List<LectureResponse> getRecommendedLectures() {
-        return null;
-    }
-
-    @Override
-    public LectureResponse getLectureDetail(Long lectureId, Long userId) {
-        return null;
-    }
-
-    @Override
-    public SearchResultResponse searchLectures(String keyword, int page) {
+    public LectureResponse registerLecture(LectureRegisterRequest request) {
         return null;
     }
 }

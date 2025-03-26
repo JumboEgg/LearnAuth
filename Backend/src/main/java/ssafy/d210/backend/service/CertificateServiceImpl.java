@@ -1,10 +1,11 @@
 package ssafy.d210.backend.service;
 
+import org.springframework.stereotype.Service;
 import ssafy.d210.backend.dto.response.certificate.CertificateDetailResponse;
 import ssafy.d210.backend.dto.response.certificate.CertificateResponse;
 
 import java.util.List;
-
+@Service
 public class CertificateServiceImpl implements CertificateService{
     @Override
     public List<CertificateResponse> getCertificates(Long userId, Long lectureId) {

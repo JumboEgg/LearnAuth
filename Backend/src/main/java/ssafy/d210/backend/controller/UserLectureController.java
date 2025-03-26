@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ssafy.d210.backend.dto.response.lecture.LectureResponse;
 import ssafy.d210.backend.service.UserLectureService;
+import ssafy.d210.backend.service.UserLectureServiceImpl;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserLectureController {
 
-    private final UserLectureService userLectureService;
+    private final UserLectureServiceImpl userLectureService;
     // 내가 보유, 참여한 강의 @GetMapping
 
     // 재생 시간 업데이트 @PostMapping

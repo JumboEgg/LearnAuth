@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ssafy.d210.backend.service.LectureManagementService;
+import ssafy.d210.backend.service.LectureManagementServiceImpl;
 
 @RestController
 @RequestMapping("/api/lecture")
 @RequiredArgsConstructor
 public class LectureManagementController {
+
 
     private final LectureManagementService lectureManagementService;
 

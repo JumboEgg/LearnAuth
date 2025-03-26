@@ -1,7 +1,6 @@
 package ssafy.d210.backend.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ssafy.d210.backend.service.LectureService;
@@ -11,7 +10,11 @@ import ssafy.d210.backend.service.LectureService;
 @RequiredArgsConstructor
 public class LectureController {
 
+
+
     private final LectureService lectureService;
+
+
 
     //전체 강의 조회
 //    @GetMapping

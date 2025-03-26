@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ssafy.d210.backend.service.ReportService;
+import ssafy.d210.backend.service.ReportServiceImpl;
 
 @RestController
 @RequestMapping("/api/report")
