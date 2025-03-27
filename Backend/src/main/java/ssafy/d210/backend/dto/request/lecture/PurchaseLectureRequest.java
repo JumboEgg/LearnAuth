@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PurchaseLecture {
+public class PurchaseLectureRequest {
     private long userId;
     private long lectureId;
 }

@@ -36,6 +36,7 @@ public class UserServiceImpl implements UserService {
     private final JwtUtil jwtUtil;
     private final TokenRepository tokenRepository;
     private final UserLectureRepository userLectureRepository;
+
     public ResponseSuccessDto<SignupResponse> signup(SignupRequest userSignupRequest) {
         // 닉네임 중복확인
         // 이메일 중복확인

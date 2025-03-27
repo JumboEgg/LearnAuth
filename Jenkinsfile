@@ -16,6 +16,8 @@ pipeline {
         DB_USERNAME = credentials('DB_USERNAME')
         DB_PASSWORD = credentials('DB_PASSWORD')
 
+        JWT_SECRET = credentials('JWT_SECRET')
+
         JAVA_HOME = '/opt/java/openjdk'
         GRADLE_HOME = '/opt/gradle/gradle-8.13'
         PATH = "${JAVA_HOME}/bin:${GRADLE_HOME}/bin:${env.PATH}"
@@ -91,6 +93,7 @@ pipeline {
                                       -p ${DOCKER_PORT}:${DOCKER_PORT} \
                                       -e SPRING_PROFILES_ACTIVE=dev \
                                       -e PORT=${DOCKER_PORT} \
+                                      -e JWT_SECRET=${JWT_SECRET} \
                                       -e DB_URL="${DB_URL}" \
                                       -e DB_USERNAME=${DB_USERNAME} \
                                       -e DB_PASSWORD=${DB_PASSWORD} \
