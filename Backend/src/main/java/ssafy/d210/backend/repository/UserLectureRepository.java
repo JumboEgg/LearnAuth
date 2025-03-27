@@ -10,6 +10,7 @@ import ssafy.d210.backend.entity.UserLecture;
 import java.util.List;
 
 public interface UserLectureRepository extends JpaRepository<UserLecture, Long> {
+
     // 사용자 강의 정보 조회
     // 사용자의 강의 보유 여부, 특정 행 조회에 사용
     @Query(value = """
@@ -19,7 +20,9 @@ public interface UserLectureRepository extends JpaRepository<UserLecture, Long> 
             and userId = :userId;
         """, nativeQuery = true)
     UserLecture getUserLectureById(Long lectureId, Long userId);
-    
+
+    public List<UserLecture> findAllByUserId(Long userId);
+
     // 사용자가 이수를 완료한 강의
     @Query(value = """
             select l.lecture_id as lectureId,
@@ -56,5 +59,4 @@ public interface UserLectureRepository extends JpaRepository<UserLecture, Long> 
          """, nativeQuery = true)
     CertificateDetailResponse getCertificateDetail(@Param("userId") Long userId, @Param("lectureId") Long lectureId);
 
-    List<UserLecture> findAllByUserId(Long userId);
 }
