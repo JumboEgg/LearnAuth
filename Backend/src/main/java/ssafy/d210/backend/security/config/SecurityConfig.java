@@ -62,7 +62,7 @@ public class SecurityConfig {
 
         // 요청 권한 설정
         http.authorizeHttpRequests(auth ->
-                auth.requestMatchers("/").permitAll()
+                auth.requestMatchers("/**").permitAll()
                         .requestMatchers("/reissue").permitAll()
                         .requestMatchers("/api/auth/signup", "/api/auth/login").permitAll()
                         .requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**").permitAll()

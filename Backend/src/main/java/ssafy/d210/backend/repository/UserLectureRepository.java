@@ -13,6 +13,7 @@ import java.util.List;
 // TODO : Database 사용 설정
 public interface UserLectureRepository extends JpaRepository<UserLecture, Long> {
 
+    public List<UserLecture> findAllByUserId(Long userId);
     // 사용자가 참여한 강의
     @Query(value = """
             select l.lectureId as lectureId,
