@@ -27,9 +27,9 @@ class RegisterLectureFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // 뒤로가기
-        binding.btnBack.setOnClickListener {
-            findNavController().popBackStack()
-        }
+//        binding.btnBack.setOnClickListener {
+//            findNavController().popBackStack()
+//        }
 
 
 
