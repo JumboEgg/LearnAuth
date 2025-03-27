@@ -4,6 +4,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/background_color">
+
     <ImageView
         android:id="@+id/btnBack"
         android:layout_width="wrap_content"
@@ -11,21 +12,23 @@
         android:src="@drawable/arrow_back_24px"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="@+id/textTitleCertDetail"
-        android:layout_marginTop="30dp" />
+        android:layout_marginTop="30dp"
+        android:paddingBottom="10dp"
+        android:paddingEnd="10dp" />
 
-<!--    수료증 텍스트 중심으로 정렬-->
+    <!--    수료증 텍스트 중심으로 정렬-->
     <TextView
         android:id="@+id/textTitleCertDetail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="수료증"
+        android:text="임시 수료증"
         style="@style/heading1"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginTop="75dp"
         android:layout_marginStart="25dp"/>
 
-<!--    수료증 발급받기 및 저장하기 버튼-->
+    <!--    수료증 발급받기 및 저장하기 버튼-->
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnCertSave"
         android:layout_width="match_parent"
@@ -40,145 +43,128 @@
         android:layout_marginHorizontal="45dp"
         android:layout_marginBottom="30dp"/>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constCert"
-        android:layout_width="350dp"
-        android:layout_height="400dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:background="@color/button_white_blue">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="임시 수료증입니다"
-            style="@style/heading1"
-            android:textColor="@color/text_gray"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
-
-        <TextView
-            android:id="@+id/textTitleCert"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="수료증"
-            style="@style/heading2"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="20dp"/>
-
-        <TextView
-            android:id="@+id/textLectureTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="데이터 강의"
-            style="@style/heading3"
-            app:layout_constraintTop_toBottomOf="@+id/textTitleCert"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="30dp"
-            />
-        <TextView
-            android:gravity="center"
-            android:id="@+id/textDescriptionCert"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:text="위 사람은 교육과정을 성실히 이수하였기에 이 증서를 수여합니다."
-            app:layout_constraintTop_toBottomOf="@+id/textLectureTitle"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="20dp"/>
-        <LinearLayout
-            android:id="@+id/linearAuthTitle"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layout_constraintTop_toBottomOf="@+id/textDescriptionCert"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:orientation="horizontal"
-            android:layout_marginTop="20dp">
-            <TextView
-                android:text="강의자"
-                android:gravity="center"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                style="@style/heading5"/>
-            <TextView
-                android:text="교육생"
-                android:gravity="center"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                style="@style/heading5"/>
-        </LinearLayout>
-        <LinearLayout
-            android:id="@+id/linearAuthName"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layout_constraintTop_toBottomOf="@+id/linearAuthTitle"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:orientation="horizontal"
-            android:layout_marginTop="10dp">
-            <TextView
-                android:id="@+id/textNameLecturer"
-                android:text="홍길동"
-                android:gravity="center"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                style="@style/heading5"
-                android:singleLine="true"
-                android:ellipsize="marquee"
-                android:marqueeRepeatLimit="marquee_forever"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:scrollHorizontally="true"/>
-            <TextView
-                android:id="@+id/textNameStudent"
-                android:text="홍길동은 형을 형이라 부르지 못하고 그럼 뭐라고 부르나요"
-                android:gravity="center"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                style="@style/heading5"
-                android:singleLine="true"
-                android:ellipsize="marquee"
-                android:marqueeRepeatLimit="marquee_forever"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:scrollHorizontally="true"/>
-        </LinearLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            app:layout_constraintTop_toBottomOf="@id/linearAuthName"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            android:background="@color/text_gray"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
     <TextView
         android:id="@+id/textTempCert"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/constCert"
-        android:layout_marginTop="15dp"
+        app:layout_constraintTop_toBottomOf="@+id/layoutCertContainer"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         style="@style/heading4"
         android:textColor="@color/text_gray"
         android:text="수료증을 발급받기 전에는 임시 수료증이 조회됩니다."/>
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutCertContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="30dp"
+        app:layout_constraintTop_toBottomOf="@+id/textTitleCertDetail"
+        app:layout_constraintBottom_toTopOf="@+id/btnCertSave"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
+        <ImageView
+            android:id="@+id/imageCertBackground"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:scaleType="fitXY"
+            android:src="@drawable/img_cert_frame"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/textLectureTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SQLD 미리보기"
+            style="@style/heading1"
+            android:textColor="@color/primary_color"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/textLectureTitle"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:paddingHorizontal="20dp"
+            android:orientation="horizontal"
+            android:layout_marginEnd="60dp">
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_weight="1"
+                android:layout_marginEnd="10dp">
+                <TextView
+                    android:id="@+id/textNameStudent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="이한나"
+                    style="@style/heading3"
+                    android:gravity="end"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="수료자"
+                    style="@style/heading4"
+                    android:textColor="@color/primary_color"
+                    android:gravity="end"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_weight="1">
+                <TextView
+                    android:id="@+id/textNameLecturer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="이한나"
+                    style="@style/heading3"
+                    android:gravity="end"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="강의자"
+                    style="@style/heading4"
+                    android:gravity="end"/>
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/imgQR"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_margin="20dp"
+            android:background="@color/primary_color"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

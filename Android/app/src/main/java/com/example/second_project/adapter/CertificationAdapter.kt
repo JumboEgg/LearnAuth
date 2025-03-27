@@ -21,6 +21,10 @@ class CertificationAdapter(
             binding.root.setOnClickListener {
                 onItemClick(adapterPosition)
             }
+
+            // 흘러가기 텍스트
+//            binding.textTitleMyCertification.isSelected = true
+
         }
     }
 

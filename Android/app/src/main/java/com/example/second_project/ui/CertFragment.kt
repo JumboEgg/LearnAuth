@@ -38,7 +38,7 @@ class CertFragment : Fragment() {
             Pair("법률 교육", "법률"),
             Pair("마케팅 교육", "마케팅"),
             Pair("수학 교육", "수학"),
-            Pair("생명과학 교육", "생명과학")
+            Pair("생명과학 교육을 한번 들어보시겠습니까 저도 한번 들어보고 싶어서 참을 수 없네요", "생명과학")
         )
 
         val adapter = CertificationAdapter(dummyCertList) { position ->
