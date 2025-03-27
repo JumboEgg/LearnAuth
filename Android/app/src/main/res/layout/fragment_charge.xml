@@ -123,7 +123,9 @@
         app:layout_constraintTop_toBottomOf="@id/chargeInputTitle"
         android:background="@drawable/seletor_radio_button"
         app:layout_constraintStart_toStartOf="@id/chargeInputTitle"
-        app:layout_constraintEnd_toStartOf="@id/chargeWon"/>
+        app:layout_constraintEnd_toStartOf="@id/chargeWon"
+        android:singleLine="true"
+        android:inputType="number"/>
 
     <TextView
         android:id="@+id/chargeWon"

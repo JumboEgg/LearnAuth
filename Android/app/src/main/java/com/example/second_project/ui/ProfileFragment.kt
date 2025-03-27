@@ -43,14 +43,14 @@ class ProfileFragment : Fragment() {
             transaction.commit()
         }
 
-
-        //화면 확인을 위한 임시 코드!!
-        binding.profileMenu4.setOnClickListener {
-            val transaction = requireActivity().supportFragmentManager.beginTransaction()
-            transaction.replace(R.id.nav_host_fragment, LectureDetailFragment())
-            transaction.addToBackStack(null)
-            transaction.commit()
-        }
+//
+//        //화면 확인을 위한 임시 코드!!
+//        binding.profileMenu4.setOnClickListener {
+//            val transaction = requireActivity().supportFragmentManager.beginTransaction()
+//            transaction.replace(R.id.nav_host_fragment, LectureDetailFragment())
+//            transaction.addToBackStack(null)
+//            transaction.commit()
+//        }
     }
 
     override fun onDestroyView() {
