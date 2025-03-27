@@ -21,14 +21,16 @@ public class SignupRequest {
     @NotBlank(message = "닉네임를 입력해주세요.")
     private String nickname;
 
-//    @NotNull(message = "지갑은 필수 입력 값입니다.")
-//    @NotBlank(message = "지갑을 입력해주세요.")
-//    private String wallet;
+    @NotNull(message = "지갑은 필수 입력 값입니다.")
+    @NotBlank(message = "지갑을 입력해주세요.")
+    private String wallet;
 
     @NotNull(message = "이름은 필수 입력 값입니다.")
     @NotBlank(message = "이름을 입력해주세요.")
     private String name;
 
-//    private String userKey;
+    @NotNull(message = "유저키는 필수 입력 값입니다.")
+    @NotBlank(message = "유저키를 입력해주세요.")
+    private String userKey;
 
 }
