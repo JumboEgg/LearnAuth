@@ -16,10 +16,6 @@ import java.util.List;
 @Slf4j
 public class UserLectureServiceImpl implements UserLectureService{
     private final UserLectureRepository userLectureRepository;
-    @Override
-    public List<LectureResponse> getLectures(Long userId) {
-        return null;
-    }
 
     @Override
     public void updateLectureTime(Long userLectureId, Long sublectid, LectureTimeRequest request) {

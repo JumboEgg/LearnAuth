@@ -5,11 +5,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class RecommendationLectureResponse {
-    private int lectureId;
+public class LectureInfoResponse {
+    private long lectureId;
     private String title;
     private int price;
-    private String name;
+    private String lecturer;
     private String lectureUrl;
     private String categoryName;
 }
