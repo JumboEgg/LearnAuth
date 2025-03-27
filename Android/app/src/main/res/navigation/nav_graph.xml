@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/nav_main">
+    app:startDestination="@+id/nav_main">
 
     <!-- 기존 Fragment들 -->
     <fragment
@@ -93,23 +93,43 @@
         android:label="fragment_my_lecture"
         tools:layout="@layout/fragment_my_lecture" />
 
+    <!-- 소유 강의 탭 -->
     <fragment
         android:id="@+id/ownedLectureFragment"
         android:name="com.example.second_project.ui.OwnedLectureFragment"
         android:label="fragment_owned_lecture"
         tools:layout="@layout/fragment_owned_lecture" />
 
+    <!-- 참여 강의 탭 -->
     <fragment
         android:id="@+id/participatedLectureFragment"
         android:name="com.example.second_project.ui.ParticipatedLectureFragment"
         android:label="fragment_participated_lecture"
         tools:layout="@layout/fragment_participated_lecture" />
 
+    <!-- 내 강의 등록하기 -->
     <fragment
         android:id="@+id/registerLectureFragment"
         android:name="com.example.second_project.ui.RegisterLectureFragment"
         android:label="내 강의 등록하기"
         tools:layout="@layout/fragment_register_lecture" />
 
+    <!-- StaticFragment: 통계 화면 -->
+    <fragment
+        android:id="@+id/staticFragment"
+        android:name="com.example.second_project.ui.StaticFragment"
+        android:label="통계 화면"
+        tools:layout="@layout/fragment_static">
+        <!-- 전달할 인자: 예를 들어 강의명 -->
+        <argument
+            android:name="lectureName"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
+
+    <!-- 전역(Global) 액션: 어느 프래그먼트에서든 StaticFragment로 이동 가능 -->
+    <action
+        android:id="@+id/action_global_staticFragment"
+        app:destination="@id/staticFragment" />
 
 </navigation>
