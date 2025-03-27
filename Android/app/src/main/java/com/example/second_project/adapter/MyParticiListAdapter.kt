@@ -8,7 +8,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.second_project.data.MyParticiItem
 import com.example.second_project.databinding.ItemParticipatedLectureBinding
 
-class MyParticiListAdapter : ListAdapter<MyParticiItem, MyParticiListAdapter.ParticipatedLectureViewHolder>(DIFF_CALLBACK) {
+class MyParticiListAdapter(
+    private val onItemClick: (MyParticiItem) -> Unit
+) : ListAdapter<MyParticiItem, MyParticiListAdapter.ParticipatedLectureViewHolder>(DIFF_CALLBACK) {
 
     companion object {
         private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<MyParticiItem>() {
@@ -33,18 +35,18 @@ class MyParticiListAdapter : ListAdapter<MyParticiItem, MyParticiListAdapter.Par
             // 강의 제목
             binding.lectureTitle.text = item.title
 
-            // boolean 타입으로 바뀌어야함. 만약
-            if(item.mainHuman){
-                binding.joinText.text = "강의자로 참여"
-            }else{
-                binding.joinText.text = ""
-            }
+            // mainHuman 값에 따라 텍스트 설정
+            binding.joinText.text = if(item.mainHuman) "강의자로 참여" else ""
+
             // 닉네임
             binding.myName.text = item.myName
 
-            // 이미지 설정(고양이 이미지).
-            // staricon을 기본으로 사용 중이니, 필요에 따라 바꾸거나 Glide/Picasso 등으로 URL 로드 가능
+            // 이미지 설정 (예: staricon 사용)
 
+            // 아이템 클릭 시 onItemClick 콜백 호출
+            binding.root.setOnClickListener {
+                onItemClick(item)
+            }
         }
     }
 
