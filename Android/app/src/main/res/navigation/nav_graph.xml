@@ -105,4 +105,11 @@
         android:label="fragment_participated_lecture"
         tools:layout="@layout/fragment_participated_lecture" />
 
+    <fragment
+        android:id="@+id/registerLectureFragment"
+        android:name="com.example.second_project.ui.RegisterLectureFragment"
+        android:label="내 강의 등록하기"
+        tools:layout="@layout/fragment_register_lecture" />
+
+
 </navigation>

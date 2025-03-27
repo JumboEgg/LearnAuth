@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/background_color">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/textTitleRegisterLecture"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:padding="25dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/titleEntireLecture"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="수익 정보"
+                style="@style/heading2" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="강의 가격"
+                style="@style/heading3"
+                android:textColor="@color/text_gray"
+                android:layout_marginTop="15dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/editTextPrice"
+                    style="@style/body1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/bg_radius_20"
+                    android:textColorHint="@color/text_gray"
+                    app:boxStrokeColor="@color/button_gray"
+                    app:boxStrokeWidth="1dp"
+                    android:layout_weight="5">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        style="@style/body1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="강의 금액을 작성해 주세요."
+                        android:paddingStart="14dp"
+                        android:textColor="@color/text_gray"
+                        android:maxLines="1"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:text="CAT"
+                    style="@style/heading2"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="10dp"
+                    android:textColor="@color/text_gray"/>
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="강의 제작에 기여한 사용자의 정보를 입력해 주세요. 강의자로 선택한 사용자 닉네임이 우선 노출됩니다."
+                android:textColor="@color/text_white_gray"
+                style="@style/semibold16"
+                android:layout_marginTop="50dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="10dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="4"
+                    android:text="강의 참여자"
+                    style="@style/semibold16"
+                    android:textColor="@color/text_gray"/>
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3"
+                    android:text="정산 비율"
+                    style="@style/semibold16"
+                    android:textColor="@color/text_gray"/>
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:text="강의자"
+                    style="@style/semibold16"
+                    android:textColor="@color/text_gray"/>
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"/>
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerParticipants"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center"
+                android:layout_marginTop="25dp"
+                android:padding="10dp">
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/add_24px"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="참여자 추가하기"
+                    android:layout_marginStart="10dp"
+                    style="@style/semibold16"
+                    android:textColor="@color/text_white_gray">
+                </TextView>
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnToUploadFile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="30dp"
+                app:cornerRadius="20dp"
+                android:backgroundTint="@color/primary_color"
+                android:text="개별 강의 등록하러 가기"
+                android:textColor="@color/white"
+                android:padding="15dp"
+                style="@style/heading4"
+                android:layout_marginBottom="30dp"
+                android:layout_marginTop="20dp"/>
+
+
+
+        </LinearLayout>
+
+
+
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

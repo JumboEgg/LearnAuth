@@ -27,7 +27,8 @@ class MainActivity : AppCompatActivity() {
         // 수료증 디테일 페이지에서 nav 바 없어짐
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.certDetailFragment -> {
+                R.id.certDetailFragment,
+                R.id.registerLectureFragment -> {
                     binding.bottomNavigation.visibility = View.GONE
                 }
                 else -> {

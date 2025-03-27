@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/participatedLectureRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,4 +11,21 @@
         android:id="@+id/participatedRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnNewLecture"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginHorizontal="30dp"
+        app:cornerRadius="20dp"
+        android:backgroundTint="@color/white"
+        android:text="신규 강의 등록"
+        android:textColor="@color/primary_color"
+        app:strokeColor="@color/primary_color"
+        app:strokeWidth="1dp"
+        android:padding="15dp"
+        style="@style/heading4"
+        android:layout_marginBottom="30dp"/>
+
 </FrameLayout>

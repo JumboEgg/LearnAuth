@@ -6,7 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.second_project.R
 import com.example.second_project.adapter.MyLectureListAdapter
 import com.example.second_project.adapter.MyParticiListAdapter
 import com.example.second_project.databinding.FragmentParticipatedLectureBinding
@@ -38,6 +40,10 @@ class ParticipatedLectureFragment : Fragment() {
         // 뷰모델에서 참여 강의 리스트 가져오기 (LiveData)
         viewModel.participatedLectures.observe(viewLifecycleOwner) { lectureList ->
             lectureAdapter.submitList(lectureList)
+        }
+
+        binding.btnNewLecture.setOnClickListener {
+            findNavController().navigate(R.id.registerLectureFragment)
         }
     }
 
