@@ -40,11 +40,11 @@ public class User {
     @Length(max = 16)
     private String name;
 
-    private String refreshToken;
-
     @NotNull
     @Length(max=64)
     private String userKey;
+
+    private String expiration;
 
     @OneToMany(mappedBy = "user")
     private List<UserLecture> userLectureList;
@@ -57,9 +57,8 @@ public class User {
         this.email = userSignupRequest.getEmail();
         this.password = userSignupRequest.getPassword();
         this.nickname = userSignupRequest.getNickname();
-//        this.wallet = userSignupRequest.getWallet();
+        this.wallet = userSignupRequest.getWallet();
         this.name = userSignupRequest.getName();
-        this.refreshToken = "";
-//        this.userKey = userSignupRequest.getUserKey();
+        this.userKey = userSignupRequest.getUserKey();
     }
 }

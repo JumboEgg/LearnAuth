@@ -9,5 +9,5 @@ import ssafy.d210.backend.dto.response.user.SignupResponse;
 public interface UserService {
     public ResponseSuccessDto<SignupResponse> signup(SignupRequest userSignupRequest);
 
-    public ResponseSuccessDto<LoginResponse> login(LoginRequest loginRequest);
+
 }
