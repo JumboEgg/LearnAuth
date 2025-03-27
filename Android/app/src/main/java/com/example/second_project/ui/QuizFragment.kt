@@ -53,7 +53,6 @@ class QuizFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 첫 문제 표시
         showQuestion()
         startTimer()
 
@@ -118,11 +117,10 @@ class QuizFragment : Fragment() {
         binding.progressBar.max = 30
         binding.progressBar.progress = 30
     }
-    /** 옵션 선택 UI를 초기화하는 함수 */
+
     private fun resetOptionSelection() {
         binding.optionsGroup.clearCheck()
         selectedOption = null
-
     }
 
 
@@ -140,15 +138,26 @@ class QuizFragment : Fragment() {
                 binding.progressBar.progress = 0
                 // 아직 답변하지 않았다면 시간초과 dialog 표시
                 if (!userHasAnswered) {
-                    userHasAnswered = true
-                    AlertDialog.Builder(requireContext())
-                        .setTitle("시간초과입니다!")
-                        .setMessage("시간 내에 답을 선택하지 않으셨습니다.")
-                        .setPositiveButton("확인") { dialog, _ ->
-                            dialog.dismiss()
+                    if (selectedOption != null) {
+                        userHasAnswered = true
+                        if (selectedOption == 1) {
+                            correctAnswers++
+                        }
+                        if (currentQuestionIndex == questions.size -1){
+                            showResultDialog()
+                        }else {
                             moveToNextOrResult()
                         }
-                        .show()
+                    } else {
+                        AlertDialog.Builder(requireContext())
+                            .setTitle("시간초과입니다!")
+                            .setMessage("시간 내에 답을 선택하지 않으셨습니다.")
+                            .setPositiveButton("확인") { dialog, _ ->
+                                dialog.dismiss()
+                                moveToNextOrResult()
+                            }
+                            .show()
+                    }
                 }
             }
         }.start()
