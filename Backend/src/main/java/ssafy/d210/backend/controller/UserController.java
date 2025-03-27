@@ -35,5 +35,6 @@ public class UserController {
     public ResponseEntity<ResponseSuccessDto<LoginResponse>> login(@RequestBody LoginRequest loginRequest) {
         // 로그인 처리
         throw new UnsupportedOperationException("LoginFilter에서 처리");
+
     }
 }
