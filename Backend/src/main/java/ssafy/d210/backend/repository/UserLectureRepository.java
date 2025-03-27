@@ -108,5 +108,4 @@ public interface UserLectureRepository extends JpaRepository<UserLecture, Long> 
          """, nativeQuery = true)
     CertificateDetailResponse getCertificateDetail(@Param("userId") Long userId, @Param("lectureId") Long lectureId);
 
-    List<UserLecture> findAllByUserId(Long userId);
 }
