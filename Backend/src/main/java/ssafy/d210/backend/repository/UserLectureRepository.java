@@ -10,7 +10,6 @@ import ssafy.d210.backend.entity.UserLecture;
 
 import java.util.List;
 
-// TODO : Database 사용 설정
 public interface UserLectureRepository extends JpaRepository<UserLecture, Long> {
 
     public List<UserLecture> findAllByUserId(Long userId);
@@ -108,4 +107,6 @@ public interface UserLectureRepository extends JpaRepository<UserLecture, Long> 
             and p.lecturer = TRUE
          """, nativeQuery = true)
     CertificateDetailResponse getCertificateDetail(@Param("userId") Long userId, @Param("lectureId") Long lectureId);
+
+    List<UserLecture> findAllByUserId(Long userId);
 }

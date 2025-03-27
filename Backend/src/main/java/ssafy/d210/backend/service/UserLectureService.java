@@ -13,10 +13,8 @@ import java.util.List;
 // 사용자가 수강한 강의 목록 조회, 시청 시간 업데이트
 
 public interface UserLectureService {
-
-    // LectureResponse는 userlecture 말고도 쓰기 때문에 그냥 Lecture Response라 한다.
-    public List<LectureResponse> getLectures(Long userId);
-    public void updateLectureTime(Long userLectureId, Long sublectid, LectureTimeRequest request);
-
     public List<UserLecture> findAllByUserId(Long userId);
+
+    // 강의 재생 시간 저장
+    public void updateLectureTime(Long userLectureId, Long subLectureId, LectureTimeRequest request);
 }

@@ -1,6 +1,7 @@
 package ssafy.d210.backend.service;
 
 import org.springframework.stereotype.Service;
+import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.response.certificate.CertificateDetailResponse;
 import ssafy.d210.backend.dto.response.certificate.CertificateResponse;
 
@@ -10,10 +11,10 @@ import java.util.List;
 public interface CertificateService {
 
     // 수료증 전체 목록 조회
-    public List<CertificateResponse> getCertificates(Long userId);
+    public ResponseSuccessDto<List<CertificateResponse>> getCertificates(Long userId);
 
     // 수료증 자세히 보기
-    public CertificateDetailResponse getCertificatesDetail(Long userId, Long lectureId);
+    public ResponseSuccessDto<CertificateDetailResponse> getCertificatesDetail(Long userId, Long lectureId);
 
     // 수료증 발급
     /*TODO : 수료증 발급 절차 논의
@@ -25,5 +26,5 @@ public interface CertificateService {
     *   Back에서 저장, 서명, 요청 후 저장
     *   Front에 tokenId와 생성한 qrCode 반환
     */
-    public boolean issueCertificate(Long lectureId, Long userId);
+    public ResponseSuccessDto<Boolean> issueCertificate(Long lectureId, Long userId);
 }

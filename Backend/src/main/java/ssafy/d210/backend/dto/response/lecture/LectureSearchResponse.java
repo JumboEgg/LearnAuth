@@ -11,5 +11,5 @@ import java.util.List;
 public class LectureSearchResponse {
     private int totalResults;
     private int currentPage;
-    private List<SearchResultResponse> searchResults = new ArrayList<>();
+    private List<LectureInfoResponse> searchResults = new ArrayList<>();
 }

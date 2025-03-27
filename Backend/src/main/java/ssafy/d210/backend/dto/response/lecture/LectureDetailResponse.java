@@ -11,11 +11,12 @@ import java.util.List;
 public class LectureDetailResponse {
     private long lectureId;
     private long userLectureId;
+    private String title;
     private String categoryName;
     private String goal;
     private String description;
     private int price;
-    private String name;
+    private String lecturer;
     private String lectureUrl;
     private long recentLectureId;
     private int studentCount;
