@@ -16,7 +16,7 @@ import com.example.second_project.databinding.FragmentOwnedLectureDetailBinding
 private const val TAG = "LectureDetailFragment_야옹"
 class LectureDetailFragment: Fragment() {
 
-    private var _binding: FragmentLectureDetailBinding? = null
+    private var _binding: FragmentLectureDetailBeforeBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -24,7 +24,7 @@ class LectureDetailFragment: Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentLectureDetailBinding.inflate(inflater, container, false)
+        _binding = FragmentLectureDetailBeforeBinding.inflate(inflater, container, false)
         return binding.root
     }
 
