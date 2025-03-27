@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardElevation="0.5dp"
+    app:cardCornerRadius="12dp"
+    android:layout_margin="4dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="2dp"
+        android:backgroundTint="@color/white"
+        android:layout_margin="4dp">
+        
+        <ImageView
+            android:id="@+id/eachThumnail"
+            android:layout_width="112dp"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="H, 16:9"
+            android:src="@drawable/sample_plzdelete"
+            android:scaleType="centerCrop"
+            android:layout_margin="2dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+        
+        <TextView
+            android:id="@+id/eachNum"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/eachThumnail"
+            android:text="1강"
+            style="@style/semibold16"
+            android:layout_marginStart="16dp"
+            app:layout_constraintTop_toTopOf="@id/eachThumnail"/>
+
+        <TextView
+            android:id="@+id/eachTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="강의 제목입니다. 긴 경우에는 이렇게 처리해 줄 겁니다"
+            android:singleLine="true"
+            style="@style/body1"
+            app:layout_constraintStart_toEndOf="@id/eachNum"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/eachNum"
+            app:layout_constraintBottom_toBottomOf="@id/eachNum"
+            android:layout_marginStart="8dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:text="이어보기"
+            style="@style/semibold14"
+            android:padding="0dp"
+            app:layout_constraintStart_toStartOf="@id/eachNum"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/eachNum"
+            app:layout_constraintBottom_toBottomOf="@id/eachThumnail"
+            android:backgroundTint="@color/button_white_blue"
+            android:textColor="@color/text_white_blue"
+            android:layout_marginTop="4dp"/>
+
+
+        
+        
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    
+
+</androidx.cardview.widget.CardView>
