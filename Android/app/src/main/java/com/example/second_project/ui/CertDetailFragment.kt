@@ -33,6 +33,8 @@ class CertDetailFragment: Fragment() {
         binding.btnCertSave.setOnClickListener {
             showConfirmDialog()
         }
+
+        binding.msgOnCert.isSelected = true
     }
 
 
