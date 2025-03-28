@@ -1,5 +1,5 @@
 package ssafy.d210.backend.enumeration.response;
-
+//
 public enum HereStatus {
     SUCCESS_SIGNUP,
     SUCCESS_LOGIN,
