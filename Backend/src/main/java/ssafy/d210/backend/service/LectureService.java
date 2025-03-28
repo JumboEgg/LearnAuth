@@ -29,7 +29,7 @@ public interface LectureService {
     public ResponseSuccessDto<Boolean> purchaseLecture(Long userId, Long lectureId);
 
     // 보유 강의 목록 조회
-    public ResponseSuccessDto<List<LectureInfoResponse>> getPurchasedLectures(Long userId);
+    public ResponseSuccessDto<List<LectureResponse>> getPurchasedLectures(Long userId);
 
-    public ResponseSuccessDto<List<LectureInfoResponse>> getParticipatedLectures(Long userId);
+    public ResponseSuccessDto<List<LectureResponse>> getParticipatedLectures(Long userId);
 }

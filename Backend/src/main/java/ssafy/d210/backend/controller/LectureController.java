@@ -37,19 +37,17 @@ public class LectureController {
 
     //조건에 따른 강의 조회 @GetMapping("/recommendation")
     @GetMapping("/recommendation")
-    @Operation(summary = "메인 페이지 강의 조회", description = "미완료")
+    @Operation(summary = "메인 페이지 강의 조회", description = "가장 많은 사람이 이수한 강의 3개, 무작위 강의 10개, 최신 강의 10개를 반환한다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조건 강의 조회 성공")
     })
-    public ResponseEntity<ResponseSuccessDto<RecommendedLectureResponse>> getRecommendedLectures(
-            LectureInfoResponse recommendationLectureResponse
-    ) {
+    public ResponseEntity<ResponseSuccessDto<RecommendedLectureResponse>> getRecommendedLectures() {
         return ResponseEntity.ok(lectureService.getRecommendedLectures());
     }
 
     //강의 상세 정보 조회, 마이페이지 강의 조회 @GetMapping("/{lectureId})
     @GetMapping("/{lectureId}")
-    @Operation(summary = "강의 상세 정보 조회", description = "미완료")
+    @Operation(summary = "[미완] 강의 상세 정보 조회", description = "미완료")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "아무튼 미완료")
     })
@@ -91,7 +89,7 @@ public class LectureController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "임시 반환값입니다.")
     })
-    public ResponseEntity<ResponseSuccessDto<List<LectureInfoResponse>>> getPurchasedLectures(
+    public ResponseEntity<ResponseSuccessDto<List<LectureResponse>>> getPurchasedLectures(
             @RequestParam Long userId
     ) {
         return ResponseEntity.ok(lectureService.getPurchasedLectures(userId));
@@ -103,7 +101,7 @@ public class LectureController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "임시 반환값입니다.")
     })
-    public ResponseEntity<ResponseSuccessDto<List<LectureInfoResponse>>> getParticipatedLectures(
+    public ResponseEntity<ResponseSuccessDto<List<LectureResponse>>> getParticipatedLectures(
             @RequestParam Long userId
     ) {
         return ResponseEntity.ok(lectureService.getParticipatedLectures(userId));
