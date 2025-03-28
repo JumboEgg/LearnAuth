@@ -17,7 +17,9 @@ import ssafy.d210.backend.repository.QuizRepository;
 import ssafy.d210.backend.repository.UserLectureRepository;
 import ssafy.d210.backend.util.ResponseUtil;
 
+import java.time.LocalDate;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -62,8 +64,12 @@ public class QuizServiceImpl implements QuizService{
 
     @Override
     public ResponseSuccessDto<Object> submitQuiz(Long lectureId, QuizResultRequest request) {
-        userLectureRepository.getUserLectures(lectureId);
-        return null;
+        UserLecture userLecture = userLectureRepository.getUserLectureById(lectureId, request.getUserId());
+
+        userLecture.setCertificateDate(LocalDate.now());
+        userLectureRepository.save(userLecture);
+        ResponseSuccessDto<Object> res = responseUtil.successResponse("ok", HereStatus.SUCCESS_QUIZ_SUBMIT);
+        return res;
     }
 
 

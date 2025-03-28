@@ -15,11 +15,11 @@ public interface UserLectureRepository extends JpaRepository<UserLecture, Long> 
     // 사용자의 강의 보유 여부, 특정 행 조회에 사용
     @Query(value = """
             select *
-            from userLecture
-            where lectureId = :lectureId
-            and userId = :userId;
+            from user_lecture
+            where lecture_lecture_id = :lectureId
+            and user_user_id = :userId;
         """, nativeQuery = true)
-    UserLecture getUserLectureById(Long lectureId, Long userId);
+    UserLecture getUserLectureById(@Param("lectureId") Long lectureId, @Param("userId") Long userId);
 
     public List<UserLecture> findAllByUserId(Long userId);
 

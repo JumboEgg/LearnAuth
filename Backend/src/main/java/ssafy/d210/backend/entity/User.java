@@ -44,8 +44,6 @@ public class User {
     @Length(max=64)
     private String userKey;
 
-    private String expiration;
-
     @OneToMany(mappedBy = "user")
     private List<UserLecture> userLectureList;
 

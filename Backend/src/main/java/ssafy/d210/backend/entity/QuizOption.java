@@ -13,7 +13,7 @@ import lombok.Setter;
 public class QuizOption {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    @Column(name = "quiz_option")
+    @Column(name = "quiz_option_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

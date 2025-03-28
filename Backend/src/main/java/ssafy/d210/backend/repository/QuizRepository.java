@@ -14,6 +14,6 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
 
 
     // 두 번째 쿼리에서 해당 ID의 퀴즈와 옵션을 함께 가져옴
-    @Query("SELECT DISTINCT q FROM Quiz q LEFT JOIN FETCH q.quizOptionlist WHERE q.id IN :quizIds")
+    @Query("SELECT DISTINCT q FROM Quiz q LEFT JOIN FETCH q.quizOptionList WHERE q.id IN :quizIds")
     List<Quiz> findQuizzesWithOptionsByIds(@Param("quizIds") List<Long> quizIds);
 }
