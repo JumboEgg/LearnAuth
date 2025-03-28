@@ -23,7 +23,7 @@ public class LectureManagementController {
 
     // 강의 등록하기 @PostMapping
     @PostMapping
-    @Operation(summary = "강의 등록", description = "미완")
+    @Operation(summary = "강의 등록 [미완료]", description = "미완")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description="미완")
     })

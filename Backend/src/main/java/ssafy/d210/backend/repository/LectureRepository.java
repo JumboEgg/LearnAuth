@@ -222,7 +222,8 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
         from sub_lecture sl
         join user_lecture_time as ult
         on sl.sub_lecture_id = ult.sub_lecture_sub_lecture_id
-        and sl.sub_lecture_id in (:subLectureIdList);
+        and sl.sub_lecture_id in (:subLectureIdList)
+        order by sl.sub_lecture_id;
     """, nativeQuery = true)
     List<SubLectureDetailResponse> getUserLectureTime(List<Integer> subLectureIdList);
 

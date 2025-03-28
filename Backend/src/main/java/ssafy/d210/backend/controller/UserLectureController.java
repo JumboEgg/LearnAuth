@@ -39,7 +39,7 @@ public class UserLectureController {
 
     // 재생 시간 저장 @PostMapping
     @PostMapping("/{userLectureId}/time")
-    @Operation(summary = "재생 시간 업데이트", description = "개별 강의의 이어보기 시간을 저장합니다.")
+    @Operation(summary = "재생 시간 업데이트", description = "{userLectureId}, subLectureId, continueWatching, endFlag로 재생 시간을 업데이트합니다. <br> endFlag가 true이면 강의를 다 보았다는 뜻입니다. <br>DB에서는 1로 저장을 할 것입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "재생 시간 저장 성공")
     })

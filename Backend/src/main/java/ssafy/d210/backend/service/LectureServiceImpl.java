@@ -5,24 +5,26 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.response.lecture.*;
-import ssafy.d210.backend.entity.SubLecture;
-import ssafy.d210.backend.entity.UserLecture;
-import ssafy.d210.backend.entity.UserLectureTime;
+import ssafy.d210.backend.entity.*;
 import ssafy.d210.backend.enumeration.response.HereStatus;
-import ssafy.d210.backend.repository.LectureRepository;
-import ssafy.d210.backend.repository.UserLectureRepository;
+import ssafy.d210.backend.repository.*;
 import ssafy.d210.backend.util.ResponseUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class LectureServiceImpl implements LectureService{
+
+    private final UserRepository userRepository;
     private final LectureRepository lectureRepository;
     private final UserLectureRepository userLectureRepository;
     private final ResponseUtil responseUtil;
+    private final SubLectureRepository subLectureRepository;
+    private final UserLectureTimeRepository userLectureTimeRepository;
 
     @Override
     public ResponseSuccessDto<List<LectureInfoResponse>> getLecturesByCategory(String category, int page) {
@@ -94,8 +96,23 @@ public class LectureServiceImpl implements LectureService{
     }
 
     @Override
-    public ResponseSuccessDto<Boolean> purchaseLecture(Long userId, Long lectureId) {
-        return null;
+    public ResponseSuccessDto<Object> purchaseLecture(Long userId, Long lectureId) {
+        UserLecture userLecture = new UserLecture();
+        Optional<User> user = userRepository.findById(userId);
+        Optional<Lecture> lecture = lectureRepository.findById(lectureId);
+        userLecture.createUserLecture(user.get(), lecture.get());
+
+        UserLecture savedUserLecture = userLectureRepository.save(userLecture);
+
+        List<SubLecture> subLectureList = subLectureRepository.findSubLectureByLectureIdOrderById(lectureId);
+
+        for (SubLecture subLecture : subLectureList) {
+            UserLectureTime userLectureTime = new UserLectureTime();
+            userLectureTime.createUserLectureTime(savedUserLecture, subLecture);
+            userLectureTimeRepository.save(userLectureTime);
+        }
+        ResponseSuccessDto<Object> res = responseUtil.successResponse("ok", HereStatus.SUCCESS_LECTURE_BUY);
+        return res;
     }
 
     @Override

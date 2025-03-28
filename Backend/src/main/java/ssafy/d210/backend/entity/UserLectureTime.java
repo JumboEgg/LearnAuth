@@ -28,4 +28,8 @@ public class UserLectureTime {
 
     private int endFlag = 0;
 
+    public void createUserLectureTime(UserLecture userLecture, SubLecture subLecture) {
+        this.userLecture = userLecture;
+        this.subLecture = subLecture;
+    }
 }

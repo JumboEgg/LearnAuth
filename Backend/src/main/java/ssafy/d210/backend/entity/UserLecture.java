@@ -1,8 +1,6 @@
 package ssafy.d210.backend.entity;
 
 import jakarta.persistence.*;
-import jakarta.persistence.criteria.Fetch;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -45,4 +43,9 @@ public class UserLecture {
 
     @OneToMany(mappedBy = "userLecture")
     private List<UserLectureTime> userLectureTimeList;
+
+    public void createUserLecture(User user, Lecture lecture) {
+        this.user = user;
+        this.lecture = lecture;
+    }
 }
