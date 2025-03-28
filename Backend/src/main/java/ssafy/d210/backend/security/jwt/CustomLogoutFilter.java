@@ -6,11 +6,13 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ssafy.d210.backend.security.repository.TokenRepository;
 
 import java.io.IOException;
 
 @RequiredArgsConstructor
+@Slf4j
 public class CustomLogoutFilter extends GenericFilter {
 
     private final JwtUtil jwtUtil;
@@ -24,7 +26,7 @@ public class CustomLogoutFilter extends GenericFilter {
     public void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException{
 
         String requestUri = request.getRequestURI();
-        if (!requestUri.matches("^\\/logout$")) {
+        if (!requestUri.endsWith("/logout")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -44,6 +46,7 @@ public class CustomLogoutFilter extends GenericFilter {
         }
 
         if (refresh == null) {
+            log.error("리프레시 토큰이 쿠키에 없습니다.");
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
@@ -51,18 +54,21 @@ public class CustomLogoutFilter extends GenericFilter {
         try {
             jwtUtil.isExpired(refresh);
         } catch (ExpiredJwtException e) {
+            log.error("리프레시 토큰이 만료되었습니다.");
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
         String category = jwtUtil.getCategory(refresh);
         if (!category.equals("refresh")) {
+            log.error("토큰 카테고리가 refresh가 아닙니다: {}", category);
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
         Boolean isExist = tokenRepository.existsByRefresh(refresh);
         if (!isExist) {
+            log.error("토큰이 데이터베이스에 존재하지 않습니다.");
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }

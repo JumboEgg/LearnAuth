@@ -47,4 +47,13 @@ public class UserController {
         // 로그인 처리
         throw new UnsupportedOperationException("LoginFilter에서 처리");
     }
+
+    @PostMapping("/logout")
+    @Operation(summary = "로그아웃", description = "로그아웃을 합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "로그아웃 성공")
+    })
+    public ResponseEntity<ResponseSuccessDto<Object>> logout() {
+        throw new UnsupportedOperationException("CustomLogoutFilter에서 처리");
+    }
 }
