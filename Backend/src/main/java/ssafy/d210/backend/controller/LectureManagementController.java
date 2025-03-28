@@ -11,7 +11,7 @@ import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.request.lecture.LectureRegisterRequest;
 import ssafy.d210.backend.service.LectureManagementService;
 import ssafy.d210.backend.service.LectureManagementServiceImpl;
-
+//
 @RestController
 @RequestMapping("/api/lecture")
 @RequiredArgsConstructor

@@ -3,7 +3,11 @@ package ssafy.d210.backend.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
+<<<<<<< Updated upstream
 ///
+=======
+//
+>>>>>>> Stashed changes
 @Configuration
 public class RestTemplateConfig {
     @Bean

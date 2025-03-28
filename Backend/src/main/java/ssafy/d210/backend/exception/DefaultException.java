@@ -1,5 +1,5 @@
 package ssafy.d210.backend.exception;
-
+//
 public class DefaultException extends RuntimeException{
 
     private static final String MESSAGE = "Unknown Exception";
