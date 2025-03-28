@@ -1,9 +1,11 @@
 package ssafy.d210.backend.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Getter
@@ -22,11 +24,8 @@ public class UserLectureTime {
     @ManyToOne(fetch = FetchType.LAZY)
     private UserLecture userLecture;
 
-    private int continueWatching;
+    private String continueWatching;
 
-    private int endFlag;
-
-
-
+    private int endFlag = 0;
 
 }
