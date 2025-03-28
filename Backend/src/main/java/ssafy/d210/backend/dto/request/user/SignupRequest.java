@@ -29,4 +29,8 @@ public class SignupRequest {
     @NotBlank(message = "이름을 입력해주세요.")
     private String name;
 
+    @NotNull(message = "유저키는 필수 입력 값입니다.")
+    @NotBlank(message = "유저키를 입력해주세요.")
+    private String userKey;
+
 }
