@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/staticRoot"
     android:layout_width="match_parent"
@@ -18,56 +16,54 @@
         android:textStyle="bold"
         android:layout_marginBottom="16dp" />
 
-    <!-- 카테고리들: 날짜별 통계 / 강의 통계 / 나의 통계 / 참여자 통계 -->
-    <!-- 실제로는 ConstraintLayout / RecyclerView / HorizontalScrollView 등 다양한 방법으로 배치 가능 -->
-
+    <!-- 메뉴 항목 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginBottom="16dp">
 
-        <!-- 날짜별 통계 -->
         <TextView
             android:id="@+id/layoutDateStats"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:padding="8dp"
             android:text="날짜별 통계"
-            android:textSize="14sp"
-            android:padding="8dp" />
+            android:textSize="14sp" />
 
-        <!-- 강의 통계 -->
         <TextView
             android:id="@+id/layoutLectureStats"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:padding="8dp"
             android:text="강의 통계"
-            android:textSize="14sp"
-            android:padding="8dp" />
+            android:textSize="14sp" />
 
-        <!-- 나의 통계 -->
         <TextView
             android:id="@+id/layoutMyStats"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:padding="8dp"
             android:text="나의 통계"
-            android:textSize="14sp"
-            android:padding="8dp" />
+            android:textSize="14sp" />
 
-        <!-- 참여자 통계 -->
         <TextView
             android:id="@+id/layoutParticipantsStats"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:padding="8dp"
             android:text="참여자 통계"
-            android:textSize="14sp"
-            android:padding="8dp" />
+            android:textSize="14sp" />
     </LinearLayout>
 
-    <!-- 아래쪽에 동적으로 통계 레이아웃(날짜별, 강의, 나의, 참여자)을 갈아끼울 컨테이너 -->
-    <FrameLayout
-        android:id="@+id/subContainer"
+    <!-- 하위 프래그먼트가 전환될 NavHostFragment (sub_nav_graph 사용) -->
+    <!-- 기존 <fragment> 태그 대신 사용 -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/subNavHostFragment"
+        android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        app:navGraph="@navigation/sub_nav_graph"
+        app:defaultNavHost="false" />
 
 </LinearLayout>
