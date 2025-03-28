@@ -8,6 +8,7 @@ import ssafy.d210.backend.dto.response.lecture.LectureInfoResponse;
 import ssafy.d210.backend.dto.response.lecture.LectureResponse;
 import ssafy.d210.backend.dto.response.lecture.SubLectureDetailResponse;
 import ssafy.d210.backend.entity.Lecture;
+import ssafy.d210.backend.entity.SubLecture;
 import ssafy.d210.backend.entity.UserLecture;
 
 import java.util.List;
@@ -168,44 +169,62 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
 
 
     // 강의 상세 조회
-
-    // 강의 정보 조회
+    // 강의 정보
     @Query(value = """
-            select l.lectureId as lectureId,
+            select l.lecture_id as lectureId,
                    l.title as title,
                    l.price as price,
                    u.name as lecturer,
-                   sl.subLectureUrl as lectureUrl,
-                   c.categoryName as categoryName
+                   sl.sub_lecture_url as lectureUrl,
+                   c.category_name as categoryName
              from lecture l
              join category c
-             on l.categoryId = c.categoryId
-             join paymentRatio p
-             on l.lectureId = p.lectureId
+             on l.category_category_id = c.category_id
+             and l.lecture_id = :lectureId
+             join payment_ratio p
+             on l.lecture_id = p.lecture_lecture_id
              and p.lecturer = true
              join user u
-             on p.userId = u.userId
+             on p.user_user_id = u.user_id
              join (
-                select sl1.lectureId, sl1.subLectureUrl
-                from subLecture sl1
+                select sl1.lecture_lecture_id,
+                    sl1.sub_lecture_url
+                from sub_lecture sl1
                 join (
-                    select lectureId, MIN(subLectureId)
-                    from subLectureId
-                    group by lectureId
+                    select lecture_lecture_id,
+                        MIN(sub_lecture_id) as sub_lecture_id
+                    from sub_lecture
+                    group by lecture_lecture_id
                 ) sl2
-                on sl1.subLectureId = sl2.subLectureId
+                on sl1.sub_lecture_id = sl2.sub_lecture_id
              ) sl
-             on l.lectureId = sl.lectureId
+             on l.lecture_id = sl.lecture_lecture_id
         """, nativeQuery = true)
     LectureDetailResponse getLectureById(Long lectureId);
 
-    // 세부 강의 정보 조회
-    @Query()
-    List<SubLectureDetailResponse> getSubLectureById(Long lectureId);
+    // 세부 강의 정보
+    @Query(value = """
+        select sub_lecture_id
+        from sub_lecture
+        where lecture_lecture_id = :lectureId
+        order by sub_lecture_id;
+    """, nativeQuery = true)
+    List<Integer> getSublecturesById(Long lectureId);
 
-    // 세부 강의 수강 정보 조회
-//    @Query()
-//    List<SubLectureDetailResponse> getUserLectureTimeById(Long lectureId, Long userId);
+    // 세부 강의 id로 사용자 강의 조회 정보 조회
+    @Query(value = """
+        select
+            sl.sub_lecture_id as subLectureId,
+            sl.sub_lecture_title as subLectureTitle,
+            sl.sub_lecture_url as lectureUrl,
+            sl.sub_lecture_length as lectureLength,
+            ult.continue_watching as continueWatching
+        from sub_lecture sl
+        join user_lecture_time as ult
+        on sl.sub_lecture_id = ult.sub_lecture_sub_lecture_id
+        and sl.sub_lecture_id in (:subLectureIdList);
+    """, nativeQuery = true)
+    List<SubLectureDetailResponse> getUserLectureTime(List<Integer> subLectureIdList);
 
     // TODO : 강의 검색
 

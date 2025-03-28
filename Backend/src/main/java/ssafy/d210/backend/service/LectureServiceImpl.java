@@ -4,12 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
-import ssafy.d210.backend.dto.response.lecture.LectureDetailResponse;
-import ssafy.d210.backend.dto.response.lecture.LectureInfoResponse;
-import ssafy.d210.backend.dto.response.lecture.LectureResponse;
-import ssafy.d210.backend.dto.response.lecture.RecommendedLectureResponse;
+import ssafy.d210.backend.dto.response.lecture.*;
+import ssafy.d210.backend.entity.SubLecture;
+import ssafy.d210.backend.entity.UserLecture;
+import ssafy.d210.backend.entity.UserLectureTime;
 import ssafy.d210.backend.enumeration.response.HereStatus;
 import ssafy.d210.backend.repository.LectureRepository;
+import ssafy.d210.backend.repository.UserLectureRepository;
 import ssafy.d210.backend.util.ResponseUtil;
 
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LectureServiceImpl implements LectureService{
     private final LectureRepository lectureRepository;
+    private final UserLectureRepository userLectureRepository;
     private final ResponseUtil responseUtil;
 
     @Override
@@ -56,7 +58,34 @@ public class LectureServiceImpl implements LectureService{
 
     @Override
     public ResponseSuccessDto<LectureDetailResponse> getLectureDetail(Long lectureId, Long userId) {
-        return null;
+        LectureDetailResponse lectureDetail = lectureRepository.getLectureById(lectureId);
+        List<Integer> subLectureIdList = lectureRepository.getSublecturesById(lectureId);
+
+        if (lectureDetail == null) {
+            log.warn("No lecture found for lectureId {}", lectureId);
+            return responseUtil.successResponse(null, HereStatus.SUCCESS_LECTURE_DETAIL);
+        }
+        if (subLectureIdList.isEmpty()) {
+            log.warn("No subLecture found for lectureId {}", lectureId);
+        } else {
+            List<SubLectureDetailResponse> subLectureDetail = lectureRepository.getUserLectureTime(subLectureIdList);
+            if (subLectureDetail.isEmpty()) log.warn("No userLectureTime found for subLectureIdList {}", subLectureIdList);
+            lectureDetail.setSubLectures(subLectureDetail);
+        }
+
+        UserLecture userLecture = userLectureRepository.getUserLectureById(lectureId, userId);
+
+        if (userLecture == null) {
+            log.warn("No userLecture found for lectureId {} and userId {}", lectureId, userId);
+        } else {
+            lectureDetail.setUserLectureId(userLecture.getId());
+            lectureDetail.setRecentLectureId(userLecture.getRecentLectureId());
+        }
+
+        log.info("Lecture Detail : {}", lectureDetail);
+
+        ResponseSuccessDto<LectureDetailResponse> res = responseUtil.successResponse(lectureDetail, HereStatus.SUCCESS_LECTURE_DETAIL);
+        return res;
     }
 
     @Override
