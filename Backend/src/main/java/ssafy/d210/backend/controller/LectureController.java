@@ -47,9 +47,9 @@ public class LectureController {
 
     //강의 상세 정보 조회, 마이페이지 강의 조회 @GetMapping("/{lectureId})
     @GetMapping("/{lectureId}")
-    @Operation(summary = "[미완] 강의 상세 정보 조회", description = "미완료")
+    @Operation(summary = "강의 상세 정보 조회", description = "lectureId와 userId를 통해 강의 상세를 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "아무튼 미완료")
+            @ApiResponse(responseCode = "200", description = "lecture, userLecture, subLecture, userLectureTime을 가져옵니다.")
     })
     public ResponseEntity<ResponseSuccessDto<LectureDetailResponse>> getLectureDetail(
             @PathVariable Long lectureId,
@@ -73,11 +73,11 @@ public class LectureController {
 
     //강의 구매 @PostMapping("/purchase")
     @PostMapping("/purchase")
-    @Operation(summary = "[미완] 강의구매", description = "미완")
+    @Operation(summary = "강의구매", description = "유저 ID와 강의 ID를 통해 강의를 구매한다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "미완")
+            @ApiResponse(responseCode = "200", description = "강의 구매 완료")
     })
-    public ResponseEntity<ResponseSuccessDto<Boolean>> purchaseLecture(
+    public ResponseEntity<ResponseSuccessDto<Object>> purchaseLecture(
             @RequestBody PurchaseLectureRequest request
     ) {
         return ResponseEntity.ok(lectureService.purchaseLecture(request.getUserId(), request.getLectureId()));

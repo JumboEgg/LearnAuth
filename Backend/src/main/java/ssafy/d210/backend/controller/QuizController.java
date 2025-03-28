@@ -26,7 +26,7 @@ public class QuizController {
 
     // 퀴즈 조회 @GetMapping
     @GetMapping
-    @Operation(summary = "퀴즈 조회", description = "완성임다.")
+    @Operation(summary = "퀴즈 조회", description = "{lectuerId}를 통해 무작위 3개 퀴즈 가져올 것입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "퀴즈 조회 성공")
     })
@@ -38,7 +38,7 @@ public class QuizController {
 
     // 퀴즈 제출 @PostMapping
     @PostMapping
-    @Operation(summary = "퀴즈 제출", description = "완성임다.")
+    @Operation(summary = "퀴즈 제출", description = "{lectureId}, completeQuiz(퀴즈 통과 기준을 넘으면 true)와 userId를 통해 퀴즈를 제출할 예정입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "퀴즈 제출 성공")
     })
@@ -46,7 +46,6 @@ public class QuizController {
             @PathVariable Long lectureId,
             @RequestBody QuizResultRequest request
     ) {
-
         return ResponseEntity.ok(quizService.submitQuiz(lectureId, request));
     }
 }

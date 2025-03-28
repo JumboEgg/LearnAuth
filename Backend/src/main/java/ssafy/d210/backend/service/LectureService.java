@@ -26,7 +26,7 @@ public interface LectureService {
 
     // 강의 구매
     // 정은이 화이팅!
-    public ResponseSuccessDto<Boolean> purchaseLecture(Long userId, Long lectureId);
+    public ResponseSuccessDto<Object> purchaseLecture(Long userId, Long lectureId);
 
     // 보유 강의 목록 조회
     public ResponseSuccessDto<List<LectureResponse>> getPurchasedLectures(Long userId);
