@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/loginbg">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="360dp"
+        android:src="@drawable/catimg2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="-100dp"/>
+
+    <TextView
+        android:id="@+id/loginTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="러너스"
+        style="@style/heading1"
+        android:textColor="@color/black"
+        android:textSize="84sp"
+        android:letterSpacing="0"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="160dp"/>
+
+    <TextView
+        android:id="@+id/loginSubTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="🏃블록체인과 달리며 공부하기"
+        style="@style/medium20"
+        android:letterSpacing="-0.07"
+        android:layout_marginTop="-16dp"
+        app:layout_constraintTop_toBottomOf="@id/loginTitle"
+        app:layout_constraintStart_toStartOf="@id/loginTitle"
+        app:layout_constraintEnd_toEndOf="@id/loginTitle"
+        />
+
+    <EditText
+        android:id="@+id/loginId"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="이메일"
+        style="@style/medium16"
+        android:paddingVertical="12dp"
+        android:paddingHorizontal="20dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginHorizontal="40dp"
+        app:layout_constraintTop_toBottomOf="@id/loginSubTitle"
+        android:background="@drawable/seletor_radio_button"
+        android:singleLine="true"/>
+
+    <EditText
+        android:id="@+id/loginPw"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="비밀번호"
+        style="@style/medium16"
+        android:paddingVertical="12dp"
+        android:paddingHorizontal="20dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginHorizontal="40dp"
+        app:layout_constraintTop_toBottomOf="@id/loginId"
+        android:background="@drawable/seletor_radio_button"
+        android:singleLine="true"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/loginBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="로그인하기"
+        style="@style/heading3"
+        android:textSize="20sp"
+        android:textColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/loginPw"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/bg_radius_12"
+        android:backgroundTint="@color/primary_color"
+        android:layout_marginHorizontal="40dp"/>
+
+    <View
+        android:id="@+id/loginLine"
+        android:layout_width="match_parent"
+        android:layout_height="2px"
+        app:layout_constraintTop_toBottomOf="@id/loginBtn"
+        android:layout_marginTop="16dp"
+        android:background="@color/text_white_blue"
+        android:layout_marginHorizontal="40dp"/>
+
+    <TextView
+        android:id="@+id/loginToJoinBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="회원가입 하러 가기"
+        style="@style/heading4"
+        android:textSize="16sp"
+        android:textColor="@color/text_gray"
+        app:layout_constraintTop_toBottomOf="@id/loginLine"
+        app:layout_constraintStart_toStartOf="@id/loginLine"
+        app:layout_constraintEnd_toEndOf="@id/loginLine"
+        android:layout_marginTop="16dp"
+        />
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
