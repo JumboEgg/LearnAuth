@@ -1,0 +1,69 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/staticRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- 상단: 강의명 표시 -->
+    <TextView
+        android:id="@+id/tvLectureName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="강의 이름"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+
+    <!-- 메뉴 항목 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:id="@+id/layoutDateStats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="날짜별 통계"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/layoutLectureStats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="강의 통계"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/layoutMyStats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="나의 통계"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/layoutParticipantsStats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="참여자 통계"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <!-- 하위 프래그먼트가 전환될 NavHostFragment (sub_nav_graph 사용) -->
+    <!-- 기존 <fragment> 태그 대신 사용 -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/subNavHostFragment"
+        android:name="androidx.navigation.fragment.NavHostFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:navGraph="@navigation/sub_nav_graph"
+        app:defaultNavHost="false" />
+
+</LinearLayout>

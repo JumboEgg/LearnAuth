@@ -38,7 +38,20 @@ public class User {
     @Length(max = 16)
     private String name;
 
+<<<<<<< HEAD
+    @NotNull
+    @Length(max=64)
+    private String userKey;
+
+    @OneToMany(mappedBy = "user")
+    private List<UserLecture> userLectureList;
+
+    @OneToMany(mappedBy = "user")
+    private List<PaymentRatio> paymentRatioList;
+
+=======
     private String refreshToken;
+>>>>>>> origin/master
 
     public void createUser(SignupRequest userSignupRequest) {
         this.email = userSignupRequest.getEmail();

@@ -5,6 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class MainViewModel : ViewModel() {
-    private val _text = MutableLiveData("메인 화면입니다!")
+    private val _text = MutableLiveData("러너스")
     val text: LiveData<String> = _text
 }

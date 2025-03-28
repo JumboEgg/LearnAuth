@@ -4,8 +4,9 @@
     <color name="white">#FFFFFFFF</color>
     
     <!--main color-->
-    <color name="private_color">#3C62DD</color>
+    <color name="primary_color">#3C62DD</color>
     <color name="background_color">#F7F9FF</color>
+    <color name="sub_color">#EAECF6</color>
 
     <!--강의 올리기 파트-->
     <color name="button_white_gray">#ECECEC</color>
@@ -32,5 +33,7 @@
     <color name="law_sub">#F7B116</color>
     <color name="sport_sub">#5C73BE</color>
     <color name="math_sub">#8269E3</color>
+
+    <color name="mainRed">#EC4E4E</color>
 
 </resources>
