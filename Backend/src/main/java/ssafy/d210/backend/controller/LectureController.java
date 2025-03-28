@@ -13,7 +13,7 @@ import ssafy.d210.backend.dto.response.lecture.*;
 import ssafy.d210.backend.service.LectureService;
 
 import java.util.List;
-
+//
 @RestController
 @RequestMapping("/api/lecture")
 @RequiredArgsConstructor

@@ -15,7 +15,7 @@ import ssafy.d210.backend.service.QuizService;
 import ssafy.d210.backend.service.QuizServiceImpl;
 
 import java.util.List;
-
+//
 @RestController
 @RequestMapping("/api/lecture/{lectureId}/quiz")
 @RequiredArgsConstructor

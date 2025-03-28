@@ -1,5 +1,5 @@
 package ssafy.d210.backend.entity;
-
+//
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
