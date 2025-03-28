@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    
+    <!--main color-->
+    <color name="primary_color">#3C62DD</color>
+    <color name="background_color">#F7F9FF</color>
+    <color name="sub_color">#EAECF6</color>
+
+    <!--강의 올리기 파트-->
+    <color name="button_white_gray">#ECECEC</color>
+    <color name="button_gray">#909090</color>
+
+    <!--카테고리 파트 -->
+    <color name="button_white_blue">#dce4ff</color>
+    <color name="text_white_blue">#7389d7</color>
+    <color name="text_gray">#787878</color>
+    <color name="text_white_gray">#aaaaaa</color>
+
+    <!--수료증 컬러-->
+    <color name="data">#C9F3A1</color>
+    <color name="life">#ED984E</color>
+    <color name="marketing">#3DCBD6</color>
+    <color name="law">#E04791</color>
+    <color name="sport">#9AB0FF</color>
+    <color name="math">#F6EFA0</color>
+
+    <!--수료증 보조컬러 -->
+    <color name="data_sub">#85C04D</color>
+    <color name="life_sub">#3DCBD6</color>
+    <color name="marketing_sub">#ED984E</color>
+    <color name="law_sub">#F7B116</color>
+    <color name="sport_sub">#5C73BE</color>
+    <color name="math_sub">#8269E3</color>
+
+    <color name="mainRed">#EC4E4E</color>
+
+</resources>

@@ -1,0 +1,17 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 그림자 효과 -->
+    <item>
+        <shape android:shape="oval">
+            <corners android:radius="8dp"/>
+            <solid android:color="#30000000"/> <!-- 반투명 검은색 (그림자 역할) -->
+        </shape>
+    </item>
+
+    <!-- 실제 버튼 배경 -->
+<!--    <item android:top="2dp" android:left="2dp">-->
+<!--        <shape android:shape="rectangle">-->
+<!--            <corners android:radius="8dp"/>-->
+<!--            <solid android:color="#FFFFFF"/> &lt;!&ndash; 흰색 배경 &ndash;&gt;-->
+<!--        </shape>-->
+<!--    </item>-->
+</layer-list>
