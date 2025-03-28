@@ -5,106 +5,57 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ssafy.d210.backend.dto.response.certificate.CertificateDetailResponse;
 import ssafy.d210.backend.dto.response.certificate.CertificateResponse;
-import ssafy.d210.backend.dto.response.lecture.LectureResponse;
 import ssafy.d210.backend.entity.UserLecture;
 
 import java.util.List;
 
 public interface UserLectureRepository extends JpaRepository<UserLecture, Long> {
 
-    public List<UserLecture> findAllByUserId(Long userId);
-    // 사용자가 참여한 강의
+    // 사용자 강의 정보 조회
+    // 사용자의 강의 보유 여부, 특정 행 조회에 사용
     @Query(value = """
-            select l.lectureId as lectureId,
-                   c.categoryName as categoryName,
-                   l.title as title,
-                   l.goal as goal,
-                   0 as learningRate,
-                   u.lecturer as teacher,
-                   0 as recentId
-            from lecture l
-            join (
-                select p.lectureId as lectureId, u.name as lecturer
-                from user u
-                join paymentRatio p
-                on user.userId = p.userId
-                and p.userId = :userId
-            ) u
-            on u.lectureId = l.lectureId
-            join category c
-            on l.categoryId = c.categoryId;
-         """, nativeQuery = true)
-    List<LectureResponse> getParticipatedLectures(@Param("userId") Long userId);
+            select *
+            from userLecture
+            where lectureId = :lectureId
+            and userId = :userId;
+        """, nativeQuery = true)
+    UserLecture getUserLectureById(Long lectureId, Long userId);
 
-    // 사용자가 보유한 강의
-    @Query(value = """
-            select l.lectureId as lectureId,
-                   c.categoryName as categoryName,
-                   l.title as title,
-                   l.goal as goal,
-                   ul.learningRate as learningRate,
-                   u.lecturer as teacher,
-                   ul.recentLectId as recentId
-            from lecture l
-            join (
-                select
-                    uLect.lectureId as lectureId,
-                    uLect.recentLectId as recentLectId,
-                    (
-                        select (COUNT(CASE WHEN endflag = TRUE THEN 1 END) * 1.0) / COUNT(*)
-                        from userLectureTime
-                        where userLectureId = uLect.userLectureId
-                    ) as learningRate
-                from userlecture uLect
-                where uLect.userId = :userId
-            ) ul
-            on l.lectureId = ul.lectureId
-            join category c
-            on l.categoryId = c.categoryId
-            join (
-                select p.lectureId as lectureId, u.name as lecturer
-                from user u
-                join paymentRatio p
-                where p.lecturer = true
-                on user.userId = p.userId
-            ) u
-            on u.lectureId = l.lectureId;
-         """, nativeQuery = true)
-    List<LectureResponse> getUserLectures(@Param("userId") Long userId);
+    public List<UserLecture> findAllByUserId(Long userId);
 
     // 사용자가 이수를 완료한 강의
     @Query(value = """
-            select l.lectureId as lectureId,
+            select l.lecture_id as lectureId,
                    l.title as title,
-                   c.categoryName as categoryName,
-                   ul.certificate,
+                   c.category_name as categoryName,
+                   ul.certificate
             from lecture l
-            join userLecture ul
-            on l.lectureId = ul.lectureId
+            join user_lecture ul
+            on l.lecture_id = ul.lecture_lecture_id
             join category c
-            on l.categoryId = c.categoryId
-            where ul.userId = :userId;
+            on l.category_category_id = c.category_id
+            where ul.user_user_id = :userId;
          """, nativeQuery = true)
     List<CertificateResponse> getFinishedUserLecture(@Param("userId") Long userId);
 
     // 사용자가 보유한 강의의 이수증
+    // TODO : qrCode 추가. 지금 DB에 없습니다
     @Query(value = """
             select l.title as title,
                    u.name as teacherName,
                    u.wallet as teacherWallet,
-                   ul.certificateDate as certificateDate,
-                   ul.certificate as certificate,
-                   ul.qrCode as qrCode
+                   ul.certificate_date as certificateDate,
+                   ul.certificate as certificate
             from lecture l
-            join userLecture ul
-            on l.lectureId = ul.lectureId
-            and l.lectureId = :lectureId
-            and ul.userId = :userId
+            join user_lecture ul
+            on l.lecture_id = ul.lecture_lecture_id
+            and l.lecture_id = :lectureId
+            and ul.user_user_id = :userId
             join user u
-            on u.userId = ul.userId
-            join paymentRatio p
-            on p.lectureId = l.lectureId
-            and p.lecturer = TRUE
+            on u.user_id = ul.user_user_id
+            join payment_ratio p
+            on p.lecture_lecture_id = l.lecture_id
+            and p.lecturer = true
          """, nativeQuery = true)
     CertificateDetailResponse getCertificateDetail(@Param("userId") Long userId, @Param("lectureId") Long lectureId);
 

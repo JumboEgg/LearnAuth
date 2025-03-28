@@ -9,9 +9,9 @@ public class LectureResponse {
     private long lectureId;
     private String categoryName;
     private String title;
-    private String goal;
     private int learningRate;
-    private String teacher;
+    private String lecturer;
+    private boolean isLecturer;
     private int recentId;
 
 }

@@ -15,159 +15,159 @@ import java.util.List;
 public interface LectureRepository extends JpaRepository<Lecture, Long> {
     // 카테고리별 강의 목록 조회
     @Query(value = """
-            select l.lectureId as lectureId,
+            select l.lecture_id as lectureId,
                    l.title as title,
                    l.price as price,
                    u.name as lecturer,
-                   sl.subLectureUrl as lectureUrl,
-                   c.categoryName as categoryName
+                   sl.sub_lecture_url as lectureUrl,
+                   c.category_name as categoryName
              from lecture l
              join category c
-             on l.categoryId = c.categoryId
-             and (c.categoryName = :category or :category is null)
-             join paymentRatio p
-             on l.lectureId = p.lectureId
+             on l.category_category_id = c.category_id
+             and (c.category_name = :category or :category is null)
+             join payment_ratio p
+             on l.lecture_id = p.lecture_lecture_id
              and p.lecturer = true
              join user u
-             on p.userId = u.userId
+             on p.user_user_id = u.user_id
              join (
-                select sl1.lectureId, sl1.subLectureUrl
-                from subLecture sl1
+                select sl1.lecture_lecture_id, sl1.sub_lecture_url
+                from sub_lecture sl1
                 join (
-                    select lectureId, MIN(subLectureId)
-                    from subLectureId
-                    group by lectureId
+                    select
+                        lecture_lecture_id,
+                        MIN(sub_lecture_id) as sub_lecture_id
+                    from sub_lecture sl2
+                    group by lecture_lecture_id
+                    order by MIN(sub_lecture_id) asc
                 ) sl2
-                on sl1.subLectureId = sl2.subLectureId
+                on sl1.sub_lecture_id = sl2.sub_lecture_id
              ) sl
-             on l.lectureId = sl.lectureId
-             order by l.lectureId
+             on l.lecture_id = sl.lecture_lecture_id
+             order by l.lecture_id
              limit 12
-             offset (:page - 1) * 12;
+             offset :offset;
         """, nativeQuery = true)
-    List<LectureInfoResponse> getLecturesByCategory(String category, int page);
+    List<LectureInfoResponse> getLecturesByCategory(String category, int offset);
 
     // 메인 화면 강의 목록
     // 최대 완료 수 강의
     @Query(value = """
-            select l.lectureId as lectureId,
+            select l.lecture_id as lectureId,
                    l.title as title,
                    l.price as price,
                    u.name as lecturer,
-                   sl.subLectureUrl as lectureUrl,
-                   c.categoryName as categoryName
+                   sl.sub_lecture_url as lectureUrl,
+                   c.category_name as categoryName
              from lecture l
              join (
-                select lectureId, COUNT(*)
-                from userLecture
-                where certificateDate is not null
-                group by lectureId
+                select lecture_lecture_id, COUNT(*)
+                from user_lecture
+                where certificate_date is not null
+                group by lecture_lecture_id
                 order by COUNT(*) desc
                 limit 3
              ) ul
-             on l.lectureId = ul.lectureId
+             on l.lecture_id = ul.lecture_lecture_id
              join category c
-             on l.categoryId = c.categoryId
-             join paymentRatio p
-             on l.lectureId = p.lectureId
+             on l.category_category_id = c.category_id
+             join payment_ratio p
+             on l.lecture_id = p.lecture_lecture_id
              and p.lecturer = true
              join user u
-             on p.userId = u.userId
+             on p.user_user_id = u.user_id
              join (
-                select sl1.lectureId, sl1.subLectureUrl
-                from subLecture sl1
+                select sl1.lecture_lecture_id,
+                    sl1.sub_lecture_url
+                from sub_lecture sl1
                 join (
-                    select lectureId,
-                        MIN(subLectureId) as subLectureId
-                    from subLectureId
-                    group by lectureId
+                    select lecture_lecture_id,
+                        MIN(sub_lecture_id) as min_sub_lecture_id
+                    from sub_lecture
+                    group by lecture_lecture_id
                 ) sl2
-                on sl1.subLectureId = sl2.subLectureId
+                on sl1.sub_lecture_id = sl2.min_sub_lecture_id
              ) sl
-             on l.lectureId = sl.lectureId;
+             on l.lecture_id = sl.lecture_lecture_id;
         """, nativeQuery = true)
     List<LectureInfoResponse> getMostFinishedLectures();
 
     // 무작위 강의
     @Query(value = """
-            select 
-                l.lectureId,
-                l.title,
-                l.price,
+            select
+                l.lecture_id as lectureId,
+                l.title as title,
+                l.price as price,
                 u.name as lecturer,
-                sl.subLectureUrl as lectureUrl,
-                c.categoryName as categoryName
+                sl.sub_lecture_url as lectureUrl,
+                c.category_name as categoryName
             from lecture l
             join lateral (
-                select lectureId 
+                select lecture_id
                 from lecture 
                 order by RAND() 
                 limit 10
-            ) r on l.lectureId = r.lectureId
+            ) r
+            on l.lecture_id = r.lecture_id
             join category c
-            on l.categoryId = c.categoryId
-            join paymentRatio p 
-            on l.lectureId = p.lectureId
+            on l.category_category_id = c.category_id
+            join payment_ratio p 
+            on l.lecture_id = p.lecture_lecture_id
             and p.lecturer = true
             join user u
-            on p.userId = u.userId
+            on p.user_user_id = u.user_id
             join (
                 select 
-                    sl1.lectureId,
-                    sl1.subLectureUrl
-                from subLecture sl1
+                    sl1.lecture_lecture_id,
+                    sl1.sub_lecture_url
+                from sub_lecture sl1
                 join (
-                    SELECT lectureId, MIN(subLectureId) AS minSubLectureId
-                    FROM subLecture
-                    GROUP BY lectureId
-                ) sl2 ON sl1.subLectureId = sl2.minSubLectureId
-            ) sl ON l.lectureId = sl.lectureId
+                    SELECT lecture_lecture_id,
+                        MIN(sub_lecture_id) as min_sub_lecture_id
+                    FROM sub_lecture
+                    GROUP BY lecture_lecture_id
+                ) sl2
+                on sl1.sub_lecture_id = sl2.min_sub_lecture_id
+            ) sl ON l.lecture_id = sl.lecture_lecture_id
         """,
         nativeQuery = true)
     List<LectureInfoResponse> getRandomLectures();
 
     // 최신 강의
     @Query(value = """
-            select l.lectureId as lectureId,
+            select l.lecture_id as lectureId,
                    l.title as title,
                    l.price as price,
                    u.name as lecturer,
-                   sl.subLectureUrl as lectureUrl,
-                   c.categoryName as categoryName
-             from lecture l
-             join category c
-             on l.categoryId = c.categoryId
-             join paymentRatio p
-             on l.lectureId = p.lectureId
-             and p.lecturer = true
-             join user u
-             on p.userId = u.userId
-             join (
-                select sl1.lectureId, sl1.subLectureUrl
-                from subLecture sl1
+                   sl.sub_lecture_url as lectureUrl,
+                   c.category_name as categoryName
+            from lecture l
+            join category c
+            on l.category_category_id = c.category_id
+            join payment_ratio p
+            on l.lecture_id = p.lecture_lecture_id
+            and p.lecturer = true
+            join user u
+            on p.user_user_id = u.user_id
+            join (
+                select sl1.lecture_lecture_id, sl1.sub_lecture_url
+                from sub_lecture sl1
                 join (
-                    select lectureId, MIN(subLectureId)
-                    from subLectureId
-                    group by lectureId
+                    select lecture_lecture_id,
+                        MIN(sub_lecture_id) as min_sub_lecture_id
+                    from sub_lecture
+                    group by lecture_lecture_id
                 ) sl2
-                on sl1.subLectureId = sl2.subLectureId
-             ) sl
-             on l.lectureId = sl.lectureId
-             order by l.lectureId desc
-             limit 10
+                on sl1.sub_lecture_id = sl2.min_sub_lecture_id
+            ) sl
+            on l.lecture_id = sl.lecture_lecture_id
+            order by l.lecture_id desc
+            limit 10
         """, nativeQuery = true)
     List<LectureInfoResponse> getNewestLectures();
 
 
     // 강의 상세 조회
-    // 강의 보유 여부 확인
-    @Query(value = """
-        select userLectureId
-        from userLecture
-        where lectureId = :lectureId
-        and userId = :userId;
-    """, nativeQuery = true)
-    Boolean findUserLectureById(Long lectureId, Long userId);
 
     // 강의 정보 조회
     @Query(value = """
@@ -199,16 +199,6 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
         """, nativeQuery = true)
     LectureDetailResponse getLectureById(Long lectureId);
 
-    // 사용자 강의 정보 조회
-    // 이건 userLecture 쪽으로 가도 될 듯
-    @Query(value = """
-            select *
-            from userLecture
-            where lectureId = :lectureId
-            and userId = :userId;
-        """, nativeQuery = true)
-    UserLecture getUserLectureById(Long lectureId, Long userId);
-
     // 세부 강의 정보 조회
     @Query()
     List<SubLectureDetailResponse> getSubLectureById(Long lectureId);
@@ -224,60 +214,66 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
 
     // 사용자가 보유한 강의
     @Query(value = """
-            select l.lectureId as lectureId,
-                   c.categoryName as categoryName,
+            select l.lecture_id as lectureId,
+                   c.category_name as categoryName,
                    l.title as title,
-                   l.goal as goal,
-                   ul.learningRate as learningRate,
-                   u.lecturer as teacher,
-                   ul.recentLectId as recentId
+                   ul.learning_rate as learningRate,
+                   u.name as lecturer,
+                   u.lecturer as isLecturer,
+                   ul.recent_lecture_id as recentId
             from lecture l
             join (
                 select
-                    uLect.lectureId as lectureId,
-                    uLect.recentLectId as recentLectId,
+                    uLect.lecture_lecture_id as lecture_id,
+                    uLect.recent_lecture_id as recent_lecture_id,
                     (
-                        select (COUNT(CASE WHEN endflag = TRUE THEN 1 END) * 1.0) / COUNT(*)
-                        from userLectureTime
-                        where userLectureId = uLect.userLectureId
-                    ) as learningRate
-                from userlecture uLect
-                where uLect.userId = :userId
+                        select (COUNT(CASE WHEN end_flag = TRUE THEN 1 END) * 1.0) / COUNT(*)
+                        from user_lecture_time
+                        where user_lecture_id = uLect.user_lecture_id
+                    ) as learning_rate
+                from user_lecture uLect
+                where uLect.user_user_id = :userId
             ) ul
-            on l.lectureId = ul.lectureId
+            on l.lecture_id = ul.lecture_id
             join category c
-            on l.categoryId = c.categoryId
+            on l.category_category_id = c.category_id
             join (
-                select p.lectureId as lectureId, u.name as lecturer
+                select
+                    p.lecture_lecture_id as lecture_id,
+                    u.name as name,
+                    p.lecturer
                 from user u
-                join paymentRatio p
+                join payment_ratio p
+                on u.user_id = p.user_user_id
                 where p.lecturer = true
-                on user.userId = p.userId
             ) u
-            on u.lectureId = l.lectureId;
+            on u.lecture_id = l.lecture_id;
          """, nativeQuery = true)
-    List<LectureResponse> getUserLectures(@Param("userId") Long userId);
+    List<LectureResponse> getPurchasedLectures(@Param("userId") Long userId);
 
     // 사용자가 참여한 강의
     @Query(value = """
-            select l.lectureId as lectureId,
-                   c.categoryName as categoryName,
+            select l.lecture_id as lectureId,
+                   c.category_name as categoryName,
                    l.title as title,
-                   l.goal as goal,
                    0 as learningRate,
-                   u.lecturer as teacher,
+                   u.name as lecturer,
+                   u.lecturer as isLecturer,
                    0 as recentId
             from lecture l
             join (
-                select p.lectureId as lectureId, u.name as lecturer
+                select
+                    p.lecture_lecture_id as lecture_id,
+                    u.name as name,
+                    p.lecturer
                 from user u
-                join paymentRatio p
-                on user.userId = p.userId
-                and p.userId = :userId
+                join payment_ratio p
+                on u.user_id = p.user_user_id
+                and p.user_user_id = :userId
             ) u
-            on u.lectureId = l.lectureId
+            on u.lecture_id = l.lecture_id
             join category c
-            on l.categoryId = c.categoryId;
+            on l.category_category_id = c.category_id;
          """, nativeQuery = true)
     List<LectureResponse> getParticipatedLectures(@Param("userId") Long userId);
 }

@@ -23,7 +23,7 @@ public class CertificateController {
 
     // 수료증 조회 @GetMapping
     @GetMapping("")
-    @Operation(summary = "수료증 조회", description = "수강 완료한 강의의 수료증 정보를 반환한다.")
+    @Operation(summary = "수료증 조회", description = "{userId}가 수강 완료한 강의의 수료증 정보를 반환한다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "수료증 목록 조회 성공")
     })
@@ -35,7 +35,7 @@ public class CertificateController {
 
     // 수료증 자세히 보기 @GetMapping("/detail")
     @GetMapping("/detail")
-    @Operation(summary = "수료증 자세히 보기", description = "선택한 수료증의 상세 정보를 반환한다.")
+    @Operation(summary = "수료증 자세히 보기", description = "선택한 수료증의 상세 정보를 반환한다. NFT 생성이 가능할 만큼 전달됩니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "수료증 자세히 보기 성공")
     })

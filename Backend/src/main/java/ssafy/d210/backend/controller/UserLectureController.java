@@ -11,7 +11,6 @@ import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.request.lecture.LectureTimeRequest;
 import ssafy.d210.backend.dto.response.lecture.LectureResponse;
 import ssafy.d210.backend.service.UserLectureService;
-import ssafy.d210.backend.service.UserLectureServiceImpl;
 
 import java.util.List;
 

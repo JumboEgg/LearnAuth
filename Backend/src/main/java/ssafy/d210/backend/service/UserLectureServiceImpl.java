@@ -4,9 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ssafy.d210.backend.dto.request.lecture.LectureTimeRequest;
-import ssafy.d210.backend.dto.response.lecture.LectureResponse;
 import ssafy.d210.backend.entity.UserLecture;
-import ssafy.d210.backend.exception.DefaultException;
 import ssafy.d210.backend.repository.UserLectureRepository;
 
 import java.util.List;
