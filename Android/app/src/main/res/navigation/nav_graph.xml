@@ -55,6 +55,10 @@
         <action
             android:id="@+id/action_profileFragment_to_myLectureFragment"
             app:destination="@id/myLectureFragment" />
+
+        <action
+            android:id="@+id/action_profileFragment_to_declarationFragment"
+            app:destination="@+id/declarationFragment"/>
     </fragment>
 
     <!-- MyWalletFragment 추가 -->
@@ -120,16 +124,19 @@
         android:name="com.example.second_project.ui.StaticFragment"
         android:label="통계 화면"
         tools:layout="@layout/fragment_static">
-        <!-- 전달할 인자: 예를 들어 강의명 -->
         <argument
             android:name="lectureName"
             app:argType="string"
             android:defaultValue="" />
     </fragment>
 
-    <!-- 전역(Global) 액션: 어느 프래그먼트에서든 StaticFragment로 이동 가능 -->
     <action
         android:id="@+id/action_global_staticFragment"
         app:destination="@id/staticFragment" />
+
+    <fragment
+        android:id="@+id/declarationFragment"
+        android:name="com.example.second_project.ui.DeclarationFragment"
+        android:label="DeclarationFragment" />
 
 </navigation>
