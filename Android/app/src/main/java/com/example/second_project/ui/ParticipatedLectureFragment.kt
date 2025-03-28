@@ -6,8 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.NavGraphNavigator
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.second_project.NavGraphDirections
 import com.example.second_project.R
 import com.example.second_project.adapter.MyLectureListAdapter
 import com.example.second_project.adapter.MyParticiListAdapter
@@ -33,7 +35,12 @@ class ParticipatedLectureFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // RecyclerView 설정
-        val lectureAdapter = MyParticiListAdapter()
+        val lectureAdapter = MyParticiListAdapter { lectureItem ->
+            // 클릭 시 NavGraph 액션 실행 (SafeArgs 사용)
+            val action = NavGraphDirections.actionGlobalStaticFragment(lectureItem.title)
+            findNavController().navigate(action)
+
+        }
         binding.participatedRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.participatedRecyclerView.adapter = lectureAdapter
 
@@ -42,8 +49,9 @@ class ParticipatedLectureFragment : Fragment() {
             lectureAdapter.submitList(lectureList)
         }
 
+
         binding.btnNewLecture.setOnClickListener {
-            findNavController().navigate(R.id.registerLectureFragment)
+            findNavController().navigate(R.id.registerMainFragment)
         }
     }
 
