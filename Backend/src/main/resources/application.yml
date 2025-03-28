@@ -1,5 +1,4 @@
 spring:
-<<<<<<< Updated upstream
   datasource:
     url: jdbc:mysql://localhost:3306/learnauth
     username: root
@@ -14,8 +13,5 @@ spring:
     properties:
       hibernate:
         format_sql: true
-=======
   profiles:
     active: local
-#
->>>>>>> Stashed changes
