@@ -38,20 +38,17 @@ public class UserLectureController {
     }
 
     // 재생 시간 저장 @PostMapping
-    @PatchMapping("/{userLectureId}/time")
+    @PostMapping("/{userLectureId}/time")
     @Operation(summary = "재생 시간 업데이트", description = "개별 강의의 이어보기 시간을 저장합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "재생 시간 저장 성공")
     })
-    public ResponseEntity<ResponseSuccessDto<Void>> updateLectureTime(
+    public ResponseEntity<ResponseSuccessDto<Object>> updateLectureTime(
             @PathVariable Long userLectureId,
-            @RequestParam Long subLectId,
+            @RequestParam Long subLectureId,
             @RequestBody LectureTimeRequest request
     ) {
-        return ResponseEntity.ok(
-                ResponseSuccessDto.<Void>builder()
-                        .build()
-        );
+        return ResponseEntity.ok(userLectureService.updateLectureTime(userLectureId, subLectureId, request));
     }
 
 }
