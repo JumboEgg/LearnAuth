@@ -7,6 +7,6 @@ import lombok.Setter;
 @Setter
 public class ReportRequest {
     private long lectureId;
-    private long reportType;
+    private int reportType;
     private String reportContent;
 }

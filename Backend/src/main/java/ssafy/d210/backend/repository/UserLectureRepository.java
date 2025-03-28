@@ -8,6 +8,7 @@ import ssafy.d210.backend.dto.response.certificate.CertificateResponse;
 import ssafy.d210.backend.entity.UserLecture;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserLectureRepository extends JpaRepository<UserLecture, Long> {
 
@@ -59,4 +60,8 @@ public interface UserLectureRepository extends JpaRepository<UserLecture, Long> 
          """, nativeQuery = true)
     CertificateDetailResponse getCertificateDetail(@Param("userId") Long userId, @Param("lectureId") Long lectureId);
 
+    // Report create 부분에 사용하는 코드
+    Optional<UserLecture> findByUserIdAndLectureId(Long userId, Long lectureId);
+
 }
+
