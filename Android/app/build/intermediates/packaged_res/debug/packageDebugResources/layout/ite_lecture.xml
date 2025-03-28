@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:background="@android:color/white">
+
+    <!-- 왼쪽 고양이 이미지 -->
+    <ImageView
+        android:id="@+id/lectureImage"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginEnd="12dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/staricon" />
+
+    <!-- 오른쪽 영역: (과목 + 강의제목) / (학습률 + 이어보기) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- 상단: 과목(subject) + 강의제목(lectureTitle) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/subject"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="데이터"
+                android:textSize="14sp"
+                android:textColor="@android:color/darker_gray"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/lectureTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="8시간 완성 SQLD"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="학습률 30%"
+                android:textSize="14sp"
+                android:textColor="@android:color/holo_blue_dark" />
+
+            <Button
+                android:id="@+id/lectureButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:backgroundTint="@android:color/holo_blue_dark"
+                android:text="이어서보기"
+                android:textColor="@android:color/white"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
