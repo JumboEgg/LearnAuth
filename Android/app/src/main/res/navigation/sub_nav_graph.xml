@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/sub_nav_graph"
+    app:startDestination="@id/dateStatsFragment">
+
+    <fragment
+        android:id="@+id/dateStatsFragment"
+        android:name="com.example.second_project.ui.DateStatsFragment"
+        android:label="날짜별 통계">
+        <argument
+            android:name="lectureName"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/lectureStatsFragment"
+        android:name="com.example.second_project.ui.LectureStatsFragment"
+        android:label="강의 통계">
+        <argument
+            android:name="lectureName"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/myStatsFragment"
+        android:name="com.example.second_project.ui.MyStatsFragment"
+        android:label="나의 통계">
+        <argument
+            android:name="lectureName"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/participantsStatsFragment"
+        android:name="com.example.second_project.ui.ParticipantsStatsFragment"
+        android:label="참여자 통계">
+        <argument
+            android:name="lectureName"
+            app:argType="string" />
+    </fragment>
+</navigation>

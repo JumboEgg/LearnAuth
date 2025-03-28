@@ -37,6 +37,10 @@ class ProfileFragment : Fragment() {
             findNavController().navigate(R.id.action_profileFragment_to_myLectureFragment)
         }
 
+        binding.profileMenu3.setOnClickListener {
+            findNavController().navigate(R.id.action_profileFragment_to_declarationFragment)
+        }
+
         // 충전하기 -> ChargeFragment 이동
         binding.chargeBtn.setOnClickListener {
             findNavController().navigate(R.id.action_profileFragment_to_chargeFragment)
