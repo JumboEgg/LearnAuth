@@ -8,8 +8,6 @@ import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 import ssafy.d210.backend.dto.request.user.SignupRequest;
 
-import java.util.List;
-
 @Entity
 @Getter
 @Setter
@@ -40,6 +38,7 @@ public class User {
     @Length(max = 16)
     private String name;
 
+<<<<<<< HEAD
     @NotNull
     @Length(max=64)
     private String userKey;
@@ -50,6 +49,9 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<PaymentRatio> paymentRatioList;
 
+=======
+    private String refreshToken;
+>>>>>>> origin/master
 
     public void createUser(SignupRequest userSignupRequest) {
         this.email = userSignupRequest.getEmail();
@@ -57,6 +59,6 @@ public class User {
         this.nickname = userSignupRequest.getNickname();
         this.wallet = userSignupRequest.getWallet();
         this.name = userSignupRequest.getName();
-        this.userKey = userSignupRequest.getUserKey();
+        this.refreshToken = "";
     }
 }

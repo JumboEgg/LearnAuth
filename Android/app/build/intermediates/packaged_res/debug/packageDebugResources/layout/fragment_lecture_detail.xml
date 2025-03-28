@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/background_color">
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"> <!-- fillViewport: 화면의 크기에 맞게 ScrollView를 확장 -->
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageButton
+                android:id="@+id/lectureDetailBack"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/arrow_back_24px"
+                app:tint="@color/white"
+                android:background="@drawable/bg_radius_7"
+                android:backgroundTint="@color/primary_color"
+                android:elevation="4dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="20dp" />
+
+    <ImageView
+        android:id="@+id/lectureDetailThumb"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintDimensionRatio="H, 16:9"
+        app:layout_constraintTop_toTopOf="parent"
+        android:src="@drawable/sample_plzdelete"
+        android:scaleType="centerCrop"/>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/lectureNameCategoryArea"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="2.000001dp"
+        android:layout_marginHorizontal="20dp"
+        app:layout_constraintTop_toBottomOf="@id/lectureDetailThumb"
+        android:layout_marginTop="-8dp">
+
+    <LinearLayout
+        android:id="@+id/lectureNameCategory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="16dp"
+        android:background="@android:color/white"
+        android:layout_gravity="center_vertical">
+
+    <TextView
+        android:id="@+id/lectureDetailName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        style="@style/heading3"
+        android:text="강의 제목입니다. 이렇게 긴 경우 따로 처리를 해 줘야 하죠."
+        android:elevation="9dp"
+        android:layout_weight="1"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:scrollHorizontally="true"
+        android:freezesText="true"
+        android:layout_gravity="center_vertical"/>
+
+        <TextView
+            android:id="@+id/lectureDetailCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="데이터"
+            android:background="@drawable/bg_radius_7"
+            android:backgroundTint="@color/button_white_blue"
+            android:fontFamily="@font/pretendard_medium"
+            android:textColor="@color/text_white_blue"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="2dp"
+            android:layout_marginStart="12dp"
+            android:layout_gravity="center_vertical"/>
+
+
+    </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/lectureDetailGoal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="이거는 예시 텍스트입니다. D210조 화이팅 저는 지금 투썸플레이스에 와 있고요, 김치찜은 무척 맛있었습니다."
+        style="@style/medium16"
+        android:textColor="@color/text_gray"
+        android:letterSpacing="-0.05"
+        app:layout_constraintTop_toBottomOf="@id/lectureNameCategoryArea"
+        android:layout_marginTop="24dp"
+        android:layout_marginHorizontal="30dp"
+        android:lineSpacingExtra="6dp"/>
+
+    <TextView
+        android:id="@+id/lectureDetailTeacherTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="강의자"
+        android:fontFamily="@font/pretendard_bold"
+        android:textSize="16sp"
+        android:letterSpacing="-0.05"
+        app:layout_constraintTop_toBottomOf="@id/lectureDetailGoal"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="20dp"/>
+
+    <TextView
+        android:id="@+id/lectureDetailTeacher"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@id/lectureDetailTeacherTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/lectureDetailTeacherTitle"
+        app:layout_constraintBottom_toBottomOf="@id/lectureDetailTeacherTitle"
+        android:singleLine="true"
+        android:text="김좀비. 강사명이 이렇게 길 리는 없겠지만 긴 경우 처리를 위해"
+        style="@style/medium16"
+        android:letterSpacing="-0.05"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="30dp"/>
+
+    <TextView
+        android:id="@+id/lectureDetailPrice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="50,000"
+        style="@style/heading1"
+        android:textSize="48sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lectureDetailTeacherTitle"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="30dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CAT"
+        app:layout_constraintEnd_toStartOf="@id/lectureDetailPrice"
+        app:layout_constraintBottom_toBottomOf="@id/lectureDetailPrice"
+        style="@style/heading3"
+        android:layout_marginEnd="12dp"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buyBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="구매하기"
+        android:fontFamily="@font/pretendard_bold"
+        android:textSize="16sp"
+        android:letterSpacing="-0.02"
+        app:layout_constraintTop_toBottomOf="@id/lectureDetailPrice"
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="32dp"
+        android:background="@drawable/bg_radius_20"
+        android:paddingVertical="12dp"/>
+
+    <TextView
+        android:id="@+id/lectureDetailListTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="강의 목록"
+        android:fontFamily="@font/pretendard_bold"
+        android:textSize="16sp"
+        android:letterSpacing="-0.05"
+        app:layout_constraintTop_toBottomOf="@id/buyBtn"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="32dp"/>
+
+    <TextView
+        android:id="@+id/lectureDetailListCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="총 3강"
+        android:fontFamily="@font/pretendard_semibold"
+        android:textSize="16sp"
+        android:letterSpacing="-0.05"
+        android:textColor="@color/button_gray"
+        app:layout_constraintStart_toEndOf="@id/lectureDetailListTitle"
+        app:layout_constraintTop_toTopOf="@id/lectureDetailListTitle"
+        app:layout_constraintBottom_toBottomOf="@id/lectureDetailListTitle"
+        android:layout_marginStart="12dp"/>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/lectureDetailListContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxHeight="200dp"
+        android:layout_marginHorizontal="24dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0.08dp"
+        app:layout_constraintTop_toBottomOf="@id/lectureDetailListTitle"
+        android:layout_marginTop="16dp">
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fillViewport="true">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/lectureDetailList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"/>
+        </androidx.core.widget.NestedScrollView>
+
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/lectureDetailContentTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="강의 내용"
+        android:fontFamily="@font/pretendard_bold"
+        android:textSize="16sp"
+        android:letterSpacing="-0.05"
+        app:layout_constraintTop_toBottomOf="@id/lectureDetailListContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="32dp"/>
+
+    <TextView
+        android:id="@+id/lectureDetailContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/lectureDetailContentTitle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="30dp"
+        android:text="이것은 예시 멘트입니다. 여러분안녕하세요? 졸려죽겟습니다. 이 화면 끝나면 그냥 집 갈 겁니다. 불만 있으신가요?"
+        style="@style/medium16"
+        android:letterSpacing="-0.05"
+        android:lineSpacingExtra="6dp"
+        android:layout_marginBottom="24dp"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="50dp">
+
+    <TextView
+        android:id="@+id/textConfirmCertification"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="수료증을 발급받을까요?"
+        style="@style/heading2"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" 
+        app:layout_constraintEnd_toEndOf="parent" />
+    
+    <TextView
+        android:id="@+id/confirmDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="NFT를 통해 학습자는 위조 불가능한\n수료증을 발급 받을 수 있습니다.\n수료증의 QR 코드를 통해 진위여부를\n판별할 수 있습니다."
+        style="@style/body1"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@+id/textConfirmCertification"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/linearBtn"
+        android:layout_marginTop="20dp"/>
+
+    <LinearLayout
+        android:id="@+id/linearBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/confirmDescription"
+        android:layout_marginTop="25dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:orientation="horizontal">
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnConfirmCert"
+            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="발급하기"
+            style="@style/heading4"
+            android:backgroundTint="@color/primary_color"
+            android:background="@drawable/bg_radius_20"
+            android:textColor="@color/white"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnCloseCert"
+            style="@style/heading4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_radius_20"
+            android:backgroundTint="@color/button_white_blue"
+            android:padding="10dp"
+            android:text="닫기"
+            android:textColor="@color/text_white_blue" />
+    </LinearLayout>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

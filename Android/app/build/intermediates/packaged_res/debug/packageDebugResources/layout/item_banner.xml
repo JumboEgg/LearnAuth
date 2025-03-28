@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardElevation="8dp"
+    app:cardCornerRadius="32dp"
+    android:layout_marginHorizontal="12dp"
+    android:layout_marginVertical="20dp">
+
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/bannerImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"/>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/lectureTitleLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/lectureImg"
+            android:layout_marginTop="8dp"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="8dp"
+            android:background="@drawable/transparent_background"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="12dp"
+            android:layout_marginHorizontal="12dp"
+            >
+
+            <TextView
+                android:id="@+id/lectureTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="강의 제목"
+                android:textColor="@color/white"
+                android:gravity="start"
+                style="@style/heading3"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                />
+
+            <ImageView
+                android:id="@+id/bannerPerson"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/person2"
+                app:layout_constraintTop_toBottomOf="@id/lectureTitle"
+                app:layout_constraintStart_toStartOf="@id/lectureTitle"
+                app:tint="@color/text_white_gray"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="데이터"
+                android:textColor="@color/text_white_gray"
+                style="@style/semibold12"
+                app:layout_constraintTop_toTopOf="@id/bannerPerson"
+                app:layout_constraintBottom_toBottomOf="@id/bannerPerson"
+                app:layout_constraintStart_toEndOf="@id/bannerPerson"
+                android:paddingStart="2dp"/>
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </FrameLayout>
+
+
+
+
+
+
+</androidx.cardview.widget.CardView>
