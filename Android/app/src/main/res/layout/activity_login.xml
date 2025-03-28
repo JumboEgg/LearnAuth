@@ -57,7 +57,7 @@
         android:singleLine="true"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/loginPw"
+        android:id="@+id/loginPwContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -65,7 +65,7 @@
         app:layout_constraintTop_toBottomOf="@id/loginId">
 
         <EditText
-            android:id="@+id/joinPw"
+            android:id="@+id/loginPw"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="비밀번호"
@@ -80,33 +80,19 @@
             android:inputType="textPassword"/>
 
         <ImageButton
-            android:id="@+id/joinPwShow"
+            android:id="@+id/loginPwShow"
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:scaleType="fitCenter"
-            app:layout_constraintEnd_toEndOf="@id/joinPw"
-            app:layout_constraintTop_toTopOf="@id/joinPw"
-            app:layout_constraintBottom_toBottomOf="@id/joinPw"
+            app:layout_constraintEnd_toEndOf="@id/loginPw"
+            app:layout_constraintTop_toTopOf="@id/loginPw"
+            app:layout_constraintBottom_toBottomOf="@id/loginPw"
             android:src="@drawable/invisibleicon"
             android:background="@drawable/transparent"
             app:tint="@color/text_white_gray"
             android:layout_marginEnd="24dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-<!--    <EditText-->
-<!--        android:id="@+id/loginPw"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:hint="비밀번호"-->
-<!--        style="@style/medium16"-->
-<!--        android:paddingVertical="12dp"-->
-<!--        android:paddingHorizontal="20dp"-->
-<!--        android:layout_marginTop="8dp"-->
-<!--        android:layout_marginHorizontal="40dp"-->
-<!--        app:layout_constraintTop_toBottomOf="@id/loginId"-->
-<!--        android:background="@drawable/seletor_radio_button"-->
-<!--        android:singleLine="true"/>-->
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/loginBtn"
@@ -116,7 +102,7 @@
         style="@style/heading3"
         android:textSize="20sp"
         android:textColor="@color/white"
-        app:layout_constraintTop_toBottomOf="@id/loginPw"
+        app:layout_constraintTop_toBottomOf="@id/loginPwContainer"
         android:layout_marginTop="20dp"
         android:background="@drawable/bg_radius_12"
         android:backgroundTint="@color/primary_color"
