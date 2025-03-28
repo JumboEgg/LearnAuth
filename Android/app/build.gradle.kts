@@ -58,10 +58,15 @@ dependencies {
 
     // web3j
     implementation("org.web3j:core:4.8.7")
+    implementation ("org.web3j:contracts:4.8.7")
 
     // 네트워크통신 (OkHttp, Retrofit)
     implementation ("com.squareup.okhttp3:okhttp:4.9.3")
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // RxJava3
+    implementation ("io.reactivex.rxjava3:rxjava:3.0.13")
+    implementation ("io.reactivex.rxjava3:rxkotlin:3.0.1")
 
 }
