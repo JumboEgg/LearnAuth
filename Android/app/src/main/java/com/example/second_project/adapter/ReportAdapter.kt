@@ -1,5 +1,5 @@
 package com.example.second_project.adapter
-
+//
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
