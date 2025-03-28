@@ -14,7 +14,7 @@ public class PaymentRatio {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "payment_ratio")
+    @Column(name = "payment_ratio_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

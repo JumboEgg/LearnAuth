@@ -35,11 +35,6 @@ public class SubLecture {
     @NotNull
     private int subLectureLength;
 
-    @NotNull
-    private int continueWatching;
-
-    private int endFlag;
-
-    @OneToMany(mappedBy = "sublecture")
+    @OneToMany(mappedBy = "subLecture")
     private List<UserLectureTime> userLectureTimeList;
 }

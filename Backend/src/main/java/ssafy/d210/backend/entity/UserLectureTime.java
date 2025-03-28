@@ -17,10 +17,10 @@ public class UserLectureTime {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private SubLecture sublecture;
+    private SubLecture subLecture;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private UserLecture userlecture;
+    private UserLecture userLecture;
 
     private int continueWatching;
 

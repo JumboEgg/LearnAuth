@@ -26,32 +26,27 @@ public class QuizController {
 
     // 퀴즈 조회 @GetMapping
     @GetMapping
-    @Operation(summary = "퀴즈 조회", description = "미완임다.")
+    @Operation(summary = "퀴즈 조회", description = "완성임다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "퀴즈 조회 성공")
     })
     public ResponseEntity<ResponseSuccessDto<List<QuizResponse>>> getQuizList(
             @PathVariable Long lectureId
     ) {
-        return ResponseEntity.ok(
-                ResponseSuccessDto.<List<QuizResponse>>builder()
-                        .build()
-        );
+        return ResponseEntity.ok(quizService.getQuizzes(lectureId));
     }
 
     // 퀴즈 제출 @PostMapping
     @PostMapping
-    @Operation(summary = "퀴즈 제출", description = "미완임다.")
+    @Operation(summary = "퀴즈 제출", description = "완성임다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "퀴즈 제출 성공")
     })
-    public ResponseEntity<ResponseSuccessDto<Void>> submitQuiz(
+    public ResponseEntity<ResponseSuccessDto<Object>> submitQuiz(
             @PathVariable Long lectureId,
             @RequestBody QuizResultRequest request
     ) {
-        return ResponseEntity.ok(
-                ResponseSuccessDto.<Void>builder()
-                        .build()
-        );
+
+        return ResponseEntity.ok(quizService.submitQuiz(lectureId, request));
     }
 }

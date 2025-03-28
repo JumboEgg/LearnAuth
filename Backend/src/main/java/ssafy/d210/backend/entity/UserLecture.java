@@ -37,10 +37,12 @@ public class UserLecture {
     @ColumnDefault("0")
     private int recentLectureId;
 
+    private String qrCode;
+
     @OneToOne
     @JoinColumn(name = "report_id")
     private Report report;
 
-    @OneToMany(mappedBy = "userlecture")
+    @OneToMany(mappedBy = "userLecture")
     private List<UserLectureTime> userLectureTimeList;
 }
