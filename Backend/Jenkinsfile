@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream:Backend/Jenkinsfile
 pipeline {
     agent any
 
@@ -242,5 +241,4 @@ pipeline {
             echo 'Deployment failed.'
         }
     }
->>>>>>> Stashed changes:Jenkinsfile
 }
