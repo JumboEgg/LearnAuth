@@ -44,16 +44,16 @@ class MainActivity : AppCompatActivity() {
 
         binding.bottomNavigation.setupWithNavController(navController)
 
-        lifecycleScope.launch {
-            try {
-                // userId를 BigInteger로 변환해서 전달
-                //userId는 기본값 1로 둡니다. 아직 로그인 로직이 없으므로...
-                blockchainManager.getTransactionHistory(BigInteger.valueOf(1))
-                Log.d(TAG, "onCreate: 거래내역 로딩 완료 ")
-            } catch (e: Exception) {
-                Log.e("MainActivity", "Error fetching transanction history", e)
-            }
-        }
+        // lifecycleScope.launch {
+        //     try {
+        //         // userId를 BigInteger로 변환해서 전달
+        //         //userId는 기본값 1로 둡니다. 아직 로그인 로직이 없으므로...
+        //         blockchainManager.getTransactionHistory(BigInteger.valueOf(1))
+        //         Log.d(TAG, "onCreate: 거래내역 로딩 완료 ")
+        //     } catch (e: Exception) {
+        //         Log.e("MainActivity", "Error fetching transanction history", e)
+        //     }
+        // }
 
     }
 }
