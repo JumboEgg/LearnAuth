@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ui.ProfileFragment"
+    android:background="@color/background_color">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/primary_color">
+
+        <LinearLayout
+            android:id="@+id/profileTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/bgCertificate"
+            app:layout_constraintStart_toStartOf="parent"
+            android:orientation="vertical"
+            android:gravity="start"
+            android:layout_marginStart="40dp"
+            android:layout_marginTop="24dp">
+
+            <TextView
+                android:id="@+id/textName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="밥테일님,"
+                style="@style/heading1"
+                android:textSize="28sp"
+                android:textColor="@color/white"/>
+
+            <TextView
+                android:id="@+id/textMent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="오늘도 힘차게!"
+                style="@style/semibold16"
+                android:textSize="28sp"
+                android:textColor="@color/white"/>
+
+        </LinearLayout>
+
+
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="8dp"
+            android:layout_marginEnd="40dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/bgCertificate"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:cardCornerRadius="24dp"
+            android:layout_marginTop="24dp">
+
+            <ImageView
+                android:id="@+id/profileImg"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@drawable/sample_plzdelete_profile"/>
+
+        </androidx.cardview.widget.CardView>
+
+
+
+        <ImageView
+            android:id="@+id/bgCertificate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_top_rounded"
+            android:scaleType="fitXY"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="180dp"
+            />
+
+
+        <LinearLayout
+            android:id="@+id/moneyLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/bgCertificate"
+            app:layout_constraintStart_toStartOf="@id/bgCertificate"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginStart="44dp"
+            android:layout_marginTop="52dp"
+            android:elevation="17dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="나의 잔액"
+                style="@style/medium20"
+                android:letterSpacing="-0.07"
+                />
+
+            <TextView
+                android:id="@+id/moneyCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="55,000 CAT"
+                style="@style/semibold16"
+                android:textSize="20dp"
+                android:letterSpacing="-0.07"/>
+
+        </LinearLayout>
+
+        <View
+            android:outlineProvider="none"
+            android:elevation="17dp"
+            android:background="#C5C5C5"
+            android:layout_width="1.5dp"
+            android:layout_height="40dp"
+            app:layout_constraintStart_toEndOf="@id/moneyLayout"
+            app:layout_constraintTop_toTopOf="@id/moneyLayout"
+            app:layout_constraintBottom_toBottomOf="@id/moneyLayout"
+            app:layout_constraintEnd_toStartOf="@id/chargeBtn"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:outlineProvider="none"
+            android:elevation="20dp"
+            android:translationZ="20dp"
+            android:id="@+id/chargeBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_radius_12"
+            android:backgroundTint="@color/primary_color"
+            android:text="충전하기"
+            style="@style/semibold16"
+            android:textSize="20dp"
+            android:paddingVertical="8dp"
+            android:paddingHorizontal="24dp"
+            app:layout_constraintTop_toTopOf="@id/moneyLayout"
+            app:layout_constraintBottom_toBottomOf="@id/moneyLayout"
+            app:layout_constraintEnd_toEndOf="@id/bgCertificate"
+            android:layout_marginEnd="44dp"/>
+
+
+<!--        메뉴1-->
+        <LinearLayout
+            android:id="@+id/profileMenu1"
+            android:outlineProvider="none"
+            android:elevation="18dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/moneyLayout"
+            android:layout_marginTop="40dp"
+            android:layout_marginHorizontal="44dp"
+            android:gravity="center_vertical">
+
+            <ImageButton
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:src="@drawable/walleticon"
+                app:tint="#FFF4E7"
+                android:backgroundTint="#FFB630"
+                android:background="@drawable/bg_radius_20"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="자산 보기"
+                style="@style/semibold16"
+                android:textSize="24dp"
+                android:letterSpacing="-0.05"
+                android:layout_marginStart="20dp"
+                android:layout_weight="1"/>
+
+            <ImageButton
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/arrow_forward"
+                app:tint="@color/button_gray"
+                android:background="@drawable/transparent"/>
+
+        </LinearLayout>
+
+
+        <!--        메뉴2-->
+        <LinearLayout
+            android:id="@+id/profileMenu2"
+            android:outlineProvider="none"
+            android:elevation="18dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/profileMenu1"
+            android:layout_marginTop="24dp"
+            android:layout_marginHorizontal="44dp"
+            android:gravity="center_vertical">
+
+            <ImageButton
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:src="@drawable/staricon"
+                app:tint="@color/sub_color"
+                android:backgroundTint="@color/primary_color"
+                android:background="@drawable/bg_radius_20"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="내 강의"
+                style="@style/semibold16"
+                android:textSize="24dp"
+                android:letterSpacing="-0.05"
+                android:layout_marginStart="20dp"
+                android:layout_weight="1"/>
+
+            <ImageButton
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/arrow_forward"
+                app:tint="@color/button_gray"
+                android:background="@drawable/transparent"/>
+
+        </LinearLayout>
+
+        <!--        메뉴3-->
+        <LinearLayout
+            android:id="@+id/profileMenu3"
+            android:outlineProvider="none"
+            android:elevation="18dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/profileMenu2"
+            android:layout_marginTop="24dp"
+            android:layout_marginHorizontal="44dp"
+            android:gravity="center_vertical">
+
+            <ImageButton
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:src="@drawable/alerticon"
+                app:tint="#F9E2E2"
+                android:backgroundTint="#EC4E4E"
+                android:background="@drawable/bg_radius_20"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="받은 신고 조회하기"
+                style="@style/semibold16"
+                android:textSize="24dp"
+                android:letterSpacing="-0.05"
+                android:layout_marginStart="20dp"
+                android:layout_weight="1"/>
+
+            <ImageButton
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/arrow_forward"
+                app:tint="@color/button_gray"
+                android:background="@drawable/transparent"/>
+
+        </LinearLayout>
+
+        <!--        메뉴4-->
+        <LinearLayout
+            android:id="@+id/profileMenu4"
+            android:outlineProvider="none"
+            android:elevation="18dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/profileMenu3"
+            android:layout_marginTop="24dp"
+            android:layout_marginHorizontal="44dp"
+            android:gravity="center_vertical">
+
+            <ImageButton
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:src="@drawable/logouticon"
+                app:tint="#F6F6F6"
+                android:backgroundTint="#848A9C"
+                android:background="@drawable/bg_radius_20"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="로그아웃"
+                style="@style/semibold16"
+                android:textSize="24dp"
+                android:letterSpacing="-0.05"
+                android:layout_marginStart="20dp"
+                android:layout_weight="1"/>
+
+            <ImageButton
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/arrow_forward"
+                app:tint="@color/button_gray"
+                android:background="@drawable/transparent"/>
+
+        </LinearLayout>
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</FrameLayout>

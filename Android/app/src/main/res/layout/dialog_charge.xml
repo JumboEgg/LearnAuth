@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_color">
+
+    <TextView
+        android:id="@+id/dialogChargeTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:text="충전하기"
+        android:fontFamily="@font/pretendard_extrabold"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/msgArea1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/dialogChargeTitle">
+
+        <TextView
+            android:id="@+id/dialogChargeMsg1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CAT"
+            android:textAlignment="center"
+            android:textColor="@color/text_gray"
+            style="@style/semibold16"
+            app:layout_constraintTop_toBottomOf="@id/dialogChargeTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/dialogChargeMsg2"/>
+
+        <TextView
+            android:id="@+id/dialogChargeMsg2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="119"
+            app:layout_constraintStart_toEndOf="@id/dialogChargeMsg1"
+            app:layout_constraintEnd_toStartOf="@id/dialogChargeMsg3"
+            app:layout_constraintTop_toTopOf="@id/dialogChargeMsg1"
+            app:layout_constraintBottom_toBottomOf="@id/dialogChargeMsg1"
+            android:textColor="#EC4E4E"
+            android:fontFamily="@font/pretendard_semibold"
+            android:layout_marginHorizontal="8dp"
+            android:textSize="24sp"/>
+
+        <TextView
+            android:id="@+id/dialogChargeMsg3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="이 부족합니다."
+            style="@style/semibold16"
+            android:textColor="@color/text_gray"
+            app:layout_constraintStart_toEndOf="@id/dialogChargeMsg2"
+            app:layout_constraintTop_toTopOf="@id/dialogChargeMsg1"
+            app:layout_constraintBottom_toBottomOf="@id/dialogChargeMsg1"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/msgArea2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="충전하시겠습니까?"
+        style="@style/semibold16"
+        android:textColor="@color/text_gray"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/msgArea1"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="50dp"
+        android:paddingHorizontal="40dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/msgArea2"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/chargeYesBtn"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pretendard_bold"
+            android:textSize="16sp"
+            android:text="충전하기"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/primary_color"
+            android:background="@drawable/bg_radius_20"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/chargeNoBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pretendard_bold"
+            android:layout_marginLeft="12dp"
+            android:textSize="16sp"
+            android:background="@drawable/bg_radius_20"
+            android:backgroundTint="@color/button_white_blue"
+            android:textColor="@color/text_white_blue"
+            android:text="돌아가기" />
+
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

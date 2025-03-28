@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@+id/nav_main">
+
+    <!-- 기존 Fragment들 -->
+    <fragment
+        android:id="@+id/nav_main"
+        android:name="com.example.second_project.ui.MainFragment"
+        android:label="홈" />
+
+    <fragment
+        android:id="@+id/nav_search"
+        android:name="com.example.second_project.ui.SearchFragment"
+        android:label="검색" >
+        <action
+            android:id="@+id/action_nav_search_to_quizFragment"
+            app:destination="@id/quizFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_cert"
+        android:name="com.example.second_project.ui.CertFragment"
+        android:label="수료증" >
+        <action
+            android:id="@+id/action_certFragment_to_certDetailFragment"
+            app:destination="@id/certDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/certDetailFragment"
+        android:name="com.example.second_project.ui.CertDetailFragment"
+        android:label="수료증 상세"
+        tools:layout="@layout/fragment_cert_detail" />
+
+    <!-- ProfileFragment -->
+    <fragment
+        android:id="@+id/nav_profile"
+        android:name="com.example.second_project.ui.ProfileFragment"
+        android:label="나의정보" >
+
+        <!-- Profile -> MyWallet 이동 액션 -->
+        <action
+            android:id="@+id/action_profileFragment_to_myWalletFragment"
+            app:destination="@id/myWalletFragment" />
+
+        <!-- Profile -> Charge 이동 액션 -->
+        <action
+            android:id="@+id/action_profileFragment_to_chargeFragment"
+            app:destination="@id/chargeFragment" />
+
+        <!-- Profile -> MyLectureFragment 이동 액션 (새로 추가) -->
+        <action
+            android:id="@+id/action_profileFragment_to_myLectureFragment"
+            app:destination="@id/myLectureFragment" />
+
+        <action
+            android:id="@+id/action_profileFragment_to_declarationFragment"
+            app:destination="@+id/declarationFragment"/>
+    </fragment>
+
+    <!-- MyWalletFragment 추가 -->
+    <fragment
+        android:id="@+id/myWalletFragment"
+        android:name="com.example.second_project.ui.MyWalletFragment"
+        android:label="내 지갑" />
+
+    <!-- ChargeFragment 추가 -->
+    <fragment
+        android:id="@+id/chargeFragment"
+        android:name="com.example.second_project.ui.ChargeFragment"
+        android:label="충전하기"
+        tools:layout="@layout/fragment_charge" />
+
+    <!-- QuizFragment -->
+    <fragment
+        android:id="@+id/quizFragment"
+        android:name="com.example.second_project.ui.QuizFragment"
+        android:label="퀴즈"
+        tools:layout="@layout/fragment_quiz">
+        <argument
+            android:name="lectureId"
+            app:argType="integer"
+            android:defaultValue="0" />
+        <argument
+            android:name="lectureTitle"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
+
+    <!-- MyLectureFragment (보유/참여 강의 뷰페이저) -->
+    <fragment
+        android:id="@+id/myLectureFragment"
+        android:name="com.example.second_project.ui.MyLectureFragment"
+        android:label="fragment_my_lecture"
+        tools:layout="@layout/fragment_my_lecture" />
+
+    <!-- 소유 강의 탭 -->
+    <fragment
+        android:id="@+id/ownedLectureFragment"
+        android:name="com.example.second_project.ui.OwnedLectureFragment"
+        android:label="fragment_owned_lecture"
+        tools:layout="@layout/fragment_owned_lecture" />
+
+    <!-- 참여 강의 탭 -->
+    <fragment
+        android:id="@+id/participatedLectureFragment"
+        android:name="com.example.second_project.ui.ParticipatedLectureFragment"
+        android:label="fragment_participated_lecture"
+        tools:layout="@layout/fragment_participated_lecture" />
+
+    <!-- 내 강의 등록하기 -->
+    <fragment
+        android:id="@+id/registerMainFragment"
+        android:name="com.example.second_project.ui.RegisterMainFragment"
+        android:label="내 강의 등록하기"
+        tools:layout="@layout/fragment_register_main" />
+
+    <!-- StaticFragment: 통계 화면 -->
+    <fragment
+        android:id="@+id/staticFragment"
+        android:name="com.example.second_project.ui.StaticFragment"
+        android:label="통계 화면"
+        tools:layout="@layout/fragment_static">
+        <argument
+            android:name="lectureName"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
+
+    <action
+        android:id="@+id/action_global_staticFragment"
+        app:destination="@id/staticFragment" />
+
+    <fragment
+        android:id="@+id/declarationFragment"
+        android:name="com.example.second_project.ui.DeclarationFragment"
+        android:label="DeclarationFragment" />
+
+</navigation>
