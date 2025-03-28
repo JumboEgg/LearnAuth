@@ -1,5 +1,5 @@
 package ssafy.d210.backend.util;
-
+//
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import ssafy.d210.backend.dto.common.ErrorContentDto;
