@@ -39,6 +39,7 @@
                 android:fontFamily="@font/pretendard_semibold"/>
 
             <ImageView
+                android:id="@+id/complete1"
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:scaleType="fitCenter"
@@ -82,8 +83,7 @@
                 style="@style/medium12"
                 android:paddingVertical="4dp"
                 android:paddingHorizontal="8dp"
-                app:tint="@color/text_white_gray"
-                android:layout_marginEnd="24dp"/>
+                android:layout_marginEnd="20dp"/>
 
             <TextView
                 android:id="@+id/joinCheckedName"
@@ -92,7 +92,7 @@
                 app:layout_constraintEnd_toEndOf="@id/joinName"
                 app:layout_constraintTop_toTopOf="@id/joinName"
                 app:layout_constraintBottom_toBottomOf="@id/joinName"
-                android:text="인증하기"
+                android:text="인증완료"
                 android:textColor="@color/white"
                 android:background="@drawable/check_name_button"
                 android:backgroundTint="@color/mainRed"
@@ -100,7 +100,7 @@
                 android:paddingVertical="4dp"
                 android:paddingHorizontal="8dp"
                 app:tint="@color/text_white_gray"
-                android:layout_marginEnd="24dp"
+                android:layout_marginEnd="20dp"
                 android:visibility="gone"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -130,6 +130,7 @@
                 android:fontFamily="@font/pretendard_semibold"/>
 
             <ImageView
+                android:id="@+id/complete2"
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:scaleType="fitCenter"
@@ -177,6 +178,7 @@
                 android:fontFamily="@font/pretendard_semibold"/>
 
             <ImageView
+                android:id="@+id/complete3"
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:scaleType="fitCenter"
@@ -248,6 +250,7 @@
                 android:fontFamily="@font/pretendard_semibold"/>
 
             <ImageView
+                android:id="@+id/complete4"
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:scaleType="fitCenter"
@@ -319,6 +322,7 @@
                 android:fontFamily="@font/pretendard_semibold"/>
 
             <ImageView
+                android:id="@+id/complete5"
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:scaleType="fitCenter"

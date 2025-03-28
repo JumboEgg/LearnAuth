@@ -1,16 +1,11 @@
 package com.example.second_project
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.ui.setupWithNavController
 import com.example.second_project.blockchain.BlockchainManager
 import com.example.second_project.databinding.ActivityMainBinding
-import kotlinx.coroutines.launch
-import java.math.BigInteger
-import io.reactivex.rxjava3.core.Flowable
 
 private const val TAG = "MainActivity_야옹"
 class MainActivity : AppCompatActivity() {
