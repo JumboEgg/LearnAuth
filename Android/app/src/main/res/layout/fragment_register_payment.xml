@@ -121,31 +121,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                tools:visibility="visible"/>
+                tools:visibility="visible"
+                tools:listitem="@layout/item_register_participants"/>
 
-            <LinearLayout
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnAddParticipants"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:text="참여자 추가하기"
+                android:background="@drawable/bg_radius_20"
+                style="@style/semibold16"
+                android:textColor="@color/text_white_gray"
+                android:drawableStart="@drawable/add_24px"
+                android:drawablePadding="8dp"
                 android:layout_gravity="center"
-                android:layout_marginTop="25dp"
-                android:padding="10dp">
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/add_24px"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="참여자 추가하기"
-                    android:layout_marginStart="10dp"
-                    style="@style/semibold16"
-                    android:textColor="@color/text_white_gray">
-                </TextView>
-            </LinearLayout>
+                android:layout_marginTop="20dp"/>
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnToUploadFile"
+                android:id="@+id/btnToSubLecture"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="30dp"

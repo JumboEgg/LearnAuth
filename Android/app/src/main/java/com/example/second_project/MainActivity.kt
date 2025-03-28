@@ -24,11 +24,10 @@ class MainActivity : AppCompatActivity() {
 
         val navController = navHostFragment.navController
         
-        // 수료증 디테일 페이지에서 nav 바 없어짐
+        // nav 바 없어져야 하는 페이지
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.certDetailFragment,
-                R.id.registerLectureFragment -> {
+                R.id.certDetailFragment,R.id.registerMainFragment -> {
                     binding.bottomNavigation.visibility = View.GONE
                 }
                 else -> {

@@ -51,7 +51,7 @@ class ParticipatedLectureFragment : Fragment() {
 
 
         binding.btnNewLecture.setOnClickListener {
-            findNavController().navigate(R.id.registerLectureFragment)
+            findNavController().navigate(R.id.registerMainFragment)
         }
     }
 

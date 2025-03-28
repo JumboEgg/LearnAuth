@@ -113,10 +113,10 @@
 
     <!-- 내 강의 등록하기 -->
     <fragment
-        android:id="@+id/registerLectureFragment"
-        android:name="com.example.second_project.ui.RegisterLectureFragment"
+        android:id="@+id/registerMainFragment"
+        android:name="com.example.second_project.ui.RegisterMainFragment"
         android:label="내 강의 등록하기"
-        tools:layout="@layout/fragment_register_lecture" />
+        tools:layout="@layout/fragment_register_main" />
 
     <!-- StaticFragment: 통계 화면 -->
     <fragment
