@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Font Style-->
+    <style name="heading1">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">32sp</item>
+        <item name="android:letterSpacing">-0.04</item>
+        <item name="android:lineSpacingExtra">11sp</item>
+        <item name="android:fontFamily">@font/pretendard_bold</item>
+    </style>
+
+    <style name="heading2">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:fontFamily">@font/pretendard_bold</item>
+        <item name="android:letterSpacing">-0.04</item>
+        <item name="android:lineSpacingExtra">8sp</item>
+    </style>
+
+    <style name="heading3">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:fontFamily">@font/pretendard_bold</item>
+        <item name="android:letterSpacing">-0.04</item>
+        <item name="android:lineSpacingExtra">10sp</item>
+    </style>
+
+    <style name="heading4">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@font/pretendard_bold</item>
+        <item name="android:letterSpacing">-0.02</item>
+        <item name="android:lineSpacingExtra">10sp</item>
+    </style>
+
+    <style name="heading5">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:letterSpacing">-0.02</item>
+        <item name="android:lineSpacingExtra">8sp</item>
+        <item name="android:fontFamily">@font/pretendard_bold</item>
+    </style>
+
+    <style name="body1">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">@font/pretendard_regular</item>
+        <item name="android:letterSpacing">-0.02</item>
+        <item name="android:lineSpacingExtra">8sp</item>
+    </style>
+
+    <style name="body2">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@font/pretendard_regular</item>
+        <item name="android:letterSpacing">-0.02</item>
+        <item name="android:lineSpacingExtra">7sp</item>
+    </style>
+
+    <style name="caption">
+        <item name="android:textColor">@color/text_gray</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">@font/pretendard_regular</item>
+        <item name="android:letterSpacing">-0.02</item>
+        <item name="android:lineSpacingExtra">6sp</item>
+    </style>
+
+    <style name="body3">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:fontFamily">@font/pretendard_regular</item>
+        <item name="android:letterSpacing">-0.02</item>
+        <item name="android:lineSpacingExtra">8sp</item>
+    </style>
+    
+    <style name="semibold16">
+        <item name="android:textSize">16sp</item>
+        <item name="fontFamily">@font/pretendard_semibold</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="semibold14">
+        <item name="android:textSize">14sp</item>
+        <item name="fontFamily">@font/pretendard_semibold</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="semibold12">
+        <item name="android:textSize">12sp</item>
+        <item name="fontFamily">@font/pretendard_semibold</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="semibold10">
+        <item name="android:textSize">10sp</item>
+        <item name="fontFamily">@font/pretendard_semibold</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="semibold8">
+        <item name="android:textSize">8sp</item>
+        <item name="fontFamily">@font/pretendard_semibold</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="medium8">
+        <item name="android:textSize">8sp</item>
+        <item name="fontFamily">@font/pretendard_medium</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="medium10">
+        <item name="android:textSize">10sp</item>
+        <item name="fontFamily">@font/pretendard_medium</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="medium12">
+        <item name="android:textSize">12sp</item>
+        <item name="fontFamily">@font/pretendard_medium</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="medium14">
+        <item name="android:textSize">14sp</item>
+        <item name="fontFamily">@font/pretendard_medium</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="medium16">
+        <item name="android:textSize">16sp</item>
+        <item name="fontFamily">@font/pretendard_medium</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="medium20">
+        <item name="android:textSize">20sp</item>
+        <item name="fontFamily">@font/pretendard_medium</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+
+<!--    floating Button에서 이용하기 위한 모서리 둥근 스타일 -->
+        <style name="ShapeAppearance.MyButton" parent="Widget.MaterialComponents.Button">
+            <item name="shapeAppearanceOverlay">@drawable/bg_radius_20</item>
+        </style>
+
+
+</resources>

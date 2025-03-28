@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/background_color">
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"> <!-- fillViewport: 화면의 크기에 맞게 ScrollView를 확장 -->
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/chargeTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="충전하기"
+        style="@style/heading1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="75dp"
+        android:layout_marginStart="25dp"/>
+
+    <RadioGroup
+        android:id="@+id/chargeOptions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="20dp"
+        app:layout_constraintTop_toBottomOf="@+id/chargeTitle">
+
+        <RadioButton
+            android:id="@+id/chargeOption1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:paddingVertical="16dp"
+            android:paddingHorizontal="20dp"
+            android:background="@drawable/seletor_radio_button"
+            android:text="5,000원"
+            style="@style/semibold16"
+            android:textSize="18dp"
+            android:checked="true"
+            android:button="@null"
+            android:elevation="2dp"
+            android:layout_margin="6dp"/>
+
+        <RadioButton
+            android:id="@+id/chargeOption2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:paddingVertical="16dp"
+            android:paddingHorizontal="20dp"
+            android:background="@drawable/seletor_radio_button"
+            android:text="10,000원"
+            style="@style/semibold16"
+            android:textSize="18dp"
+            android:button="@null"
+            android:elevation="2dp"
+            android:layout_margin="6dp"/>
+
+        <RadioButton
+            android:id="@+id/chargeOption3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:paddingVertical="16dp"
+            android:paddingHorizontal="20dp"
+            android:background="@drawable/seletor_radio_button"
+            android:text="50,000원"
+            style="@style/semibold16"
+            android:textSize="18dp"
+            android:button="@null"
+            android:elevation="2dp"
+            android:layout_margin="6dp"/>
+
+        <RadioButton
+            android:id="@+id/chargeOption4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:paddingVertical="16dp"
+            android:paddingHorizontal="20dp"
+            android:background="@drawable/seletor_radio_button"
+            android:text="100,000원"
+            style="@style/semibold16"
+            android:textSize="18dp"
+            android:button="@null"
+            android:elevation="2dp"
+            android:layout_margin="6dp"/>
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/chargeInputTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="직접 입력"
+        style="@style/heading3"
+        android:paddingHorizontal="8dp"
+        android:textColor="@color/text_gray"
+        app:layout_constraintTop_toBottomOf="@id/chargeOptions"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="28dp"/>
+
+    <EditText
+        android:id="@+id/chargeInput"
+        android:textAlignment="textEnd"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="금액 입력"
+        style="@style/medium20"
+        android:paddingVertical="12dp"
+        android:paddingHorizontal="20dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginTop="12dp"
+        app:layout_constraintTop_toBottomOf="@id/chargeInputTitle"
+        android:background="@drawable/seletor_radio_button"
+        app:layout_constraintStart_toStartOf="@id/chargeInputTitle"
+        app:layout_constraintEnd_toStartOf="@id/chargeWon"
+        android:singleLine="true"
+        android:inputType="number"/>
+
+    <TextView
+        android:id="@+id/chargeWon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="원"
+        style="@style/heading3"
+        android:layout_marginEnd="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/chargeInput"
+        app:layout_constraintBottom_toBottomOf="@id/chargeInput"/>
+
+    <TextView
+        android:id="@+id/chargeOutputTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="충전단위"
+        style="@style/medium20"
+        android:textColor="@color/text_gray"
+        app:layout_constraintTop_toBottomOf="@id/chargeInput"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="20dp"
+        android:paddingHorizontal="8dp"
+        android:layout_marginTop="12dp"/>
+
+    <TextView
+        android:id="@+id/chargeOutput"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="10,000 CAT"
+        style="@style/heading3"
+        android:textColor="@color/text_gray"
+        app:layout_constraintTop_toTopOf="@id/chargeOutputTitle"
+        app:layout_constraintBottom_toBottomOf="@id/chargeOutputTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="20dp"
+        />
+
+    <TextView
+        android:id="@+id/chargeResult"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="충전 후 103,000 CAT 보유 예상"
+        style="@style/semibold16"
+        android:textColor="#505972"
+        android:background="@drawable/bg_radius_12"
+        android:backgroundTint="@color/button_white_blue"
+        android:gravity="center"
+        android:layout_marginHorizontal="32dp"
+        android:padding="12dp"
+        app:layout_constraintTop_toBottomOf="@id/chargeOutputTitle"
+        android:layout_marginTop="52dp"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/purchaseBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="결제하기"
+        android:textSize="18sp"
+        style="@style/heading3"
+        android:textColor="@color/white"
+        android:padding="16dp"
+        app:layout_constraintHorizontal_weight="0.8"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/chargeResult"
+        app:layout_constraintEnd_toStartOf="@id/purchaseCancel"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="32dp"
+        app:cornerRadius="20dp"
+        android:elevation="16dp"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/purchaseCancel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="닫기"
+        android:textSize="18sp"
+        style="@style/heading3"
+        android:padding="16dp"
+        android:textColor="@color/text_white_blue"
+        app:layout_constraintHorizontal_weight="0.25"
+        app:layout_constraintTop_toTopOf="@id/purchaseBtn"
+        app:layout_constraintBottom_toBottomOf="@id/purchaseBtn"
+        app:layout_constraintStart_toEndOf="@id/purchaseBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="40dp"
+        android:layout_marginStart="8dp"
+        android:backgroundTint="@color/button_white_blue"
+        app:cornerRadius="20dp"
+        android:elevation="4dp"
+        />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
