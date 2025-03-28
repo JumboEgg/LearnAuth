@@ -21,7 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/report")
 @RequiredArgsConstructor
-@Tag(name = "ReportController", description = "미완 신고 관련 API")
+@Tag(name = "ReportController", description = "신고 관련 API")
 public class ReportController {
 
     private final ReportService reportService;
@@ -30,7 +30,7 @@ public class ReportController {
     @GetMapping
     @Operation(summary = "받은 신고 전체 조회", description = "사용자의 전체 신고 목록을 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "미완 신고 목록 조회 성공")
+            @ApiResponse(responseCode = "200", description = "신고 목록 조회 성공")
     })
     // userId를 통해 해당 유저의 신고 목록 반환하는 메서드 : getAllReports
     public ResponseEntity<ResponseSuccessDto<List<ReportResponse>>> getAllReports(
@@ -51,9 +51,9 @@ public class ReportController {
 
     // 받은 신고 자세히 보기 @GetMapping("/{reportId}")
     @GetMapping("/{reportId}")
-    @Operation(summary = "받은 신고 자세히 보기", description = "미완 특정 신고의 상세 내용을 조회합니다.")
+    @Operation(summary = "받은 신고 자세히 보기", description = "특정 신고의 상세 내용을 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "미완 신고 상세 조회 성공")
+            @ApiResponse(responseCode = "200", description = "신고 상세 조회 성공")
     })
     // PathVariable에서 받은 reportId 파라미터로 받아서 처리
     public ResponseEntity<ResponseSuccessDto<ReportDetailResponse>> getReportDetail(
@@ -72,7 +72,7 @@ public class ReportController {
     @PostMapping
     @Operation(summary = "신고하기", description = "강의를 신고합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "미완, 신고 접수 성공")
+            @ApiResponse(responseCode = "200", description = "신고 접수 성공")
     })
     public ResponseEntity<ResponseSuccessDto<Void>> submitReport(
             @RequestBody ReportRequest request,
