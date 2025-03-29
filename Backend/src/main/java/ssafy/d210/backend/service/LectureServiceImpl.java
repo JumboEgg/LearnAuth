@@ -60,16 +60,16 @@ public class LectureServiceImpl implements LectureService{
 
     @Override
     public ResponseSuccessDto<LectureDetailResponse> getLectureDetail(Long lectureId, Long userId) {
-        Object lecture = lectureRepository.getLectureById(lectureId);
-        log.info("result: {}", lecture);
+        LectureDetail lecture = lectureRepository.getLectureById(lectureId);
+        log.info("result: {}", lecture.getTitle());
 
         if (lecture == null) {
             log.warn("No lecture found for lectureId {}", lectureId);
             return responseUtil.successResponse(null, HereStatus.SUCCESS_LECTURE_DETAIL);
         }
 
-//        LectureDetailResponse lectureDetail = convertToLectureDetailResponse(lecture);
-        LectureDetailResponse lectureDetail = LectureDetailResponse.builder().build();
+        LectureDetailResponse lectureDetail = convertToLectureDetailResponse(lecture);
+//        LectureDetailResponse lectureDetail = LectureDetailResponse.builder().build();
         List<Integer> subLectureIdList = lectureRepository.getSublecturesById(lectureId);
 
         if (subLectureIdList.isEmpty()) {
@@ -78,6 +78,7 @@ public class LectureServiceImpl implements LectureService{
             List<SubLectureDetailResponse> subLectureDetail = lectureRepository.getUserLectureTime(subLectureIdList);
             if (subLectureDetail.isEmpty()) log.warn("No userLectureTime found for subLectureIdList {}", subLectureIdList);
             lectureDetail.setSubLectures(subLectureDetail);
+            log.info("subLectureDetail: {}", subLectureDetail.get(0));
         }
 
         UserLecture userLecture = userLectureRepository.getUserLectureById(lectureId, userId);
@@ -140,7 +141,7 @@ public class LectureServiceImpl implements LectureService{
 
     @Override
     public ResponseSuccessDto<List<LectureResponse>> getParticipatedLectures(Long userId) {
-        // 사용자 ID로 구매한 강의 목록 조회
+        // 사용자가 참여한 강의 목록 조회
         List<LectureResponse> lectures = lectureRepository.getParticipatedLectures(userId);
         log.info("UserId: {} lectures: {}", userId, lectures);
 

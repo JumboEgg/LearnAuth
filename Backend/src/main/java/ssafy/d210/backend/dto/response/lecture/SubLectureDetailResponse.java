@@ -14,5 +14,5 @@ public class SubLectureDetailResponse {
     private String subLectureTitle;
     private String lectureUrl;
     private int lectureLength;
-    private Integer continueWatching;
+    private String continueWatching;
 }
