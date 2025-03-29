@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/background_color">
 
 
@@ -23,6 +24,27 @@
                 android:layout_height="wrap_content"
                 android:text="개별 강의 등록하기"
                 style="@style/heading2" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerSubLectures"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnAddSubLecture"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="개별 강의 추가하기"
+                android:background="@drawable/bg_radius_20"
+                style="@style/semibold16"
+                android:textColor="@color/text_white_gray"
+                android:drawableStart="@drawable/add_24px"
+                android:drawablePadding="8dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="20dp"/>
+
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnToQuiz"

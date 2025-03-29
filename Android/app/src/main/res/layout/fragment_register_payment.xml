@@ -95,7 +95,7 @@
                     android:layout_weight="4"
                     android:text="강의 참여자"
                     style="@style/semibold16"
-                    android:textColor="@color/text_gray"/>
+                    android:textColor="@color/text_gray" />
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"

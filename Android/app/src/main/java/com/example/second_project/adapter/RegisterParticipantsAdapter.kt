@@ -1,5 +1,6 @@
 package com.example.second_project.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -20,12 +21,14 @@ class RegisterParticipantsAdapter(
 
             fun bind(name: String, position: Int) {
                 binding.editTextNameParticipants.editText?.apply {
-                    setText(name)
                     isFocusable = false
                     isClickable = true
-                    setOnClickListener {
-                        onNameClick(position)
-                    }
+                }
+
+                binding.editTextNameParticipants.editText?.setText(name)
+
+                binding.editRegisterUser.setOnClickListener{
+                    onNameClick(position)
                 }
 
                 binding.delete.setOnClickListener {
