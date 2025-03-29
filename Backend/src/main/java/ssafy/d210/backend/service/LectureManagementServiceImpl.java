@@ -8,13 +8,14 @@ import ssafy.d210.backend.dto.request.lecture.SubLectureRequest;
 import ssafy.d210.backend.dto.request.payment.RatioRequest;
 import ssafy.d210.backend.dto.request.quiz.QuizOptionRequest;
 import ssafy.d210.backend.dto.request.quiz.QuizRequest;
-import ssafy.d210.backend.dto.response.lecture.LectureResponse;
 import ssafy.d210.backend.entity.*;
 import ssafy.d210.backend.enumeration.CategoryName;
 import ssafy.d210.backend.repository.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -55,13 +56,23 @@ public class LectureManagementServiceImpl implements LectureManagementService {
                 throw new IllegalArgumentException("SubLecture은 최소 1개 이상 등록해야 합니다.");
             }
 
-            // 4. Ratio 최소 1명 + 강의 등록자 포함
+            // 4. Ratio 최소 1명 + 강의 등록자 포함 + 중복 이메일 금지
             if (request.getRatios() == null || request.getRatios().isEmpty()) {
                 throw new IllegalArgumentException("수익 분배는 최소 1명 이상 등록해야 합니다.");
             }
-            boolean hasLecturer = request.getRatios().stream().anyMatch(RatioRequest::isLecturer);
-            if (!hasLecturer) {
-                throw new IllegalArgumentException("등록자는 반드시 ratio에 포함되어야 한다.");
+            Set<String> emailset = new HashSet<>();
+            int lecturerCount = 0;
+            for (RatioRequest ratioRequest : request.getRatios()) {
+                if (!emailset.add(ratioRequest.getEmail())) {
+                    throw new IllegalArgumentException("수익 부배 대상자 이메일이 중복 됐습니다. : " + ratioRequest.getEmail());
+                }
+                if (ratioRequest.isLecturer()) {
+                    lecturerCount++;
+                }
+            }
+            // 강의 등록자 무조건 1명
+            if (lecturerCount != 1) {
+                throw new IllegalArgumentException("등록자는 반드시 한 명이어야 하고, ratio에서 lecturer=true로 설정 되어야 한다.");
             }
 
 
@@ -84,6 +95,10 @@ public class LectureManagementServiceImpl implements LectureManagementService {
             // 3. SubLecture 저장
             List<SubLecture> subLectures = new ArrayList<>();
             for (SubLectureRequest subReq : request.getSubLectures()) {
+                // 개별 강의 1초 이상이어야 한다.
+                if (subReq.getSubLectureLength() <= 0) {
+                    throw new IllegalArgumentException("개별 강의 길이는 1초 이상이어야 한다.");
+                }
                 SubLecture subLecture = new SubLecture();
                 subLecture.setSubLectureTitle(subReq.getSubLectureTitle());
                 subLecture.setSubLectureUrl(subReq.getSubLectureUrl());
@@ -93,14 +108,30 @@ public class LectureManagementServiceImpl implements LectureManagementService {
             }
             subLectureRepository.saveAll(subLectures);
 
-            // 4. Quiz, QuizOption 저장
+            // 4. Quiz, QuizOption 저장 + 옵션은 3개만 허용 + 정답은 무조건 하나 + 퀴즈 옵션 내용 비어있으면 안된다.
             for (QuizRequest quizReq : request.getQuizzes()) {
+                if (quizReq.getQuizOptions() == null || quizReq.getQuizOptions().size() != 3) {
+                    throw new IllegalArgumentException("퀴즈 옵션은 정확히 3개만 등록해야 합니다.");
+                }
+                // 정답 개수 세기
+                long correctCount = quizReq.getQuizOptions().stream()
+                        .filter(QuizOptionRequest::getIsCorrect)
+                        .count();
+
+                if (correctCount != 1) {
+                    throw new IllegalArgumentException("퀴즈 옵션에는 정확히 하나의 정답이 있어야 합니다.");
+                }
+
                 Quiz quiz = new Quiz();
                 quiz.setQuestion(quizReq.getQuestion());
                 quiz.setLecture(savedLecture);
                 Quiz savedQuiz = quizRepository.save(quiz);
+
                 List<QuizOption> quizOptions = new ArrayList<>();
                 for (QuizOptionRequest optionReq : quizReq.getQuizOptions()) {
+                    if (optionReq.getQuizOption() == null || optionReq.getQuizOption().isBlank()) {
+                        throw new IllegalArgumentException(("퀴즈 옵션 내용은 비어 있을 수 없다."));
+                    }
                     QuizOption quizOption = new QuizOption();
                     quizOption.setOptionText(optionReq.getQuizOption());
                     // true : 1, false : 0으로 변환
@@ -111,22 +142,38 @@ public class LectureManagementServiceImpl implements LectureManagementService {
                 quizOptionRepository.saveAll(quizOptions);
             }
 
-            // 5. PaymentRatio 저장 : user email로 조회
+            // 5. PaymentRatio + UserLecture + UserLectureTime 등록 : user email로 조회
             List<PaymentRatio> paymentRatios = new ArrayList<>();
             for (RatioRequest ratioReq : request.getRatios()) {
                 User user = userRepository.findOptionalUserByEmail(ratioReq.getEmail())
                         .orElseThrow(() -> new RuntimeException("해당 이메일로 유저를 찾을 수 없습니다. : " + ratioReq.getEmail()));
+                // PaymentRatio 저장
                 PaymentRatio paymentRatio = new PaymentRatio();
                 paymentRatio.setLecture(savedLecture);
                 paymentRatio.setUser(user);
                 paymentRatio.setRatio(ratioReq.getRatio());
                 paymentRatio.setLecturer(ratioReq.isLecturer() ? 1 : 0);
                 paymentRatios.add(paymentRatio);
+
+                // UserLecture 등록
+                UserLecture userLecture = new UserLecture();
+                userLecture.setUser(user);
+                userLecture.setLecture(savedLecture);
+                UserLecture savedUserLecture = userLectureRepository.save(userLecture);
+
+                // UserLectureTime 등록
+                for (SubLecture sub : subLectures) {
+                    UserLectureTime ult = new UserLectureTime();
+                    ult.setUserLecture(savedUserLecture);
+                    ult.setSubLecture(sub);
+                    userLectureTimeRepository.save(ult);
+                }
             }
             paymentRatioRepository.saveAll(paymentRatios);
 
             return true;
         } catch (Exception e) {
+            // 워낙 예외 처리가 많아서 printStackTrace 적어둡니다.
             e.printStackTrace();
             return false;
         }

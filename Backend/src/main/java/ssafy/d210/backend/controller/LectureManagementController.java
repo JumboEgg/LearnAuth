@@ -19,7 +19,7 @@ import java.time.ZonedDateTime;
 @RestController
 @RequestMapping("/api/lecture")
 @RequiredArgsConstructor
-@Tag(name = "LectureManagementController", description = "[미완] 강의 등록 기능")
+@Tag(name = "LectureManagementController", description = "강의 등록 기능")
 public class LectureManagementController {
 
 
@@ -27,7 +27,10 @@ public class LectureManagementController {
 
     // 강의 등록하기 @PostMapping
     @PostMapping
-    @Operation(summary = "강의 등록", description = "미완")
+    @Operation(summary = "강의 등록", description = """
+            - input : 강의 제목, 카테고리, 목표, 설명, 금액, 정산 비율, 세부 강의, 퀴즈
+            - output : 성공 시 true 반환
+            """)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description="강의 등록 성공")
     })
