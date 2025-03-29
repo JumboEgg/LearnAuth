@@ -199,7 +199,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
              ) sl
              on l.lecture_id = sl.lecture_lecture_id
         """, nativeQuery = true)
-    Object getLectureById(Long lectureId);
+    LectureDetail getLectureById(Long lectureId);
 
     // 세부 강의 정보
     @Query(value = """
@@ -236,7 +236,6 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             select l.lecture_id as lectureId,
                    c.category_name as categoryName,
                    l.title as title,
-                   ul.learning_rate as learningRate,
                    u.name as lecturer,
                    u.lecturer as isLecturer,
                    ul.recent_lecture_id as recentId
@@ -275,7 +274,6 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             select l.lecture_id as lectureId,
                    c.category_name as categoryName,
                    l.title as title,
-                   0 as learningRate,
                    u.name as lecturer,
                    u.lecturer as isLecturer,
                    0 as recentId
@@ -292,7 +290,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             ) u
             on u.lecture_id = l.lecture_id
             join category c
-            on l.category_category_id = c.category_id;
+            on l.category_category_id = c.category_id
          """, nativeQuery = true)
     List<LectureResponse> getParticipatedLectures(@Param("userId") Long userId);
 }

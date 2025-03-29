@@ -27,7 +27,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/signup")
-    @Operation(summary = "회원가입", description = "회원가입을 합니다.")
+    @Operation(summary = "회원가입", description = "이메일, 비밀번호, 실명, 닉네임, 지갑을 이용해 회원가입을 합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "회원가입 성공")
     })
@@ -37,7 +37,7 @@ public class UserController {
 
 
     @PostMapping("/login")
-    @Operation(summary = "로그인", description = "로그인을 합니다.")
+    @Operation(summary = "로그인", description = "이메일과 비밀번호를 이용해 로그인을 합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "로그인 성공")
     })

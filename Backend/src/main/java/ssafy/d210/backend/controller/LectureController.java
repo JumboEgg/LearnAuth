@@ -62,7 +62,7 @@ public class LectureController {
     @GetMapping("/search")
     @Operation(summary = "[미완] 강의검색", description = "미완")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "미완")
+            @ApiResponse(responseCode = "200", description = "언니 화이팅")
     })
     public ResponseEntity<ResponseSuccessDto<List<LectureInfoResponse>>> searchLectures(
             @RequestParam String keyword,
