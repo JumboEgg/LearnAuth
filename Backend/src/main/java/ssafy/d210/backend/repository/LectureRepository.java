@@ -3,10 +3,7 @@ package ssafy.d210.backend.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ssafy.d210.backend.dto.response.lecture.LectureDetailResponse;
-import ssafy.d210.backend.dto.response.lecture.LectureInfoResponse;
-import ssafy.d210.backend.dto.response.lecture.LectureResponse;
-import ssafy.d210.backend.dto.response.lecture.SubLectureDetailResponse;
+import ssafy.d210.backend.dto.response.lecture.*;
 import ssafy.d210.backend.entity.Lecture;
 import ssafy.d210.backend.entity.SubLecture;
 import ssafy.d210.backend.entity.UserLecture;
@@ -26,12 +23,12 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
              join category c
              on l.category_category_id = c.category_id
              and (c.category_name = :category or :category is null)
-             join payment_ratio p
+             left join payment_ratio p
              on l.lecture_id = p.lecture_lecture_id
              and p.lecturer = true
-             join user u
+             left join user u
              on p.user_user_id = u.user_id
-             join (
+             left join (
                 select sl1.lecture_lecture_id, sl1.sub_lecture_url
                 from sub_lecture sl1
                 join (
@@ -72,12 +69,12 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
              on l.lecture_id = ul.lecture_lecture_id
              join category c
              on l.category_category_id = c.category_id
-             join payment_ratio p
+             left join payment_ratio p
              on l.lecture_id = p.lecture_lecture_id
              and p.lecturer = true
-             join user u
+             left join user u
              on p.user_user_id = u.user_id
-             join (
+             left join (
                 select sl1.lecture_lecture_id,
                     sl1.sub_lecture_url
                 from sub_lecture sl1
@@ -112,12 +109,12 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             on l.lecture_id = r.lecture_id
             join category c
             on l.category_category_id = c.category_id
-            join payment_ratio p 
+            left join payment_ratio p 
             on l.lecture_id = p.lecture_lecture_id
             and p.lecturer = true
-            join user u
+            left join user u
             on p.user_user_id = u.user_id
-            join (
+            left join (
                 select 
                     sl1.lecture_lecture_id,
                     sl1.sub_lecture_url
@@ -145,12 +142,12 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             from lecture l
             join category c
             on l.category_category_id = c.category_id
-            join payment_ratio p
+            left join payment_ratio p
             on l.lecture_id = p.lecture_lecture_id
             and p.lecturer = true
-            join user u
+            left join user u
             on p.user_user_id = u.user_id
-            join (
+            left join (
                 select sl1.lecture_lecture_id, sl1.sub_lecture_url
                 from sub_lecture sl1
                 join (
@@ -174,6 +171,8 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             select l.lecture_id as lectureId,
                    l.title as title,
                    l.price as price,
+                   l.goal as goal,
+                   l.description as description,
                    u.name as lecturer,
                    sl.sub_lecture_url as lectureUrl,
                    c.category_name as categoryName
@@ -181,12 +180,12 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
              join category c
              on l.category_category_id = c.category_id
              and l.lecture_id = :lectureId
-             join payment_ratio p
+             left join payment_ratio p
              on l.lecture_id = p.lecture_lecture_id
              and p.lecturer = true
-             join user u
+             left join user u
              on p.user_user_id = u.user_id
-             join (
+             left join (
                 select sl1.lecture_lecture_id,
                     sl1.sub_lecture_url
                 from sub_lecture sl1
@@ -200,7 +199,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
              ) sl
              on l.lecture_id = sl.lecture_lecture_id
         """, nativeQuery = true)
-    LectureDetailResponse getLectureById(Long lectureId);
+    Object getLectureById(Long lectureId);
 
     // 세부 강의 정보
     @Query(value = """
@@ -257,7 +256,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             on l.lecture_id = ul.lecture_id
             join category c
             on l.category_category_id = c.category_id
-            join (
+            left join (
                 select
                     p.lecture_lecture_id as lecture_id,
                     u.name as name,
@@ -281,7 +280,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
                    u.lecturer as isLecturer,
                    0 as recentId
             from lecture l
-            join (
+            left join (
                 select
                     p.lecture_lecture_id as lecture_id,
                     u.name as name,

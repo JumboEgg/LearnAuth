@@ -60,13 +60,18 @@ public class LectureServiceImpl implements LectureService{
 
     @Override
     public ResponseSuccessDto<LectureDetailResponse> getLectureDetail(Long lectureId, Long userId) {
-        LectureDetailResponse lectureDetail = lectureRepository.getLectureById(lectureId);
-        List<Integer> subLectureIdList = lectureRepository.getSublecturesById(lectureId);
+        Object lecture = lectureRepository.getLectureById(lectureId);
+        log.info("result: {}", lecture);
 
-        if (lectureDetail == null) {
+        if (lecture == null) {
             log.warn("No lecture found for lectureId {}", lectureId);
             return responseUtil.successResponse(null, HereStatus.SUCCESS_LECTURE_DETAIL);
         }
+
+//        LectureDetailResponse lectureDetail = convertToLectureDetailResponse(lecture);
+        LectureDetailResponse lectureDetail = LectureDetailResponse.builder().build();
+        List<Integer> subLectureIdList = lectureRepository.getSublecturesById(lectureId);
+
         if (subLectureIdList.isEmpty()) {
             log.warn("No subLecture found for lectureId {}", lectureId);
         } else {
@@ -83,6 +88,9 @@ public class LectureServiceImpl implements LectureService{
             lectureDetail.setUserLectureId(userLecture.getId());
             lectureDetail.setRecentLectureId(userLecture.getRecentLectureId());
         }
+
+        int studentCount = userLectureRepository.countUserLectureByLectureId(lectureId);
+        lectureDetail.setStudentCount(studentCount);
 
         log.info("Lecture Detail : {}", lectureDetail);
 
@@ -143,5 +151,18 @@ public class LectureServiceImpl implements LectureService{
 
         ResponseSuccessDto<List<LectureResponse>> res = responseUtil.successResponse(lectures, HereStatus.SUCCESS_LECTURE);
         return res;
+    }
+
+    private LectureDetailResponse convertToLectureDetailResponse(LectureDetail lectureDetail) {
+        return LectureDetailResponse.builder()
+                .lecturer(lectureDetail.getLecturer())
+                .lectureUrl(lectureDetail.getLectureUrl())
+                .price(lectureDetail.getPrice())
+                .goal(lectureDetail.getGoal())
+                .title(lectureDetail.getTitle())
+                .description(lectureDetail.getDescription())
+                .lectureId(lectureDetail.getLectureId())
+                .categoryName(lectureDetail.getCategoryName())
+                .build();
     }
 }

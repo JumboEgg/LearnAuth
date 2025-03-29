@@ -43,14 +43,13 @@ public class CertificateServiceImpl implements CertificateService{
 
         // 조회 결과 null 체크
         if (certificateDetail == null) {
-            log.warn("No certificate detail found for user {} and lecture {}", userId, lectureId);
-            throw new DefaultException("해당 이수증을 찾을 수 없습니다.");
+            log.error("No certificate detail found for user {} and lecture {}", userId, lectureId);
+        } else {
+            log.info("Certificate Detail: title={}, teacherName={}, certificateDate={}",
+                    certificateDetail.getTitle(),
+                    certificateDetail.getTeacherName(),
+                    certificateDetail.getCertificateDate());
         }
-
-        log.info("Certificate Detail: title={}, teacherName={}, certificateDate={}",
-                certificateDetail.getTitle(),
-                certificateDetail.getTeacherName(),
-                certificateDetail.getCertificateDate());
 
         ResponseSuccessDto<CertificateDetailResponse> res = responseUtil.successResponse(certificateDetail, HereStatus.SUCCESS_CERTIFICATE_DETAIL);
         return res;

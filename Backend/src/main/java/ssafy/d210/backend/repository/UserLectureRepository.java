@@ -29,7 +29,7 @@ public interface UserLectureRepository extends JpaRepository<UserLecture, Long> 
             select l.lecture_id as lectureId,
                    l.title as title,
                    c.category_name as categoryName,
-                   ul.certificate
+                   ul.certificate as certificate
             from lecture l
             join user_lecture ul
             on l.lecture_id = ul.lecture_lecture_id
@@ -40,13 +40,13 @@ public interface UserLectureRepository extends JpaRepository<UserLecture, Long> 
     List<CertificateResponse> getFinishedUserLecture(@Param("userId") Long userId);
 
     // 사용자가 보유한 강의의 이수증
-    // TODO : qrCode 추가. 지금 DB에 없습니다
     @Query(value = """
             select l.title as title,
                    u.name as teacherName,
                    u.wallet as teacherWallet,
                    ul.certificate_date as certificateDate,
-                   ul.certificate as certificate
+                   ul.certificate as certificate,
+                   ul.qr_code as qrCode
             from lecture l
             join user_lecture ul
             on l.lecture_id = ul.lecture_lecture_id
@@ -63,5 +63,12 @@ public interface UserLectureRepository extends JpaRepository<UserLecture, Long> 
     // Report create 부분에 사용하는 코드
     Optional<UserLecture> findByUserIdAndLectureId(Long userId, Long lectureId);
 
+    // 특정 강의를 수강하는 수강생 수
+    @Query(value = """
+        select COUNT(*)
+        from user_lecture
+        where lecture_lecture_id = :lectureId;
+    """, nativeQuery = true)
+    int countUserLectureByLectureId(long lectureId);
 }
 
