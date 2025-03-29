@@ -19,7 +19,7 @@ import ssafy.d210.backend.dto.response.user.SignupResponse;
 import ssafy.d210.backend.service.UserService;
 //
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/auth")
 @Validated
 @RequiredArgsConstructor
 public class UserController {
@@ -44,5 +44,26 @@ public class UserController {
     public ResponseEntity<ResponseSuccessDto<LoginResponse>> login(@RequestBody LoginRequest loginRequest) {
         // 로그인 처리
         throw new UnsupportedOperationException("LoginFilter에서 처리");
+    }
+
+    @PostMapping("/logout")
+    @Operation(summary = "로그아웃", description = "로그아웃을 합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "로그아웃 성공"),
+            @ApiResponse(responseCode = "400", description = "유효하지 않은 토큰 또는 토큰 없음")
+    })
+    public ResponseEntity<ResponseSuccessDto<Object>> logout() {
+        throw new UnsupportedOperationException("CustomLogoutFilter에서 처리");
+    }
+
+    @PostMapping("/refresh")
+    @Operation(summary = "토큰 갱신", description = "리프레시 토큰을 사용해 액세스 토큰을 갱신합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "토큰 갱신 성공"),
+            @ApiResponse(responseCode = "401", description = "유효하지 않은 리프레시 토큰")
+    })
+    public ResponseEntity<ResponseSuccessDto<Object>> refreshToken() {
+        // 실제 로직은 TokenRefreshFilter에서 처리
+        return ResponseEntity.ok(new ResponseSuccessDto<>(null));
     }
 }
