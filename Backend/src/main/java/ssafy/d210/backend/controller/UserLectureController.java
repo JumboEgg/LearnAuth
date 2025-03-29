@@ -21,21 +21,6 @@ import java.util.List;
 public class UserLectureController {
 
     private final UserLectureService userLectureService;
-    // 내가 보유, 참여한 강의 @GetMapping
-    @GetMapping
-    @Operation(summary = "보유/참여 강의 목록 조회", description = "미 완 사용자가 보유하거나 참여한 강의 목록을 조회합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "미 완 강의 목록 조회 성공")
-    })
-    public ResponseEntity<ResponseSuccessDto<List<LectureResponse>>> getUserLectures(
-            @RequestParam Long userId,
-            @RequestParam boolean participant
-    ) {
-        return ResponseEntity.ok(
-                ResponseSuccessDto.<List<LectureResponse>>builder()
-                        .build()
-        );
-    }
 
     // 재생 시간 저장 @PostMapping
     @PostMapping("/{userLectureId}/time")
@@ -43,7 +28,7 @@ public class UserLectureController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "재생 시간 저장 성공")
     })
-    public ResponseEntity<ResponseSuccessDto<Object>> updateLectureTime(
+    public ResponseEntity<ResponseSuccessDto<Boolean>> updateLectureTime(
             @PathVariable Long userLectureId,
             @RequestParam Long subLectureId,
             @RequestBody LectureTimeRequest request
