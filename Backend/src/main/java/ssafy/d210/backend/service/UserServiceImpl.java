@@ -61,7 +61,7 @@ public class UserServiceImpl implements UserService {
     // 닉네임 중복 확인
     private void isNicknameDuplicated(User newUser) {
         if (userRepository.existsByNickname(newUser.getNickname())) {
-            log.info("중복 닉네임: {}", newUser.getNickname());
+            log.error("중복 닉네임: {}", newUser.getNickname());
             throw new DuplicatedValueException("이미 사용중인 닉네임입니다.");
         }
     }
@@ -69,7 +69,7 @@ public class UserServiceImpl implements UserService {
     // 이메일 중복 확인
     private void isEmailDuplicated(User newUser) {
         if (userRepository.existsByEmail(newUser.getEmail())) {
-            log.info("중복 이메일: {}", newUser.getEmail());
+            log.error("중복 이메일: {}", newUser.getEmail());
             throw new DuplicatedValueException("이미 사용중인 이메일입니다.");
         }
     }

@@ -29,13 +29,13 @@ public class UserLectureServiceImpl implements UserLectureService{
     }
 
     @Override
-    public ResponseSuccessDto<Object> updateLectureTime(Long userLectureId, Long subLectureId, LectureTimeRequest request) {
+    public ResponseSuccessDto<Boolean> updateLectureTime(Long userLectureId, Long subLectureId, LectureTimeRequest request) {
         UserLectureTime userLectureTime = userLectureTimeRepository.findByUserLectureIdAndSubLectureId(userLectureId, subLectureId);
         userLectureTime.setContinueWatching(request.getContinueWatching());
         if (request.isEndFlag()) {
             userLectureTime.setEndFlag(1);
         }
-        ResponseSuccessDto<Object> res = responseUtil.successResponse("ok", HereStatus.SUCCESS_LECTURE_SAVEPLAYTIME);
+        ResponseSuccessDto<Boolean> res = responseUtil.successResponse(true, HereStatus.SUCCESS_LECTURE_SAVEPLAYTIME);
 
         return res;
     }

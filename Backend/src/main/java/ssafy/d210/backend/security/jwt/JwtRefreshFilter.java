@@ -1,5 +1,6 @@
 package ssafy.d210.backend.security.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -10,9 +11,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.filter.OncePerRequestFilter;
+import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.entity.User;
+import ssafy.d210.backend.enumeration.response.HereStatus;
 import ssafy.d210.backend.repository.UserRepository;
 import ssafy.d210.backend.security.repository.TokenRepository;
+import ssafy.d210.backend.util.ResponseUtil;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -25,6 +29,8 @@ public class JwtRefreshFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final TokenRepository tokenRepository;
     private final UserRepository userRepository;
+    private final ResponseUtil responseUtil;
+    private final ObjectMapper objectMapper;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -56,27 +62,31 @@ public class JwtRefreshFilter extends OncePerRequestFilter {
         }
 
         if (refresh == null) {
-            sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Refresh token is missing");
+            log.error("Refresh token이 없습니다.");
+            sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Refresh token이 없습니다.");
             return;
         }
 
         try {
             // 토큰 검증
             if (jwtUtil.isExpired(refresh)) {
-                sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Refresh token expired");
+                log.error("Refresh token이 만료되었습니다.");
+                sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Refresh token이 만료되었습니다.");
                 return;
             }
 
             String category = jwtUtil.getCategory(refresh);
             if (!category.equals("refresh")) {
-                sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid token type");
+                log.error("유효하지 않은 토큰 타입입니다.");
+                sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 토큰 타입입니다.");
                 return;
             }
 
             // DB에 저장된 토큰인지 확인
             Boolean isExist = tokenRepository.existsByRefresh(refresh);
             if (!isExist) {
-                sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid refresh token");
+                log.error("토큰이 DB에 저장되어 있지 않습니다.");
+                sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "토큰이 DB에 저장되어 있지 않습니다.");
                 return;
             }
 
@@ -87,7 +97,8 @@ public class JwtRefreshFilter extends OncePerRequestFilter {
             // 사용자 존재 확인
             User user = userRepository.findUserByEmail(email);
             if (user == null) {
-                sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "User not found");
+                log.error("사용자가 존재하지 않습니다.");
+                sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "사용자가 존재하지 않습니다.");
                 return;
             }
 
@@ -98,14 +109,9 @@ public class JwtRefreshFilter extends OncePerRequestFilter {
             response.setHeader("access", newAccessToken);
             response.setStatus(HttpStatus.OK.value());
 
-            String jsonResponse =
-                    "{" +
-                            "\"timeStamp\":\"" + Instant.now().toString() + "\"," +
-                            "\"code\":" + HttpStatus.OK.value() + "," +
-                            "\"status\":\"" + HttpStatus.OK.name() + "\"," +
-                            "\"message\":\"Access token refreshed successfully\"" +
-                            "}";
+            ResponseSuccessDto<Boolean> res = responseUtil.successResponse(true, HereStatus.SUCCESS_REFRESH);
 
+            String jsonResponse = objectMapper.writeValueAsString(res);
             PrintWriter writer = response.getWriter();
             writer.write(jsonResponse);
             writer.flush();
@@ -113,9 +119,10 @@ public class JwtRefreshFilter extends OncePerRequestFilter {
             log.info("액세스 토큰 갱신 성공: {}", email);
 
         } catch (ExpiredJwtException e) {
-            sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Refresh token expired");
+            log.error("Refresh token이 만료되었습니다.");
+            sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Refresh token이 만료되었습니다.");
         } catch (Exception e) {
-            log.error("Token refresh error", e);
+            log.error("Refresh token 에러", e);
             sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }

@@ -1,5 +1,6 @@
 package ssafy.d210.backend.security.config;
 //
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +32,7 @@ public class SecurityConfig {
     private final TokenRepository tokenRepository;
     private final ResponseUtil responseUtil;
     private final UserLectureService userLectureService;
+    private final ObjectMapper objectMapper;
 
     @Bean
     public AuthenticationManager authenticationManager() throws Exception {
@@ -76,7 +78,7 @@ public class SecurityConfig {
         http.addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         // 리프레시 토큰 필터
-        http.addFilterAt(new JwtRefreshFilter(jwtUtil, tokenRepository, userRepository), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAt(new JwtRefreshFilter(jwtUtil, tokenRepository, userRepository, responseUtil, objectMapper), UsernamePasswordAuthenticationFilter.class);
 
         // 로그아웃 필터 추가
         http.addFilterBefore(new CustomLogoutFilter(jwtUtil, tokenRepository), LogoutFilter.class);
