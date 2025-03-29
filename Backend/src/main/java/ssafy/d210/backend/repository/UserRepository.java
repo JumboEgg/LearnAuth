@@ -4,4 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import ssafy.d210.backend.entity.User;
 public interface UserRepository extends JpaRepository<User, Long> {
     User findUserByEmail(String email);
+    boolean existsByEmail(String email);
+    boolean existsByNickname(String nickname);
 }
