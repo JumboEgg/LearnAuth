@@ -47,9 +47,6 @@ public class ReportServiceImpl implements ReportService{
                 .orElseThrow(() -> new RuntimeException("해당 신고 id가 없습니다."));
         // 왜 신고 내역 없는지 확인
         if (report.getUserLecture().getLecture() == null) {
-            throw new IllegalStateException("해당 신고는 그 어떤 UserLecture과도 연결 되어 있지 않습니다.");
-        }
-        if (report.getUserLecture().getLecture() == null) {
             throw new IllegalStateException("해당 신고에 연결된 강의 정보가 없습니다.");
         }
         // 강의 제목 가져오기 : report -> userLecture -> lecture -> title
