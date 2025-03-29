@@ -63,12 +63,12 @@ public class QuizServiceImpl implements QuizService{
     }
 
     @Override
-    public ResponseSuccessDto<Object> submitQuiz(Long lectureId, QuizResultRequest request) {
+    public ResponseSuccessDto<Boolean> submitQuiz(Long lectureId, QuizResultRequest request) {
         UserLecture userLecture = userLectureRepository.getUserLectureById(lectureId, request.getUserId());
 
         userLecture.setCertificateDate(LocalDate.now());
         userLectureRepository.save(userLecture);
-        ResponseSuccessDto<Object> res = responseUtil.successResponse("ok", HereStatus.SUCCESS_QUIZ_SUBMIT);
+        ResponseSuccessDto<Boolean> res = responseUtil.successResponse(true, HereStatus.SUCCESS_QUIZ_SUBMIT);
         return res;
     }
 
