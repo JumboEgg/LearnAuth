@@ -52,7 +52,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "로그아웃 성공"),
             @ApiResponse(responseCode = "400", description = "유효하지 않은 토큰 또는 토큰 없음")
     })
-    public ResponseEntity<ResponseSuccessDto<Object>> logout() {
+    public ResponseEntity<ResponseSuccessDto<Boolean>> logout() {
         throw new UnsupportedOperationException("CustomLogoutFilter에서 처리");
     }
 
@@ -62,8 +62,8 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "토큰 갱신 성공"),
             @ApiResponse(responseCode = "401", description = "유효하지 않은 리프레시 토큰")
     })
-    public ResponseEntity<ResponseSuccessDto<Object>> refreshToken() {
+    public ResponseEntity<ResponseSuccessDto<Boolean>> refreshToken() {
         // 실제 로직은 TokenRefreshFilter에서 처리
-        return ResponseEntity.ok(new ResponseSuccessDto<>(null));
+        return ResponseEntity.ok(new ResponseSuccessDto<>(true));
     }
 }
