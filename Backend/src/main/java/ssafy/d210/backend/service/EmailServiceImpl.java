@@ -18,17 +18,12 @@ public class EmailServiceImpl implements EmailService{
     private final ResponseUtil responseUtil;
     @Override
     public ResponseSuccessDto<EmailResponse> identityEmail(String email) {
-        User user = userRepository.findUserByEmail(email);
-        EmailResponse emailResponse;
-        if (user == null) {
-            emailResponse = EmailResponse.builder()
-                    .boolEmail(false)
-                    .build();
-        } else {
-            emailResponse = EmailResponse.builder()
-                    .boolEmail(true)
-                    .build();
-        }
+        boolean isEmail = userRepository.existsByEmail(email);
+
+        EmailResponse emailResponse = EmailResponse.builder()
+                .boolEmail(isEmail)
+                .build();
+
         ResponseSuccessDto<EmailResponse> res = responseUtil.successResponse(emailResponse,HereStatus.SUCCESS_FIND_EMAIL);
         return res;
     }
