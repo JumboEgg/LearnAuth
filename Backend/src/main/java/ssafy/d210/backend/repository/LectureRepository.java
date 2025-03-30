@@ -226,7 +226,30 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
     """, nativeQuery = true)
     List<SubLectureDetailResponse> getUserLectureTime(List<Integer> subLectureIdList);
 
-    // TODO : 강의 검색
+    // 강의 검색
+    // 검색어 기반 강의 리스트 반환
+    @Query("""
+        SELECT new ssafy.d210.backend.dto.response.lecture.LectureInfoResponse(
+            l.id, l.title, l.price, u.name, l.walletKey, c.categoryName)
+        FROM Lecture l
+        JOIN l.category c
+        JOIN PaymentRatio pr ON pr.lecture = l AND pr.lecturer = 1
+        JOIN pr.user u
+        WHERE l.title LIKE %:keyword%
+        ORDER BY l.id DESC
+    """)
+    List<LectureInfoResponse> searchLecturesByKeyword(
+            @Param("keyword") String keyword
+            // offset, limit은 EntityManager로 처리
+    );
+
+    // 검색어 기반 전체 개수 반환
+    @Query("""
+        SELECT COUNT(1)
+        FROM Lecture l
+        WHERE l.title LIKE %:keyword%
+    """)
+    int countLecturesByKeyword(@Param("keyword") String keyword);
 
     // 강의 구매
 

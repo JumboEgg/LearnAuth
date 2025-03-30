@@ -56,7 +56,7 @@ public class LectureManagementServiceImpl implements LectureManagementService {
                 throw new IllegalArgumentException("SubLecture은 최소 1개 이상 등록해야 합니다.");
             }
 
-            // 4. Ratio 최소 1명 + 강의 등록자 포함 + 중복 이메일 금지
+            // 4. Ratio 최소 1명 + 중복 이메일 금지 + 강의자 1명
             if (request.getRatios() == null || request.getRatios().isEmpty()) {
                 throw new IllegalArgumentException("수익 분배는 최소 1명 이상 등록해야 합니다.");
             }
@@ -64,7 +64,7 @@ public class LectureManagementServiceImpl implements LectureManagementService {
             int lecturerCount = 0;
             for (RatioRequest ratioRequest : request.getRatios()) {
                 if (!emailset.add(ratioRequest.getEmail())) {
-                    throw new IllegalArgumentException("수익 부배 대상자 이메일이 중복 됐습니다. : " + ratioRequest.getEmail());
+                    throw new IllegalArgumentException("수익 분배 대상자 이메일이 중복 됐습니다. : " + ratioRequest.getEmail());
                 }
                 if (ratioRequest.isLecturer()) {
                     lecturerCount++;

@@ -12,6 +12,7 @@ import ssafy.d210.backend.dto.request.lecture.PurchaseLectureRequest;
 import ssafy.d210.backend.dto.response.lecture.*;
 import ssafy.d210.backend.service.LectureService;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 //
 @RestController
@@ -60,11 +61,15 @@ public class LectureController {
 
     //강의 검색 @GetMapping("/search")
     @GetMapping("/search")
-    @Operation(summary = "[미완] 강의검색", description = "미완")
+    @Operation(summary = "강의 검색", description = """
+            - input : keyword, page (Query Parameter)
+            - output : 1 page 당 최대 12개의 강의 검색 결과 반환
+                - lectureId, title, price, lecturer, lectureUrl, categoryName
+            """)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "언니 화이팅")
+            @ApiResponse(responseCode = "200", description = "강의 검색 성공")
     })
-    public ResponseEntity<ResponseSuccessDto<List<LectureInfoResponse>>> searchLectures(
+    public ResponseEntity<ResponseSuccessDto<LectureSearchResponse>> searchLectures(
             @RequestParam String keyword,
             @RequestParam int page
     ) {

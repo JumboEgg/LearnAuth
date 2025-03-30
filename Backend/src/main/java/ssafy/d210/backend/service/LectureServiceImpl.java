@@ -100,8 +100,26 @@ public class LectureServiceImpl implements LectureService{
     }
 
     @Override
-    public ResponseSuccessDto<List<LectureInfoResponse>> searchLectures(String keyword, int page) {
-        return null;
+    public ResponseSuccessDto<LectureSearchResponse> searchLectures(String keyword, int page) {
+        int pageSize = 12;
+        int offset = (page -1 ) * pageSize;
+
+        // 전체 결과 수
+        int total = lectureRepository.countLecturesByKeyword(keyword);
+
+        // 페이징 된 검색 결과 조회
+        List<LectureInfoResponse> resultList = lectureRepository.searchLecturesByKeyword(keyword);
+
+        List<LectureInfoResponse> pagedList = resultList.stream()
+                .skip(offset)
+                .limit(pageSize)
+                .toList();
+
+        LectureSearchResponse response = new LectureSearchResponse();
+        response.setTotalResults(total);
+        response.setCurrentPage(page);
+        response.setSearchResults(pagedList);
+        return responseUtil.successResponse(response, HereStatus.SUCCESS_LECTURE_SEARCH);
     }
 
     @Override
