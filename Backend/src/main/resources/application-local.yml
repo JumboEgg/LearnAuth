@@ -24,6 +24,10 @@ spring:
   encryption:
     key: ${AES_256}
 
+springdoc:
+  server:
+    url: http://localhost:8080
+
 logging:
   level:
     root: INFO
