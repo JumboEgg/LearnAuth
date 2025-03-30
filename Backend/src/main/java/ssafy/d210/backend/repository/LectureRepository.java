@@ -235,7 +235,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
         JOIN l.category c
         JOIN PaymentRatio pr ON pr.lecture = l AND pr.lecturer = 1
         JOIN pr.user u
-        WHERE l.title LIKE %:keyword%
+        WHERE l.title LIKE CONCAT('%', :keyword, '%')
         ORDER BY l.id DESC
     """)
     List<LectureInfoResponse> searchLecturesByKeyword(
@@ -247,7 +247,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
     @Query("""
         SELECT COUNT(1)
         FROM Lecture l
-        WHERE l.title LIKE %:keyword%
+        WHERE l.title LIKE CONCAT('%', :keyword, '%')
     """)
     int countLecturesByKeyword(@Param("keyword") String keyword);
 
