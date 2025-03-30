@@ -33,6 +33,10 @@ spring:
       remote-ip-header: x-forwarded-for
       protocol-header: x-forwarded-proto
 
+springdoc:
+  server:
+    url: https://j12d210.p.ssafy.io
+
 logging:
   level:
     root: INFO
