@@ -60,8 +60,8 @@ public class LectureServiceImpl implements LectureService{
 
     @Override
     public ResponseSuccessDto<LectureDetailResponse> getLectureDetail(Long lectureId, Long userId) {
-        Object lecture = lectureRepository.getLectureById(lectureId);
-        log.info("result: {}", lecture);
+        LectureDetailDTO lecture = lectureRepository.getLectureById(lectureId);
+        log.info("result: {}", lecture.getDescription());
 
         if (lecture == null) {
             log.warn("No lecture found for lectureId {}", lectureId);

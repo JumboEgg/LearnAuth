@@ -3,6 +3,7 @@ package ssafy.d210.backend.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import ssafy.d210.backend.dto.response.lecture.*;
 import ssafy.d210.backend.entity.Lecture;
 import ssafy.d210.backend.entity.SubLecture;
@@ -199,7 +200,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
              ) sl
              on l.lecture_id = sl.lecture_lecture_id
         """, nativeQuery = true)
-    Object getLectureById(Long lectureId);
+    LectureDetailDTO getLectureById(@Param("lectureId") Long lectureId);
 
     // 세부 강의 정보
     @Query(value = """
