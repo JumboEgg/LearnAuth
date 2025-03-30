@@ -10,7 +10,7 @@ import java.util.List;
 public interface LectureService {
 
     // 카테고리별 강의 조회
-    public ResponseSuccessDto<List<LectureInfoResponse>> getLecturesByCategory(String category, int page);
+    public ResponseSuccessDto<List<LectureInfoListResponse>> getLecturesByCategory(String category, int page);
 
     // 메인 화면 강의 목록
     public ResponseSuccessDto<RecommendedLectureResponse> getRecommendedLectures();

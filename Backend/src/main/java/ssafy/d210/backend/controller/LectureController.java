@@ -29,7 +29,7 @@ public class LectureController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "전체 강의 조회 성공")
     })
-    public ResponseEntity<ResponseSuccessDto<List<LectureInfoResponse>>> getLecturesByCategory(
+    public ResponseEntity<ResponseSuccessDto<List<LectureInfoListResponse>>> getLecturesByCategory(
             @RequestParam String category,
             @RequestParam int page
     ) {

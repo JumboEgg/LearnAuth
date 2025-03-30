@@ -5,18 +5,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.Optional;
-
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LectureResponse {
+public class LectureProfile {
     private long lectureId;
     private String categoryName;
     private String title;
     private String lecturer;
     private Boolean isLecturer;
     private Long recentId;
-    private Double learningRate;
 }

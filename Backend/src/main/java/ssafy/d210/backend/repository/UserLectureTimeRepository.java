@@ -11,4 +11,12 @@ public interface UserLectureTimeRepository extends JpaRepository<UserLectureTime
 
     UserLectureTime findByUserLectureIdAndSubLectureId(Long userLectureId, Long subLectureId);
 
+    @Query(value = """
+        select COUNT(*)
+        from UserLectureTime ult
+        join UserLecture ul
+        on ul.id = ult.userLecture.id
+        and ult.endFlag = 1
+    """)
+    int countUserLectureTimesByLectureId(Long lectureId);
 }

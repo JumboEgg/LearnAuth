@@ -49,6 +49,9 @@ dependencies {
 
 	// swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
+
+	// Web3j dependencies
+	implementation 'org.web3j:core:4.12.3'
 }
 
 tasks.named('test') {
