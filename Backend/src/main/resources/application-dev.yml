@@ -27,6 +27,11 @@ spring:
   encryption:
     key: ${AES_256}
 
+  server:
+    forward-headers-strategy: NATIVE
+    tomcat:
+      remote-ip-header: x-forwarded-for
+      protocol-header: x-forwarded-proto
 
 logging:
   level:
