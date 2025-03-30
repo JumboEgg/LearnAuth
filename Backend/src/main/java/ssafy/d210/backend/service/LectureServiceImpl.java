@@ -21,16 +21,16 @@ public class LectureServiceImpl implements LectureService{
 
     private final UserRepository userRepository;
     private final LectureRepository lectureRepository;
-    private final UserLectureRepository userLectureRepository;
-    private final ResponseUtil responseUtil;
     private final SubLectureRepository subLectureRepository;
+    private final UserLectureRepository userLectureRepository;
     private final UserLectureTimeRepository userLectureTimeRepository;
+    private final ResponseUtil responseUtil;
 
     @Override
-    public ResponseSuccessDto<List<LectureInfoResponse>> getLecturesByCategory(String category, int page) {
+    public ResponseSuccessDto<List<LectureInfoListResponse>> getLecturesByCategory(String category, int page) {
         // 카테고리별 강의 목록 조회
         int offset = (page - 1) * 12;
-        List<LectureInfoResponse> lectures = lectureRepository.getLecturesByCategory(category, offset);
+        List<LectureInfoListResponse> lectures = lectureRepository.getLecturesByCategory(category, offset);
         log.info("Category {} page {} lectures: {}", category, page, lectures);
 
         // 결과 검증 및 로깅
@@ -38,7 +38,7 @@ public class LectureServiceImpl implements LectureService{
             log.warn("No lectures found for category {}", category);
         }
 
-        ResponseSuccessDto<List<LectureInfoResponse>> res = responseUtil.successResponse(lectures, HereStatus.SUCCESS_LECTURE_CATEGORY);
+        ResponseSuccessDto<List<LectureInfoListResponse>> res = responseUtil.successResponse(lectures, HereStatus.SUCCESS_LECTURE_CATEGORY);
         return res;
     }
 
@@ -46,9 +46,9 @@ public class LectureServiceImpl implements LectureService{
     public ResponseSuccessDto<RecommendedLectureResponse> getRecommendedLectures() {
 
         RecommendedLectureResponse lectures = new RecommendedLectureResponse();
-        List<LectureInfoResponse> mostCompletedLectures = lectureRepository.getMostFinishedLectures();
-        List<LectureInfoResponse> randomLectures = lectureRepository.getRandomLectures();
-        List<LectureInfoResponse> recentLectures = lectureRepository.getNewestLectures();
+        List<LectureInfoListResponse> mostCompletedLectures = lectureRepository.getMostFinishedLectures();
+        List<LectureInfoListResponse> randomLectures = lectureRepository.getRandomLectures();
+        List<LectureInfoListResponse> recentLectures = lectureRepository.getNewestLectures();
 
         lectures.setMostCompletedLectures(mostCompletedLectures);
         lectures.setRandomLectures(randomLectures);
@@ -145,13 +145,17 @@ public class LectureServiceImpl implements LectureService{
     @Override
     public ResponseSuccessDto<List<LectureResponse>> getPurchasedLectures(Long userId) {
         // 사용자 ID로 구매한 강의 목록 조회
-        List<LectureResponse> lectures = lectureRepository.getPurchasedLectures(userId);
-        log.info("UserId: {} lectures: {}", userId, lectures);
+        List<LectureProfile> lectureProfiles = lectureRepository.getPurchasedLectures(userId);
+        log.info("UserId: {} lectures: {}", userId, lectureProfiles);
 
         // 결과 검증 및 로깅
-        if (lectures.isEmpty()) {
+        if (lectureProfiles.isEmpty()) {
             log.warn("No lectures found for userId {}", userId);
         }
+
+        List<LectureResponse> lectures = lectureProfiles.stream()
+                .map(this::convertToLectureResponse)
+                .toList();
 
         ResponseSuccessDto<List<LectureResponse>> res = responseUtil.successResponse(lectures, HereStatus.SUCCESS_LECTURE);
         return res;
@@ -160,13 +164,17 @@ public class LectureServiceImpl implements LectureService{
     @Override
     public ResponseSuccessDto<List<LectureResponse>> getParticipatedLectures(Long userId) {
         // 사용자가 참여한 강의 목록 조회
-        List<LectureResponse> lectures = lectureRepository.getParticipatedLectures(userId);
-        log.info("UserId: {} lectures: {}", userId, lectures);
+        List<LectureProfile> lectureProfiles = lectureRepository.getParticipatedLectures(userId);
+        log.info("UserId: {} lectures: {}", userId, lectureProfiles);
 
         // 결과 검증 및 로깅
-        if (lectures.isEmpty()) {
+        if (lectureProfiles.isEmpty()) {
             log.warn("No lectures found for userId {}", userId);
         }
+
+        List<LectureResponse> lectures = lectureProfiles.stream()
+                .map(this::convertToLectureResponse)
+                .toList();
 
         ResponseSuccessDto<List<LectureResponse>> res = responseUtil.successResponse(lectures, HereStatus.SUCCESS_LECTURE);
         return res;
@@ -182,6 +190,20 @@ public class LectureServiceImpl implements LectureService{
                 .description(lectureDetail.getDescription())
                 .lectureId(lectureDetail.getLectureId())
                 .categoryName(lectureDetail.getCategoryName())
+                .build();
+    }
+
+    private LectureResponse convertToLectureResponse(LectureProfile profile) {
+        int subLectureCount = subLectureRepository.countSubLecturesByLectureId(profile.getLectureId());
+        int finishedSubLectureCount = userLectureTimeRepository.countUserLectureTimesByLectureId(profile.getLectureId());
+
+        return LectureResponse.builder()
+                .isLecturer(profile.getIsLecturer())
+                .title(profile.getTitle())
+                .lecturer(profile.getLecturer())
+                .categoryName(profile.getCategoryName())
+                .lectureId(profile.getLectureId())
+                .learningRate(subLectureCount * 1.0 / finishedSubLectureCount)
                 .build();
     }
 }

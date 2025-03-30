@@ -46,7 +46,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
              limit 12
              offset :offset;
         """, nativeQuery = true)
-    List<LectureInfoResponse> getLecturesByCategory(String category, int offset);
+    List<LectureInfoListResponse> getLecturesByCategory(String category, int offset);
 
     // 메인 화면 강의 목록
     // 최대 완료 수 강의
@@ -88,7 +88,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
              ) sl
              on l.lecture_id = sl.lecture_lecture_id;
         """, nativeQuery = true)
-    List<LectureInfoResponse> getMostFinishedLectures();
+    List<LectureInfoListResponse> getMostFinishedLectures();
 
     // 무작위 강의
     @Query(value = """
@@ -129,7 +129,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             ) sl ON l.lecture_id = sl.lecture_lecture_id
         """,
         nativeQuery = true)
-    List<LectureInfoResponse> getRandomLectures();
+    List<LectureInfoListResponse> getRandomLectures();
 
     // 최신 강의
     @Query(value = """
@@ -162,7 +162,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             order by l.lecture_id desc
             limit 10
         """, nativeQuery = true)
-    List<LectureInfoResponse> getNewestLectures();
+    List<LectureInfoListResponse> getNewestLectures();
 
 
     // 강의 상세 조회
@@ -290,7 +290,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             ) u
             on u.lecture_id = l.lecture_id;
          """, nativeQuery = true)
-    List<LectureResponse> getPurchasedLectures(@Param("userId") Long userId);
+    List<LectureProfile> getPurchasedLectures(@Param("userId") Long userId);
 
     // 사용자가 참여한 강의
     @Query(value = """
@@ -315,5 +315,5 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             join category c
             on l.category_category_id = c.category_id
          """, nativeQuery = true)
-    List<LectureResponse> getParticipatedLectures(@Param("userId") Long userId);
+    List<LectureProfile> getParticipatedLectures(@Param("userId") Long userId);
 }

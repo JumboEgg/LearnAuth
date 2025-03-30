@@ -1,9 +1,11 @@
 package ssafy.d210.backend.service;
 //
 import org.springframework.stereotype.Service;
+import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 
 
 public interface PaymentService {
-    // 정은이 납치할래요 히히
-    // 아싸 허락 받았다
+    public ResponseSuccessDto<Boolean> decreaseToken(long userId, int quantity);
+
+    public ResponseSuccessDto<Boolean> increaseToken(long userId, int quantity);
 }
