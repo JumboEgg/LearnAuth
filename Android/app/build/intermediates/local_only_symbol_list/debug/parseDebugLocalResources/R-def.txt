@@ -205,7 +205,6 @@ id ivLectureStatsArrow
 id ivMyStatsArrow
 id ivParticipantsStatsArrow
 id joinBtn
-id joinCheckName
 id joinCheckedName
 id joinEmail
 id joinEmailContainer
