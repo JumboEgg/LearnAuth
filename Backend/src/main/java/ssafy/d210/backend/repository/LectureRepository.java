@@ -26,7 +26,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
              from lecture l
              join category c
              on l.category_category_id = c.category_id
-             and (c.category_name = :category or :category is null)
+             and (c.category_id = :categoryId or :categoryId = 0)
              left join payment_ratio p
              on l.lecture_id = p.lecture_lecture_id
              and p.lecturer = true
@@ -50,7 +50,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
              limit 12
              offset :offset;
         """, nativeQuery = true)
-    List<LectureInfoListResponse> getLecturesByCategory(@Param("category") String category, @Param("offset") int offset);
+    List<LectureInfoListResponse> getLecturesByCategory(@Param("categoryId") int categoryId, @Param("offset") int offset);
 
     // 메인 화면 강의 목록
     // 최대 완료 수 강의
@@ -312,7 +312,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
                    u.lecturer as isLecturer,
                    0 as recentId
             from lecture l
-            left join (
+            join (
                 select
                     p.lecture_lecture_id as lecture_id,
                     u.name as name,

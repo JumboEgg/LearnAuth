@@ -62,6 +62,10 @@ dependencies {
 
 	// Web3j dependencies
 	implementation 'org.web3j:core:4.12.3'
+	implementation 'org.web3j:contracts:4.12.3'
+	implementation 'org.web3j:crypto:4.12.3'
+	implementation 'org.web3j:utils:4.12.3'
+	implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
 }
 
 tasks.named('test') {

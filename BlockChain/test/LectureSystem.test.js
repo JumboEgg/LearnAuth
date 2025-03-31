@@ -27,7 +27,7 @@ describe("LectureSystem with LectureForwarder", function () {
     await catToken.deployed();
     
     // Deploy LectureSystem
-    const LectureSystem = await ethers.getContractFactory("LectureSystem");
+    const LectureSystem = await ethers.getContractFactory("OldLectureSystem");
     lectureSystem = await LectureSystem.deploy(catToken.address, forwarder.address);
     await lectureSystem.deployed();
 

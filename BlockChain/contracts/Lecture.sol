@@ -13,7 +13,6 @@ import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
     // Roles
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-    bytes32 public constant LECTURE_ROLE = keccak256("LECTURE_ROLE");
     
     // Token
     IERC20 public catToken;
@@ -29,7 +28,6 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
     
     struct Lecture {
         string title;
-        address lectureWallet;
         Participant[] participants;
         bool exists;
     }
@@ -44,7 +42,7 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
     // 수령자 id에만 indexed 적용
     event TokenWithdrawn(uint256 indexed userId, uint256 amount, string activityType);
     event TokenDeposited(uint256 indexed userId, uint256 amount, string activityType);
-    event LectureCreated(uint256 lectureId, string title, address lectureWallet);
+    event LectureCreated(uint256 lectureId, string title);
     event LecturePurchased(uint256 indexed userId, uint256 amount, string lectureTitle);
     event LectureSettled(uint16 indexed userId, uint16 indexed lectureId, uint256 amount, string lectureTitle);
     event NFTIssued(uint256 userId, uint256 tokenId);
@@ -125,14 +123,12 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
      * @param lectureId Unique identifier for the lecture
      * @param title Title of the lecture
      * @param participants Array of lecture participants and their settlement ratios
-     * @param lectureWallet Wallet address for the lecture
      */
      // 저장할 강의 정보 넘기기
     function createLecture(
         uint16 lectureId, 
         string memory title,
-        Participant[] memory participants, 
-        address lectureWallet
+        Participant[] memory participants
     ) external {
         address sender = _msgSender();
         require(hasRole(ADMIN_ROLE, sender) || !lectures[lectureId].exists, "Only admin or new lecture ID allowed");
@@ -147,7 +143,6 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
         // Store the lecture
         Lecture storage lecture = lectures[lectureId];
         lecture.title = title;
-        lecture.lectureWallet = lectureWallet;
         lecture.exists = true;
         
         // Clear previous participants if any
@@ -158,10 +153,7 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
             lecture.participants.push(participants[i]);
         }
         
-        // Grant lecture role to the lecture wallet
-        _grantRole(LECTURE_ROLE, lectureWallet);
-        
-        emit LectureCreated(lectureId, title, lectureWallet);
+        emit LectureCreated(lectureId, title);
     }
     
     /**
@@ -175,38 +167,23 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
         require(amount > 0, "Amount must be greater than zero");
         
         address sender = _msgSender();
+                
+        Lecture storage lecture = lectures[lectureId];
         
-        // Transfer tokens from user to lecture wallet
-        require(catToken.transferFrom(sender, lectures[lectureId].lectureWallet, amount), "Token transfer failed");
+        for (uint i = 0; i < lecture.participants.length; i++) {
+            // Calculate amount based on settlement ratio
+            uint256 participantAmount = (amount * lecture.participants[i].settlementRatio) / 100;
+            
+            // Transfer tokens from user to participant
+            require(catToken.transferFrom(sender, users[lecture.participants[i].participantId], participantAmount), "Token transfer failed");
+            
+            emit LectureSettled(lecture.participants[i].participantId, lectureId, participantAmount, lecture.title);
+        }
         
         // Record the purchase
         userPurchases[sender].push(lectureId);
         
         emit LecturePurchased(userId, amount, lectures[lectureId].title);
-    }
-    
-    /**
-     * @dev Settle payments for a lecture
-     * @param lectureId Identifier of the lecture to settle
-     */
-    function settleLecture(uint16 lectureId) external {
-        require(lectures[lectureId].exists, "Lecture does not exist");
-        uint256 totalAmount = checkBalance(lectures[lectureId].lectureWallet);
-        require(totalAmount > 0, "Not enought token to settle");
-        address sender = _msgSender();
-        require(hasRole(LECTURE_ROLE, sender), "Sender does not have admin role");
-        
-        Lecture storage lecture = lectures[lectureId];
-        
-        for (uint i = 0; i < lecture.participants.length; i++) {
-            // Calculate amount based on settlement ratio
-            uint256 participantAmount = (totalAmount * lecture.participants[i].settlementRatio) / 100;
-            
-            // Transfer tokens from lecture wallet to participant
-            require(catToken.transferFrom(sender, users[lecture.participants[i].participantId], participantAmount), "Token transfer failed");
-            
-            emit LectureSettled(lecture.participants[i].participantId, lectureId, participantAmount, lecture.title);
-        }
     }
     
     /**
@@ -234,9 +211,10 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
         _safeMint(recipient, tokenId);
         
         // Set token URI
+        string memory tokenURI = string(abi.encodePacked("ipfs://", cid));
+
         // private 저장 공간에 저장하기 때문에 front에서 cid와 IPFS key를 조합해 조회한다.
-        // string memory tokenURI = string(abi.encodePacked("ipfs://", cid));
-        string memory tokenURI = string(abi.encodePacked(cid));
+        // string memory tokenURI = string(abi.encodePacked(cid));
         _setTokenURI(tokenId, tokenURI);
         
         emit NFTIssued(userId, tokenId);

@@ -29,10 +29,10 @@ public class LectureController {
             @ApiResponse(responseCode = "200", description = "전체 강의 조회 성공")
     })
     public ResponseEntity<ResponseSuccessDto<List<LectureInfoListResponse>>> getLecturesByCategory(
-            @RequestParam("category") String category,
+            @RequestParam("categoryId") int categoryId,
             @RequestParam("page") int page
     ) {
-        return ResponseEntity.ok(lectureService.getLecturesByCategory(category, page));
+        return ResponseEntity.ok(lectureService.getLecturesByCategory(categoryId, page));
     }
 
     //조건에 따른 강의 조회 @GetMapping("/recommendation")
@@ -43,6 +43,36 @@ public class LectureController {
     })
     public ResponseEntity<ResponseSuccessDto<RecommendedLectureResponse>> getRecommendedLectures() {
         return ResponseEntity.ok(lectureService.getRecommendedLectures());
+    }
+
+    // 최다 이수 강의
+    @GetMapping("/mostCompleted")
+    @Operation(summary = "최다 이수 강의 목록 조회", description = "가장 많은 사람이 이수한 강의를 최대 3개 반환한다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "최다 이수 강의 목록 조회 성공")
+    })
+    public ResponseEntity<ResponseSuccessDto<List<LectureInfoListResponse>>> getMostCompletedLectures() {
+        return ResponseEntity.ok(lectureService.getMostCompletedLectures());
+    }
+
+    // 최다 이수 강의
+    @GetMapping("/random")
+    @Operation(summary = "무작위 강의 목록 조회", description = "무작위 강의를 최대 10개 반환한다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "무작위 강의 목록 조회 성공")
+    })
+    public ResponseEntity<ResponseSuccessDto<List<LectureInfoListResponse>>> getRamdomLectures() {
+        return ResponseEntity.ok(lectureService.getRandomLectures());
+    }
+
+    // 최다 이수 강의
+    @GetMapping("/mostRecent")
+    @Operation(summary = "최근 강의 목록 조회", description = "가장 최근에 등록된 강의를 최대 10개 반환한다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "최근 강의 목록 조회 성공")
+    })
+    public ResponseEntity<ResponseSuccessDto<List<LectureInfoListResponse>>> getMostRecentLectures() {
+        return ResponseEntity.ok(lectureService.getMostRecentLectures());
     }
 
     //강의 상세 정보 조회, 마이페이지 강의 조회 @GetMapping("/{lectureId})
