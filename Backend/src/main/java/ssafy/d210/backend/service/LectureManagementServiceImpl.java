@@ -31,7 +31,6 @@ public class LectureManagementServiceImpl implements LectureManagementService {
     private final PaymentRatioRepository paymentRatioRepository;
     private final UserLectureRepository userLectureRepository;
     private final UserLectureTimeRepository userLectureTimeRepository;
-    private final AES256Util aes256Util;
 
     @Override
     @Transactional
