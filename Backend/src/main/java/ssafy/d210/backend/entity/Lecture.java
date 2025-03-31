@@ -39,8 +39,9 @@ public class Lecture {
     @NotNull
     private int price;
 
-    @Null
-    private String walletKey;
+// 강의 자체 지갑 삭제
+//    @Null
+//    private String walletKey;
 
     @OneToMany(mappedBy = "lecture")
     private List<SubLecture> subLectureList;
