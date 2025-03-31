@@ -32,6 +32,15 @@
         <activity
             android:name="com.example.second_project.MainActivity"
             android:exported="true"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name="com.example.second_project.JoinActivity"
+            android:windowSoftInputMode="adjustPan" />
+
+        <!-- LoginActivity를 시작화면으로 설정 -->
+        <activity
+            android:name="com.example.second_project.LoginActivity"
+            android:exported="true"
             android:windowSoftInputMode="adjustPan" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -39,12 +48,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="com.example.second_project.JoinActivity"
-            android:windowSoftInputMode="adjustPan" />
-        <activity
-            android:name="com.example.second_project.LoginActivity"
-            android:windowSoftInputMode="adjustPan" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"
