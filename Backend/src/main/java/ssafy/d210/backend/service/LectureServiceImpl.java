@@ -2,6 +2,7 @@ package ssafy.d210.backend.service;
 //
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.response.lecture.*;
@@ -10,9 +11,11 @@ import ssafy.d210.backend.enumeration.response.HereStatus;
 import ssafy.d210.backend.repository.*;
 import ssafy.d210.backend.util.ResponseUtil;
 
+import org.springframework.data.domain.Pageable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
 
 @Slf4j
 @Service
@@ -102,18 +105,16 @@ public class LectureServiceImpl implements LectureService{
     @Override
     public ResponseSuccessDto<LectureSearchResponse> searchLectures(String keyword, int page) {
         int pageSize = 12;
-        int offset = (page -1 ) * pageSize;
 
         // 전체 결과 수
         int total = lectureRepository.countLecturesByKeyword(keyword);
 
-        // 페이징 된 검색 결과 조회
-        List<LectureInfoResponse> resultList = lectureRepository.searchLecturesByKeyword(keyword);
+        // pageable 객체 생성
+        Pageable pageable = PageRequest.of(page-1, pageSize);
 
-        List<LectureInfoResponse> pagedList = resultList.stream()
-                .skip(offset)
-                .limit(pageSize)
-                .toList();
+        // 페이징 처리된 검색 결과 조회
+        List<LectureInfoResponse> pagedList = lectureRepository.searchLecturesByKeywordPaged(keyword, pageable);
+
 
         LectureSearchResponse response = new LectureSearchResponse();
         response.setTotalResults(total);

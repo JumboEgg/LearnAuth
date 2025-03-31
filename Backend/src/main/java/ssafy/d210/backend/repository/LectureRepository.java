@@ -7,6 +7,9 @@ import ssafy.d210.backend.dto.response.lecture.*;
 import ssafy.d210.backend.entity.Lecture;
 import ssafy.d210.backend.entity.SubLecture;
 import ssafy.d210.backend.entity.UserLecture;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+
 
 import java.util.List;
 
@@ -238,8 +241,9 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
         WHERE l.title LIKE CONCAT('%', :keyword, '%')
         ORDER BY l.id DESC
     """)
-    List<LectureInfoResponse> searchLecturesByKeyword(
-            @Param("keyword") String keyword
+    List<LectureInfoResponse> searchLecturesByKeywordPaged(
+            @Param("keyword") String keyword,
+            org.springframework.data.domain.Pageable pageable
             // offset, limit은 EntityManager로 처리
     );
 
