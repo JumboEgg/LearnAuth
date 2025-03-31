@@ -15,24 +15,26 @@
         android:theme="@style/Theme.Second_project"
         tools:targetApi="31">
 
-
         <activity
             android:name=".MainActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustPan" />
+
+        <activity
+            android:name=".JoinActivity"
+            android:windowSoftInputMode="adjustPan" />
+
+        <!-- LoginActivity를 시작화면으로 설정 -->
+        <activity
+            android:name=".LoginActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".JoinActivity"
-            android:windowSoftInputMode="adjustPan"/>
-        <activity
-            android:name=".LoginActivity"
-            android:windowSoftInputMode="adjustPan"/>
     </application>
 
 </manifest>

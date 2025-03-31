@@ -1,0 +1,566 @@
+[
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_ic_trash.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/ic_trash.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_item_register_search_participants.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/item_register_search_participants.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_bg_category_certificate.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/bg_category_certificate.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "com.example.second_project.app-main-56:/mipmap-mdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "com.example.second_project.app-main-56:/mipmap-xxxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_item_ownedlecture_detail.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/item_ownedlecture_detail.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_quiz.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_quiz.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_sporticon.png.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/sporticon.png"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_visibleicon.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/visibleicon.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_ic_process_checked.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/ic_process_checked.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_walleticon.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/walleticon.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_ic_certificate.png.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/ic_certificate.png"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "com.example.second_project.app-main-56:/mipmap-hdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_add_24px.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/add_24px.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "com.example.second_project.app-main-56:/mipmap-xxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_item_report.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/item_report.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_declaration.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_declaration.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "com.example.second_project.app-main-56:/mipmap-xxxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_fail_check.png.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/fail_check.png"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/font_pretendard_regular.ttf.flat",
+        "source": "com.example.second_project.app-main-56:/font/pretendard_regular.ttf"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_profile.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_profile.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_badge.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/badge.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_img_cert_frame.png.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/img_cert_frame.png"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "com.example.second_project.app-main-56:/mipmap-mdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/navigation_nav_graph.xml.flat",
+        "source": "com.example.second_project.app-main-56:/navigation/nav_graph.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_sample_plzdelete_profile.png.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/sample_plzdelete_profile.png"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_dialog_charge.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/dialog_charge.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_search.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_search.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_cancel.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/cancel.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/mipmap-hdpi_ic_launcher_round.webp.flat",
+        "source": "com.example.second_project.app-main-56:/mipmap-hdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_item_search_lecture.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/item_search_lecture.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_ic_process_unchecked.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/ic_process_unchecked.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_mathicon.png.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/mathicon.png"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_register_sublecture.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_register_sublecture.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_activity_join.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/activity_join.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_bg_report_type.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/bg_report_type.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_my_lecture.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_my_lecture.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_my_stats.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_my_stats.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_walletcard.png.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/walletcard.png"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_item_register_participants.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/item_register_participants.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_register_payment.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_register_payment.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_person.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/person.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_item_register_quiz_detail.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/item_register_quiz_detail.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_bg_top_rounded.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/bg_top_rounded.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/font_tmoney_round_wind_extrabold.ttf.flat",
+        "source": "com.example.second_project.app-main-56:/font/tmoney_round_wind_extrabold.ttf"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_staricon.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/staricon.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/font_pretendard_semibold.ttf.flat",
+        "source": "com.example.second_project.app-main-56:/font/pretendard_semibold.ttf"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_cert_veify.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_cert_veify.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_lawicon.png.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/lawicon.png"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_upload_file_24px.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/upload_file_24px.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/font_pretendard_medium.ttf.flat",
+        "source": "com.example.second_project.app-main-56:/font/pretendard_medium.ttf"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_check_name_button.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/check_name_button.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_dialog_buy.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/dialog_buy.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_main.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_main.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_person2.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/person2.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/font_pretendard_extrabold.ttf.flat",
+        "source": "com.example.second_project.app-main-56:/font/pretendard_extrabold.ttf"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_loginbg.png.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/loginbg.png"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_bg_radius_12.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/bg_radius_12.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_checkicon.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/checkicon.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_participated_lecture.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_participated_lecture.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_logouticon.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/logouticon.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_lecture_play.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_lecture_play.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.example.second_project.app-main-56:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_owned_lecture.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_owned_lecture.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_videocam_24px.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/videocam_24px.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_item_category.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/item_category.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_register_main.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_register_main.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_owned_lecture_detail.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_owned_lecture_detail.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_arrow_back_24px.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/arrow_back_24px.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_register_quiz.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_register_quiz.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/xml_backup_rules.xml.flat",
+        "source": "com.example.second_project.app-main-56:/xml/backup_rules.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_keyboard_arrow_up_24px.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/keyboard_arrow_up_24px.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_alerticon.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/alerticon.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/navigation_sub_nav_graph.xml.flat",
+        "source": "com.example.second_project.app-main-56:/navigation/sub_nav_graph.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_sample_plzdelete2.jpg.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/sample_plzdelete2.jpg"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/font_pretendard_bold.ttf.flat",
+        "source": "com.example.second_project.app-main-56:/font/pretendard_bold.ttf"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_item_transaction.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/item_transaction.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_cert.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_cert.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_item_certification.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/item_certification.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/xml_data_extraction_rules.xml.flat",
+        "source": "com.example.second_project.app-main-56:/xml/data_extraction_rules.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_seletor_radio_button.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/seletor_radio_button.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_selector_radio_text.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/selector_radio_text.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.example.second_project.app-main-56:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_search_border.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/search_border.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_option_selector.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/option_selector.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/font_pretendard_black.ttf.flat",
+        "source": "com.example.second_project.app-main-56:/font/pretendard_black.ttf"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_dialog_quiz_result.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/dialog_quiz_result.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_search_24px.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/search_24px.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_dataicon.png.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/dataicon.png"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_charge.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_charge.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/menu_bottom_nav_menu.xml.flat",
+        "source": "com.example.second_project.app-main-56:/menu/bottom_nav_menu.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_mywallet.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_mywallet.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_bg_dialog_rounded.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/bg_dialog_rounded.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/font_pretendard_thin.ttf.flat",
+        "source": "com.example.second_project.app-main-56:/font/pretendard_thin.ttf"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_arrow_forward.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/arrow_forward.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_marketingicon.png.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/marketingicon.png"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_register_upload.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_register_upload.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_transparent.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/transparent.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_catimg1.png.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/catimg1.png"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_pass_check.png.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/pass_check.png"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_bg_radius_7.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/bg_radius_7.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_sample_plzdelete3.webp.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/sample_plzdelete3.webp"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/font_pretendard_extralight.ttf.flat",
+        "source": "com.example.second_project.app-main-56:/font/pretendard_extralight.ttf"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_transparent_background.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/transparent_background.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_invisibleicon.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/invisibleicon.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_dialog_register_search_participants.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/dialog_register_search_participants.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_participants_stats.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_participants_stats.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_activity_login.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/activity_login.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_bg_radius_20.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/bg_radius_20.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_dialog_report_detail.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/dialog_report_detail.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_item_lecture.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/item_lecture.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_dialog_cert_confirm.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/dialog_cert_confirm.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_playicon.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/playicon.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_lecture_detail.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_lecture_detail.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_home.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/home.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_shadow_background.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/shadow_background.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_register_lecture.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_register_lecture.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/color_bottom_nav_item_color.xml.flat",
+        "source": "com.example.second_project.app-main-56:/color/bottom_nav_item_color.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_item_register_sublecture_detail.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/item_register_sublecture_detail.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "com.example.second_project.app-main-56:/mipmap-xhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_catimg2.png.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/catimg2.png"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_ite_lecture.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/ite_lecture.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_lecture_stats.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_lecture_stats.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_lifeicon.png.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/lifeicon.png"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_keyboard_arrow_down_24px.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/keyboard_arrow_down_24px.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_cert_detail.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_cert_detail.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_static.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_static.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_circular_progress_bar.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/circular_progress_bar.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_item_participated_lecture.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/item_participated_lecture.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_activity_main.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "com.example.second_project.app-main-56:/mipmap-xxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_sample_plzdelete.jpg.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/sample_plzdelete.jpg"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_text_sample.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/text_sample.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/font_pretendard_light.ttf.flat",
+        "source": "com.example.second_project.app-main-56:/font/pretendard_light.ttf"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "com.example.second_project.app-main-56:/mipmap-xhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/font_tmoney_round_wind_regular.ttf.flat",
+        "source": "com.example.second_project.app-main-56:/font/tmoney_round_wind_regular.ttf"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_item_banner.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/item_banner.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/drawable_search.xml.flat",
+        "source": "com.example.second_project.app-main-56:/drawable/search.xml"
+    },
+    {
+        "merged": "com.example.second_project.app-debug-54:/layout_fragment_date_stats.xml.flat",
+        "source": "com.example.second_project.app-main-56:/layout/fragment_date_stats.xml"
+    }
+]
