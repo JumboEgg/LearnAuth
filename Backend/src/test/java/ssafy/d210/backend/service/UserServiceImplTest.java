@@ -51,7 +51,6 @@ class UserServiceImplTest {
         signupRequest.setNickname("test");
         signupRequest.setPassword("12345678");
         signupRequest.setWallet("asdkhjfaskhjfae");
-        signupRequest.setUserKey("12asknhjfsdkljfsdk");
 
         user = new User();
         user.createUser(signupRequest);
