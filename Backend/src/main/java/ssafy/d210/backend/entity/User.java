@@ -40,7 +40,6 @@ public class User {
     @Length(max = 16)
     private String name;
 
-    @NotNull
     @Length(max=64)
     private String userKey;
 

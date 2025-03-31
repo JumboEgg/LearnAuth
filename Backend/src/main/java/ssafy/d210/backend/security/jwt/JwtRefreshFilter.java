@@ -1,6 +1,8 @@
 package ssafy.d210.backend.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,7 +22,8 @@ import ssafy.d210.backend.util.ResponseUtil;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.util.TimeZone;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -110,8 +113,14 @@ public class JwtRefreshFilter extends OncePerRequestFilter {
             response.setStatus(HttpStatus.OK.value());
 
             ResponseSuccessDto<Boolean> res = responseUtil.successResponse(true, HereStatus.SUCCESS_REFRESH);
+            res.setTimeStamp(ZonedDateTime.now(TimeZone.getTimeZone("UTC").toZoneId()));
 
-            String jsonResponse = objectMapper.writeValueAsString(res);
+            // ObjectMapper 설정 - ZonedDateTime 직렬화를 위해
+            ObjectMapper responseMapper = objectMapper.copy();
+            responseMapper.registerModule(new JavaTimeModule());
+            responseMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+
+            String jsonResponse = responseMapper.writeValueAsString(res);
             PrintWriter writer = response.getWriter();
             writer.write(jsonResponse);
             writer.flush();
