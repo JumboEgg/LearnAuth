@@ -16,10 +16,10 @@ import java.math.BigInteger
 
 private const val TAG = "BlockChainManager_야옹"
 
-class BlockchainManager {
-    private val web3j: Web3j // 블록체인 네트워크와 연결하는 객체
-    private val lectureSystem: LectureSystem // 스마트 컨트랙트 객체
-    private val credentials: Credentials //사용자 지갑 정보 (개인 키)
+class BlockChainManager {
+    private val web3j: Web3j
+    private val lectureSystem: LectureSystem
+    private val credentials: Credentials
 
     init {
         // Web3j 설정
@@ -31,7 +31,7 @@ class BlockchainManager {
         // 테스트용 지갑의 개인 키 (실제 서비스에서는 노출 금지?)
         credentials = Credentials.create("0000000000000000000000000000000000000000000000000000000000000000")
 
-        // LectureSystem 스마트 컨트랙트 로드 (배포된 컨트랙트와 연결)
+        // LectureSystem 스마트 컨트랙트 로드
         lectureSystem = LectureSystem.load(
             lectureSystemAddress,
             web3j,
@@ -40,10 +40,9 @@ class BlockchainManager {
         )
     }
 
-    // 특정 사용자의 블록체인 거래 내역 조회하는 함수
     suspend fun getTransactionHistory(userId: BigInteger) {
         withContext(Dispatchers.IO) {
-            // 입금 기록 가져오는 Flowable (블록체인 이벤트 리스너)
+            // 입금 이벤트
             val depositFlowable: Flowable<TransactionEvent> = lectureSystem.tokenDepositedEventFlowable(
                 DefaultBlockParameterName.EARLIEST,
                 DefaultBlockParameterName.LATEST

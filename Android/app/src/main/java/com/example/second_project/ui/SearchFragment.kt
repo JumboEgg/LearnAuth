@@ -6,17 +6,18 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.NavGraphNavigator
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.second_project.adapter.CategoryAdapter
-import com.example.second_project.adapter.LectureAdapter
+import com.example.second_project.adapter.SearchLectureAdapter
 import com.example.second_project.databinding.FragmentSearchBinding
 import com.example.second_project.viewmodel.SearchViewModel
 
 class SearchFragment : Fragment() {
 
-    private var _binding : FragmentSearchBinding? = null
+    private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
     private val viewModel: SearchViewModel by viewModels()
 
@@ -31,6 +32,7 @@ class SearchFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 카테고리 리스트 정의 (첫번째 "전체" 선택 시 전체 강의 로드)
         val categoryList = listOf("전체", "데이터", "법률", "생명과학", "체육", "수학")
 
         // dp -> px로 변환
@@ -38,6 +40,11 @@ class SearchFragment : Fragment() {
 
         val categoryAdapter = CategoryAdapter(categoryList){ position ->
             val selectedCategory = categoryList[position]
+            if (selectedCategory == "전체") {
+                viewModel.loadLectures("", 1)
+            } else {
+                viewModel.loadLectures(selectedCategory, 1)
+            }
         }
         binding.categoryRecyclerView.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
@@ -45,31 +52,30 @@ class SearchFragment : Fragment() {
             addItemDecoration(HorizontalSpacingItemDecoration(spacing))
         }
 
-        val lectureAdapter = LectureAdapter(mainPage = false) { lectureId, lectureTitle ->
-            // NavDirections로 이동 (lectureId, lectureTitle 모두 전달)
+        // SearchLectureAdapter 생성 (강의 클릭 시 NavGraph를 통해 화면 이동)
+        val searchLectureAdapter = SearchLectureAdapter { lectureId, lectureTitle ->
             val action = SearchFragmentDirections.actionNavSearchToQuizFragment(
                 lectureId = lectureId,
                 lectureTitle = lectureTitle
             )
             findNavController().navigate(action)
         }
+        binding.lectureList.apply {
+            layoutManager = GridLayoutManager(context, 2)
+            adapter = searchLectureAdapter
+            addItemDecoration(
+                GridSpaceItemDecoration(spanCount = 1, space = dpToPx(8) )
+            )
+        }
 
-//        binding.lectureList.apply {
-//            layoutManager = GridLayoutManager(context, 2)
-//            adapter = lectureAdapter
-//
-//            addItemDecoration(GridSpaceItemDecoration(spanCount = 2, spacing = dpToPx(16)))
-//        }
 
-        binding.lectureList.layoutManager = GridLayoutManager(requireContext(), 2)
-        binding.lectureList.adapter = lectureAdapter
-        binding.lectureList.addItemDecoration(
-            GridSpaceItemDecoration(spanCount = 1, space = dpToPx(8))
-        )
+        // ViewModel의 강의 데이터를 관찰하여 어댑터에 업데이트
+        viewModel.lectures.observe(viewLifecycleOwner) { lectureList ->
+            searchLectureAdapter.submitList(lectureList)
+        }
 
-        //예시 데이터 삽입
-        val lectureList = List(10) {it}
-        lectureAdapter.submitList(lectureList)
+        // 초기 로딩: 기본값은 "전체"로 모든 강의 데이터 로드
+        viewModel.loadLectures("", 1)
     }
 
     override fun onDestroyView() {
