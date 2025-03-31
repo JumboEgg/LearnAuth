@@ -24,6 +24,18 @@ spring:
   jwt:
     secret: ${JWT_SECRET}
 
+  encryption:
+    key: ${AES_256}
+
+  server:
+    forward-headers-strategy: NATIVE
+    tomcat:
+      remote-ip-header: x-forwarded-for
+      protocol-header: x-forwarded-proto
+
+springdoc:
+  server:
+    url: https://j12d210.p.ssafy.io
 
 logging:
   level:

@@ -1,13 +1,13 @@
 package ssafy.d210.backend.dto.response.certificate;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
 //
 @Getter
-@Setter
+@Builder
 public class CertificateResponse {
     private long lectureId;
     private String title;
     private String categoryName;
-    private int certificate;
+    private Integer certificate;
 }

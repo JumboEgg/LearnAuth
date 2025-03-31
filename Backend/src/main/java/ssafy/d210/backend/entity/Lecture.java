@@ -40,7 +40,6 @@ public class Lecture {
     private int price;
 
     @Null
-    @Length(max = 64)
     private String walletKey;
 
     @OneToMany(mappedBy = "lecture")

@@ -9,8 +9,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.request.lecture.LectureRegisterRequest;
+import ssafy.d210.backend.dto.response.lecture.LectureResponse;
 import ssafy.d210.backend.service.LectureManagementService;
 import ssafy.d210.backend.service.LectureManagementServiceImpl;
+
+import java.time.ZonedDateTime;
+
 //
 @RestController
 @RequestMapping("/api/lecture")
@@ -23,17 +27,29 @@ public class LectureManagementController {
 
     // 강의 등록하기 @PostMapping
     @PostMapping
-    @Operation(summary = "강의 등록 [미완료]", description = "미완")
+    @Operation(summary = "강의 등록", description = """
+            - input : 강의 제목, 카테고리, 목표, 설명, 금액, 정산 비율, 세부 강의, 퀴즈
+            - output : 성공 시 true 반환
+            """)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description="미완")
+            @ApiResponse(responseCode = "200", description="강의 등록 성공")
     })
-    public ResponseEntity<ResponseSuccessDto<Void>> registerLecture(
+
+    // request를 받아서 처리
+    public ResponseEntity<ResponseSuccessDto<Boolean>> registerLecture(
             @RequestBody LectureRegisterRequest request
-            ) {
-                return ResponseEntity.ok(
-                        ResponseSuccessDto.<Void>builder()
-                                .build()
-            );
+    ) {
+        // 로직 실행
+        boolean result = lectureManagementService.registerLecture(request);
+        // 이 부분 형식 맞추기 필요
+        return ResponseEntity.ok(
+                ResponseSuccessDto.<Boolean>builder()
+                    .data(result)
+                    .timestamp(ZonedDateTime.now())
+                    .code(200)
+                    .status("ok")
+                    .build()
+        );
     }
 
     // "강의 등록 이메일 찾기" 는 "회원 가입 이메일 중복 확인"입니다.

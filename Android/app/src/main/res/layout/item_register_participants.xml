@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
@@ -24,14 +24,15 @@
             android:paddingHorizontal="5dp">
 
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editRegisterUser"
                 style="@style/body1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="검색"
                 android:paddingStart="14dp"
-                android:textColor="@color/text_gray"
-                android:maxLines="1"
-                android:drawableEnd="@drawable/search"/>
+                android:textColor="@color/text_gray"                android:maxLines="1"
+                android:drawableEnd="@drawable/search"
+                android:singleLine="true"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 

@@ -1,5 +1,6 @@
 package ssafy.d210.backend.security.config;
 //
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,10 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import ssafy.d210.backend.repository.UserLectureRepository;
 import ssafy.d210.backend.repository.UserRepository;
-import ssafy.d210.backend.security.jwt.CustomLogoutFilter;
-import ssafy.d210.backend.security.jwt.JwtFilter;
-import ssafy.d210.backend.security.jwt.JwtUtil;
-import ssafy.d210.backend.security.jwt.LoginFilter;
+import ssafy.d210.backend.security.jwt.*;
 import ssafy.d210.backend.security.repository.TokenRepository;
 import ssafy.d210.backend.service.UserLectureService;
 import ssafy.d210.backend.util.ResponseUtil;
@@ -34,6 +32,7 @@ public class SecurityConfig {
     private final TokenRepository tokenRepository;
     private final ResponseUtil responseUtil;
     private final UserLectureService userLectureService;
+    private final ObjectMapper objectMapper;
 
     @Bean
     public AuthenticationManager authenticationManager() throws Exception {
@@ -63,8 +62,7 @@ public class SecurityConfig {
         // 요청 권한 설정
         http.authorizeHttpRequests(auth ->
                 auth.requestMatchers("/**").permitAll()
-                        .requestMatchers("/reissue").permitAll()
-                        .requestMatchers("/api/auth/signup", "/api/auth/login").permitAll()
+                        .requestMatchers("/api/auth/signup", "/api/auth/login", "/api/auth/refresh").permitAll()
                         .requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
         );
@@ -78,6 +76,9 @@ public class SecurityConfig {
 
         // 그 후 JwtFilter 추가
         http.addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+
+        // 리프레시 토큰 필터
+        http.addFilterAt(new JwtRefreshFilter(jwtUtil, tokenRepository, userRepository, responseUtil, objectMapper), UsernamePasswordAuthenticationFilter.class);
 
         // 로그아웃 필터 추가
         http.addFilterBefore(new CustomLogoutFilter(jwtUtil, tokenRepository), LogoutFilter.class);
