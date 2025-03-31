@@ -10,13 +10,19 @@ import android.view.WindowManager
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.second_project.databinding.FragmentRegisterLectureBinding
+import com.example.second_project.interfaces.RegisterStepSavable
+import com.example.second_project.viewmodel.RegisterViewModel
 
-class RegisterLectureFragment: Fragment() {
+class RegisterLectureFragment: Fragment(), RegisterStepSavable {
 
     private var _binding: FragmentRegisterLectureBinding? = null
     private val binding get() = _binding!!
+    private val viewModel: RegisterViewModel by activityViewModels()
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,7 +50,14 @@ class RegisterLectureFragment: Fragment() {
             (parentFragment as? RegisterMainFragment)?.moveToStep(1)
         }
 
+    }
 
+    // 인터페이스 구현!
+    override fun saveDataToViewModel() {
+        viewModel.title = binding.editTextTitle.editText?.text.toString()
+        viewModel.categoryName = binding.autoCompleteCategory.text.toString()
+        viewModel.goal = binding.editTextGoal.editText?.text.toString()
+        viewModel.description = binding.editTextContent.editText?.text.toString()
     }
 
     override fun onDestroyView() {
