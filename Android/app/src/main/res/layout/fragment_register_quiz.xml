@@ -42,7 +42,8 @@
                 android:drawableStart="@drawable/add_24px"
                 android:drawablePadding="8dp"
                 android:layout_gravity="center"
-                android:layout_marginTop="20dp"/>
+                android:layout_marginTop="20dp"
+                android:visibility="gone"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnDone"

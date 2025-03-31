@@ -59,7 +59,8 @@
                         android:hint="강의 금액을 작성해 주세요."
                         android:paddingStart="14dp"
                         android:textColor="@color/text_gray"
-                        android:maxLines="1"/>
+                        android:maxLines="1"
+                        android:inputType="number"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
 

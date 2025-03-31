@@ -16,15 +16,15 @@ import org.web3j.abi.TypeReference
 private const val TAG = "LectureSystem_야옹"
 
 data class TransactionEvent(
-    val userId: BigInteger,
-    val amount: BigInteger,
-    val activityType: String
+    val userId: BigInteger, //거래자 ID
+    val amount: BigInteger, // 거래 금액 (토큰단위)
+    val activityType: String //거래 유형 (입/출금)
 )
 
 data class LecturePurchaseEvent(
-    val userId: BigInteger,
-    val amount: BigInteger,
-    val lectureTitle: String
+    val userId: BigInteger, // 강의구매자
+    val amount: BigInteger, // 강의구매비용
+    val lectureTitle: String // 구매한 강의 제목
 )
 
 class LectureSystem(
@@ -35,6 +35,7 @@ class LectureSystem(
 ) : Contract("", contractAddress, web3j, credentials, gasProvider) {
 
     companion object {
+        // 스마트컨트랙트 로드하기
         fun load(
             contractAddress: String,
             web3j: Web3j,
@@ -45,20 +46,21 @@ class LectureSystem(
         }
     }
 
+    // 스마트 컨트랙트에서 발생하는 이벤트 목록 정의
     private val events = mapOf(
         "TokenDeposited" to Event(
             "TokenDeposited",
             listOf(
-                TypeReference.create(Uint256::class.java, true),
-                TypeReference.create(Uint256::class.java),
-                TypeReference.create(Utf8String::class.java)
+                TypeReference.create(Uint256::class.java, true), //사용자 ID
+                TypeReference.create(Uint256::class.java), //입금 금액
+                TypeReference.create(Utf8String::class.java) // 활동 유형
             )
         ),
         "TokenWithdrawn" to Event(
             "TokenWithdrawn",
             listOf(
-                TypeReference.create(Uint256::class.java, true),
-                TypeReference.create(Uint256::class.java),
+                TypeReference.create(Uint256::class.java, true), // ID
+                TypeReference.create(Uint256::class.java), //출금 금액
                 TypeReference.create(Utf8String::class.java)
             )
         ),
@@ -66,13 +68,13 @@ class LectureSystem(
             "LecturePurchased",
             listOf(
                 TypeReference.create(Uint256::class.java, true),
-                TypeReference.create(Uint256::class.java),
+                TypeReference.create(Uint256::class.java), // 구매 금액
                 TypeReference.create(Utf8String::class.java)
             )
         )
     )
 
-    // 입금 이벤트
+    // 입금 이벤트 모니터링하는 함수
     fun tokenDepositedEventFlowable(
         fromBlock: DefaultBlockParameter,
         toBlock: DefaultBlockParameter
@@ -94,7 +96,7 @@ class LectureSystem(
         }
     }
 
-    // 출금 이벤트
+    // 출금 이벤트 모니터링 함수
     fun tokenWithdrawnEventFlowable(
         fromBlock: DefaultBlockParameter,
         toBlock: DefaultBlockParameter
@@ -116,7 +118,7 @@ class LectureSystem(
         }
     }
 
-    // 강의 구매 이벤트
+    // 강의 구매 이벤트 모니터링 함수
     fun lecturePurchasedEventFlowable(
         fromBlock: DefaultBlockParameter,
         toBlock: DefaultBlockParameter
