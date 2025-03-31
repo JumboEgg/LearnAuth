@@ -35,7 +35,7 @@ class SearchFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // 카테고리 리스트 정의 (첫번째 "전체" 선택 시 전체 강의 로드)
-        val categoryList = listOf("전체", "데이터", "법률", "생명과학", "체육", "수학")
+        val categoryList = listOf("전체", "통계학", "법률", "생물학", "체육", "수학", "마케팅")
 
         // dp -> px로 변환
         val spacing = dpToPx(8)

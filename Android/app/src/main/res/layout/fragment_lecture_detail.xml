@@ -146,7 +146,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/lectureDetailTeacherTitle"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="30dp"/>
+        android:layout_marginEnd="30dp"
+        android:singleLine="true"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -155,6 +156,7 @@
         app:layout_constraintEnd_toStartOf="@id/lectureDetailPrice"
         app:layout_constraintBottom_toBottomOf="@id/lectureDetailPrice"
         style="@style/heading3"
+        android:layout_marginStart="30dp"
         android:layout_marginEnd="12dp"/>
 
     <com.google.android.material.button.MaterialButton
@@ -241,7 +243,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/lectureDetailContentTitle"
-        app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginTop="16dp"
         android:layout_marginHorizontal="30dp"
         android:text="이것은 예시 멘트입니다. 여러분안녕하세요? 졸려죽겟습니다. 이 화면 끝나면 그냥 집 갈 겁니다. 불만 있으신가요?"

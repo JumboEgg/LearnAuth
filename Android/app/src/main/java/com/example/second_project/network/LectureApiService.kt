@@ -4,6 +4,7 @@ import com.example.second_project.data.model.dto.response.LectureDetailResponse
 import com.example.second_project.data.model.dto.response.LectureResponse
 import retrofit2.Call
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 
@@ -15,5 +16,5 @@ interface LectureApiService {
     ): Call<LectureResponse>
 
     @GET("api/lecture/{lectureId}")
-    fun getLectureDetail(@Query("lectureId") lectureId: Int, @Query("userId") userId: Int): Call<LectureDetailResponse>
+    fun getLectureDetail(@Path("lectureId") lectureId: Int, @Query("userId") userId: Int): Call<LectureDetailResponse>
 }

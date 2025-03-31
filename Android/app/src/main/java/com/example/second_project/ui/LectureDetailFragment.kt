@@ -52,22 +52,24 @@ class LectureDetailFragment: Fragment(R.layout.fragment_lecture_detail) {
         _binding = FragmentLectureDetailBinding.bind(view)
 
         val lectureId = arguments?.getInt("lectureId") ?: return
+//        val lectureId = 2 //임시..!!!!
         val userId = 1 //임시 고정값, 수정 필요
 
         viewModel.fetchLectureDetail(lectureId, userId)
 
         viewModel.lectureDetail.observe(viewLifecycleOwner) { detail ->
             detail?.let {
+                Log.d(TAG, "onViewCreated: $it")
                 binding.lectureDetailName.text = it.data.title
                 binding.lectureDetailCategory.text = it.data.categoryName
                 binding.lectureDetailTeacher.text = it.data.lecturer ?: "강의자 미정"
-                binding.lectureDetailPrice.text = "{it.data.price}원"
+                binding.lectureDetailPrice.text = "${it.data.price}"
                 binding.lectureDetailGoal.text = it.data.goal
                 binding.lectureDetailContent.text = it.data.description
 
-                val subLectures = it.data.subLectures
+                val subLectures = it.data.subLectures ?: emptyList()
                 val adapter = LectureDetailAdapter(subLectureList = subLectures)
-                
+                binding.lectureDetailList.adapter = adapter
             }
         }
 

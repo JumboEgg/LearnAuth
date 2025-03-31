@@ -30,6 +30,7 @@ class SearchLectureAdapter(
             binding.root.setOnClickListener {
 //                onItemClick(lecture.lectureId, lecture.title)
                 onItemClick(lecture.lectureId, 1)
+//                onItemClick(2, 1)
                 Log.d(TAG, "bind: ${lecture.lectureId}, ${lecture.title}")
             }
         }
