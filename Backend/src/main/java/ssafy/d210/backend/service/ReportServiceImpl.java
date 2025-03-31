@@ -7,6 +7,8 @@ import ssafy.d210.backend.dto.response.report.ReportDetailResponse;
 import ssafy.d210.backend.dto.response.report.ReportResponse;
 import ssafy.d210.backend.entity.Report;
 import ssafy.d210.backend.entity.UserLecture;
+import ssafy.d210.backend.exception.service.EntityIsNullException;
+import ssafy.d210.backend.exception.service.LectureNotFoundException;
 import ssafy.d210.backend.repository.ReportRepository;
 import ssafy.d210.backend.repository.UserLectureRepository;
 
@@ -44,10 +46,10 @@ public class ReportServiceImpl implements ReportService{
     public ReportDetailResponse getReportDetail(Long reportId) {
         // reportId로 DB에서 report entity 찾기
         Report report = reportRepository.findById(reportId)
-                .orElseThrow(() -> new RuntimeException("해당 신고 id가 없습니다."));
+                .orElseThrow(() -> new EntityIsNullException("해당 신고 id가 없습니다."));
         // 왜 신고 내역 없는지 확인
         if (report.getUserLecture().getLecture() == null) {
-            throw new IllegalStateException("해당 신고에 연결된 강의 정보가 없습니다.");
+            throw new LectureNotFoundException("해당 신고에 연결된 강의 정보가 없습니다.");
         }
         // 강의 제목 가져오기 : report -> userLecture -> lecture -> title
         String title = report.getUserLecture().getLecture().getTitle();
@@ -61,7 +63,7 @@ public class ReportServiceImpl implements ReportService{
         // JWTToken으로 사용자 정보 가져오기 : 수정 필요할 수도
         UserLecture userLecture = userLectureRepository
                 .findByUserIdAndLectureId(userId, request.getLectureId())
-                .orElseThrow(() -> new RuntimeException("UserLecture가 없습니다."));
+                .orElseThrow(() -> new EntityIsNullException("해당 유저와 강의에 연결된 UserLecture가 없습니다."));
 
         // 새 report entity 생성
         Report report = new Report();
