@@ -28,7 +28,7 @@ public class CertificateController {
             @ApiResponse(responseCode = "200", description = "수료증 목록 조회 성공")
     })
     public ResponseEntity<ResponseSuccessDto<List<CertificateResponse>>> getCertificates(
-            @RequestParam Long userId
+            @RequestParam("userId") Long userId
     ) {
         return ResponseEntity.ok(certificateService.getCertificates(userId));
     }
@@ -40,8 +40,8 @@ public class CertificateController {
             @ApiResponse(responseCode = "200", description = "수료증 자세히 보기 성공")
     })
     public ResponseEntity<ResponseSuccessDto<CertificateDetailResponse>> getCertificatesDetail(
-            @RequestParam Long userId,
-            @RequestParam Long lectureId
+            @RequestParam("userId") Long userId,
+            @RequestParam("lectureId") Long lectureId
     ) {
         return ResponseEntity.ok(certificateService.getCertificatesDetail(userId, lectureId));
     }
@@ -55,8 +55,8 @@ public class CertificateController {
             @ApiResponse(responseCode = "200", description = "수료증 발급 요청")
     })
     public ResponseEntity<Boolean> issueCertificate(
-            @RequestParam Long userId,
-            @PathVariable Long lectureId
+            @RequestParam("userId") Long userId,
+            @PathVariable("lectureId") Long lectureId
     ) {
         boolean isValid = true; // 일단 냅다 넣어놓음
         return ResponseEntity.ok(isValid);

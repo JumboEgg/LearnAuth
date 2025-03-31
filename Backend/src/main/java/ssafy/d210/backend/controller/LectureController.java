@@ -30,8 +30,8 @@ public class LectureController {
             @ApiResponse(responseCode = "200", description = "전체 강의 조회 성공")
     })
     public ResponseEntity<ResponseSuccessDto<List<LectureInfoListResponse>>> getLecturesByCategory(
-            @RequestParam String category,
-            @RequestParam int page
+            @RequestParam("category") String category,
+            @RequestParam("page") int page
     ) {
         return ResponseEntity.ok(lectureService.getLecturesByCategory(category, page));
     }
@@ -53,8 +53,8 @@ public class LectureController {
             @ApiResponse(responseCode = "200", description = "lecture, userLecture, subLecture, userLectureTime을 가져옵니다.")
     })
     public ResponseEntity<ResponseSuccessDto<LectureDetailResponse>> getLectureDetail(
-            @PathVariable Long lectureId,
-            @RequestParam Long userId
+            @PathVariable("lectureId") Long lectureId,
+            @RequestParam("userId") Long userId
     ) {
         return ResponseEntity.ok(lectureService.getLectureDetail(lectureId, userId));
     }
@@ -70,8 +70,8 @@ public class LectureController {
             @ApiResponse(responseCode = "200", description = "강의 검색 성공")
     })
     public ResponseEntity<ResponseSuccessDto<LectureSearchResponse>> searchLectures(
-            @RequestParam String keyword,
-            @RequestParam int page
+            @RequestParam("keyword") String keyword,
+            @RequestParam("page") int page
     ) {
         return ResponseEntity.ok(lectureService.searchLectures(keyword, page));
     }
@@ -95,7 +95,7 @@ public class LectureController {
             @ApiResponse(responseCode = "200", description = "임시 반환값입니다.")
     })
     public ResponseEntity<ResponseSuccessDto<List<LectureResponse>>> getPurchasedLectures(
-            @RequestParam Long userId
+            @RequestParam("userId") Long userId
     ) {
         return ResponseEntity.ok(lectureService.getPurchasedLectures(userId));
     }
@@ -107,7 +107,7 @@ public class LectureController {
             @ApiResponse(responseCode = "200", description = "임시 반환값입니다.")
     })
     public ResponseEntity<ResponseSuccessDto<List<LectureResponse>>> getParticipatedLectures(
-            @RequestParam Long userId
+            @RequestParam("userId") Long userId
     ) {
         return ResponseEntity.ok(lectureService.getParticipatedLectures(userId));
     }

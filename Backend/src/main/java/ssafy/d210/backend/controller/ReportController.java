@@ -36,7 +36,7 @@ public class ReportController {
     public ResponseEntity<ResponseSuccessDto<List<ReportResponse>>> getAllReports(
             // 한나 : jwt 구현 후면 param으로 userId를 받을 필요가 있을까?
             // @AuthenticationPrincipal CustomUserDetails userDetails
-            @RequestParam long userId
+            @RequestParam("userId") Long userId
     ) {
         // jwt : LonguserId = userDetails.getUserId();
         // reportService에서 userId를 갖고 해당 유저의 신고 리스트를 가지고 온다.
@@ -57,7 +57,7 @@ public class ReportController {
     })
     // PathVariable에서 받은 reportId 파라미터로 받아서 처리
     public ResponseEntity<ResponseSuccessDto<ReportDetailResponse>> getReportDetail(
-            @PathVariable Long reportId
+            @PathVariable("reportId") Long reportId
     ) {
         // 서비스에 해당 reportId 신고 데이터 요청, 데이터를 detail 변수에 담는다.
         ReportDetailResponse detail = reportService.getReportDetail(reportId);
