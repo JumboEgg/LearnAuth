@@ -12,7 +12,6 @@ import ssafy.d210.backend.dto.request.lecture.PurchaseLectureRequest;
 import ssafy.d210.backend.dto.response.lecture.*;
 import ssafy.d210.backend.service.LectureService;
 
-import java.time.ZonedDateTime;
 import java.util.List;
 //
 @RestController

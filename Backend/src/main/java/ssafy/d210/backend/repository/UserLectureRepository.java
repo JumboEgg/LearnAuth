@@ -69,6 +69,6 @@ public interface UserLectureRepository extends JpaRepository<UserLecture, Long> 
         from user_lecture
         where lecture_lecture_id = :lectureId;
     """, nativeQuery = true)
-    int countUserLectureByLectureId(long lectureId);
+    int countUserLectureByLectureId(@Param("lectureId") Long lectureId);
 }
 
