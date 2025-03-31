@@ -14,6 +14,7 @@ import com.example.second_project.databinding.FragmentRegisterUploadBinding
 import com.example.second_project.interfaces.RegisterStepSavable
 import com.example.second_project.viewmodel.RegisterViewModel
 import android.app.Activity
+import android.net.Uri
 import com.example.second_project.utils.FileUtils
 
 
@@ -23,6 +24,7 @@ class RegisterUploadFragment: Fragment(), RegisterStepSavable {
     private var _binding: FragmentRegisterUploadBinding? = null
     private val binding get() = _binding!!
     private val PICK_FILE_REQUEST_CODE = 100
+    private var selectedFileUri: Uri? = null
 
     private val viewModel: RegisterViewModel by activityViewModels()
 
@@ -37,6 +39,10 @@ class RegisterUploadFragment: Fragment(), RegisterStepSavable {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        viewModel.selectedLectureFileName?.let {
+            binding.textFile.text = it
+        }
+
         // 파일 업로드 레이아웃 클릭 시
         binding.constraintUploadFile.setOnClickListener {
             openFilePicker()
@@ -49,7 +55,8 @@ class RegisterUploadFragment: Fragment(), RegisterStepSavable {
 
     // 인터페이스 구현!
     override fun saveDataToViewModel() {
-//        viewModel.title = binding.
+        viewModel.selectedLectureFileName = binding.textFile.text.toString()
+        viewModel.selectedLectureFileUri = selectedFileUri
     }
 
     private fun openFilePicker() {
@@ -61,7 +68,7 @@ class RegisterUploadFragment: Fragment(), RegisterStepSavable {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == PICK_FILE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            val selectedFileUri = data?.data
+            selectedFileUri = data?.data
             selectedFileUri?.let {
                 // 선택된 파일 처리 (ex. 파일명 보여주기, 서버 업로드 등)
                 Toast.makeText(requireContext(), "파일 선택됨: ${it.lastPathSegment}", Toast.LENGTH_SHORT).show()

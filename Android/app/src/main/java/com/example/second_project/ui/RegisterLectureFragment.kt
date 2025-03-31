@@ -35,16 +35,29 @@ class RegisterLectureFragment: Fragment(), RegisterStepSavable {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 카테고리 더미 데이터
-        val categoryList = listOf("체육", "데이터", "법률", "생명과학", "마케팅")
+        // 카테고리
+        viewModel.fetchCategories()
 
-        val adapter = ArrayAdapter(requireContext(), R.layout.simple_list_item_1, categoryList)
-        binding.autoCompleteCategory.setAdapter(adapter)
+        viewModel.categoryList.observe(viewLifecycleOwner) { categories ->
+            val categoryNames = categories.map { it.categoryName }
+            val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, categoryNames)
+            binding.autoCompleteCategory.setAdapter(adapter)
 
-        binding.autoCompleteCategory.setOnItemClickListener { _, _, position, _ ->
-            val selected = categoryList[position]
-            Log.d("CategorySelect", "선택된 카테고리: $selected")
+            binding.autoCompleteCategory.setOnItemClickListener { _, _, position, _ ->
+                val selected = categoryNames[position]
+                viewModel.categoryName = selected
+                Log.d("CategorySelect", "선택된 카테고리: $selected")
+            }
         }
+
+        // 화면 전환하고 돌아와도 작성 기록 유지
+        binding.editTextTitle.editText?.setText(viewModel.title)
+        if (viewModel.categoryName.isNotBlank()) {
+            binding.autoCompleteCategory.setText(viewModel.categoryName, false)
+        }
+        binding.editTextGoal.editText?.setText(viewModel.goal)
+        binding.editTextContent.editText?.setText(viewModel.description)
+
 
         binding.btnToUploadFile.setOnClickListener {
             (parentFragment as? RegisterMainFragment)?.moveToStep(1)

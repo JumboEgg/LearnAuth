@@ -11,4 +11,6 @@ object ApiClient {
         .baseUrl(BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
+
+    val registerService: RegisterService = retrofit.create(RegisterService::class.java)
 }
