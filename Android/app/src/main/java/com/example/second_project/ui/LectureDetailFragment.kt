@@ -56,9 +56,14 @@ class LectureDetailFragment: Fragment(R.layout.fragment_lecture_detail) {
         val userId = 1 //임시 고정값, 수정 필요
 
         viewModel.fetchLectureDetail(lectureId, userId)
+        binding.loadingProgressBar.visibility = View.VISIBLE
+
 
         viewModel.lectureDetail.observe(viewLifecycleOwner) { detail ->
             detail?.let {
+                // 로딩이 끝났으면 ProgressBar 숨기기
+                binding.loadingProgressBar.visibility = View.GONE
+
                 Log.d(TAG, "onViewCreated: $it")
                 binding.lectureDetailName.text = it.data.title
                 binding.lectureDetailCategory.text = it.data.categoryName
@@ -70,6 +75,7 @@ class LectureDetailFragment: Fragment(R.layout.fragment_lecture_detail) {
                 val subLectures = it.data.subLectures ?: emptyList()
                 val adapter = LectureDetailAdapter(subLectureList = subLectures)
                 binding.lectureDetailList.adapter = adapter
+                binding.lectureDetailListCount.text = "총 ${ subLectures.size }강"
             }
         }
 
