@@ -31,7 +31,7 @@ public class QuizController {
             @ApiResponse(responseCode = "200", description = "퀴즈 조회 성공")
     })
     public ResponseEntity<ResponseSuccessDto<List<QuizResponse>>> getQuizList(
-            @PathVariable Long lectureId
+            @PathVariable("lectureId") Long lectureId
     ) {
         return ResponseEntity.ok(quizService.getQuizzes(lectureId));
     }
@@ -43,7 +43,7 @@ public class QuizController {
             @ApiResponse(responseCode = "200", description = "퀴즈 제출 성공")
     })
     public ResponseEntity<ResponseSuccessDto<Boolean>> submitQuiz(
-            @PathVariable Long lectureId,
+            @PathVariable("lectureId") Long lectureId,
             @RequestBody QuizResultRequest request
     ) {
         return ResponseEntity.ok(quizService.submitQuiz(lectureId, request));

@@ -57,6 +57,5 @@ public class User {
         this.nickname = userSignupRequest.getNickname();
         this.wallet = userSignupRequest.getWallet();
         this.name = userSignupRequest.getName();
-        this.userKey = userSignupRequest.getUserKey();
     }
 }

@@ -29,8 +29,8 @@ public class UserLectureController {
             @ApiResponse(responseCode = "200", description = "재생 시간 저장 성공")
     })
     public ResponseEntity<ResponseSuccessDto<Boolean>> updateLectureTime(
-            @PathVariable Long userLectureId,
-            @RequestParam Long subLectureId,
+            @PathVariable("userLectureId") Long userLectureId,
+            @RequestParam("subLectureId") Long subLectureId,
             @RequestBody LectureTimeRequest request
     ) {
         return ResponseEntity.ok(userLectureService.updateLectureTime(userLectureId, subLectureId, request));

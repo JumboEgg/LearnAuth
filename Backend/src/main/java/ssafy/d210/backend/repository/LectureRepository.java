@@ -3,6 +3,7 @@ package ssafy.d210.backend.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import ssafy.d210.backend.dto.response.lecture.*;
 import ssafy.d210.backend.entity.Lecture;
 import ssafy.d210.backend.entity.SubLecture;
@@ -49,7 +50,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
              limit 12
              offset :offset;
         """, nativeQuery = true)
-    List<LectureInfoListResponse> getLecturesByCategory(String category, int offset);
+    List<LectureInfoListResponse> getLecturesByCategory(@Param("category") String category, @Param("offset") int offset);
 
     // 메인 화면 강의 목록
     // 최대 완료 수 강의
@@ -202,7 +203,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
              ) sl
              on l.lecture_id = sl.lecture_lecture_id
         """, nativeQuery = true)
-    LectureDetail getLectureById(Long lectureId);
+    LectureDetail getLectureById(@Param("lectureId") Long lectureId);
 
     // 세부 강의 정보
     @Query(value = """
@@ -211,7 +212,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
         where lecture_lecture_id = :lectureId
         order by sub_lecture_id;
     """, nativeQuery = true)
-    List<Integer> getSublecturesById(Long lectureId);
+    List<Integer> getSublecturesById(@Param("lectureId") Long lectureId);
 
     // 세부 강의 id로 사용자 강의 조회 정보 조회
     @Query(value = """
@@ -227,7 +228,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
         and sl.sub_lecture_id in (:subLectureIdList)
         order by sl.sub_lecture_id;
     """, nativeQuery = true)
-    List<SubLectureDetailResponse> getUserLectureTime(List<Integer> subLectureIdList);
+    List<SubLectureDetailResponse> getUserLectureTime(@Param("subLectureIdList") List<Integer> subLectureIdList);
 
     // 강의 검색
     // 검색어 기반 강의 리스트 반환
