@@ -35,9 +35,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 @Slf4j
 public class LoginFilter extends AbstractAuthenticationProcessingFilter {
@@ -141,22 +143,25 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
         String wallet = user.getWallet() != null ? user.getWallet() : "";
 
         // 간단한 JSON 문자열 생성 (포맷 문자열 사용 대신 문자열 연결)
-        LoginResponse loginResponse = LoginResponse.builder()
-                .userId(userId)
-                .nickname(nickname)
-                .certificateCount(userLectureList.size())
-                .wallet(wallet != null ? wallet : "")
-                .build();
-
-        ResponseSuccessDto<LoginResponse> res = responseUtil.successResponse(loginResponse, HereStatus.SUCCESS_LOGIN);
-
-        String jsonResponse = objectMapper.writeValueAsString(res);
+        String jsonResponse =
+                "{" +
+                        "\"timeStamp\":\"" + Instant.now().toString() + "\"," +
+                        "\"code\":" + code + "," +
+                        "\"status\":\"" + status + "\"," +
+                        "\"data\":{" +
+                        "\"userId\":" + userId + "," +
+                        "\"nickname\":\"" + nickname + "\"," +
+                        "\"certificateCount\":" + userLectureList.size() + "," +
+                        "\"wallet\":\"" + wallet + "\"" +
+                        "}" +
+                        "}";
 
         PrintWriter writer = response.getWriter();
         writer.write(jsonResponse);
         writer.flush();
 
         log.info("로그인 성공");
+
 
         // 인증 정보 설정
         SecurityContextHolder.getContext().setAuthentication(authResult);
