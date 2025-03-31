@@ -13,7 +13,6 @@ import ssafy.d210.backend.util.ResponseUtil;
 
 import java.util.List;
 
-// TODO : ResponseUtil 적용
 @Slf4j
 @Service
 @RequiredArgsConstructor

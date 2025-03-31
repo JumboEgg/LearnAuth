@@ -1,14 +1,9 @@
 package ssafy.d210.backend.dto.response.lecture;
 //
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Setter
 public class LectureProfile {
     private long lectureId;
     private String categoryName;
@@ -16,4 +11,13 @@ public class LectureProfile {
     private String lecturer;
     private Boolean isLecturer;
     private Long recentId;
+
+    public LectureProfile(long lectureId, String categoryName, String title, String lecturer, Integer isLecturer, Long recentId) {
+        this.lectureId = lectureId;
+        this.categoryName = categoryName;
+        this.title = title;
+        this.lecturer = lecturer;
+        this.isLecturer = isLecturer != null && isLecturer == 1;
+        this.recentId = recentId;
+    }
 }

@@ -6,7 +6,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/learnauth
     username: root
-    password: 1234
+    password: ssafy
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -37,3 +37,15 @@ logging:
 #logging:
 #  level:
 #    root: DEBUG
+
+blockchain:
+  rpc:
+    url: https://rpc-amoy.polygon.technology/
+  relayer:
+    private-key: 0x8a4c7215f414765da4fd823d84203b81a61979c980e1635f8a9721888d704785
+  forwarder:
+    address: 0x5C42CEF1FF10c7275Da64E316A8e81B0fA375784
+  cat-token:
+    address: 0xd2181f42bbBb503B628ED25dA8765D087639A682
+  lecture-system:
+    address: 0x5532EDfa8C6a10e0FA62Cc8f8c221c1573D0fcbc

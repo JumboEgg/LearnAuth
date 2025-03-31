@@ -30,15 +30,15 @@ public class LectureServiceImpl implements LectureService{
     private final ResponseUtil responseUtil;
 
     @Override
-    public ResponseSuccessDto<List<LectureInfoListResponse>> getLecturesByCategory(String category, int page) {
+    public ResponseSuccessDto<List<LectureInfoListResponse>> getLecturesByCategory(int categoryId, int page) {
         // 카테고리별 강의 목록 조회
         int offset = (page - 1) * 12;
-        List<LectureInfoListResponse> lectures = lectureRepository.getLecturesByCategory(category, offset);
-        log.info("Category {} page {} lectures: {}", category, page, lectures);
+        List<LectureInfoListResponse> lectures = lectureRepository.getLecturesByCategory(categoryId, offset);
+        log.info("Category {} page {} lectures: {}", categoryId, page, lectures);
 
         // 결과 검증 및 로깅
         if (lectures.isEmpty()) {
-            log.warn("No lectures found for category {}", category);
+            log.warn("No lectures found for category {}", categoryId);
         }
 
         ResponseSuccessDto<List<LectureInfoListResponse>> res = responseUtil.successResponse(lectures, HereStatus.SUCCESS_LECTURE_CATEGORY);
@@ -60,6 +60,28 @@ public class LectureServiceImpl implements LectureService{
         ResponseSuccessDto<RecommendedLectureResponse> res = responseUtil.successResponse(lectures, HereStatus.SUCCESS_LECTURE);
         return res;
     }
+
+    @Override
+    public ResponseSuccessDto<List<LectureInfoListResponse>> getMostCompletedLectures() {
+        List<LectureInfoListResponse> mostCompletedLectures = lectureRepository.getMostFinishedLectures();
+        ResponseSuccessDto<List<LectureInfoListResponse>> res = responseUtil.successResponse(mostCompletedLectures, HereStatus.SUCCESS_LECTURE);
+        return res;
+    }
+
+    @Override
+    public ResponseSuccessDto<List<LectureInfoListResponse>> getRandomLectures() {
+        List<LectureInfoListResponse> randomLectures = lectureRepository.getRandomLectures();
+        ResponseSuccessDto<List<LectureInfoListResponse>> res = responseUtil.successResponse(randomLectures, HereStatus.SUCCESS_LECTURE);
+        return res;
+    }
+
+    @Override
+    public ResponseSuccessDto<List<LectureInfoListResponse>> getMostRecentLectures() {
+        List<LectureInfoListResponse> newestLectures = lectureRepository.getNewestLectures();
+        ResponseSuccessDto<List<LectureInfoListResponse>> res = responseUtil.successResponse(newestLectures, HereStatus.SUCCESS_LECTURE);
+        return res;
+    }
+
 
     @Override
     public ResponseSuccessDto<LectureDetailResponse> getLectureDetail(Long lectureId, Long userId) {

@@ -52,11 +52,11 @@ public interface UserLectureRepository extends JpaRepository<UserLecture, Long> 
             on l.lecture_id = ul.lecture_lecture_id
             and l.lecture_id = :lectureId
             and ul.user_user_id = :userId
-            join user u
-            on u.user_id = ul.user_user_id
             join payment_ratio p
             on p.lecture_lecture_id = l.lecture_id
             and p.lecturer = true
+            join user u
+            on u.user_id = p.user_user_id
          """, nativeQuery = true)
     CertificateDetailResponse getCertificateDetail(@Param("userId") Long userId, @Param("lectureId") Long lectureId);
 

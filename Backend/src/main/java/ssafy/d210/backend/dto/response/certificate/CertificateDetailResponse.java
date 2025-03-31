@@ -1,17 +1,19 @@
 package ssafy.d210.backend.dto.response.certificate;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
+import java.sql.Date;
+
 //
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CertificateDetailResponse {
-//    private String name;
     private String title;
     private String teacherName;
     private String teacherWallet;
-    private Integer certificateDate;
+    private Date certificateDate;
     private Integer certificate;
     private String qrCode;
 }
