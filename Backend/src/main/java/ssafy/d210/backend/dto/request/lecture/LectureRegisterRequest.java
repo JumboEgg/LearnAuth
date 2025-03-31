@@ -16,7 +16,7 @@ public class LectureRegisterRequest {
     private String goal;
     private String description;
     private int price;
-    private String walletKey;
+//    private String walletKey;
     private List<RatioRequest> ratios = new ArrayList<>();
     private List<SubLectureRequest> subLectures = new ArrayList<>();
     private List<QuizRequest> quizzes = new ArrayList<>();
@@ -31,8 +31,8 @@ public class LectureRegisterRequest {
     public void setDescription(String description) { this.description = description; }
     public int getPrice() { return price; }
     public void setPrice(int price) { this.price = price; }
-    public String getWalletKey() { return walletKey; }
-    public void setWalletKey(String walletKey) { this.walletKey = walletKey; }
+//    public String getWalletKey() { return walletKey; }
+//    public void setWalletKey(String walletKey) { this.walletKey = walletKey; }
     public List<RatioRequest> getRatios() { return ratios; }
     public void setRatios(List<RatioRequest> ratios) { this.ratios = ratios; }
     public List<SubLectureRequest> getSubLectures() { return subLectures; }

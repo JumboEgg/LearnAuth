@@ -234,7 +234,13 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
     // 검색어 기반 강의 리스트 반환
     @Query("""
         SELECT new ssafy.d210.backend.dto.response.lecture.LectureInfoResponse(
-            l.id, l.title, l.price, u.name, l.walletKey, c.categoryName)
+            l.id, l.title, l.price, u.name, 
+            (
+                SELECT sl.subLectureUrl
+                FROM SubLecture sl
+                WHERE sl.lecture.id = l.id
+                ORDER BY sl.id ASC
+            ), c.categoryName)
         FROM Lecture l
         JOIN l.category c
         JOIN PaymentRatio pr ON pr.lecture = l AND pr.lecturer = 1
@@ -244,7 +250,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
     """)
     List<LectureInfoResponse> searchLecturesByKeywordPaged(
             @Param("keyword") String keyword,
-            org.springframework.data.domain.Pageable pageable
+            Pageable pageable
             // offset, limit은 EntityManager로 처리
     );
 

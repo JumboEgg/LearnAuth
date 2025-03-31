@@ -42,8 +42,6 @@ public class QLecture extends EntityPathBase<Lecture> {
 
     public final ListPath<UserLecture, QUserLecture> userLectureList = this.<UserLecture, QUserLecture>createList("userLectureList", UserLecture.class, QUserLecture.class, PathInits.DIRECT2);
 
-    public final StringPath walletKey = createString("walletKey");
-
     public QLecture(String variable) {
         this(Lecture.class, forVariable(variable), INITS);
     }
