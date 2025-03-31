@@ -1,6 +1,7 @@
 package com.example.second_project.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +16,7 @@ import com.example.second_project.adapter.SearchLectureAdapter
 import com.example.second_project.databinding.FragmentSearchBinding
 import com.example.second_project.viewmodel.SearchViewModel
 
+private const val TAG = "SearchFragment_야옹"
 class SearchFragment : Fragment() {
 
     private var _binding: FragmentSearchBinding? = null
@@ -53,10 +55,15 @@ class SearchFragment : Fragment() {
         }
 
         // SearchLectureAdapter 생성 (강의 클릭 시 NavGraph를 통해 화면 이동)
-        val searchLectureAdapter = SearchLectureAdapter { lectureId, lectureTitle ->
-            val action = SearchFragmentDirections.actionNavSearchToQuizFragment(
+//        val searchLectureAdapter = SearchLectureAdapter { lectureId, lectureTitle ->
+//            val action = SearchFragmentDirections.actionNavSearchToQuizFragment(
+//                lectureId = lectureId,
+//                lectureTitle = lectureTitle
+//            )
+        val searchLectureAdapter = SearchLectureAdapter { lectureId, userId ->
+            val action = SearchFragmentDirections.actionNavSearchToLectureDetailFragment(
                 lectureId = lectureId,
-                lectureTitle = lectureTitle
+                userId = userId
             )
             findNavController().navigate(action)
         }
@@ -72,6 +79,7 @@ class SearchFragment : Fragment() {
         // ViewModel의 강의 데이터를 관찰하여 어댑터에 업데이트
         viewModel.lectures.observe(viewLifecycleOwner) { lectureList ->
             searchLectureAdapter.submitList(lectureList)
+            Log.d(TAG, "onViewCreated: ${lectureList}")
         }
 
         // 초기 로딩: 기본값은 "전체"로 모든 강의 데이터 로드

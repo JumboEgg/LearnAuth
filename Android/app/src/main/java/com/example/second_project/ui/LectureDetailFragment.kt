@@ -9,15 +9,33 @@ import android.view.WindowManager
 import android.widget.Button
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.example.second_project.R
+import com.example.second_project.adapter.LectureDetailAdapter
+import com.example.second_project.data.repository.LectureDetailRepository
+import com.example.second_project.data.repository.LectureRepository
 import com.example.second_project.databinding.FragmentLectureDetailBinding
 import com.example.second_project.databinding.FragmentOwnedLectureDetailBinding
+import com.example.second_project.viewmodel.LectureDetailViewModel
 
 private const val TAG = "LectureDetailFragment_야옹"
-class LectureDetailFragment: Fragment() {
+class LectureDetailFragment: Fragment(R.layout.fragment_lecture_detail) {
 
     private var _binding: FragmentLectureDetailBinding? = null
     private val binding get() = _binding!!
+    private val viewModel: LectureDetailViewModel by viewModels {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                if (modelClass.isAssignableFrom(LectureDetailViewModel::class.java)) {
+                    return LectureDetailViewModel(LectureDetailRepository()) as T
+                }
+                throw IllegalArgumentException("Unknown ViewModel class")
+            }
+        }
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -31,6 +49,27 @@ class LectureDetailFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentLectureDetailBinding.bind(view)
+
+        val lectureId = arguments?.getInt("lectureId") ?: return
+        val userId = 1 //임시 고정값, 수정 필요
+
+        viewModel.fetchLectureDetail(lectureId, userId)
+
+        viewModel.lectureDetail.observe(viewLifecycleOwner) { detail ->
+            detail?.let {
+                binding.lectureDetailName.text = it.data.title
+                binding.lectureDetailCategory.text = it.data.categoryName
+                binding.lectureDetailTeacher.text = it.data.lecturer ?: "강의자 미정"
+                binding.lectureDetailPrice.text = "{it.data.price}원"
+                binding.lectureDetailGoal.text = it.data.goal
+                binding.lectureDetailContent.text = it.data.description
+
+                val subLectures = it.data.subLectures
+                val adapter = LectureDetailAdapter(subLectureList = subLectures)
+                
+            }
+        }
 
         binding.buyBtn.setOnClickListener {
             Log.d(TAG, "onViewCreated: 클릭")

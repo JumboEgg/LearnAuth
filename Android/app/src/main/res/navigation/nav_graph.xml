@@ -18,6 +18,8 @@
         <action
             android:id="@+id/action_nav_search_to_quizFragment"
             app:destination="@id/quizFragment" />
+        <action android:id="@+id/action_nav_search_to_lectureDetailFragment"
+            app:destination="@+id/lectureDetailFragment"/>
     </fragment>
 
     <fragment
@@ -73,6 +75,22 @@
         android:name="com.example.second_project.ui.ChargeFragment"
         android:label="충전하기"
         tools:layout="@layout/fragment_charge" />
+
+    <!-- QuizFragment -->
+    <fragment
+        android:id="@+id/lectureDetailFragment"
+        android:name="com.example.second_project.ui.LectureDetailFragment"
+        android:label="강의 디테일"
+        tools:layout="@layout/fragment_lecture_detail">
+        <argument
+            android:name="lectureId"
+            app:argType="integer"
+            android:defaultValue="0" />
+        <argument
+            android:name="userId"
+            app:argType="integer"
+            android:defaultValue="0" />
+    </fragment>
 
     <!-- QuizFragment -->
     <fragment
