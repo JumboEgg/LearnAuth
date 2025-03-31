@@ -1,5 +1,6 @@
 package com.example.second_project.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.example.second_project.LoginActivity
 import com.example.second_project.R
 import com.example.second_project.databinding.FragmentProfileBinding
 import com.example.second_project.viewmodel.ProfileViewModel
@@ -46,14 +48,11 @@ class ProfileFragment : Fragment() {
             findNavController().navigate(R.id.action_profileFragment_to_chargeFragment)
         }
 
-//
-//        //화면 확인을 위한 임시 코드!!
-//        binding.profileMenu4.setOnClickListener {
-//            val transaction = requireActivity().supportFragmentManager.beginTransaction()
-//            transaction.replace(R.id.nav_host_fragment, LectureDetailFragment())
-//            transaction.addToBackStack(null)
-//            transaction.commit()
-//        }
+
+        binding.profileMenu4.setOnClickListener {
+            val intent = Intent(requireContext(), LoginActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     override fun onDestroyView() {
