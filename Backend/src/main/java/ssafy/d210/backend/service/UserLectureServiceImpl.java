@@ -35,6 +35,7 @@ public class UserLectureServiceImpl implements UserLectureService{
         if (request.isEndFlag()) {
             userLectureTime.setEndFlag(1);
         }
+        userLectureTimeRepository.save(userLectureTime);
         ResponseSuccessDto<Boolean> res = responseUtil.successResponse(true, HereStatus.SUCCESS_LECTURE_SAVEPLAYTIME);
 
         return res;
