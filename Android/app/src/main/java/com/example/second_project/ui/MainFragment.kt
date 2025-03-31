@@ -45,7 +45,7 @@ class MainFragment : Fragment() {
 
         // 추천 강의
         binding.recommendList.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        val lectureAdapter = LectureAdapter()
+        val lectureAdapter = LectureAdapter(mainPage = true)
         binding.recommendList.adapter = lectureAdapter
         binding.recommendList.addItemDecoration(HorizontalSpacingItemDecoration(spacing))
 

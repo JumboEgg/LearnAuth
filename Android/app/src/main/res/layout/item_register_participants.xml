@@ -60,7 +60,9 @@
                     android:hint="숫자"
                     android:paddingStart="14dp"
                     android:textColor="@color/text_gray"
-                    android:maxLines="1"/>
+                    android:maxLines="1"
+                    android:inputType="number"
+                    android:singleLine="true"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 

@@ -1,11 +1,14 @@
 package com.example.second_project.adapter
 
+import android.content.Context
+import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.second_project.databinding.ItemLectureBinding
 
 class LectureAdapter(
+    private val mainPage: Boolean,
     private val onItemClick: ((Int, String) -> Unit)? = null)
 
     : RecyclerView.Adapter<LectureAdapter.LectureViewHolder>() {
@@ -26,6 +29,14 @@ class LectureAdapter(
 
     override fun onBindViewHolder(holder: LectureViewHolder, position: Int) {
         holder.bind(items[position])
+
+        if (mainPage) { // mainPage에 들어가는 목록에 한해 너비 조정... 가로스크롤이므로
+            val layoutParams = holder.itemView.layoutParams
+            layoutParams.width = dpToPx(holder.itemView.context, 144)
+            layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+            holder.itemView.layoutParams = layoutParams
+
+        }
     }
 
     override fun getItemCount(): Int = items.size
@@ -43,4 +54,9 @@ class LectureAdapter(
             }
         }
     }
+
+    private fun dpToPx(context: Context, dp: Int): Int {
+        return (dp * context.resources.displayMetrics.density).toInt()
+    }
+
 }

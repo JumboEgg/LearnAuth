@@ -6,12 +6,33 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
+    <ImageView
+        android:id="@+id/btnBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/arrow_back_24px"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="30dp"
+        android:paddingBottom="10dp"
+        android:paddingEnd="10dp" />
+
+    <TextView
+        android:id="@+id/quizNum"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="n번 문제"
+        style="@style/heading1"
+        app:layout_constraintTop_toBottomOf="@id/btnBack"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"/>
+
     <TextView
         android:id="@+id/timerText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="15"
-        android:textSize="20sp"
+        android:textSize="32sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="@+id/progressBar"
         app:layout_constraintEnd_toEndOf="@+id/progressBar"
@@ -31,7 +52,8 @@
         android:progressDrawable="@drawable/circular_progress_bar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/quizNum"
+        android:rotation="270" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/problemCard"

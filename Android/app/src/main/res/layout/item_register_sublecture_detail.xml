@@ -67,13 +67,14 @@
                     android:hint="등록할 개별 강의의 이름을 작성하세요"
                     android:paddingStart="14dp"
                     android:textColor="@color/text_gray"
-                    android:maxLines="1"/>
+                    android:maxLines="1"
+                    android:singleLine="true"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="개별 강의 제목"
+                android:text="개별 강의 링크"
                 style="@style/heading3"
                 android:textColor="@color/text_gray"
                 android:layout_marginTop="15dp"/>
@@ -103,7 +104,8 @@
                         android:hint="등록할 개별 강의 링크를 작성하세요"
                         android:paddingStart="14dp"
                         android:textColor="@color/text_gray"
-                        android:maxLines="1"/>
+                        android:maxLines="1"
+                        android:singleLine="true"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <androidx.appcompat.widget.AppCompatButton

@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.navigation.NavGraphNavigator
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -46,7 +45,7 @@ class SearchFragment : Fragment() {
             addItemDecoration(HorizontalSpacingItemDecoration(spacing))
         }
 
-        val lectureAdapter = LectureAdapter { lectureId, lectureTitle ->
+        val lectureAdapter = LectureAdapter(mainPage = false) { lectureId, lectureTitle ->
             // NavDirections로 이동 (lectureId, lectureTitle 모두 전달)
             val action = SearchFragmentDirections.actionNavSearchToQuizFragment(
                 lectureId = lectureId,
@@ -55,10 +54,18 @@ class SearchFragment : Fragment() {
             findNavController().navigate(action)
         }
 
-        binding.lectureList.apply {
-            layoutManager = GridLayoutManager(context, 2)
-            adapter = lectureAdapter
-        }
+//        binding.lectureList.apply {
+//            layoutManager = GridLayoutManager(context, 2)
+//            adapter = lectureAdapter
+//
+//            addItemDecoration(GridSpaceItemDecoration(spanCount = 2, spacing = dpToPx(16)))
+//        }
+
+        binding.lectureList.layoutManager = GridLayoutManager(requireContext(), 2)
+        binding.lectureList.adapter = lectureAdapter
+        binding.lectureList.addItemDecoration(
+            GridSpaceItemDecoration(spanCount = 1, space = dpToPx(8))
+        )
 
         //예시 데이터 삽입
         val lectureList = List(10) {it}
@@ -74,4 +81,5 @@ class SearchFragment : Fragment() {
     private fun dpToPx(dp: Int): Int {
         return (dp * resources.displayMetrics.density).toInt()
     }
+
 }
