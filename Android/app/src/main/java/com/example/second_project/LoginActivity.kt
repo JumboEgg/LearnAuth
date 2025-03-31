@@ -1,5 +1,5 @@
 package com.example.second_project
-
+//
 import android.content.Intent
 import android.os.Bundle
 import android.text.method.HideReturnsTransformationMethod
