@@ -1,10 +1,7 @@
 package ssafy.d210.backend.service;
 //
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
-import ssafy.d210.backend.dto.response.lecture.LectureDetailResponse;
-import ssafy.d210.backend.dto.response.lecture.LectureInfoResponse;
-import ssafy.d210.backend.dto.response.lecture.LectureResponse;
-import ssafy.d210.backend.dto.response.lecture.RecommendedLectureResponse;
+import ssafy.d210.backend.dto.response.lecture.*;
 
 import java.util.List;
 
@@ -13,7 +10,7 @@ import java.util.List;
 public interface LectureService {
 
     // 카테고리별 강의 조회
-    public ResponseSuccessDto<List<LectureInfoResponse>> getLecturesByCategory(String category, int page);
+    public ResponseSuccessDto<List<LectureInfoListResponse>> getLecturesByCategory(String category, int page);
 
     // 메인 화면 강의 목록
     public ResponseSuccessDto<RecommendedLectureResponse> getRecommendedLectures();
@@ -22,7 +19,7 @@ public interface LectureService {
     public ResponseSuccessDto<LectureDetailResponse> getLectureDetail(Long lectureId, Long userId);
 
     // 강의 검색(검색어)
-    public ResponseSuccessDto<List<LectureInfoResponse>> searchLectures(String keyword, int page);
+    public ResponseSuccessDto<LectureSearchResponse> searchLectures(String keyword, int page);
 
     // 강의 구매
     // 정은이 화이팅!

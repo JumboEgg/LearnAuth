@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -127,21 +128,6 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-//        LoginResponse loginResponse = LoginResponse.builder()
-//                .userId(userId)
-//                .nickname(user.getNickname())
-//                .certificateCount(0)
-////                .certificateCount(user.getCertificateCount() != null ? user.getCertificateCount() : 0)
-//                .wallet(user.getWallet() != null ? user.getWallet() : "")
-//                .build();
-//
-//        ResponseSuccessDto<LoginResponse> res = responseUtil.successResponse(loginResponse, HereStatus.SUCCESS_LOGIN);
-//
-//        // ObjectMapper를 사용하여 JSON 변환
-//        String jsonResponse = objectMapper.writeValueAsString(res);
-//
-//        response.getWriter().write(jsonResponse);
-//        response.getWriter().flush();
         // Status 정보
         int code = HttpStatus.OK.value();
         String status = HttpStatus.OK.name();
@@ -155,18 +141,16 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
         String wallet = user.getWallet() != null ? user.getWallet() : "";
 
         // 간단한 JSON 문자열 생성 (포맷 문자열 사용 대신 문자열 연결)
-        String jsonResponse =
-                "{" +
-                        "\"timeStamp\":\"" + Instant.now().toString() + "\"," +
-                        "\"code\":" + code + "," +
-                        "\"status\":\"" + status + "\"," +
-                            "\"data\":{" +
-                            "\"userId\":" + userId + "," +
-                            "\"nickname\":\"" + nickname + "\"," +
-                            "\"certificateCount\":" + userLectureList.size() + "," +
-                            "\"wallet\":\"" + wallet + "\"" +
-                            "}" +
-                        "}";
+        LoginResponse loginResponse = LoginResponse.builder()
+                .userId(userId)
+                .nickname(nickname)
+                .certificateCount(userLectureList.size())
+                .wallet(wallet != null ? wallet : "")
+                .build();
+
+        ResponseSuccessDto<LoginResponse> res = responseUtil.successResponse(loginResponse, HereStatus.SUCCESS_LOGIN);
+
+        String jsonResponse = objectMapper.writeValueAsString(res);
 
         PrintWriter writer = response.getWriter();
         writer.write(jsonResponse);

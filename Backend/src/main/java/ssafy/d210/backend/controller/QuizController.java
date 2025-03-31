@@ -42,7 +42,7 @@ public class QuizController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "퀴즈 제출 성공")
     })
-    public ResponseEntity<ResponseSuccessDto<Object>> submitQuiz(
+    public ResponseEntity<ResponseSuccessDto<Boolean>> submitQuiz(
             @PathVariable Long lectureId,
             @RequestBody QuizResultRequest request
     ) {

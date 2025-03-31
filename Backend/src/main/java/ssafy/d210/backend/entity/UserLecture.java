@@ -33,7 +33,7 @@ public class UserLecture {
     private LocalDate certificateDate;
 
     @ColumnDefault("0")
-    private int recentLectureId;
+    private Long recentLectureId;
 
     private String qrCode;
 

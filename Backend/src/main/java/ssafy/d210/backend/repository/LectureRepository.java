@@ -3,13 +3,13 @@ package ssafy.d210.backend.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ssafy.d210.backend.dto.response.lecture.LectureDetailResponse;
-import ssafy.d210.backend.dto.response.lecture.LectureInfoResponse;
-import ssafy.d210.backend.dto.response.lecture.LectureResponse;
-import ssafy.d210.backend.dto.response.lecture.SubLectureDetailResponse;
+import ssafy.d210.backend.dto.response.lecture.*;
 import ssafy.d210.backend.entity.Lecture;
 import ssafy.d210.backend.entity.SubLecture;
 import ssafy.d210.backend.entity.UserLecture;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+
 
 import java.util.List;
 
@@ -26,12 +26,12 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
              join category c
              on l.category_category_id = c.category_id
              and (c.category_name = :category or :category is null)
-             join payment_ratio p
+             left join payment_ratio p
              on l.lecture_id = p.lecture_lecture_id
              and p.lecturer = true
-             join user u
+             left join user u
              on p.user_user_id = u.user_id
-             join (
+             left join (
                 select sl1.lecture_lecture_id, sl1.sub_lecture_url
                 from sub_lecture sl1
                 join (
@@ -49,7 +49,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
              limit 12
              offset :offset;
         """, nativeQuery = true)
-    List<LectureInfoResponse> getLecturesByCategory(String category, int offset);
+    List<LectureInfoListResponse> getLecturesByCategory(String category, int offset);
 
     // 메인 화면 강의 목록
     // 최대 완료 수 강의
@@ -72,12 +72,12 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
              on l.lecture_id = ul.lecture_lecture_id
              join category c
              on l.category_category_id = c.category_id
-             join payment_ratio p
+             left join payment_ratio p
              on l.lecture_id = p.lecture_lecture_id
              and p.lecturer = true
-             join user u
+             left join user u
              on p.user_user_id = u.user_id
-             join (
+             left join (
                 select sl1.lecture_lecture_id,
                     sl1.sub_lecture_url
                 from sub_lecture sl1
@@ -91,7 +91,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
              ) sl
              on l.lecture_id = sl.lecture_lecture_id;
         """, nativeQuery = true)
-    List<LectureInfoResponse> getMostFinishedLectures();
+    List<LectureInfoListResponse> getMostFinishedLectures();
 
     // 무작위 강의
     @Query(value = """
@@ -112,12 +112,12 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             on l.lecture_id = r.lecture_id
             join category c
             on l.category_category_id = c.category_id
-            join payment_ratio p 
+            left join payment_ratio p 
             on l.lecture_id = p.lecture_lecture_id
             and p.lecturer = true
-            join user u
+            left join user u
             on p.user_user_id = u.user_id
-            join (
+            left join (
                 select 
                     sl1.lecture_lecture_id,
                     sl1.sub_lecture_url
@@ -132,7 +132,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             ) sl ON l.lecture_id = sl.lecture_lecture_id
         """,
         nativeQuery = true)
-    List<LectureInfoResponse> getRandomLectures();
+    List<LectureInfoListResponse> getRandomLectures();
 
     // 최신 강의
     @Query(value = """
@@ -145,12 +145,12 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             from lecture l
             join category c
             on l.category_category_id = c.category_id
-            join payment_ratio p
+            left join payment_ratio p
             on l.lecture_id = p.lecture_lecture_id
             and p.lecturer = true
-            join user u
+            left join user u
             on p.user_user_id = u.user_id
-            join (
+            left join (
                 select sl1.lecture_lecture_id, sl1.sub_lecture_url
                 from sub_lecture sl1
                 join (
@@ -165,7 +165,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             order by l.lecture_id desc
             limit 10
         """, nativeQuery = true)
-    List<LectureInfoResponse> getNewestLectures();
+    List<LectureInfoListResponse> getNewestLectures();
 
 
     // 강의 상세 조회
@@ -174,6 +174,8 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             select l.lecture_id as lectureId,
                    l.title as title,
                    l.price as price,
+                   l.goal as goal,
+                   l.description as description,
                    u.name as lecturer,
                    sl.sub_lecture_url as lectureUrl,
                    c.category_name as categoryName
@@ -181,12 +183,12 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
              join category c
              on l.category_category_id = c.category_id
              and l.lecture_id = :lectureId
-             join payment_ratio p
+             left join payment_ratio p
              on l.lecture_id = p.lecture_lecture_id
              and p.lecturer = true
-             join user u
+             left join user u
              on p.user_user_id = u.user_id
-             join (
+             left join (
                 select sl1.lecture_lecture_id,
                     sl1.sub_lecture_url
                 from sub_lecture sl1
@@ -200,7 +202,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
              ) sl
              on l.lecture_id = sl.lecture_lecture_id
         """, nativeQuery = true)
-    LectureDetailResponse getLectureById(Long lectureId);
+    LectureDetail getLectureById(Long lectureId);
 
     // 세부 강의 정보
     @Query(value = """
@@ -227,7 +229,31 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
     """, nativeQuery = true)
     List<SubLectureDetailResponse> getUserLectureTime(List<Integer> subLectureIdList);
 
-    // TODO : 강의 검색
+    // 강의 검색
+    // 검색어 기반 강의 리스트 반환
+    @Query("""
+        SELECT new ssafy.d210.backend.dto.response.lecture.LectureInfoResponse(
+            l.id, l.title, l.price, u.name, l.walletKey, c.categoryName)
+        FROM Lecture l
+        JOIN l.category c
+        JOIN PaymentRatio pr ON pr.lecture = l AND pr.lecturer = 1
+        JOIN pr.user u
+        WHERE l.title LIKE CONCAT('%', :keyword, '%')
+        ORDER BY l.id DESC
+    """)
+    List<LectureInfoResponse> searchLecturesByKeywordPaged(
+            @Param("keyword") String keyword,
+            org.springframework.data.domain.Pageable pageable
+            // offset, limit은 EntityManager로 처리
+    );
+
+    // 검색어 기반 전체 개수 반환
+    @Query("""
+        SELECT COUNT(1)
+        FROM Lecture l
+        WHERE l.title LIKE CONCAT('%', :keyword, '%')
+    """)
+    int countLecturesByKeyword(@Param("keyword") String keyword);
 
     // 강의 구매
 
@@ -237,7 +263,6 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             select l.lecture_id as lectureId,
                    c.category_name as categoryName,
                    l.title as title,
-                   ul.learning_rate as learningRate,
                    u.name as lecturer,
                    u.lecturer as isLecturer,
                    ul.recent_lecture_id as recentId
@@ -257,7 +282,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             on l.lecture_id = ul.lecture_id
             join category c
             on l.category_category_id = c.category_id
-            join (
+            left join (
                 select
                     p.lecture_lecture_id as lecture_id,
                     u.name as name,
@@ -269,19 +294,18 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             ) u
             on u.lecture_id = l.lecture_id;
          """, nativeQuery = true)
-    List<LectureResponse> getPurchasedLectures(@Param("userId") Long userId);
+    List<LectureProfile> getPurchasedLectures(@Param("userId") Long userId);
 
     // 사용자가 참여한 강의
     @Query(value = """
             select l.lecture_id as lectureId,
                    c.category_name as categoryName,
                    l.title as title,
-                   0 as learningRate,
                    u.name as lecturer,
                    u.lecturer as isLecturer,
                    0 as recentId
             from lecture l
-            join (
+            left join (
                 select
                     p.lecture_lecture_id as lecture_id,
                     u.name as name,
@@ -293,7 +317,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             ) u
             on u.lecture_id = l.lecture_id
             join category c
-            on l.category_category_id = c.category_id;
+            on l.category_category_id = c.category_id
          """, nativeQuery = true)
-    List<LectureResponse> getParticipatedLectures(@Param("userId") Long userId);
+    List<LectureProfile> getParticipatedLectures(@Param("userId") Long userId);
 }

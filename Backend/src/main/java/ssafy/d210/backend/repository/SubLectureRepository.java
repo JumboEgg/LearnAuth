@@ -9,4 +9,6 @@ import java.util.List;
 public interface SubLectureRepository extends JpaRepository<SubLecture, Long> {
 
     List<SubLecture> findSubLectureByLectureIdOrderById(Long lectureId);
+
+    int countSubLecturesByLectureId(Long lectureId);
 }
