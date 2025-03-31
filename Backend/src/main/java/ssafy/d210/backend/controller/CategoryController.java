@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
-import ssafy.d210.backend.dto.response.category.CategoryListResponse;
+import ssafy.d210.backend.dto.response.category.CategoryResponse;
 import ssafy.d210.backend.service.CategoryService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/category")
@@ -25,7 +27,7 @@ public class CategoryController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "카테고리 조회 성공")
     })
-    public ResponseEntity<ResponseSuccessDto<CategoryListResponse>> getCategoryList() {
-        return ResponseEntity.ok(categoryService.getCategoryList());
+    public ResponseEntity<ResponseSuccessDto<List<CategoryResponse>>> getCategoryList() {
+        return ResponseEntity.ok(categoryService.getAllCategoryList());
     }
 }
