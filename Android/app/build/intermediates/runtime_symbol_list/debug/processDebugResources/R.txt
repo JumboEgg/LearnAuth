@@ -3589,7 +3589,6 @@ int id ivLectureStatsArrow 0x7f090152
 int id ivMyStatsArrow 0x7f090153
 int id ivParticipantsStatsArrow 0x7f090154
 int id joinBtn 0x7f090155
-int id joinCheckName 0x7f090156
 int id joinCheckedName 0x7f090157
 int id joinEmail 0x7f090158
 int id joinEmailContainer 0x7f090159
