@@ -11,6 +11,7 @@ import ssafy.d210.backend.dto.request.quiz.QuizRequest;
 import ssafy.d210.backend.entity.*;
 import ssafy.d210.backend.enumeration.CategoryName;
 import ssafy.d210.backend.repository.*;
+import ssafy.d210.backend.util.AES256Util;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -30,6 +31,7 @@ public class LectureManagementServiceImpl implements LectureManagementService {
     private final PaymentRatioRepository paymentRatioRepository;
     private final UserLectureRepository userLectureRepository;
     private final UserLectureTimeRepository userLectureTimeRepository;
+    private final AES256Util aes256Util;
 
     @Override
     @Transactional
@@ -88,7 +90,7 @@ public class LectureManagementServiceImpl implements LectureManagementService {
             lecture.setGoal(request.getGoal());
             lecture.setDescription(request.getDescription());
             lecture.setPrice(request.getPrice());
-            lecture.setWalletKey(request.getWalletKey());
+            lecture.setWalletKey(aes256Util.encrypt(request.getWalletKey()));
             lecture.setCategory(category);
             Lecture savedLecture = lectureRepository.save(lecture);
 
