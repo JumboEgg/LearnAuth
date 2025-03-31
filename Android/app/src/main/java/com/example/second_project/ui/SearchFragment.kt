@@ -35,15 +35,15 @@ class SearchFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // 카테고리 리스트 정의 (첫번째 "전체" 선택 시 전체 강의 로드)
-        val categoryList = listOf("전체", "통계학", "법률", "생물학", "체육", "수학", "마케팅")
+        val categoryList = listOf("전체", "수학", "생물학", "법률", "통계학", "마케팅", "체육")
 
         // dp -> px로 변환
         val spacing = dpToPx(8)
 
         val categoryAdapter = CategoryAdapter(categoryList){ position ->
-            val selectedCategory = categoryList[position]
-            if (selectedCategory == "전체") {
-                viewModel.loadLectures("", 1)
+            val selectedCategory = position
+            if (selectedCategory == 0) {
+                viewModel.loadLectures(0, 1)
             } else {
                 viewModel.loadLectures(selectedCategory, 1)
             }
@@ -60,21 +60,21 @@ class SearchFragment : Fragment() {
 //                lectureId = lectureId,
 //                lectureTitle = lectureTitle
 //            )
-//        val searchLectureAdapter = SearchLectureAdapter { lectureId, userId ->
-//            val action = SearchFragmentDirections.actionNavSearchToLectureDetailFragment(
-//                lectureId = lectureId,
-//                userId = userId
-//            )
-//            findNavController().navigate(action)
-//        }
-
         val searchLectureAdapter = SearchLectureAdapter { lectureId, userId ->
-            val action = SearchFragmentDirections.actionNavSearchToOwnedLectureDetailFragment(
+            val action = SearchFragmentDirections.actionNavSearchToLectureDetailFragment(
                 lectureId = lectureId,
                 userId = userId
             )
             findNavController().navigate(action)
         }
+
+//        val searchLectureAdapter = SearchLectureAdapter { lectureId, userId ->
+//            val action = SearchFragmentDirections.actionNavSearchToOwnedLectureDetailFragment(
+//                lectureId = lectureId,
+//                userId = userId
+//            )
+//            findNavController().navigate(action)
+//        }
 
         binding.lectureList.apply {
             layoutManager = GridLayoutManager(context, 2)
@@ -92,7 +92,7 @@ class SearchFragment : Fragment() {
         }
 
         // 초기 로딩: 기본값은 "전체"로 모든 강의 데이터 로드
-        viewModel.loadLectures("", 1)
+        viewModel.loadLectures(0, 1)
     }
 
     override fun onDestroyView() {

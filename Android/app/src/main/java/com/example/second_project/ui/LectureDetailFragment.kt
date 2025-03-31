@@ -7,11 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Button
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.second_project.R
 import com.example.second_project.adapter.LectureDetailAdapter
 import com.example.second_project.data.repository.LectureDetailRepository
@@ -51,6 +53,13 @@ class LectureDetailFragment: Fragment(R.layout.fragment_lecture_detail) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentLectureDetailBinding.bind(view)
 
+        binding.lectureDetailList.layoutManager = LinearLayoutManager(requireContext())
+
+        //뒤로가기 버튼 설정
+        binding.lectureDetailBack.setOnClickListener {
+            requireActivity().onBackPressed()
+        }
+
         val lectureId = arguments?.getInt("lectureId") ?: return
 //        val lectureId = 2 //임시..!!!!
         val userId = 1 //임시 고정값, 수정 필요
@@ -76,6 +85,11 @@ class LectureDetailFragment: Fragment(R.layout.fragment_lecture_detail) {
                 val adapter = LectureDetailAdapter(subLectureList = subLectures)
                 binding.lectureDetailList.adapter = adapter
                 binding.lectureDetailListCount.text = "총 ${ subLectures.size }강"
+            } ?: run {
+                // detail이 null인 경우 처리
+                binding.loadingProgressBar.visibility = View.GONE
+                Log.e(TAG, "강의 상세 정보를 가져오지 못했습니다.")
+                Toast.makeText(requireContext(), "강의 상세 정보 로딩 실패", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -111,5 +125,10 @@ class LectureDetailFragment: Fragment(R.layout.fragment_lecture_detail) {
         }
 
         dialog.show()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

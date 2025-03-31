@@ -11,7 +11,7 @@ import retrofit2.http.Query
 interface LectureApiService {
     @GET("api/lecture")
     fun getLectures(
-        @Query("category") category: String,
+        @Query("categoryId") categoryId: Int,
         @Query("page") page: Int
     ): Call<LectureResponse>
 
