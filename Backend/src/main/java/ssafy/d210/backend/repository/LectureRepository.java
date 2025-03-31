@@ -239,7 +239,10 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
                 SELECT sl.subLectureUrl
                 FROM SubLecture sl
                 WHERE sl.lecture.id = l.id
-                ORDER BY sl.id ASC
+                    AND sl.id = (
+                    SELECT MIN(sl2.id)
+                    FROM SubLecture sl2
+                    WHERE sl2.lecture.id = l.id)
             ), c.categoryName)
         FROM Lecture l
         JOIN l.category c
