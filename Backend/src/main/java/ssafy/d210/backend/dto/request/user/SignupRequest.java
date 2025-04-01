@@ -3,12 +3,16 @@ package ssafy.d210.backend.dto.request.user;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 //
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class SignupRequest {
 
     @NotNull(message = "이메일은 필수 입력 값입니다.")
