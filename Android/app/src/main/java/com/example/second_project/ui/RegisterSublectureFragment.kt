@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.second_project.R
 import com.example.second_project.adapter.RegisterSublectureAdapter
 import com.example.second_project.databinding.FragmentRegisterSublectureBinding
 import com.example.second_project.interfaces.RegisterStepSavable
@@ -46,9 +47,26 @@ class RegisterSublectureFragment: Fragment(), RegisterStepSavable {
             onLoadVideoClick = { position, url ->
                 val videoId = YoutubeUtil.extractVideoId(url)
                 if (videoId != null) {
-                    Toast.makeText(requireContext(), "추출된 ID: $videoId", Toast.LENGTH_SHORT).show()
-                    Log.d("onLoadVideoClick", " $videoId")
-                    // 추후 fetchYoutubeMetaData(videoId, ...) 호출할 예정
+                    viewModel.fetchYoutubeMetaData(
+                        videoId = videoId,
+                        apiKey = "AIzaSyBoQEjW4Cx2Z6p0DB5OniYbA8caxC88WYc", // string 리소스에서 불러오거나 BuildConfig 사용
+                        onResult = { title, durationSeconds ->
+                            val thumbnailUrl = YoutubeUtil.getThumbnailUrl(videoId)
+
+                            // 어댑터의 특정 위치 아이템 업데이트
+                            val tempList = sublectureAdapter.getTempSubLectures().toMutableList()
+                            val item = tempList[position]
+                            item.videoTitle = title
+                            item.duration = durationSeconds
+                            item.videoId = videoId
+                            item.thumbnailUrl = thumbnailUrl
+
+                            sublectureAdapter.setItems(tempList)
+                        },
+                        onError = { message ->
+                            Toast.makeText(requireContext(), "유튜브 정보 불러오기 실패: $message", Toast.LENGTH_SHORT).show()
+                        }
+                    )
                 } else {
                     Toast.makeText(requireContext(), "올바른 YouTube 링크가 아닙니다.", Toast.LENGTH_SHORT).show()
                 }
@@ -58,8 +76,8 @@ class RegisterSublectureFragment: Fragment(), RegisterStepSavable {
         )
 
         // ✅ 기존 데이터 있으면 어댑터에 세팅
-        if (viewModel.subLectures.isNotEmpty()) {
-            sublectureAdapter.setItems(viewModel.subLectures)
+        if (viewModel.tempSubLectures.isNotEmpty()) {
+            sublectureAdapter.setItems(viewModel.tempSubLectures)
         }
 
 
@@ -78,33 +96,26 @@ class RegisterSublectureFragment: Fragment(), RegisterStepSavable {
     }
 
     override fun saveDataToViewModel(): Boolean {
-        val lectures = sublectureAdapter.getSubLectures()
+        val tempLectures = sublectureAdapter.getTempSubLectures()
 
-        val processedLectures = lectures.mapIndexed { index, lecture ->
-            val videoId = YoutubeUtil.extractVideoId(lecture.subLectureUrl)
+        tempLectures.forEachIndexed { index, lecture ->
+            val videoId = YoutubeUtil.extractVideoId(lecture.inputUrl)
             if (videoId.isNullOrBlank()) {
                 Toast.makeText(requireContext(), "${index + 1}번째 강의의 유효한 링크를 입력해주세요.", Toast.LENGTH_SHORT).show()
                 return false
             }
-
-            // videoId만 저장하고 싶을 경우 여기에 ID만 저장
-            lecture.copy(subLectureUrl = videoId)
+            lecture.videoId = videoId // 추출된 ID로 업데이트
         }
 
-        viewModel.subLectures.clear()
-        viewModel.subLectures.addAll(processedLectures)
+        // ✅ ViewModel에 임시 저장만 해두자
+        viewModel.tempSubLectures.clear()
+        viewModel.tempSubLectures.addAll(tempLectures)
 
         return true
     }
 
-    private fun fetchYoutubeMetaData(videoId: String, onResult: (title: String, thumbnailUrl: String, duration: Int) -> Unit) {
-        // retrofit 호출 or Web API 요청
-    }
-
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-
     }
 }

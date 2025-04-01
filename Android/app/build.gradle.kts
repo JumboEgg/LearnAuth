@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("androidx.navigation.safeargs.kotlin")
     id("kotlin-parcelize")
+    id("kotlin-kapt")
 }
 
 android {
@@ -75,5 +76,10 @@ dependencies {
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.1.2")
     implementation("androidx.datastore:datastore-preferences-core:1.1.2")
+
+    // Glide
+    implementation("com.github.bumptech.glide:glide:4.15.1")
+    kapt("com.github.bumptech.glide:compiler:4.15.1")
+
 
 }

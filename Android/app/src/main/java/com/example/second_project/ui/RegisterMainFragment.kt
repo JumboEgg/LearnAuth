@@ -90,6 +90,8 @@ class RegisterMainFragment: Fragment() {
         super.onDestroyView()
         _binding = null
 
+        viewModel.reset()
+
     }
 
 }

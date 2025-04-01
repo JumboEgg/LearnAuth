@@ -5,7 +5,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.second_project.R
+import com.example.second_project.data.model.dto.RegisterTempSubLecture
 import com.example.second_project.data.model.dto.request.SubLecture
 import com.example.second_project.databinding.ItemRegisterSublectureDetailBinding
 
@@ -14,13 +16,16 @@ class RegisterSublectureAdapter (
     private val onDeleteClick: (Int) -> Unit,
     private val onLoadVideoClick: (position: Int, url: String) -> Unit
 ) : RecyclerView.Adapter<RegisterSublectureAdapter.ViewHolder>(){
-    private val subLectures = mutableListOf<SubLecture>()
+
+    private val tempSubLectures = mutableListOf<RegisterTempSubLecture>()
     private val isExpandedList = mutableListOf<Boolean>()
 
     inner class ViewHolder(private val binding: ItemRegisterSublectureDetailBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(position: Int) {
+
+            val item = tempSubLectures[position]
             // 제목 업데이트 (ex. 개별 강의 1)
             binding.textSubLectureIndex.text = "개별 강의 ${position + 1}"
 
@@ -52,30 +57,32 @@ class RegisterSublectureAdapter (
                 notifyItemRangeChanged(position, itemCount)
             }
 
-            val subLecture = subLectures[position]
+            binding.editTextTitle.editText?.setText(item.title)
+            binding.editURL.editText?.setText(item.inputUrl)
 
-            binding.editTextTitle.editText?.setText(subLecture.subLectureTitle)
-            binding.editURL.editText?.setText(subLecture.subLectureUrl)
+            // 불러온 제목 보여주기
+            binding.textYoutubeTitle.text = item.videoTitle
 
-            binding.editTextTitle.editText?.setOnFocusChangeListener { _, _ ->
-                val newTitle = binding.editTextTitle.editText?.text.toString()
-                // 새 객체를 생성하여 리스트의 해당 위치에 할당
-                subLectures[position] = SubLecture(
-                    subLectureTitle = newTitle,
-                    subLectureUrl = subLectures[position].subLectureUrl,
-                    subLectureLength = subLectures[position].subLectureLength
-                )
+            // 썸네일 보여주기 (Glide로 로딩)
+            Glide.with(binding.imageViewThumbnail)
+                .load(item.thumbnailUrl)
+                .into(binding.imageViewThumbnail)
+
+
+            // 제목 수정
+            binding.editTextTitle.editText?.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus) {
+                    item.title = binding.editTextTitle.editText?.text.toString()
+                }
             }
 
-            binding.editURL.editText?.setOnFocusChangeListener { _, _ ->
-                val newUrl = binding.editURL.editText?.text.toString()
-                // 새 객체를 생성하여 리스트의 해당 위치에 할당
-                subLectures[position] = SubLecture(
-                    subLectureTitle = subLectures[position].subLectureTitle,
-                    subLectureUrl = newUrl,
-                    subLectureLength = subLectures[position].subLectureLength
-                )
+            // URL 수정
+            binding.editURL.editText?.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus) {
+                    item.inputUrl = binding.editURL.editText?.text.toString()
+                }
             }
+
             // 영상 불러오기 버튼 클릭
             binding.btnConfirm.setOnClickListener {
                 val url = binding.editURL.editText?.text.toString()
@@ -97,9 +104,9 @@ class RegisterSublectureAdapter (
     override fun getItemCount(): Int = isExpandedList.size
 
     fun addItem() {
-        subLectures.add(SubLecture(subLectureTitle = "", subLectureUrl = "", subLectureLength = 0))
+        tempSubLectures.add(RegisterTempSubLecture())
         isExpandedList.add(true)
-        notifyItemInserted(subLectures.size - 1)
+        notifyItemInserted(tempSubLectures.size - 1)
     }
 
 
@@ -108,20 +115,13 @@ class RegisterSublectureAdapter (
         notifyDataSetChanged()
     }
 
-    fun getSubLectures(): List<SubLecture> {
-        return subLectures
-    }
+    fun getTempSubLectures(): List<RegisterTempSubLecture> = tempSubLectures
 
-    fun setItems(subLectureList: List<SubLecture>) {
-        subLectures.clear()
-        subLectures.addAll(subLectureList)
-
+    fun setItems(tempList: List<RegisterTempSubLecture>) {
+        tempSubLectures.clear()
+        tempSubLectures.addAll(tempList)
         isExpandedList.clear()
-        isExpandedList.addAll(List(subLectureList.size) { true })
-
+        isExpandedList.addAll(List(tempList.size) { true })
         notifyDataSetChanged()
     }
-
-
-
 }

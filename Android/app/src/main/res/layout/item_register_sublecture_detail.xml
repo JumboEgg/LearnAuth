@@ -130,11 +130,13 @@
                 android:layout_marginTop="20dp">
 
                 <ImageView
+                    android:id="@+id/imageViewThumbnail"
                     android:layout_width="160dp"
                     android:layout_height="90dp"
                     android:background="@color/button_white_blue"/>
 
                 <TextView
+                    android:id="@+id/textYoutubeTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="영상 제목이 이곳에 들어갑니다"

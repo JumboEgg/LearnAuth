@@ -29,5 +29,18 @@ object YoutubeUtil {
         return "https://i.ytimg.com/vi/$videoId/${quality.value}.jpg"
     }
 
+    // 재생 길이 파싱
+    fun parseDuration(isoDuration: String): Int {
+        val pattern = Regex("PT(?:(\\d+)H)?(?:(\\d+)M)?(?:(\\d+)S)?")
+        val match = pattern.find(isoDuration)
+
+        val hours = match?.groups?.get(1)?.value?.toIntOrNull() ?: 0
+        val minutes = match?.groups?.get(2)?.value?.toIntOrNull() ?: 0
+        val seconds = match?.groups?.get(3)?.value?.toIntOrNull() ?: 0
+
+        return hours * 3600 + minutes * 60 + seconds
+    }
+
+
 
 }
