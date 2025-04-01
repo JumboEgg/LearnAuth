@@ -107,6 +107,7 @@ public class LectureServiceImpl implements LectureService{
             lectureDetail.setUserLectureId(userLecture.getId());
             lectureDetail.setRecentLectureId(userLecture.getRecentLectureId());
             lectureDetail.setOwned(true);
+            lectureDetail.setCertificate(userLecture.getCertificateDate() != null);
         }
 
         if (subLectureIdList.isEmpty()) {

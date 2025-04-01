@@ -21,5 +21,6 @@ public class LectureDetailResponse {
     private Long recentLectureId;
     private int studentCount;
     private boolean owned;
+    private boolean certificate;
     private List<SubLectureDetailResponse> subLectures = new ArrayList<>();
 }
