@@ -37,13 +37,7 @@ public class CustomLogoutFilter extends GenericFilter {
             return;
         }
 
-        String refresh = null;
-        Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("refresh")) {
-                refresh = cookie.getValue();
-            }
-        }
+        String refresh = request.getHeader("refresh");
 
         if (refresh == null) {
             log.error("Refresh 토큰이 없습니다.");
@@ -75,13 +69,8 @@ public class CustomLogoutFilter extends GenericFilter {
 
         tokenRepository.deleteByRefresh(refresh);
 
-        Cookie cookie = new Cookie("refresh", null);
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-
-        response.addCookie(cookie);
+        response.setHeader("Refresh", null);
         response.setStatus(HttpServletResponse.SC_OK);
-
 
     }
 }
