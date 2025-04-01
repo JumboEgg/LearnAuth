@@ -1,9 +1,10 @@
 package com.example.second_project
-//
+
 import android.content.Intent
 import android.os.Bundle
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.second_project.data.model.dto.request.LogInRequest
@@ -24,6 +25,14 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        Log.d("TAG", "onCreate 내 userId: ${UserSession.userId}")
+
+        // 이미 로그인한 기록이 있다면 바로 MainActivity로 이동
+        if(UserSession.userId != 0) {
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+            return
+        }
 
         binding.loginToJoinBtn.setOnClickListener {
             val intent = Intent(this, JoinActivity::class.java)
@@ -37,7 +46,6 @@ class LoginActivity : AppCompatActivity() {
         binding.loginPwShow.setOnClickListener {
             changePasswordVisibility()
         }
-
     }
 
     private fun performLogin() {
@@ -55,17 +63,18 @@ class LoginActivity : AppCompatActivity() {
         apiService.login(loginRequest).enqueue(object : Callback<LoginResponse> {
             override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
                 if (response.isSuccessful && response.body() != null) {
+                    // 로그인 성공 시 응답으로 받은 userId를 UserSession에 저장합니다.
+                    UserSession.userId = response.body()!!.data.userId
                     Toast.makeText(this@LoginActivity, "로그인 성공", Toast.LENGTH_SHORT).show()
-                    // 필요하다면 response.body()?.data를 활용하여 사용자 정보를 저장할 수 있음.
                     val intent = Intent(this@LoginActivity, MainActivity::class.java)
                     startActivity(intent)
+                    finish()
                 } else {
                     Toast.makeText(
                         this@LoginActivity,
                         "로그인 실패: ${response.message()}",
                         Toast.LENGTH_SHORT
                     ).show()
-
                 }
             }
 
@@ -73,7 +82,6 @@ class LoginActivity : AppCompatActivity() {
                 Toast.makeText(this@LoginActivity, "네트워크 오류: ${t.message}", Toast.LENGTH_SHORT)
                     .show()
             }
-
         })
     }
 
@@ -90,6 +98,4 @@ class LoginActivity : AppCompatActivity() {
         // 커서 위치 유지
         binding.loginPw.setSelection(binding.loginPw.text.length)
     }
-
-
 }
