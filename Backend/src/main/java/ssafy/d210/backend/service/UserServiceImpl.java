@@ -16,6 +16,7 @@ import ssafy.d210.backend.enumeration.response.HereStatus;
 import ssafy.d210.backend.exception.DefaultException;
 import ssafy.d210.backend.exception.service.DuplicatedValueException;
 import ssafy.d210.backend.exception.service.PasswordIsNotAllowed;
+import ssafy.d210.backend.redis.DistributedLock;
 import ssafy.d210.backend.repository.UserLectureRepository;
 import ssafy.d210.backend.repository.UserRepository;
 import ssafy.d210.backend.security.entity.Token;
@@ -37,6 +38,7 @@ public class UserServiceImpl implements UserService {
     private final ResponseUtil responseUtil;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    @DistributedLock(key = "#userSignupRequest.email")
     public ResponseSuccessDto<SignupResponse> signup(SignupRequest userSignupRequest) {
 
         // 이름 본인인증

@@ -24,6 +24,11 @@ spring:
   encryption:
     key: ${AES_256}
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
 springdoc:
   server:
     url: http://localhost:8080
