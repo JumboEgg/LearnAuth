@@ -18,6 +18,8 @@ pipeline {
 
         JWT_SECRET = credentials('JWT_SECRET')
         AES_256 = credentials('AES_256')
+        REDIS = credentials('REDIS')
+        REDIS_PASSWORD = credentials('REDIS_PASSWORD')
 
         JAVA_HOME = '/opt/java/openjdk'
         GRADLE_HOME = '/opt/gradle/gradle-8.13'
