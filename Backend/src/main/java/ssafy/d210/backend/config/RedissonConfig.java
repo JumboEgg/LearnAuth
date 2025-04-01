@@ -1,5 +1,6 @@
 package ssafy.d210.backend.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -7,8 +8,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.core.parameters.P;
 
 @Configuration
+@Slf4j
 public class RedissonConfig {
 
     @Value("${spring.data.redis.host}")
@@ -35,15 +38,24 @@ public class RedissonConfig {
     @Bean
     @Profile({"dev"})
     public RedissonClient redissonClientDev() {
-        Config config = new Config();
-        config.useSingleServer()
-                .setAddress(REDISSON_HOST_PREFIX + host +":" + port)
-                .setPassword(password)
-                .setConnectTimeout(5000)  // 연결 타임아웃 추가
-                .setRetryAttempts(3)      // 재시도 횟수 추가
-                .setRetryInterval(1000);  // 재시도 간격 추가
+        try {
+            log.info("Redis Connection Details - Host: {}, Port: {}", host, port);
 
-        return Redisson.create(config);
+            Config config = new Config();
+            config.useSingleServer()
+                    .setAddress("redis://" + host + ":" + port)
+                    .setPassword(password)
+                    .setConnectTimeout(5000)
+                    .setRetryAttempts(3)
+                    .setRetryInterval(1000);
+
+            RedissonClient client = Redisson.create(config);
+            log.info("Redisson Client created successfully");
+            return client;
+        } catch (Exception e) {
+            log.error("Failed to create Redisson Client", e);
+            throw new RuntimeException("Redis connection failed", e);
+        }
     }
 
 }
