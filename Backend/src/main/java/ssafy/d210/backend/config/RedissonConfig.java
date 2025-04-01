@@ -20,7 +20,7 @@ public class RedissonConfig {
     @Value("${spring.data.redis.port}")
     public int port;
 
-    @Value("${spring.redis.password:}")  // 비밀번호가 없으면 빈 문자열
+    @Value("${spring.data.redis.password:}")  // 비밀번호가 없으면 빈 문자열
     private String password;
 
     private static final String REDISSON_HOST_PREFIX= "redis://";
