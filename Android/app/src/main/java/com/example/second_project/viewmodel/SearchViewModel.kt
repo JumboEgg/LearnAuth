@@ -4,14 +4,20 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.second_project.data.model.dto.request.Lecture
+import com.example.second_project.data.model.dto.response.LectureDetailResponse
+import com.example.second_project.data.repository.LectureDetailRepository
 import com.example.second_project.data.repository.LectureRepository
 
 class SearchViewModel : ViewModel() {
 
     private val repository = LectureRepository()
+    private val lectureDetailRepository = LectureDetailRepository()
 
     private val _lectures = MutableLiveData<List<Lecture>>()
     val lectures: LiveData<List<Lecture>> = _lectures
+
+    private val _lectureDetail = MutableLiveData<LectureDetailResponse?>()
+    val lectureDetail: LiveData<LectureDetailResponse?> = _lectureDetail
 
     private val _text = MutableLiveData("검색화면입니당")
     val text: LiveData<String> = _text
@@ -20,6 +26,12 @@ class SearchViewModel : ViewModel() {
     fun loadLectures(categoryId: Int, page: Int) {
         repository.fetchLectures(categoryId, page).observeForever { lectureList ->
             _lectures.value = lectureList
+        }
+    }
+
+    fun loadLectureDetail(lectureId: Int, userId: Int) {
+        lectureDetailRepository.fetchLectureDetail(lectureId, userId).observeForever { response ->
+            _lectureDetail.value = response
         }
     }
 

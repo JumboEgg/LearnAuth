@@ -60,21 +60,21 @@ class SearchFragment : Fragment() {
 //                lectureId = lectureId,
 //                lectureTitle = lectureTitle
 //            )
-        val searchLectureAdapter = SearchLectureAdapter { lectureId, userId ->
-            val action = SearchFragmentDirections.actionNavSearchToLectureDetailFragment(
-                lectureId = lectureId,
-                userId = userId
-            )
-            findNavController().navigate(action)
-        }
-
 //        val searchLectureAdapter = SearchLectureAdapter { lectureId, userId ->
-//            val action = SearchFragmentDirections.actionNavSearchToOwnedLectureDetailFragment(
+//            val action = SearchFragmentDirections.actionNavSearchToLectureDetailFragment(
 //                lectureId = lectureId,
 //                userId = userId
 //            )
 //            findNavController().navigate(action)
 //        }
+
+        val searchLectureAdapter = SearchLectureAdapter { lectureId, userId ->
+            val action = SearchFragmentDirections.actionNavSearchToOwnedLectureDetailFragment(
+                lectureId = lectureId,
+                userId = userId
+            )
+            findNavController().navigate(action)
+        }
 
         binding.lectureList.apply {
             layoutManager = GridLayoutManager(context, 2)
