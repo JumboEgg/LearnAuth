@@ -221,6 +221,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             sl.sub_lecture_title as subLectureTitle,
             sl.sub_lecture_url as lectureUrl,
             sl.sub_lecture_length as lectureLength,
+            ROW_NUMBER() OVER (ORDER BY sl.sub_lecture_id) AS lectureOrder,
             ult.continue_watching as continueWatching,
             ult.end_flag as endFlag
         from sub_lecture sl
