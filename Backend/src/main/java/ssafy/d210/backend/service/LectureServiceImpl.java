@@ -13,8 +13,10 @@ import ssafy.d210.backend.util.ResponseUtil;
 
 import org.springframework.data.domain.Pageable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -97,15 +99,6 @@ public class LectureServiceImpl implements LectureService{
 //        LectureDetailResponse lectureDetail = LectureDetailResponse.builder().build();
         List<Integer> subLectureIdList = lectureRepository.getSublecturesById(lectureId);
 
-        if (subLectureIdList.isEmpty()) {
-            log.warn("No subLecture found for lectureId {}", lectureId);
-        } else {
-            List<SubLectureDetailResponse> subLectureDetail = lectureRepository.getUserLectureTime(subLectureIdList);
-            if (subLectureDetail.isEmpty()) log.warn("No userLectureTime found for subLectureIdList {}", subLectureIdList);
-            lectureDetail.setSubLectures(subLectureDetail);
-            log.info("subLectureDetail: {}", subLectureDetail.get(0));
-        }
-
         UserLecture userLecture = userLectureRepository.getUserLectureById(lectureId, userId);
 
         if (userLecture == null) {
@@ -113,6 +106,32 @@ public class LectureServiceImpl implements LectureService{
         } else {
             lectureDetail.setUserLectureId(userLecture.getId());
             lectureDetail.setRecentLectureId(userLecture.getRecentLectureId());
+            lectureDetail.setOwned(true);
+        }
+
+        if (subLectureIdList.isEmpty()) {
+            log.warn("No subLecture found for lectureId {}", lectureId);
+        } else if (userLecture != null){
+            List<SubLectureDetailResponse> subLectureDetail = lectureRepository.getUserLectureTime(subLectureIdList, userLecture.getId());
+            if (subLectureDetail.isEmpty()) log.warn("No userLectureTime found for subLectureIdList {}", subLectureIdList);
+            lectureDetail.setSubLectures(subLectureDetail);
+            log.info("subLectureDetail: {}", subLectureDetail.get(0));
+        } else {
+            List<SubLecture> subLectures = subLectureRepository.findSubLectureByLectureIdOrderById(lectureId);
+            List<SubLectureDetailResponse> subLectureDetail = subLectures.stream()
+                            .map(subLecture -> new SubLectureDetailResponse(
+                                    subLecture.getId(),
+                                    subLecture.getSubLectureTitle(),
+                                    subLecture.getSubLectureUrl(),
+                                    subLecture.getSubLectureLength(),
+                                    null,
+                                    0
+                            ))
+                                    .collect(Collectors.toList());
+
+
+
+            lectureDetail.setSubLectures(subLectureDetail);
         }
 
         int studentCount = userLectureRepository.countUserLectureByLectureId(lectureId);
