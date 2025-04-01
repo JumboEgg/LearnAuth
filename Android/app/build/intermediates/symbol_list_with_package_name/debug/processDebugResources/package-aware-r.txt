@@ -2980,6 +2980,7 @@ dimen notification_subtext_size
 dimen notification_top_pad
 dimen notification_top_pad_large_text
 dimen sliding_pane_detail_pane_width
+dimen stroke_width
 dimen tooltip_corner_radius
 dimen tooltip_horizontal_padding
 dimen tooltip_margin
@@ -3358,7 +3359,6 @@ id beginOnFirstDraw
 id beginning
 id below
 id bestChoice
-id bgCategoryCertification
 id bgCertificate
 id blocking
 id bottom
@@ -3387,6 +3387,7 @@ id btnToQuiz
 id btnToSubLecture
 id btnToUploadFile
 id btnToggleSubLecture
+id buttonDetail
 id buttonPanel
 id buyBtn
 id buyCloseBtn
@@ -3506,6 +3507,7 @@ id dropdown_menu
 id eachNum
 id eachThumnail
 id eachTitle
+id eachWatchBtn
 id easeIn
 id easeInOut
 id easeOut
@@ -3554,6 +3556,7 @@ id frost
 id fullscreen_header
 id ghost_view
 id ghost_view_holder
+id glide_custom_view_target_tag
 id gone
 id graph
 id graph_wrap
@@ -3804,6 +3807,7 @@ id outline
 id outward
 id overshoot
 id ownedCertBtn
+id ownedDetailPlayBtn
 id ownedLectureDetailFragment
 id ownedLectureFragment
 id ownedLectureRoot
@@ -4266,7 +4270,7 @@ layout item_banner
 layout item_category
 layout item_certification
 layout item_lecture
-layout item_ownedlecture_detail
+layout item_owned_sublecture
 layout item_participated_lecture
 layout item_register_participants
 layout item_register_quiz_detail
