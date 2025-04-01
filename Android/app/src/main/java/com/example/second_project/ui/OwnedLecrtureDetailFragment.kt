@@ -209,7 +209,6 @@ class OwnedLecrtureDetailFragment : Fragment() {
                     } else {
                         Log.e(TAG, "신고 접수 실패 - 응답 코드: ${response.code()}")  // 응답 코드 출력
                         Log.e(TAG, "신고 접수 실패 - 응답 메시지: ${response.message()}") // 기본 메시지
-                        Toast.makeText(requireContext(), "신고 접수 실패: ${response.code()}", Toast.LENGTH_SHORT).show()
                     }
                 }
 
