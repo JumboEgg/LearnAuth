@@ -23,10 +23,9 @@ spring:
 
   data:
     redis:
-      host: j12d210.p.ssafy.io
+      host: 172.19.0.3
       port: 6379
       password: ${REDIS_PASSWORD}
-
   jwt:
     secret: ${JWT_SECRET}
 

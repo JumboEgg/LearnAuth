@@ -20,14 +20,14 @@ public class RedissonConfig {
     @Value("${spring.redis.password:}")  // 비밀번호가 없으면 빈 문자열
     private String password;
 
-    private static final String REDDISON_HOST_PREFIX= "redis://";
+    private static final String REDISSON_HOST_PREFIX= "redis://";
 
     @Bean
     @Profile({"local"})
     public RedissonClient redissonClient() {
 
         Config config = new Config();
-        config.useSingleServer().setAddress(REDDISON_HOST_PREFIX + host + ":" + port);
+        config.useSingleServer().setAddress(REDISSON_HOST_PREFIX + host + ":" + port);
 
         return Redisson.create(config);
     }
@@ -37,11 +37,11 @@ public class RedissonConfig {
     public RedissonClient redissonClientDev() {
         Config config = new Config();
         config.useSingleServer()
-                .setAddress(REDDISON_HOST_PREFIX + host +":" + port)
+                .setAddress(REDISSON_HOST_PREFIX + host +":" + port)
                 .setPassword(password)
-                .setConnectTimeout(10000)
-                .setRetryAttempts(3)
-                .setRetryInterval(1500);
+                .setConnectTimeout(5000)  // 연결 타임아웃 추가
+                .setRetryAttempts(3)      // 재시도 횟수 추가
+                .setRetryInterval(1000);  // 재시도 간격 추가
 
         return Redisson.create(config);
     }
