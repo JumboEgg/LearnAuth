@@ -17,8 +17,8 @@ class SearchViewModel : ViewModel() {
     val text: LiveData<String> = _text
 
     // API 호출하여 강의 목록을 가져옵니다.
-    fun loadLectures(category: String, page: Int) {
-        repository.fetchLectures(category, page).observeForever { lectureList ->
+    fun loadLectures(categoryId: Int, page: Int) {
+        repository.fetchLectures(categoryId, page).observeForever { lectureList ->
             _lectures.value = lectureList
         }
     }

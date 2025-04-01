@@ -1,6 +1,7 @@
 package com.example.second_project.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +16,7 @@ import com.example.second_project.adapter.SearchLectureAdapter
 import com.example.second_project.databinding.FragmentSearchBinding
 import com.example.second_project.viewmodel.SearchViewModel
 
+private const val TAG = "SearchFragment_야옹"
 class SearchFragment : Fragment() {
 
     private var _binding: FragmentSearchBinding? = null
@@ -33,15 +35,15 @@ class SearchFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // 카테고리 리스트 정의 (첫번째 "전체" 선택 시 전체 강의 로드)
-        val categoryList = listOf("전체", "데이터", "법률", "생명과학", "체육", "수학")
+        val categoryList = listOf("전체", "수학", "생물학", "법률", "통계학", "마케팅", "체육")
 
         // dp -> px로 변환
         val spacing = dpToPx(8)
 
         val categoryAdapter = CategoryAdapter(categoryList){ position ->
-            val selectedCategory = categoryList[position]
-            if (selectedCategory == "전체") {
-                viewModel.loadLectures("", 1)
+            val selectedCategory = position
+            if (selectedCategory == 0) {
+                viewModel.loadLectures(0, 1)
             } else {
                 viewModel.loadLectures(selectedCategory, 1)
             }
@@ -53,13 +55,27 @@ class SearchFragment : Fragment() {
         }
 
         // SearchLectureAdapter 생성 (강의 클릭 시 NavGraph를 통해 화면 이동)
-        val searchLectureAdapter = SearchLectureAdapter { lectureId, lectureTitle ->
-            val action = SearchFragmentDirections.actionNavSearchToQuizFragment(
+//        val searchLectureAdapter = SearchLectureAdapter { lectureId, lectureTitle ->
+//            val action = SearchFragmentDirections.actionNavSearchToQuizFragment(
+//                lectureId = lectureId,
+//                lectureTitle = lectureTitle
+//            )
+        val searchLectureAdapter = SearchLectureAdapter { lectureId, userId ->
+            val action = SearchFragmentDirections.actionNavSearchToLectureDetailFragment(
                 lectureId = lectureId,
-                lectureTitle = lectureTitle
+                userId = userId
             )
             findNavController().navigate(action)
         }
+
+//        val searchLectureAdapter = SearchLectureAdapter { lectureId, userId ->
+//            val action = SearchFragmentDirections.actionNavSearchToOwnedLectureDetailFragment(
+//                lectureId = lectureId,
+//                userId = userId
+//            )
+//            findNavController().navigate(action)
+//        }
+
         binding.lectureList.apply {
             layoutManager = GridLayoutManager(context, 2)
             adapter = searchLectureAdapter
@@ -72,10 +88,11 @@ class SearchFragment : Fragment() {
         // ViewModel의 강의 데이터를 관찰하여 어댑터에 업데이트
         viewModel.lectures.observe(viewLifecycleOwner) { lectureList ->
             searchLectureAdapter.submitList(lectureList)
+            Log.d(TAG, "onViewCreated: ${lectureList}")
         }
 
         // 초기 로딩: 기본값은 "전체"로 모든 강의 데이터 로드
-        viewModel.loadLectures("", 1)
+        viewModel.loadLectures(0, 1)
     }
 
     override fun onDestroyView() {
