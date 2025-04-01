@@ -19,6 +19,9 @@ pipeline {
         JWT_SECRET = credentials('JWT_SECRET')
         AES_256 = credentials('AES_256')
         REDIS = credentials('REDIS')
+
+        SPRING_DATA_REDIS_HOST = '172.19.0.7'
+        SPRING_DATA_REDIS_PORT = '6379'
         REDIS_PASSWORD = credentials('REDIS_PASSWORD')
 
         JAVA_HOME = '/opt/java/openjdk'
@@ -97,8 +100,8 @@ pipeline {
                                       -e SPRING_PROFILES_ACTIVE=dev \
                                       -e PORT=${DOCKER_PORT} \
                                       -e JWT_SECRET=${JWT_SECRET} \
-                                      -e SPRING_DATA_REDIS_HOST=172.19.0.7 \
-                                      -e SPRING_DATA_REDIS_PORT=6379 \
+                                      -e SPRING_DATA_REDIS_HOST="${SPRING_DATA_REDIS_HOST}" \
+                                      -e SPRING_DATA_REDIS_PORT="${SPRING_DATA_REDIS_PORT}" \
                                       -e SPRING_DATA_REDIS_PASSWORD="${REDIS_PASSWORD}" \
                                       -e DB_URL="${DB_URL}" \
                                       -e DB_USERNAME=${DB_USERNAME} \
