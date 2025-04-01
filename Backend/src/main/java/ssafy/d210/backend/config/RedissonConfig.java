@@ -20,9 +20,6 @@ public class RedissonConfig {
     @Value("${spring.redis.password:}")  // 비밀번호가 없으면 빈 문자열
     private String password;
 
-    @Value("${spring.redis.ssl:false}")  // SSL 사용 여부
-    private boolean useSsl;
-
     private static final String REDDISON_HOST_PREFIX= "redis://";
 
     @Bean
