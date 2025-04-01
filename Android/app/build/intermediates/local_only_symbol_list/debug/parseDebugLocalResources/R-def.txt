@@ -25,6 +25,7 @@ color text_gray
 color text_white_blue
 color text_white_gray
 color white
+dimen stroke_width
 drawable add_24px
 drawable alerticon
 drawable arrow_back_24px
@@ -111,7 +112,6 @@ id autoCompleteCategory
 id bannerArea
 id bannerImage
 id bannerPerson
-id bgCategoryCertification
 id bgCertificate
 id bottom_navigation
 id btnAddParticipants
@@ -134,6 +134,7 @@ id btnToQuiz
 id btnToSubLecture
 id btnToUploadFile
 id btnToggleSubLecture
+id buttonDetail
 id buyBtn
 id buyCloseBtn
 id buyMsgArea1
@@ -185,6 +186,7 @@ id dropdownCategoryLayout
 id eachNum
 id eachThumnail
 id eachTitle
+id eachWatchBtn
 id editAnswer1
 id editAnswer2
 id editAnswer3
@@ -305,6 +307,7 @@ id option2
 id option3
 id optionsGroup
 id ownedCertBtn
+id ownedDetailPlayBtn
 id ownedLectureDetailFragment
 id ownedLectureFragment
 id ownedLectureRoot
@@ -469,7 +472,7 @@ layout item_banner
 layout item_category
 layout item_certification
 layout item_lecture
-layout item_ownedlecture_detail
+layout item_owned_sublecture
 layout item_participated_lecture
 layout item_register_participants
 layout item_register_quiz_detail
