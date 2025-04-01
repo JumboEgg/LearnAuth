@@ -105,7 +105,7 @@ class QuizFragment : Fragment() {
 
     private fun showQuestion() {
         val question = questions[currentQuestionIndex]
-        binding.problemTitle.text = question.title
+        binding.quizNum.text = question.title
         binding.problemContent.text = question.content
         binding.option1.text = question.option1
         binding.option2.text = question.option2

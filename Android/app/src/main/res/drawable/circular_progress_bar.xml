@@ -2,15 +2,16 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@android:id/background">
         <shape android:shape="ring"
-            android:thickness="5dp"
+            android:thickness="8dp"
             android:useLevel="false">
-            <solid android:color="#E0E0E0"/>
+            <solid android:color="#DCE4FF"/>
         </shape>
     </item>
     <item android:id="@android:id/progress">
         <shape android:shape="ring"
-            android:thickness="5dp">
-            <solid android:color="#0047AB"/>
+            android:thickness="8dp">
+            <solid android:color="#2946A4"/>
+            <corners android:radius="5dp"/>
         </shape>
     </item>
 </layer-list>

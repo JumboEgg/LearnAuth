@@ -30,7 +30,7 @@ class RegisterLectureFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // 카테고리 더미 데이터
-        val categoryList = listOf("체육", "데이터", "법률", "생명과학", "마케팅")
+        val categoryList = listOf("체육", "통계학", "법률", "생물학", "마케팅", "수학")
 
         val adapter = ArrayAdapter(requireContext(), R.layout.simple_list_item_1, categoryList)
         binding.autoCompleteCategory.setAdapter(adapter)
