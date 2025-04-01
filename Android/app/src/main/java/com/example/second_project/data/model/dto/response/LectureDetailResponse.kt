@@ -19,6 +19,8 @@ data class LectureData(
     val lectureUrl: String,
     val recentLectureId: Int,
     val studentCount: Int,
+    val owned: Boolean,
+    val certificate: Boolean,
     val subLectures: List<SubLecture>
 )
 

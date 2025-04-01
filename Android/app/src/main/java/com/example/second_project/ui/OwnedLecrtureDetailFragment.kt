@@ -1,11 +1,18 @@
 package com.example.second_project.ui
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
+import android.widget.Button
+import android.widget.EditText
+import android.widget.RadioGroup
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
@@ -13,10 +20,21 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.second_project.R
+import com.example.second_project.UserSession.userId
 import com.example.second_project.adapter.OwnedLectureDetailAdapter
+import com.example.second_project.data.ReportItem
+import com.example.second_project.data.model.dto.response.ReportApiResponse
+import com.example.second_project.data.model.dto.response.ReportDetailResponse
 import com.example.second_project.data.repository.LectureDetailRepository
+import com.example.second_project.databinding.DialogReportBinding
+import com.example.second_project.databinding.DialogReportDetailBinding
 import com.example.second_project.databinding.FragmentOwnedLectureDetailBinding
+import com.example.second_project.network.ApiClient
+import com.example.second_project.network.ReportApiService
 import com.example.second_project.viewmodel.OwnedLectureDetailViewModel
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 private const val TAG = "OwnedLecrtureDetailFrag_야옹"
 class OwnedLecrtureDetailFragment : Fragment() {
@@ -24,16 +42,21 @@ class OwnedLecrtureDetailFragment : Fragment() {
     private var _binding: FragmentOwnedLectureDetailBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: OwnedLectureDetailViewModel by viewModels {
-        object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                if (modelClass.isAssignableFrom(OwnedLectureDetailViewModel::class.java)) {
-                    return OwnedLectureDetailViewModel(LectureDetailRepository()) as T
-                }
-                throw IllegalArgumentException("Unknown ViewModel class")
-            }
-        }
+//    private val viewModel: OwnedLectureDetailViewModel by viewModels {
+//        object : ViewModelProvider.Factory {
+//            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+//                if (modelClass.isAssignableFrom(OwnedLectureDetailViewModel::class.java)) {
+//                    return OwnedLectureDetailViewModel(LectureDetailRepository()) as T
+//                }
+//                throw IllegalArgumentException("Unknown ViewModel class")
+//            }
+//        }
+//    }
+
+    private val viewModel: OwnedLectureDetailViewModel by lazy {
+        OwnedLectureDetailViewModel(LectureDetailRepository())
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -68,7 +91,8 @@ class OwnedLecrtureDetailFragment : Fragment() {
 //        }
 
         val lectureId = arguments?.getInt("lectureId") ?: return
-        val userId = 1 //임시 고정값, 수정 필요
+//        val userId = 1 //임시 고정값, 수정 필요
+        val userId = userId
 
         viewModel.fetchLectureDetail(lectureId, userId)
         binding.loadingProgressBar.visibility = View.VISIBLE
@@ -112,6 +136,89 @@ class OwnedLecrtureDetailFragment : Fragment() {
             }
         })
 
+
+        binding.declarationBtn.setOnClickListener {
+            showReportDialog(userId, lectureId)
+        }
+
+    }
+
+
+
+    private fun showReportDialog(userId:Int, lectureId: Int) {
+        val builder = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+        val inflater = requireActivity().layoutInflater
+        val dialogView = inflater.inflate(R.layout.dialog_report, null)
+        builder.setView(dialogView)
+
+        val dialog = builder.create()
+        dialog.window?.apply {
+            setBackgroundDrawableResource(R.drawable.bg_radius_20)
+
+            val params = attributes
+            params.width =
+                (resources.displayMetrics.widthPixels * 0.6).toInt() // 화면 너비의 60%로 설정? (반영될지 안될지는..)
+            params.height = WindowManager.LayoutParams.WRAP_CONTENT
+            attributes = params
+        }
+
+        dialog.show()
+
+        val dialogBinding = DialogReportBinding.bind(dialogView)
+        val reportOptions = dialogBinding.reportOptions
+        val reportContent = dialogBinding.reportContent
+        val reportBtn = dialogBinding.reportBtn
+
+        reportBtn.setOnClickListener {
+            val selectedOptionId = reportOptions.checkedRadioButtonId
+            Log.d(TAG, "showReportDialog: 버튼눌림, $selectedOptionId")
+
+            val reportType = when (selectedOptionId) {
+                R.id.type1 -> 1
+                R.id.type2 -> 2
+                R.id.type3 -> 3
+                else -> 0
+            }
+
+            if (reportType == 0) {
+                Toast.makeText(requireContext(), "신고 유형을 선택해 주세요.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val content = reportContent.text.toString().trim()
+            if (content.isEmpty()) {
+                Toast.makeText(requireContext(), "신고 내용을 입력해 주세요.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val report = ReportItem(
+                userId = userId,
+                lectureId = lectureId,
+                reportType = reportType,
+                reportContent = content
+            )
+
+            Log.d(TAG, "showReportDialog: $userId, $lectureId, $reportType, $content")
+
+            val reportApiService = ApiClient.retrofit.create(ReportApiService::class.java)
+            reportApiService.postReport(report).enqueue(object : Callback<ReportApiResponse> {
+                override fun onResponse(call: Call<ReportApiResponse>, response: Response<ReportApiResponse>) {
+                    if (response.isSuccessful) {
+                        Toast.makeText(requireContext(), "신고가 접수되었습니다.", Toast.LENGTH_SHORT).show()
+                        dialog.dismiss()
+                    } else {
+                        Log.e(TAG, "신고 접수 실패 - 응답 코드: ${response.code()}")  // 응답 코드 출력
+                        Log.e(TAG, "신고 접수 실패 - 응답 메시지: ${response.message()}") // 기본 메시지
+                        Toast.makeText(requireContext(), "신고 접수 실패: ${response.code()}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onFailure(call: Call<ReportApiResponse>, t: Throwable) {
+                    Toast.makeText(requireContext(), "신고 요청 중 오류 발생", Toast.LENGTH_SHORT).show()
+                    Log.e(TAG, "신고 요청 실패", t)
+                }
+            })
+        }
     }
 
 
