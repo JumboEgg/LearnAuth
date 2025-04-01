@@ -50,6 +50,7 @@
             android:layout_marginStart="8dp"/>
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/eachWatchBtn"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:text="이어보기"

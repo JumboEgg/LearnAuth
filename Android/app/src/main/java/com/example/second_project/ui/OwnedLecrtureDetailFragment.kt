@@ -5,21 +5,17 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
-import android.widget.Button
-import androidx.appcompat.app.AlertDialog
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.second_project.R
-import com.example.second_project.adapter.LectureDetailAdapter
-import com.example.second_project.adapter.LectureItem
-import com.example.second_project.adapter.OwnedLectureAdapter
+import com.example.second_project.adapter.OwnedLectureDetailAdapter
 import com.example.second_project.data.repository.LectureDetailRepository
 import com.example.second_project.databinding.FragmentOwnedLectureDetailBinding
-import com.example.second_project.viewmodel.LectureDetailViewModel
 import com.example.second_project.viewmodel.OwnedLectureDetailViewModel
 
 private const val TAG = "OwnedLecrtureDetailFrag_야옹"
@@ -72,7 +68,6 @@ class OwnedLecrtureDetailFragment : Fragment() {
 //        }
 
         val lectureId = arguments?.getInt("lectureId") ?: return
-//        val lectureId = 2 //임시..!!!!
         val userId = 1 //임시 고정값, 수정 필요
 
         viewModel.fetchLectureDetail(lectureId, userId)
@@ -90,11 +85,32 @@ class OwnedLecrtureDetailFragment : Fragment() {
                 binding.lectureDetailTeacher.text = it.data.lecturer ?: "강의자 미정"
                 binding.lectureDetailGoal.text = it.data.goal
 
+                // "수료 완료한 강의인지 아닌지 조건문 추가 필요"
+                if (it.data.recentLectureId != 0 ) {
+                    binding.ownedDetailPlayBtn.text = "${it.data.recentLectureId}강 - 이어 보기"
+                } else {
+                    binding.ownedDetailPlayBtn.text = "수강하기"
+                }
+
+
+//                val subLectures = it.data.subLectures ?: emptyList()
+//                val adapter = LectureDetailAdapter(subLectureList = subLectures)
+//                binding.lectureDetailList.adapter = adapter
+//                binding.lectureDetailListCount.text = "총 ${ subLectures.size }강"
+
                 val subLectures = it.data.subLectures ?: emptyList()
-                val adapter = LectureDetailAdapter(subLectureList = subLectures)
+                val adapter = OwnedLectureDetailAdapter(subLectureList = subLectures)
+                binding.myLectureDetailList.layoutManager = LinearLayoutManager(requireContext())
+                binding.myLectureDetailList.adapter = adapter
             }
         }
 
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                findNavController().popBackStack(R.id.nav_search, true)
+            }
+        })
 
     }
 

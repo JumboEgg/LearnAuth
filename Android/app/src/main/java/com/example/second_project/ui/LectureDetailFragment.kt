@@ -8,11 +8,13 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.second_project.R
 import com.example.second_project.adapter.LectureDetailAdapter
@@ -61,7 +63,6 @@ class LectureDetailFragment: Fragment(R.layout.fragment_lecture_detail) {
         }
 
         val lectureId = arguments?.getInt("lectureId") ?: return
-//        val lectureId = 2 //임시..!!!!
         val userId = 1 //임시 고정값, 수정 필요
 
         viewModel.fetchLectureDetail(lectureId, userId)
@@ -98,6 +99,11 @@ class LectureDetailFragment: Fragment(R.layout.fragment_lecture_detail) {
             showChargeDialog()
         }
 
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                findNavController().popBackStack(R.id.nav_search, true)
+            }
+        })
     }
 
     fun showChargeDialog() {
@@ -125,6 +131,7 @@ class LectureDetailFragment: Fragment(R.layout.fragment_lecture_detail) {
         }
 
         dialog.show()
+
     }
 
     override fun onDestroyView() {
