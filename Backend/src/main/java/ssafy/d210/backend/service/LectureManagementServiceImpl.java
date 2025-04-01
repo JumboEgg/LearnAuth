@@ -3,6 +3,7 @@ package ssafy.d210.backend.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.request.lecture.LectureRegisterRequest;
 import ssafy.d210.backend.dto.request.lecture.SubLectureRequest;
 import ssafy.d210.backend.dto.request.payment.RatioRequest;
@@ -10,9 +11,11 @@ import ssafy.d210.backend.dto.request.quiz.QuizOptionRequest;
 import ssafy.d210.backend.dto.request.quiz.QuizRequest;
 import ssafy.d210.backend.entity.*;
 import ssafy.d210.backend.enumeration.CategoryName;
+import ssafy.d210.backend.enumeration.response.HereStatus;
 import ssafy.d210.backend.exception.service.*;
 import ssafy.d210.backend.repository.*;
 import ssafy.d210.backend.util.AES256Util;
+import ssafy.d210.backend.util.ResponseUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -32,10 +35,11 @@ public class LectureManagementServiceImpl implements LectureManagementService {
     private final PaymentRatioRepository paymentRatioRepository;
     private final UserLectureRepository userLectureRepository;
     private final UserLectureTimeRepository userLectureTimeRepository;
+    private final ResponseUtil<Boolean> responseUtil;
 
     @Override
     @Transactional
-    public boolean registerLecture(LectureRegisterRequest request) {
+    public ResponseSuccessDto<Boolean> registerLecture(LectureRegisterRequest request) {
         try {
             // 예외 처리
             // 한나 : 더 찾으면 알려주세요
@@ -173,11 +177,11 @@ public class LectureManagementServiceImpl implements LectureManagementService {
             }
             paymentRatioRepository.saveAll(paymentRatios);
 
-            return true;
+            return responseUtil.successResponse(true, HereStatus.SUCCESS_LECTURE_REGISTERED);
         } catch (Exception e) {
             // 워낙 예외 처리가 많아서 printStackTrace 적어둡니다.
             e.printStackTrace();
-            return false;
+            return responseUtil.successResponse(false, HereStatus.FAIL_LECTURE_REGISTERED);
         }
     }
 
