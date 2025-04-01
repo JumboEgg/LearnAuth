@@ -99,7 +99,7 @@ pipeline {
                                       -e JWT_SECRET=${JWT_SECRET} \
                                       -e SPRING_DATA_REDIS_HOST=redis \
                                       -e SPRING_DATA_REDIS_PORT=6379 \
-                                      -e SPRING_DATA_REDIS_PASSWORD="${REDIS_PASSWORD}"
+                                      -e SPRING_DATA_REDIS_PASSWORD="${REDIS_PASSWORD}" \
                                       -e DB_URL="${DB_URL}" \
                                       -e DB_USERNAME=${DB_USERNAME} \
                                       -e DB_PASSWORD=${DB_PASSWORD} \
