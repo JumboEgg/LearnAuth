@@ -1,5 +1,6 @@
 package ssafy.d210.backend.redis;
 
+import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -14,14 +15,17 @@ public class CustomSpringELParser {
      * @return 파싱된 실제 키 값
      */
     public static String getDynamicValue(String[] parameterNames, Object[] args, String key) {
-        ExpressionParser parser = new SpelExpressionParser();
-        StandardEvaluationContext context = new StandardEvaluationContext();
+        // 파라미터 이름이나 인자가 null이거나 비어있으면 기본값 반환
+        if (parameterNames == null || parameterNames.length == 0 || args == null || args.length == 0) {
+            return "defaultKey";  // 또는 적절한 기본값
+        }
 
-        // 파라미터를 SpEL context에 추가
+        StandardEvaluationContext context = new StandardEvaluationContext();
         for (int i = 0; i < parameterNames.length; i++) {
             context.setVariable(parameterNames[i], args[i]);
         }
 
-        return parser.parseExpression(key).getValue(context, String.class);
+        Expression expression = new SpelExpressionParser().parseExpression(key);
+        return expression.getValue(context, String.class);
     }
 }

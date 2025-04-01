@@ -53,16 +53,7 @@ public class JwtRefreshFilter extends OncePerRequestFilter {
         response.setCharacterEncoding("UTF-8");
 
         // 쿠키에서 리프레시 토큰 추출
-        String refresh = null;
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("refresh")) {
-                    refresh = cookie.getValue();
-                    break;
-                }
-            }
-        }
+        String refresh = request.getHeader("refresh");
 
         if (refresh == null) {
             log.error("Refresh token이 없습니다.");
