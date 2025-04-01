@@ -9,6 +9,7 @@ class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         setupBouncyCastle()
+        UserSession.init(this)
     }
 
     private fun setupBouncyCastle() {

@@ -38,7 +38,14 @@
         android:id="@+id/certDetailFragment"
         android:name="com.example.second_project.ui.CertDetailFragment"
         android:label="수료증 상세"
-        tools:layout="@layout/fragment_cert_detail" />
+        tools:layout="@layout/fragment_cert_detail">
+        <argument
+            android:name="userId"
+            app:argType="integer" />
+        <argument
+            android:name="lectureId"
+            app:argType="integer" />
+    </fragment>
 
     <!-- ProfileFragment -->
     <fragment

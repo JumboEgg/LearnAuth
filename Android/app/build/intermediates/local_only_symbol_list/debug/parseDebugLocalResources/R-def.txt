@@ -32,6 +32,7 @@ drawable arrow_forward
 drawable badge
 drawable bg_category_certificate
 drawable bg_dialog_rounded
+drawable bg_radius_100
 drawable bg_radius_12
 drawable bg_radius_20
 drawable bg_radius_7
@@ -99,6 +100,8 @@ font tmoney_round_wind_extrabold
 font tmoney_round_wind_regular
 id action_certFragment_to_certDetailFragment
 id action_global_staticFragment
+id action_nav_search_to_lectureDetailFragment
+id action_nav_search_to_ownedLectureDetailFragment
 id action_nav_search_to_quizFragment
 id action_profileFragment_to_chargeFragment
 id action_profileFragment_to_declarationFragment
@@ -236,6 +239,7 @@ id lectureDetailBack
 id lectureDetailCategory
 id lectureDetailContent
 id lectureDetailContentTitle
+id lectureDetailFragment
 id lectureDetailGoal
 id lectureDetailList
 id lectureDetailListContainer
@@ -262,6 +266,7 @@ id lectureTitle
 id lectureTitleLayout
 id linearBtn
 id linearToggleArea
+id loadingProgressBar
 id loginBtn
 id loginId
 id loginLine
@@ -300,6 +305,7 @@ id option2
 id option3
 id optionsGroup
 id ownedCertBtn
+id ownedLectureDetailFragment
 id ownedLectureFragment
 id ownedLectureRoot
 id ownedRecyclerView
@@ -317,7 +323,6 @@ id playTitle
 id previousNextBtn
 id problemCard
 id problemContent
-id problemTitle
 id profileImg
 id profileMenu1
 id profileMenu2
@@ -352,9 +357,12 @@ id step_2
 id step_3
 id step_4
 id step_5
+id subLectureTitle
 id subNavHostFragment
 id sub_nav_graph
 id subject
+id sublectureCount
+id submitButton
 id tabLayout
 id textCategory
 id textCategoryCertification
@@ -469,6 +477,7 @@ layout item_register_search_participants
 layout item_register_sublecture_detail
 layout item_report
 layout item_search_lecture
+layout item_sub_lecture
 layout item_transaction
 layout text_sample
 menu bottom_nav_menu
