@@ -20,7 +20,7 @@ pipeline {
         AES_256 = credentials('AES_256')
         REDIS = credentials('REDIS')
 
-        SPRING_DATA_REDIS_HOST = '172.19.0.3'
+        SPRING_DATA_REDIS_HOST = 'j12d210.p.ssafy.io'
         SPRING_DATA_REDIS_PORT = '6379'
         REDIS_PASSWORD = credentials('REDIS_PASSWORD')
 
