@@ -28,7 +28,7 @@ class LoginActivity : AppCompatActivity() {
         Log.d("TAG", "onCreate 내 userId: ${UserSession.userId}")
 
         // 이미 로그인한 기록이 있다면 바로 MainActivity로 이동
-        if(UserSession.userId != 0) {
+        if (UserSession.userId != 0) {
             startActivity(Intent(this, MainActivity::class.java))
             finish()
             return
@@ -63,9 +63,22 @@ class LoginActivity : AppCompatActivity() {
         apiService.login(loginRequest).enqueue(object : Callback<LoginResponse> {
             override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
                 if (response.isSuccessful && response.body() != null) {
-                    // 로그인 성공 시 응답으로 받은 userId를 UserSession에 저장합니다.
-                    UserSession.userId = response.body()!!.data.userId
+
+                    val loginData = response.body()!!.data
+                    UserSession.userId = loginData.userId
+                    UserSession.nickname = loginData.nickname  // 닉네임 저장
+
                     Toast.makeText(this@LoginActivity, "로그인 성공", Toast.LENGTH_SHORT).show()
+
+                    val accessToken = response.headers()["access"]
+                    val refreshToken = response.headers()["refresh"]
+
+                    Log.d("LoginActivity", "Access Token: $accessToken")
+                    Log.d("LoginActivity", "Refresh Token: $refreshToken")
+
+                    UserSession.accessToken = accessToken
+                    UserSession.refreshToken = refreshToken
+
                     val intent = Intent(this@LoginActivity, MainActivity::class.java)
                     startActivity(intent)
                     finish()

@@ -3217,6 +3217,7 @@ drawable pass_check
 drawable person
 drawable person2
 drawable playicon
+drawable report_option_button
 drawable sample_plzdelete
 drawable sample_plzdelete2
 drawable sample_plzdelete3
@@ -3868,6 +3869,10 @@ id recyclerUserList
 id recyclerViewReport
 id registerFragmentContainer
 id registerMainFragment
+id reportBtn
+id reportContent
+id reportOptions
+id reportTitle
 id report_drawn
 id reverseSawtooth
 id right
@@ -4065,6 +4070,9 @@ id tvStudentCount
 id tvTitle
 id tvTotalIncome
 id tvTotalStudentCount
+id type1
+id type2
+id type3
 id unchecked
 id uniform
 id unlabeled
@@ -4235,6 +4243,7 @@ layout dialog_cert_confirm
 layout dialog_charge
 layout dialog_quiz_result
 layout dialog_register_search_participants
+layout dialog_report
 layout dialog_report_detail
 layout fragment_cert
 layout fragment_cert_detail
