@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
 @Slf4j
@@ -119,20 +120,22 @@ public class LectureServiceImpl implements LectureService{
             log.info("subLectureDetail: {}", subLectureDetail.get(0));
         } else {
             List<SubLecture> subLectures = subLectureRepository.findSubLectureByLectureIdOrderById(lectureId);
-            List<SubLectureDetailResponse> subLectureDetail = subLectures.stream()
-                            .map(subLecture -> new SubLectureDetailResponse(
-                                    subLecture.getId(),
-                                    subLecture.getSubLectureTitle(),
-                                    subLecture.getSubLectureUrl(),
-                                    subLecture.getSubLectureLength(),
-                                    null,
-                                    0
-                            ))
-                                    .collect(Collectors.toList());
-
-
-
+            List<SubLectureDetailResponse> subLectureDetail = IntStream.range(0, subLectures.size())
+                    .mapToObj(index -> {
+                        SubLecture subLecture = subLectures.get(index);
+                        return new SubLectureDetailResponse(
+                                subLecture.getId(),
+                                subLecture.getSubLectureTitle(),
+                                subLecture.getSubLectureUrl(),
+                                subLecture.getSubLectureLength(),
+                                index + 1L,
+                                null,
+                                0
+                        );
+                    })
+                    .collect(Collectors.toList());
             lectureDetail.setSubLectures(subLectureDetail);
+
         }
 
         int studentCount = userLectureRepository.countUserLectureByLectureId(lectureId);
