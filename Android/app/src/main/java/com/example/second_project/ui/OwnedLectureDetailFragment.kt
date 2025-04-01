@@ -108,6 +108,15 @@ class OwnedLectureDetailFragment : Fragment() {
                     findNavController().navigate(action)
                 }
 
+                binding.quizBtn.setOnClickListener {
+                    val lectureId = arguments?.getInt("lectureId") ?: return@setOnClickListener
+                    val userId = userId
+
+                    val action = OwnedLectureDetailFragmentDirections
+                        .actionOwnedLectureDetailFragmentToQuizFragment(lectureId, userId)
+                    findNavController().navigate(action)
+                }
+
             }
         }
 
