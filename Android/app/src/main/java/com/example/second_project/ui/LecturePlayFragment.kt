@@ -5,7 +5,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.second_project.adapter.OwnedLectureDetailAdapter
+import com.example.second_project.data.model.dto.response.SubLecture
 import com.example.second_project.data.repository.LectureDetailRepository
 import com.example.second_project.databinding.FragmentLecturePlayBinding
 import com.example.second_project.viewmodel.OwnedLectureDetailViewModel
@@ -15,6 +19,9 @@ class LecturePlayFragment: Fragment() {
 
     private var _binding: FragmentLecturePlayBinding? = null
     private val binding get() = _binding!!
+    private var currentLectureId: Int = 0
+    private var currentSubLectureId: Int = 0
+    private var allSubLectures: List<SubLecture> = emptyList()
 
     private val viewModel: OwnedLectureDetailViewModel by lazy {
         OwnedLectureDetailViewModel(LectureDetailRepository())
@@ -34,27 +41,22 @@ class LecturePlayFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         val args = arguments?.let { LecturePlayFragmentArgs.fromBundle(it) }
-        val lectureId = args?.lectureId ?: 0
+        currentLectureId = args?.lectureId ?: 0
         val userId = args?.userId ?: 0
-//        val subLectureId = args?.subLectureId ?: 0
-         val subLectureId = 6 //임시!!! 입니다. 현재 DB가 안정화되지 않아 기입합니다.
+        currentSubLectureId = 6 //임시!!! 입니다. 현재 DB가 안정화되지 않아 기입합니다.
 
-        Log.d(TAG, "onViewCreated: $lectureId, $userId, $subLectureId")
+        Log.d(TAG, "onViewCreated: $currentLectureId, $userId, $currentSubLectureId")
 
-        viewModel.fetchLectureDetail(lectureId, userId)
+        viewModel.fetchLectureDetail(currentLectureId, userId)
 
         binding.playLectureName.isSelected = true
 
         viewModel.lectureDetail.observe(viewLifecycleOwner) { detail ->
             detail?.let {
-                val subLecture = it.data.subLectures?.find { sub -> sub.subLectureId == subLectureId }
+                allSubLectures = it.data.subLectures ?: emptyList()
+                val subLecture = allSubLectures.find { sub -> sub.subLectureId == currentSubLectureId }
 
-                // subLectures가 null이 아닌지 확인하고, subLecture가 null인 경우를 처리
-                Log.d(TAG, "sublectures: ${it.data.subLectures}")
-                Log.d(TAG, "찾으려는 subLectureId: $subLectureId")
-                Log.d(TAG, "subLecture: $subLecture")
-
-                if (it.data.lectureId == lectureId) {
+                if (it.data.lectureId == currentLectureId) {
                     binding.playLectureName.text = it.data.title
                 }
 
@@ -66,9 +68,42 @@ class LecturePlayFragment: Fragment() {
                     binding.playTitle.text = "강의 제목 없음"
                     binding.playNum.text = " "
                 }
+
+                // RecyclerView 설정
+                val adapter = OwnedLectureDetailAdapter(subLectureList = allSubLectures)
+                binding.playLectureList.layoutManager = LinearLayoutManager(requireContext())
+                binding.playLectureList.adapter = adapter
             }
         }
 
+        // 이전, 다음 버튼
+        binding.playPreviousBtn.setOnClickListener {
+            val previousSubLecture = allSubLectures.find { it.subLectureId == currentSubLectureId - 1 }
+            if (previousSubLecture != null) {
+                currentSubLectureId--
+                updateLectureContent(currentSubLectureId)
+            } else {
+                Toast.makeText(requireContext(), "이전 강의가 없습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        binding.playNextBtn.setOnClickListener {
+            val nextSubLecture = allSubLectures.find { it.subLectureId == currentSubLectureId + 1 }
+            if (nextSubLecture != null) {
+                currentSubLectureId++
+                updateLectureContent(currentSubLectureId)
+            } else {
+                Toast.makeText(requireContext(), "다음 강의가 없습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun updateLectureContent(subLectureId: Int) {
+        val subLecture = allSubLectures.find { it.subLectureId == subLectureId }
+        if (subLecture != null) {
+            binding.playTitle.text = subLecture.subLectureTitle
+            binding.playNum.text = "${subLecture.subLectureId}강"
+        }
     }
 
 }
