@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.second_project.UserSession.userId
 import com.example.second_project.data.model.dto.request.Lecture
 import com.example.second_project.databinding.ItemSearchLectureBinding
 
@@ -28,9 +29,7 @@ class SearchLectureAdapter(
             // 이미지의 경우 XML에서 기본 샘플 이미지(@drawable/sample_plzdelete)가 지정되어 있으므로,
             // 별도의 이미지 로딩 라이브러리 사용 시 여기서 lecture의 이미지 URL을 처리하면 됨.
             binding.root.setOnClickListener {
-//                onItemClick(lecture.lectureId, lecture.title)
-                onItemClick(lecture.lectureId, 1)
-//                onItemClick(2, 1)
+                onItemClick(lecture.lectureId, userId)
                 Log.d(TAG, "bind: ${lecture.lectureId}, ${lecture.title}")
             }
         }

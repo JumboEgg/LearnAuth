@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.second_project.R
+import com.example.second_project.UserSession.userId
 import com.example.second_project.adapter.LectureDetailAdapter
 import com.example.second_project.data.repository.LectureDetailRepository
 import com.example.second_project.data.repository.LectureRepository
@@ -63,7 +64,7 @@ class LectureDetailFragment: Fragment(R.layout.fragment_lecture_detail) {
         }
 
         val lectureId = arguments?.getInt("lectureId") ?: return
-        val userId = 1 //임시 고정값, 수정 필요
+        val userId = userId
 
         viewModel.fetchLectureDetail(lectureId, userId)
         binding.loadingProgressBar.visibility = View.VISIBLE

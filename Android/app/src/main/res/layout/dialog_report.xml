@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/background_color">
+
+    <TextView
+        android:id="@+id/reportTitle"
+        style="@style/heading1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="신고하기" />
+
+            <RadioGroup
+                android:id="@+id/reportOptions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/type1"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/report_option_button"
+                    android:text="강의자"
+                    android:textColor="@color/white"
+                    android:textAlignment="center"
+                    style="@style/semibold16"
+                    android:button="@null"
+                    android:elevation="2dp"
+                    android:layout_margin="6dp"/>
+
+                <RadioButton
+                    android:id="@+id/type2"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/report_option_button"
+                    android:text="강의 영상"
+                    android:textColor="@color/white"
+                    android:textAlignment="center"
+                    style="@style/semibold16"
+                    android:button="@null"
+                    android:elevation="2dp"
+                    android:layout_margin="6dp"/>
+
+                <RadioButton
+                    android:id="@+id/type3"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/report_option_button"
+                    android:text="강의 자료"
+                    android:textColor="@color/white"
+                    android:textAlignment="center"
+                    style="@style/semibold16"
+                    android:button="@null"
+                    android:elevation="2dp"
+                    android:layout_margin="6dp"/>
+
+            </RadioGroup>
+
+    <!-- 신고 내용 영역 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:layout_weight="1"
+                android:text="신고 내용"
+                style="@style/semibold16"
+                android:textColor="@color/text_gray"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+<!--        <ScrollView-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="120dp"-->
+<!--            android:fillViewport="true"-->
+<!--            android:clipToPadding="false"-->
+<!--            android:paddingBottom="8dp">-->
+
+            <EditText
+                android:id="@+id/reportContent"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:hint="신고 내용을 적어 주세요."
+                style="@style/medium14"
+                android:paddingVertical="12dp"
+                android:paddingHorizontal="20dp"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/seletor_radio_button"/>
+<!--        </ScrollView>-->
+
+
+    </LinearLayout>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/reportBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/mainRed"
+        android:background="@drawable/bg_radius_20"
+        android:textColor="@color/white"
+        android:text="신고하기"
+        style="@style/heading3"
+        android:textSize="16sp"
+        />
+
+</LinearLayout>
