@@ -3,6 +3,7 @@ package ssafy.d210.backend.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.response.certificate.CertificateDetailResponse;
 import ssafy.d210.backend.dto.response.certificate.CertificateResponse;
@@ -16,11 +17,13 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CertificateServiceImpl implements CertificateService{
     private final UserLectureRepository userLectureRepository;
     private final ResponseUtil responseUtil;
 
     @Override
+    @Transactional(readOnly = true)
     public ResponseSuccessDto<List<CertificateResponse>> getCertificates(Long userId) {
         // 사용자 ID로 완료된 강의 조회
         List<CertificateResponse> certificates = userLectureRepository.getFinishedUserLecture(userId);
@@ -36,6 +39,7 @@ public class CertificateServiceImpl implements CertificateService{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ResponseSuccessDto<CertificateDetailResponse> getCertificatesDetail(Long userId, Long lectureId) {
         // 이수증 상세 정보 조회
         CertificateDetailResponse certificateDetail = userLectureRepository.getCertificateDetail(userId, lectureId);

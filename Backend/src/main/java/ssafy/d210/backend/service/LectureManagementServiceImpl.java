@@ -24,6 +24,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class LectureManagementServiceImpl implements LectureManagementService {
 
     private final LectureRepository lectureRepository;
@@ -38,7 +39,6 @@ public class LectureManagementServiceImpl implements LectureManagementService {
     private final ResponseUtil<Boolean> responseUtil;
 
     @Override
-    @Transactional
     public ResponseSuccessDto<Boolean> registerLecture(LectureRegisterRequest request) {
         try {
             // 예외 처리

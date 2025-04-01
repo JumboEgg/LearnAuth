@@ -12,9 +12,9 @@ import java.util.List;
 public interface QuizService {
 
     // 강의별 퀴즈 목록 조회
-    public ResponseSuccessDto<List<QuizResponse>> getQuizzes(Long lectureId);
+    ResponseSuccessDto<List<QuizResponse>> getQuizzes(Long lectureId);
 
     // 퀴즈 제출
-    public ResponseSuccessDto<Boolean> submitQuiz(Long lectureId, QuizResultRequest request);
+    ResponseSuccessDto<Boolean> submitQuiz(Long lectureId, QuizResultRequest request);
 
 }

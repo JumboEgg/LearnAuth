@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.response.usersearch.UserInfoResponse;
 import ssafy.d210.backend.dto.response.usersearch.UserSearchResponse;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserSearchServiceImpl implements UserSearchService{
     private final UserRepository userRepository;
     private final ResponseUtil responseUtil;
@@ -26,6 +28,7 @@ public class UserSearchServiceImpl implements UserSearchService{
     // 검색 금지어 넣기
     private static final List<String> BLOCKED_KEYWORDS = List.of("google", "naver", "com");
     @Override
+    @Transactional(readOnly = true)
     public ResponseSuccessDto<UserSearchResponse> searchUsers(String keyword, int page) {
         int pageSize = 12;
 

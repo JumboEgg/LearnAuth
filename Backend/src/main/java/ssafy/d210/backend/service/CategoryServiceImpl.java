@@ -2,6 +2,7 @@ package ssafy.d210.backend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.response.category.CategoryResponse;
 import ssafy.d210.backend.entity.Category;
@@ -14,12 +15,14 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CategoryServiceImpl implements CategoryService{
 
     private final CategoryRepository categoryRepository;
     private final ResponseUtil responseUtil;
 
     @Override
+    @Transactional(readOnly = true)
     public ResponseSuccessDto<List<CategoryResponse>> getAllCategoryList() {
         //DB 카테고리 전체 조회
         List<Category> categories = categoryRepository.findAll();

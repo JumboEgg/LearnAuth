@@ -2,6 +2,7 @@ package ssafy.d210.backend.service;
 //
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.request.report.ReportRequest;
 import ssafy.d210.backend.dto.response.report.ReportDetailResponse;
@@ -20,6 +21,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ReportServiceImpl implements ReportService{
 
     // report data db 조회, 저장 위한 repository
@@ -32,6 +34,7 @@ public class ReportServiceImpl implements ReportService{
     private final ResponseUtil responseUtil;
 
     @Override
+    @Transactional(readOnly = true)
     public ResponseSuccessDto<List<ReportResponse>> getReports(Long userId) {
         // ReportRequest, 200ok
         // userId를 이용해 UserLecture와 연관된 Report들 조회 (ReportRepository에 커스텀 메서드 추가)
@@ -49,6 +52,7 @@ public class ReportServiceImpl implements ReportService{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ResponseSuccessDto<ReportDetailResponse> getReportDetail(Long reportId) {
         // reportId로 DB에서 report entity 찾기
         Report report = reportRepository.findById(reportId)

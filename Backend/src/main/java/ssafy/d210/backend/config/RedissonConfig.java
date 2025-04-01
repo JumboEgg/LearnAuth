@@ -50,11 +50,11 @@ public class RedissonConfig {
                     .setRetryInterval(1000);
 
             RedissonClient client = Redisson.create(config);
-            log.info("Redisson Client created successfully");
+            log.info("Redisson Client 성공적으로 만들어 졌다.");
             return client;
         } catch (Exception e) {
-            log.error("Failed to create Redisson Client", e);
-            throw new RuntimeException("Redis connection failed", e);
+            log.error("Redisson Client를 만드는게 실패했다.", e);
+            throw new RuntimeException("Redis 연결 실패", e);
         }
     }
 
