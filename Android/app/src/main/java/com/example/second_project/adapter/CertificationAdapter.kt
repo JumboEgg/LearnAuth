@@ -3,28 +3,25 @@ package com.example.second_project.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.second_project.data.model.dto.response.CertificateData
 import com.example.second_project.databinding.ItemCertificationBinding
 
 class CertificationAdapter(
-    private val items: List<Pair<String, String>>,
-    private val onItemClick: (Int) -> Unit
+    private var items: List<CertificateData>,
+    private val onItemClick: (CertificateData) -> Unit
 ) : RecyclerView.Adapter<CertificationAdapter.CertViewHolder>() {
 
     inner class CertViewHolder(private val binding: ItemCertificationBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: Pair<String, String>) {
-            binding.textTitleMyCertification.text = item.first
-            binding.textCategoryCertification.text = item.second
+        fun bind(item: CertificateData) {
+            binding.textTitleMyCertification.text = item.title
+            binding.textCategoryCertification.text = item.categoryName
 
-            // 클릭 시 onItemClick 호출
+            // 클릭 시 CertificateData 객체를 콜백으로 전달
             binding.root.setOnClickListener {
-                onItemClick(adapterPosition)
+                onItemClick(item)
             }
-
-            // 흘러가기 텍스트
-//            binding.textTitleMyCertification.isSelected = true
-
         }
     }
 
@@ -43,4 +40,8 @@ class CertificationAdapter(
 
     override fun getItemCount(): Int = items.size
 
+    fun updateList(newItems: List<CertificateData>) {
+        items = newItems
+        notifyDataSetChanged()
+    }
 }

@@ -16,5 +16,8 @@ interface LectureApiService {
     ): Call<LectureResponse>
 
     @GET("api/lecture/{lectureId}")
-    fun getLectureDetail(@Path("lectureId") lectureId: Int, @Query("userId") userId: Int): Call<LectureDetailResponse>
+    fun getLectureDetail(
+        @Path("lectureId") lectureId: Int,
+        @Query("userId") userId: Int
+    ): Call<LectureDetailResponse>
 }

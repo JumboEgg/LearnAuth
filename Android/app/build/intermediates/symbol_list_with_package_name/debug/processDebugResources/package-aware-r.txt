@@ -3076,6 +3076,7 @@ drawable avd_show_password
 drawable badge
 drawable bg_category_certificate
 drawable bg_dialog_rounded
+drawable bg_radius_100
 drawable bg_radius_12
 drawable bg_radius_20
 drawable bg_radius_7
@@ -3318,6 +3319,8 @@ id action_menu_presenter
 id action_mode_bar
 id action_mode_bar_stub
 id action_mode_close_button
+id action_nav_search_to_lectureDetailFragment
+id action_nav_search_to_ownedLectureDetailFragment
 id action_nav_search_to_quizFragment
 id action_profileFragment_to_chargeFragment
 id action_profileFragment_to_declarationFragment
@@ -3625,6 +3628,7 @@ id lectureDetailBack
 id lectureDetailCategory
 id lectureDetailContent
 id lectureDetailContentTitle
+id lectureDetailFragment
 id lectureDetailGoal
 id lectureDetailList
 id lectureDetailListContainer
@@ -3659,6 +3663,7 @@ id linearBtn
 id linearToggleArea
 id listMode
 id list_item
+id loadingProgressBar
 id locale
 id loginBtn
 id loginId
@@ -3799,6 +3804,7 @@ id outline
 id outward
 id overshoot
 id ownedCertBtn
+id ownedLectureDetailFragment
 id ownedLectureFragment
 id ownedLectureRoot
 id ownedRecyclerView
@@ -3831,7 +3837,6 @@ id pressed
 id previousNextBtn
 id problemCard
 id problemContent
-id problemTitle
 id profileImg
 id profileMenu1
 id profileMenu2
@@ -3940,10 +3945,13 @@ id step_4
 id step_5
 id stop
 id stretch
+id subLectureTitle
 id subNavHostFragment
 id sub_nav_graph
 id subject
+id sublectureCount
 id submenuarrow
+id submitButton
 id submit_area
 id supportScrollUp
 id tabLayout
@@ -4266,6 +4274,7 @@ layout item_register_search_participants
 layout item_register_sublecture_detail
 layout item_report
 layout item_search_lecture
+layout item_sub_lecture
 layout item_transaction
 layout m3_alert_dialog
 layout m3_alert_dialog_actions
