@@ -15,6 +15,8 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "BASE_URL", "\"https://j12d210.p.ssafy.io\"")
+
     }
     buildTypes {
         release {
@@ -34,6 +36,8 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true  // 이 줄을 추가합니다.
+
     }
 }
 

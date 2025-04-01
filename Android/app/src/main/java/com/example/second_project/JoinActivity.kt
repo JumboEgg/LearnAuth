@@ -5,54 +5,98 @@ import android.os.Bundle
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
 import android.util.Log
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.second_project.data.model.dto.request.SignupRequest
+import com.example.second_project.data.model.dto.response.SignupResponse
 import com.example.second_project.databinding.ActivityJoinBinding
-import kotlin.math.log
+import com.example.second_project.network.ApiClient
+import com.example.second_project.network.SignupApiService
+import org.web3j.crypto.WalletUtils
+import java.io.File
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 private const val TAG = "JoinActivity_야옹"
+
 class JoinActivity : AppCompatActivity() {
 
-    private lateinit var binding : ActivityJoinBinding
+    private lateinit var binding: ActivityJoinBinding
     private var isPwVisible = false
     private var isPw2Visible = false
-    private var nameCheck = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityJoinBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
-
-        // xml파일 내에 일부 요소들을 visiblity=gone 처리해 두었습니다.
-        // 본인인증시, 비밀번호 노출버튼 클릭시 각 요소들 visiblity값 바꿔주면 됩니다.
-        // complete이미지, joinCheckName, joinPwShow
-        binding.joinCheckName.setOnClickListener {
-            //ui변화를 확인하기 위해서 '클릭'을 조건으로 설정해 두었습니다.
-            //이후 인증 구현시, 클릭이 아닌 '본인인증 완료시'라는 조건부로 메서드 실행하면 됩니다.
-            nameCheck = true
-            nameChecked()
-        }
-
-        binding.joinPwShow.setOnClickListener {
-            changePasswordVisibility()
-        }
-        binding.joinPwShow2.setOnClickListener {
-            changePassword2Visibility()
-        }
+        binding.joinPwShow.setOnClickListener { changePasswordVisibility() }
+        binding.joinPwShow2.setOnClickListener { changePassword2Visibility() }
 
         binding.joinBtn.setOnClickListener {
+            // Wallet 생성 및 회원가입 API 호출을 백그라운드 스레드에서 실행
+            Thread {
+                try {
+                    // 1. web3j를 이용한 wallet 생성 (비밀번호를 wallet 암호로 사용)
+                    val walletPassword = binding.joinPw.text.toString()
+                    val walletFileName = WalletUtils.generateLightNewWalletFile(walletPassword, filesDir)
+                    val walletFile = File(filesDir, walletFileName)
+                    val credentials = WalletUtils.loadCredentials(walletPassword, walletFile)
+                    val walletAddress = credentials.address
 
+                    // 2. 회원가입 request 객체 생성 (입력한 email, password, nickname, name 정보 사용)
+                    val signupRequest = SignupRequest(
+                        email = binding.joinEmail.text.toString(),
+                        password = walletPassword,
+                        nickname = binding.joinNickname.text.toString(),
+                        wallet = walletAddress,
+                        name = binding.joinName.text.toString()
+                    )
 
-            //회원가입 성공시 -> 회원가입 api + 토스트 + 로그인 화면으로 이동
-            Toast.makeText(this, "회원가입이 완료되었습니다.", Toast.LENGTH_SHORT).show()
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
+                    // 3. ApiClient의 Retrofit 인스턴스를 통해 ApiService 생성
+                    val apiService = ApiClient.retrofit.create(SignupApiService::class.java)
+
+                    // 4. UI 스레드에서 Retrofit의 비동기 enqueue 호출 (runOnUiThread 내에서 실행)
+                    runOnUiThread {
+                        apiService.signup(signupRequest).enqueue(object : Callback<SignupResponse> {
+                            override fun onResponse(call: Call<SignupResponse>, response: Response<SignupResponse>) {
+                                if (response.isSuccessful && response.body() != null) {
+                                    Toast.makeText(
+                                        this@JoinActivity,
+                                        response.body()!!.data.message,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    // 회원가입 성공 시 LoginActivity로 이동
+                                    val intent = Intent(this@JoinActivity, LoginActivity::class.java)
+                                    startActivity(intent)
+                                } else {
+                                    Toast.makeText(
+                                        this@JoinActivity,
+                                        "회원가입 실패: ${response.message()}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+
+                            override fun onFailure(call: Call<SignupResponse>, t: Throwable) {
+                                Toast.makeText(
+                                    this@JoinActivity,
+                                    "네트워크 오류: ${t.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        })
+                    }
+                } catch (e: Exception) {
+                    runOnUiThread {
+                        Log.d(TAG, "onCreate fucking: $e")
+                        Toast.makeText(this, "Wallet 생성 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }.start()
         }
     }
-
 
     private fun changePasswordVisibility() {
         if (isPwVisible) {
@@ -63,7 +107,6 @@ class JoinActivity : AppCompatActivity() {
             binding.joinPwShow.setImageResource(R.drawable.visibleicon)
         }
         isPwVisible = !isPwVisible
-
         // 커서 위치 유지
         binding.joinPw.setSelection(binding.joinPw.text.length)
     }
@@ -77,21 +120,7 @@ class JoinActivity : AppCompatActivity() {
             binding.joinPwShow2.setImageResource(R.drawable.visibleicon)
         }
         isPw2Visible = !isPw2Visible
-
         // 커서 위치 유지
         binding.joinPw2.setSelection(binding.joinPw2.text.length)
     }
-
-    private fun nameChecked() {
-
-        if (nameCheck) {
-            binding.joinCheckName.visibility = View.GONE
-            binding.joinCheckedName.visibility = View.VISIBLE
-        } else {
-            binding.joinCheckName.visibility = View.VISIBLE
-            binding.joinCheckedName.visibility = View.GONE
-        }
-    }
-
-
 }
