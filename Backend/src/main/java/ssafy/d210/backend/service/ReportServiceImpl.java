@@ -2,15 +2,18 @@ package ssafy.d210.backend.service;
 //
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.request.report.ReportRequest;
 import ssafy.d210.backend.dto.response.report.ReportDetailResponse;
 import ssafy.d210.backend.dto.response.report.ReportResponse;
 import ssafy.d210.backend.entity.Report;
 import ssafy.d210.backend.entity.UserLecture;
+import ssafy.d210.backend.enumeration.response.HereStatus;
 import ssafy.d210.backend.exception.service.EntityIsNullException;
 import ssafy.d210.backend.exception.service.LectureNotFoundException;
 import ssafy.d210.backend.repository.ReportRepository;
 import ssafy.d210.backend.repository.UserLectureRepository;
+import ssafy.d210.backend.util.ResponseUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,12 +29,14 @@ public class ReportServiceImpl implements ReportService{
     // JWT -> 현재 사용자 ID : 그 사용자 ID로 UserLecture 조회 "UserLectureRepository"
     // Long currentUserId = jwtUtil.getCurrentUserId(); -> 이런 식으로 id 추출
     private final UserLectureRepository userLectureRepository;
+    private final ResponseUtil responseUtil;
 
     @Override
-    public List<ReportResponse> getReports(Long userId) {
+    public ResponseSuccessDto<List<ReportResponse>> getReports(Long userId) {
         // ReportRequest, 200ok
         // userId를 이용해 UserLecture와 연관된 Report들 조회 (ReportRepository에 커스텀 메서드 추가)
         List<Report> reports = reportRepository.findByUserLectureUserId(userId);
+        System.out.println("조회된 신고 개수 = " + reports.size());
         // 클라이언트에 반환할 DTO 리스트 만드는 변수
         List<ReportResponse> responseList = new ArrayList<>();
         // 조회된 report 순회하면서 제목 가져오기, ReportResponse DTO 생성해서 리스트 추가
@@ -39,11 +44,12 @@ public class ReportServiceImpl implements ReportService{
             String title = report.getUserLecture().getLecture().getTitle();
             responseList.add(new ReportResponse(report.getId(), title, report.getReportType()));
         }
-        return responseList;
+
+        return responseUtil.successResponse(responseList, HereStatus.SUCCESS_REPORT_LIST);
     }
 
     @Override
-    public ReportDetailResponse getReportDetail(Long reportId) {
+    public ResponseSuccessDto<ReportDetailResponse> getReportDetail(Long reportId) {
         // reportId로 DB에서 report entity 찾기
         Report report = reportRepository.findById(reportId)
                 .orElseThrow(() -> new EntityIsNullException("해당 신고 id가 없습니다."));
@@ -54,11 +60,16 @@ public class ReportServiceImpl implements ReportService{
         // 강의 제목 가져오기 : report -> userLecture -> lecture -> title
         String title = report.getUserLecture().getLecture().getTitle();
         // 강의 제목, report entity에서 ReportType, ReportContent 바로 가져오기
-        return new ReportDetailResponse(title, report.getReportType(), report.getReportContent());
+        ReportDetailResponse response = new ReportDetailResponse(
+                title,
+                report.getReportType(),
+                report.getReportContent()
+        );
+        return responseUtil.successResponse(response, HereStatus.SUCCESS_REPORT_DETAIL);
     }
 
     @Override
-    public ReportResponse createReport(ReportRequest request, Long userId) {
+    public ResponseSuccessDto<Void> createReport(ReportRequest request, Long userId) {
 
         // JWTToken으로 사용자 정보 가져오기 : 수정 필요할 수도
         UserLecture userLecture = userLectureRepository
@@ -75,7 +86,9 @@ public class ReportServiceImpl implements ReportService{
         userLecture.setReport(savedReport);
         userLectureRepository.save(userLecture);
 
-        String title = userLecture.getLecture().getTitle();
-        return new ReportResponse(savedReport.getId(), title, savedReport.getReportType());
+//        String title = userLecture.getLecture().getTitle();
+//        ReportResponse response = new ReportResponse(savedReport.getId(), title, savedReport.getReportType());
+
+        return responseUtil.successResponse(null, HereStatus.SUCCESS_REPORT_CREATED);
     }
 }
