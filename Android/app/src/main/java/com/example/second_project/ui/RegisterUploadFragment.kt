@@ -54,9 +54,10 @@ class RegisterUploadFragment: Fragment(), RegisterStepSavable {
     }
 
     // 인터페이스 구현!
-    override fun saveDataToViewModel() {
+    override fun saveDataToViewModel(): Boolean {
         viewModel.selectedLectureFileName = binding.textFile.text.toString()
         viewModel.selectedLectureFileUri = selectedFileUri
+        return true
     }
 
     private fun openFilePicker() {

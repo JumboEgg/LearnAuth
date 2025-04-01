@@ -6,13 +6,15 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import androidx.recyclerview.widget.RecyclerView
 import com.example.second_project.R
+import com.example.second_project.data.model.dto.request.SubLecture
 import com.example.second_project.databinding.ItemRegisterSublectureDetailBinding
 
 class RegisterSublectureAdapter (
     private val subLectureCount: () -> Int,
-    private val onDeleteClick: (Int) -> Unit
+    private val onDeleteClick: (Int) -> Unit,
+    private val onLoadVideoClick: (position: Int, url: String) -> Unit
 ) : RecyclerView.Adapter<RegisterSublectureAdapter.ViewHolder>(){
-
+    private val subLectures = mutableListOf<SubLecture>()
     private val isExpandedList = mutableListOf<Boolean>()
 
     inner class ViewHolder(private val binding: ItemRegisterSublectureDetailBinding) :
@@ -49,6 +51,37 @@ class RegisterSublectureAdapter (
                 notifyItemRemoved(position)
                 notifyItemRangeChanged(position, itemCount)
             }
+
+            val subLecture = subLectures[position]
+
+            binding.editTextTitle.editText?.setText(subLecture.subLectureTitle)
+            binding.editURL.editText?.setText(subLecture.subLectureUrl)
+
+            binding.editTextTitle.editText?.setOnFocusChangeListener { _, _ ->
+                val newTitle = binding.editTextTitle.editText?.text.toString()
+                // 새 객체를 생성하여 리스트의 해당 위치에 할당
+                subLectures[position] = SubLecture(
+                    subLectureTitle = newTitle,
+                    subLectureUrl = subLectures[position].subLectureUrl,
+                    subLectureLength = subLectures[position].subLectureLength
+                )
+            }
+
+            binding.editURL.editText?.setOnFocusChangeListener { _, _ ->
+                val newUrl = binding.editURL.editText?.text.toString()
+                // 새 객체를 생성하여 리스트의 해당 위치에 할당
+                subLectures[position] = SubLecture(
+                    subLectureTitle = subLectures[position].subLectureTitle,
+                    subLectureUrl = newUrl,
+                    subLectureLength = subLectures[position].subLectureLength
+                )
+            }
+            // 영상 불러오기 버튼 클릭
+            binding.btnConfirm.setOnClickListener {
+                val url = binding.editURL.editText?.text.toString()
+                onLoadVideoClick(position, url)
+            }
+
         }
     }
 
@@ -64,13 +97,31 @@ class RegisterSublectureAdapter (
     override fun getItemCount(): Int = isExpandedList.size
 
     fun addItem() {
+        subLectures.add(SubLecture(subLectureTitle = "", subLectureUrl = "", subLectureLength = 0))
         isExpandedList.add(true)
-        notifyItemInserted(isExpandedList.size - 1)
+        notifyItemInserted(subLectures.size - 1)
     }
+
 
     fun removeAll() {
         isExpandedList.clear()
         notifyDataSetChanged()
     }
+
+    fun getSubLectures(): List<SubLecture> {
+        return subLectures
+    }
+
+    fun setItems(subLectureList: List<SubLecture>) {
+        subLectures.clear()
+        subLectures.addAll(subLectureList)
+
+        isExpandedList.clear()
+        isExpandedList.addAll(List(subLectureList.size) { true })
+
+        notifyDataSetChanged()
+    }
+
+
 
 }

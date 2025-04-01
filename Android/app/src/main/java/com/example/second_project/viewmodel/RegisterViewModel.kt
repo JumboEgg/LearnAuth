@@ -22,6 +22,7 @@ class RegisterViewModel : ViewModel(){
     private val _categoryList = MutableLiveData<List<CategoryResponse>>()
     val categoryList: LiveData<List<CategoryResponse>> = _categoryList
 
+
     fun fetchCategories() {
         viewModelScope.launch {
             runCatching {

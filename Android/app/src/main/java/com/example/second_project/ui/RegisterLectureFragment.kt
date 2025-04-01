@@ -66,11 +66,13 @@ class RegisterLectureFragment: Fragment(), RegisterStepSavable {
     }
 
     // 인터페이스 구현!
-    override fun saveDataToViewModel() {
+    override fun saveDataToViewModel(): Boolean {
         viewModel.title = binding.editTextTitle.editText?.text.toString()
         viewModel.categoryName = binding.autoCompleteCategory.text.toString()
         viewModel.goal = binding.editTextGoal.editText?.text.toString()
         viewModel.description = binding.editTextContent.editText?.text.toString()
+
+        return true
     }
 
     override fun onDestroyView() {

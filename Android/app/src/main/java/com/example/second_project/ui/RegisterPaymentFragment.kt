@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -49,7 +50,7 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
                     .setView(dialogBinding.root)
                     .create()
 
-                val dummyUsers = listOf("ssafy@naver.com", "hello@world.com", "test@domain.com")
+                val dummyUsers = listOf("user1@example.com", "user2@example.com", "user3@example.com")
                 var selectedEmail: String? = null
 
                 val dialogAdapter = RegisterSearchParticipantsAdapter(dummyUsers) { email ->
@@ -94,15 +95,26 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
 
         // 다음 버튼
         binding.btnToSubLecture.setOnClickListener {
-            (parentFragment as? RegisterMainFragment)?.moveToStep(3)
+            val saved = saveDataToViewModel()
+            if (saved) {
+                (parentFragment as? RegisterMainFragment)?.moveToStep(3)
+            }
         }
     }
 
     // 인터페이스 구현
-    override fun saveDataToViewModel() {
+    override fun saveDataToViewModel(): Boolean  {
         // 가격 저장
         val priceText = binding.editTextPrice.editText?.text.toString()
         viewModel.price = priceText.toIntOrNull() ?: 0
+
+        val participantData = adapter.getParticipantData()
+        // ❗ 빈 이메일 존재 확인
+        val hasInvalidEmail = participantData.any { it.first.isBlank() }
+        if (hasInvalidEmail) {
+            Toast.makeText(requireContext(), "참여자 이메일을 모두 입력해주세요.", Toast.LENGTH_SHORT).show()
+            return false
+        }
 
         // 참여자 정보 저장
         viewModel.ratios.clear()
@@ -111,6 +123,7 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
                 viewModel.ratios.add(Ratio(email, ratio, isLecturer))
             }
         }
+        return true
     }
 
     override fun onDestroyView() {

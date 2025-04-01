@@ -58,7 +58,12 @@ class RegisterMainFragment: Fragment() {
     fun moveToStep(index: Int) {
 
         val currentFragment = childFragmentManager.findFragmentById(binding.registerFragmentContainer.id)
-        (currentFragment as? RegisterStepSavable)?.saveDataToViewModel()
+        val shouldProceed = (currentFragment as? RegisterStepSavable)?.saveDataToViewModel() ?: true
+
+        if (!shouldProceed) {
+            // ❌ 저장 실패 시 전환하지 않음
+            return
+        }
 
         val fragment = when (index) {
             0 -> RegisterLectureFragment()
