@@ -1,6 +1,7 @@
 package com.example.second_project.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.second_project.adapter.RegisterSublectureAdapter
 import com.example.second_project.databinding.FragmentRegisterSublectureBinding
 import com.example.second_project.interfaces.RegisterStepSavable
+import com.example.second_project.utils.YoutubeUtil
 import com.example.second_project.viewmodel.RegisterViewModel
 
 class RegisterSublectureFragment: Fragment(), RegisterStepSavable {
@@ -42,9 +44,10 @@ class RegisterSublectureFragment: Fragment(), RegisterStepSavable {
             },
             // 불러오기 버튼 클릭
             onLoadVideoClick = { position, url ->
-                val videoId = extractYoutubeVideoId(url)
+                val videoId = YoutubeUtil.extractVideoId(url)
                 if (videoId != null) {
                     Toast.makeText(requireContext(), "추출된 ID: $videoId", Toast.LENGTH_SHORT).show()
+                    Log.d("onLoadVideoClick", " $videoId")
                     // 추후 fetchYoutubeMetaData(videoId, ...) 호출할 예정
                 } else {
                     Toast.makeText(requireContext(), "올바른 YouTube 링크가 아닙니다.", Toast.LENGTH_SHORT).show()
@@ -77,28 +80,21 @@ class RegisterSublectureFragment: Fragment(), RegisterStepSavable {
     override fun saveDataToViewModel(): Boolean {
         val lectures = sublectureAdapter.getSubLectures()
 
-        val hasEmptyTitleOrUrl = lectures.any {
-            it.subLectureTitle.isBlank() || it.subLectureUrl.isBlank()
-        }
+        val processedLectures = lectures.mapIndexed { index, lecture ->
+            val videoId = YoutubeUtil.extractVideoId(lecture.subLectureUrl)
+            if (videoId.isNullOrBlank()) {
+                Toast.makeText(requireContext(), "${index + 1}번째 강의의 유효한 링크를 입력해주세요.", Toast.LENGTH_SHORT).show()
+                return false
+            }
 
-        if (hasEmptyTitleOrUrl) {
-            Toast.makeText(requireContext(), "모든 개별 강의의 제목과 링크를 입력해주세요.", Toast.LENGTH_SHORT).show()
-            return false
+            // videoId만 저장하고 싶을 경우 여기에 ID만 저장
+            lecture.copy(subLectureUrl = videoId)
         }
 
         viewModel.subLectures.clear()
-        viewModel.subLectures.addAll(lectures)
+        viewModel.subLectures.addAll(processedLectures)
 
         return true
-    }
-
-    // 영상 링크에서 영상 id 추출
-    private fun extractYoutubeVideoId(url: String): String? {
-        val regex = Regex(
-            "(?:https?://)?(?:www\\.)?(?:youtube\\.com/(?:watch\\?v=|embed/|v/)|youtu\\.be/)([\\w-]{11})"
-        )
-        val matchResult = regex.find(url)
-        return matchResult?.groups?.get(1)?.value
     }
 
     private fun fetchYoutubeMetaData(videoId: String, onResult: (title: String, thumbnailUrl: String, duration: Int) -> Unit) {
