@@ -1,22 +1,22 @@
 package com.example.second_project.adapter
 
 import android.content.Context
-import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.second_project.data.model.dto.request.Lecture
 import com.example.second_project.databinding.ItemLectureBinding
 
 class LectureAdapter(
     private val mainPage: Boolean,
-    private val onItemClick: ((Int, String) -> Unit)? = null)
+    // onItemClick: 강의 클릭 시 lectureId와 title을 전달
+    private val onItemClick: ((Int, String) -> Unit)? = null
+) : RecyclerView.Adapter<LectureAdapter.LectureViewHolder>() {
 
-    : RecyclerView.Adapter<LectureAdapter.LectureViewHolder>() {
+    private val items = mutableListOf<Lecture>()
 
-    private val items = mutableListOf<Int>()  // 임시로 데이터는 Integer로 하드코딩
-
-    // 데이터 세팅
-    fun submitList(data: List<Int>) {
+    // 강의 리스트 업데이트
+    fun submitList(data: List<Lecture>) {
         items.clear()
         items.addAll(data)
         notifyDataSetChanged()
@@ -30,27 +30,29 @@ class LectureAdapter(
     override fun onBindViewHolder(holder: LectureViewHolder, position: Int) {
         holder.bind(items[position])
 
-        if (mainPage) { // mainPage에 들어가는 목록에 한해 너비 조정... 가로스크롤이므로
+        if (mainPage) { // 메인 페이지에서의 목록은 고정된 너비 적용
             val layoutParams = holder.itemView.layoutParams
             layoutParams.width = dpToPx(holder.itemView.context, 144)
             layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
             holder.itemView.layoutParams = layoutParams
-
         }
     }
 
     override fun getItemCount(): Int = items.size
 
-    class LectureViewHolder(private val binding: ItemLectureBinding,
-                            private val onItemClick: ((Int, String) -> Unit)?
+    class LectureViewHolder(
+        private val binding: ItemLectureBinding,
+        private val onItemClick: ((Int, String) -> Unit)?
     ) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: Int) {
-            // 예시로, 'item'을 그냥 아이템 번호로 표시 (추가적인 정보는 필요에 따라 수정)
-            val lectureTitle = "강의 $item"
-            binding.lectureTitle.text = lectureTitle
 
-            binding.root.setOnClickListener{
-                onItemClick?.invoke(item, lectureTitle)
+        fun bind(item: Lecture) {
+            // 강의 제목을 표시 (추가적인 정보도 필요하면 여기서 바인딩)
+            binding.lectureTitle.text = item.title
+            binding.lectureTeacherName.text = item.lecturer   // 강의자 정보 바인딩
+            binding.lecturePrice.text = "${item.price}원"
+            // 클릭 시 lectureId와 title 전달
+            binding.root.setOnClickListener {
+                onItemClick?.invoke(item.lectureId, item.title)
             }
         }
     }
@@ -58,5 +60,4 @@ class LectureAdapter(
     private fun dpToPx(context: Context, dp: Int): Int {
         return (dp * context.resources.displayMetrics.density).toInt()
     }
-
 }

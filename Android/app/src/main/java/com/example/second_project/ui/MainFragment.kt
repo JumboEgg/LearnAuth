@@ -11,6 +11,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import com.example.second_project.R
+import com.example.second_project.UserSession
 import com.example.second_project.adapter.BannerAdapter
 import com.example.second_project.adapter.LectureAdapter
 import com.example.second_project.databinding.FragmentMainBinding
@@ -22,10 +23,11 @@ class MainFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: MainViewModel by viewModels()
     private lateinit var bannerAdapter: BannerAdapter
+    private lateinit var recommendedAdapter: LectureAdapter
+    private lateinit var recentAdapter: LectureAdapter
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentMainBinding.inflate(inflater, container, false)
@@ -35,27 +37,41 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 예시: ViewModel 데이터 관찰
-//        viewModel.text.observe(viewLifecycleOwner) {
-//            binding.mainText.text = it
-//        }
+        val nickname = UserSession.nickname ?: "(닉네임)"
+        binding.recommendTitle.text = "${nickname}님을 위한 추천 강의"
+        // dp -> px 변환
+        val spacing = dpToPx(4)
 
-        // dp -> px로 변환
-        val spacing = dpToPx(4) // 16dp 여백 설정
-
-        // 추천 강의
+        // 추천 강의 (랜덤 강의) RecyclerView 설정
+        recommendedAdapter = LectureAdapter(mainPage = true)
         binding.recommendList.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        val lectureAdapter = LectureAdapter(mainPage = true)
-        binding.recommendList.adapter = lectureAdapter
+        binding.recommendList.adapter = recommendedAdapter
         binding.recommendList.addItemDecoration(HorizontalSpacingItemDecoration(spacing))
 
-        // 예시 아이템 넣기
-        lectureAdapter.submitList(listOf(1, 2, 3, 4, 5))
-
-        // 최근 등록 강의
+        // 최근 등록 강의 RecyclerView 설정
+        recentAdapter = LectureAdapter(mainPage = true)
         binding.newList.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        binding.newList.adapter = lectureAdapter
+        binding.newList.adapter = recentAdapter
         binding.newList.addItemDecoration(HorizontalSpacingItemDecoration(spacing))
+
+        // ViewModel의 추천 강의 데이터 관찰 (랜덤 강의)
+        viewModel.randomLectures.observe(viewLifecycleOwner) { lectureList ->
+            if (lectureList.isNullOrEmpty()) {
+                // 데이터가 없으면 adapter에 빈 리스트 전달
+                recommendedAdapter.submitList(emptyList())
+            } else {
+                recommendedAdapter.submitList(lectureList)
+            }
+        }
+
+        // ViewModel의 최근 등록 강의 데이터 관찰
+        viewModel.recentLectures.observe(viewLifecycleOwner) { lectureList ->
+            if (lectureList.isNullOrEmpty()) {
+                recentAdapter.submitList(emptyList())
+            } else {
+                recentAdapter.submitList(lectureList)
+            }
+        }
 
         // 배너 설정
         val bannerList = listOf(
@@ -63,13 +79,11 @@ class MainFragment : Fragment() {
             R.drawable.sample_plzdelete2,
             R.drawable.sample_plzdelete3
         )
-
         bannerAdapter = BannerAdapter(bannerList)
-
         val viewPager = view.findViewById<ViewPager2>(R.id.bannerArea)
         viewPager.adapter = bannerAdapter
 
-        // 자동 슬라이드 기능 추가
+        // 자동 슬라이드 기능
         val handler = Handler(Looper.getMainLooper())
         val runnable = object : Runnable {
             var currentItem = 0
@@ -78,7 +92,7 @@ class MainFragment : Fragment() {
                     currentItem = 0
                 }
                 viewPager.currentItem = currentItem++
-                handler.postDelayed(this, 3000) // 3초마다 변경
+                handler.postDelayed(this, 3000)
             }
         }
         handler.postDelayed(runnable, 3000)

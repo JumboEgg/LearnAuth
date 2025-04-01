@@ -1,61 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="120dp"
+    android:layout_margin="5dp"
     android:background="@drawable/bg_radius_20"
-    android:backgroundTint="@color/data"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_margin="5dp">
-    <ImageView
-        android:id="@+id/bgCategoryCertification"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="@+id/textTitleMyCertification"
-        app:layout_constraintBottom_toTopOf="@+id/textTitleMyCertification"
-        android:layout_marginBottom="5dp"
-        android:src="@drawable/bg_category_certificate"/>
+    android:backgroundTint="@color/data">
+
     <TextView
         android:id="@+id/textCategoryCertification"
+        style="@style/heading5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="2dp"
+        android:paddingRight="5dp"
+        android:paddingLeft="5dp"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
         android:text="데이터"
-        style="@style/heading5"
-        app:layout_constraintTop_toTopOf="@id/bgCategoryCertification"
-        app:layout_constraintStart_toStartOf="@+id/bgCategoryCertification"
-        app:layout_constraintBottom_toBottomOf="@+id/bgCategoryCertification"
-        app:layout_constraintEnd_toEndOf="@+id/bgCategoryCertification"/>
+        android:background="@drawable/bg_category_certificate"
+        app:layout_constraintBottom_toTopOf="@+id/textTitleMyCertification"
+        app:layout_constraintStart_toStartOf="@+id/textTitleMyCertification" />
 
     <TextView
         android:id="@+id/textTitleMyCertification"
+        style="@style/heading3"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="데이터 교육"
-        style="@style/heading3"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginHorizontal="20dp"
-        android:singleLine="true"
         android:ellipsize="marquee"
-        android:marqueeRepeatLimit="marquee_forever"
         android:focusable="true"
         android:focusableInTouchMode="true"
-        android:scrollHorizontally="true"/>
+        android:marqueeRepeatLimit="marquee_forever"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:text="데이터 교육"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/buttonDetail"
+        style="@style/heading4"
         android:layout_width="100dp"
         android:layout_height="35dp"
+        android:layout_marginTop="3dp"
         android:background="@drawable/bg_radius_20"
         android:backgroundTint="@color/white"
         android:text=" 자세히 보기"
-        style="@style/heading4"
         android:textColor="@color/data_sub"
-        app:layout_constraintTop_toBottomOf="@id/textTitleMyCertification"
-        android:layout_marginTop="3dp"
-        app:layout_constraintEnd_toEndOf="@id/textTitleMyCertification"/>
-
-
+        app:layout_constraintEnd_toEndOf="@id/textTitleMyCertification"
+        app:layout_constraintTop_toBottomOf="@id/textTitleMyCertification" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
