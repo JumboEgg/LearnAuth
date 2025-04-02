@@ -152,6 +152,7 @@ class OwnedLectureDetailFragment : Fragment() {
 
                 binding.myLectureDetailList.layoutManager = LinearLayoutManager(requireContext())
                 binding.myLectureDetailList.adapter = adapter
+                binding.myLectureDetailList.isNestedScrollingEnabled = false
 
                 // RecyclerView의 위치를 동적으로 조정
                 val contentLayout = binding.ownedLectureDetailContentLayout
