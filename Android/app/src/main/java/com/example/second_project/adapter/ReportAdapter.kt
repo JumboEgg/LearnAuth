@@ -1,41 +1,33 @@
 package com.example.second_project.adapter
-//
+
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.second_project.data.ReportItem
+import com.example.second_project.data.DeclarationItem
 import com.example.second_project.databinding.ItemReportBinding
+
 class ReportAdapter(
-    private val onItemClick: (ReportItem) -> Unit
+    private val onItemClick: (DeclarationItem) -> Unit
 ) : RecyclerView.Adapter<ReportAdapter.ReportViewHolder>() {
 
-    private val items = mutableListOf<ReportItem>()
+    private val items = mutableListOf<DeclarationItem>()
 
-    // 외부에서 리스트 전체를 갱신하고 싶을 때 사용
-    fun submitList(newList: List<ReportItem>) {
+    fun submitList(list: List<DeclarationItem>) {
         items.clear()
-        items.addAll(newList)
+        items.addAll(list)
         notifyDataSetChanged()
     }
 
-    inner class ReportViewHolder(val binding: ItemReportBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: ReportItem) {
+    inner class ReportViewHolder(private val binding: ItemReportBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: DeclarationItem) {
             binding.tvReportTitle.text = item.title
-            binding.tvReportType.text = item.type
-
-            // 아이템 클릭
-            binding.root.setOnClickListener {
-                onItemClick(item)
-            }
+            binding.root.setOnClickListener { onItemClick(item) }
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReportViewHolder {
-        val binding = ItemReportBinding.inflate(
-            LayoutInflater.from(parent.context),
-            parent,
-            false
-        )
+        val binding = ItemReportBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ReportViewHolder(binding)
     }
 

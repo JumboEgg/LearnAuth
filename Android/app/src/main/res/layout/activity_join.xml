@@ -70,20 +70,7 @@
                 android:singleLine="true"
                 android:inputType="textPassword"/>
 
-            <TextView
-                android:id="@+id/joinCheckName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="@id/joinName"
-                app:layout_constraintTop_toTopOf="@id/joinName"
-                app:layout_constraintBottom_toBottomOf="@id/joinName"
-                android:text="인증하기"
-                android:textColor="@color/mainRed"
-                android:background="@drawable/check_name_button"
-                style="@style/medium12"
-                android:paddingVertical="4dp"
-                android:paddingHorizontal="8dp"
-                android:layout_marginEnd="20dp"/>
+
 
             <TextView
                 android:id="@+id/joinCheckedName"

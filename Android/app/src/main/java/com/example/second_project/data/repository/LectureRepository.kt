@@ -14,9 +14,9 @@ class LectureRepository {
     private val lectureApiService =
         ApiClient.retrofit.create(LectureApiService::class.java)
 
-    fun fetchLectures(category: String, page: Int): LiveData<List<Lecture>> {
+    fun fetchLectures(categoryId: Int, page: Int): LiveData<List<Lecture>> {
         val lecturesLiveData = MutableLiveData<List<Lecture>>()
-        lectureApiService.getLectures(category, page).enqueue(object : Callback<LectureResponse> {
+        lectureApiService.getLectures(categoryId, page).enqueue(object : Callback<LectureResponse> {
             override fun onResponse(
                 call: Call<LectureResponse>,
                 response: Response<LectureResponse>

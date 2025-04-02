@@ -1,55 +1,61 @@
 package com.example.second_project.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.second_project.data.DeclarationItem
 import com.example.second_project.data.ReportItem
+import com.example.second_project.data.model.dto.response.ReportApiResponse
+import com.example.second_project.network.ApiClient
+import com.example.second_project.network.ReportApiService
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class DeclarationViewModel : ViewModel() {
+    private val _reportList = MutableLiveData<List<DeclarationItem>>()
+    val reportList: LiveData<List<DeclarationItem>> get() = _reportList
 
-    private val _reportList = MutableLiveData<List<ReportItem>>()
-    val reportList: LiveData<List<ReportItem>> = _reportList
+    // 신고 목록을 API로부터 가져옵니다.
+    fun fetchReports(userID: Int) {
+        val reportApiService = ApiClient.retrofit.create(ReportApiService::class.java)
+        reportApiService.getReports(userID).enqueue(object : Callback<ReportApiResponse> {
+            override fun onResponse(
+                call: Call<ReportApiResponse>,
+                response: Response<ReportApiResponse>
+            ) {
+                if (response.isSuccessful && response.body() != null) {
+                    val apiReports = response.body()!!.data
+                    // ReportData를 ReportItem으로 매핑합니다.
+                    val items = apiReports.map { reportData ->
+                        DeclarationItem(
+                            reportId = reportData.reportId,
+                            title = reportData.title,
+                            type = mapReportType(reportData.reportType),
+                            content = "" // 목록 API에는 상세 내용이 없으므로 빈 문자열 처리
+                        )
+                    }
+                    _reportList.value = items
+                } else {
+                    Log.e("DeclarationVM", "Error: ${response.message()}")
+                    _reportList.value = emptyList()
+                }
+            }
 
-    // 샘플 데이터
-    init {
-        _reportList.value = listOf(
-            ReportItem(
-                title = "눈 감고 차이는 법",
-                type = "강의자",
-                content = "강의자가 이상합니다. 강의자를 고소하겠습니다. 참 고소하군요.\n" +
-                        "\n" +
-                        "\n" +
-                        "\n" +
-                        "\n\n" +
-                        "\n" +
-                        "\n" +
-                        "\n" +
-                        "\n\n" +
-                        "\n" +
-                        "\n" +
-                        "\n" +
-                        "\n\n" +
-                        "\n" +
-                        "\n" +
-                        "\n" +
-                        "\n" +
-                        "실험중입니다." +
-                        "악" +
-                        "진짜" +
-                        "\n" +
-                        "\n" +
-                        "어렵네요"
-            ),
-            ReportItem(
-                title = "눈 감고 차이는 법",
-                type = "강의 자료",
-                content = "강의자료가 이상합니다. 고소하겠습니다."
-            ),
-            ReportItem(
-                title = "눈 감고 차이는 법",
-                type = "강의 영상",
-                content = "영상이 이상해요. 내용이 적절하지 않습니다."
-            )
-        )
+            override fun onFailure(call: Call<ReportApiResponse>, t: Throwable) {
+                Log.e("DeclarationVM", "API call failed", t)
+                _reportList.value = emptyList()
+            }
+        })
+    }
+
+    private fun mapReportType(reportType: Int): String {
+        return when (reportType) {
+            0 -> "강의자"
+            1 -> "강의 자료"
+            2 -> "강의 영상"
+            else -> "기타"
+        }
     }
 }

@@ -3,12 +3,13 @@ package com.example.second_project.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.second_project.databinding.ItemOwnedlectureDetailBinding
+import com.example.second_project.databinding.ItemOwnedSublectureBinding
 
+private const val TAG = "OwnedLectureAdapter_야옹"
 class OwnedLectureAdapter(private val items: List<LectureItem>) :
     RecyclerView.Adapter<OwnedLectureAdapter.ViewHolder>() {
 
-    class ViewHolder(private val binding: ItemOwnedlectureDetailBinding) :
+    class ViewHolder(private val binding: ItemOwnedSublectureBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(item: LectureItem) {
             binding.eachNum.text = item.lectureNum
@@ -18,7 +19,7 @@ class OwnedLectureAdapter(private val items: List<LectureItem>) :
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = ItemOwnedlectureDetailBinding.inflate(
+        val binding = ItemOwnedSublectureBinding.inflate(
             LayoutInflater.from(parent.context), parent, false
         )
         return ViewHolder(binding)

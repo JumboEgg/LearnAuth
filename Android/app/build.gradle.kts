@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("androidx.navigation.safeargs.kotlin")
     id("kotlin-parcelize")
-    id("kotlin-kapt")
 }
 
 android {
@@ -16,6 +15,8 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "BASE_URL", "\"https://j12d210.p.ssafy.io\"")
+
     }
     buildTypes {
         release {
@@ -35,6 +36,8 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true  // 이 줄을 추가합니다.
+
     }
 }
 
@@ -77,9 +80,9 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.1.2")
     implementation("androidx.datastore:datastore-preferences-core:1.1.2")
 
-    // Glide
-    implementation("com.github.bumptech.glide:glide:4.15.1")
-    kapt("com.github.bumptech.glide:compiler:4.15.1")
+    // 이미지 불러오기 (Glide 사용)
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 
 
 }

@@ -1,6 +1,5 @@
 package com.example.second_project.ui
 
-import android.R
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater

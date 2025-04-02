@@ -5,6 +5,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/background_color">
 
+    <ProgressBar
+        android:id="@+id/loadingProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone" />
+
 
     <ScrollView
         android:layout_width="match_parent"
@@ -81,7 +91,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         style="@style/heading3"
-        android:text="강의 제목입니다. 이렇게 긴 경우 따로 처리를 해 줘야 하죠."
+        android:text=" "
         android:elevation="9dp"
         android:layout_weight="1"
         android:singleLine="true"
@@ -97,7 +107,7 @@
             android:id="@+id/lectureDetailCategory"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="데이터"
+            android:text=" "
             android:background="@drawable/bg_radius_7"
             android:backgroundTint="@color/button_white_blue"
             android:fontFamily="@font/pretendard_medium"
@@ -116,7 +126,7 @@
         android:id="@+id/lectureDetailGoal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="이거는 예시 텍스트입니다. D210조 화이팅 저는 지금 투썸플레이스에 와 있고요, 김치찜은 무척 맛있었습니다."
+        android:text=" "
         style="@style/medium16"
         android:textColor="@color/text_gray"
         android:letterSpacing="-0.05"
@@ -147,7 +157,7 @@
         app:layout_constraintTop_toTopOf="@id/lectureDetailTeacherTitle"
         app:layout_constraintBottom_toBottomOf="@id/lectureDetailTeacherTitle"
         android:singleLine="true"
-        android:text="김좀비. 강사명이 이렇게 길 리는 없겠지만 긴 경우 처리를 위해"
+        android:text=" "
         style="@style/medium16"
         android:letterSpacing="-0.05"
         android:layout_marginStart="12dp"
@@ -165,6 +175,7 @@
                 android:layout_marginHorizontal="32dp">
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/ownedDetailPlayBtn"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:text="n강 - 이어보기"

@@ -1,7 +1,13 @@
 package com.example.second_project.data
 
 data class ReportItem(
-    val title: String,      // 강의 제목
-    val type: String,       // 신고 부류 (ex: 강의 자료, 강의 영상, ...)
-    val content: String     // 신고 상세 내용
+//    val reportId: Int,
+//    val title: String,
+//    val type: String,
+//    val content: String // 상세정보는 API 호출 후 채워질 수 있음.
+
+    val userId: Int,
+    val lectureId: Int,
+    val reportType: Int,
+    val reportContent: String
 )
