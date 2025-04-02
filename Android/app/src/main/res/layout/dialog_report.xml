@@ -104,7 +104,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="120dp"
                 android:hint="신고 내용을 적어 주세요."
-                style="@style/medium14"
+                style="@style/medium16"
                 android:paddingVertical="12dp"
                 android:paddingHorizontal="20dp"
                 android:layout_marginTop="4dp"
@@ -113,6 +113,15 @@
 
 
     </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="신고 접수는 유형당 한 번만 가능합니다."
+        android:textAlignment="center"
+        style="@style/medium16"
+        android:textColor="@color/text_gray"
+        android:layout_marginVertical="16dp"/>
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/reportBtn"

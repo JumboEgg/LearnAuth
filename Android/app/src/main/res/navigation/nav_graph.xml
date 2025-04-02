@@ -105,9 +105,25 @@
     <!-- OwnedLectureDetailFragment -->
     <fragment
         android:id="@+id/ownedLectureDetailFragment"
-        android:name="com.example.second_project.ui.OwnedLecrtureDetailFragment"
+        android:name="com.example.second_project.ui.OwnedLectureDetailFragment"
         android:label="보유 강의 디테일"
         tools:layout="@layout/fragment_owned_lecture_detail">
+        <action
+            android:id="@+id/action_ownedLectureDetailFragment_to_lecturePlayFragment"
+            app:destination="@id/lecturePlayFragment">
+            <argument
+                android:name="lectureId"
+                app:argType="integer"/>
+            <argument
+                android:name="userId"
+                app:argType="integer"/>
+            <argument
+                android:name="subLectureId"
+                app:argType="integer"/>
+        </action>
+        <action
+            android:id="@+id/action_ownedLectureDetailFragment_to_quizFragment"
+            app:destination="@+id/quizFragment"/>
         <argument
             android:name="lectureId"
             app:argType="integer"
@@ -129,9 +145,9 @@
             app:argType="integer"
             android:defaultValue="0" />
         <argument
-            android:name="lectureTitle"
-            app:argType="string"
-            android:defaultValue="" />
+            android:name="userId"
+            app:argType="integer"
+            android:defaultValue="0" />
     </fragment>
 
     <!-- MyLectureFragment (보유/참여 강의 뷰페이저) -->
@@ -182,5 +198,21 @@
         android:id="@+id/declarationFragment"
         android:name="com.example.second_project.ui.DeclarationFragment"
         android:label="DeclarationFragment" />
+
+    <fragment android:id="@+id/lecturePlayFragment"
+        android:name="com.example.second_project.ui.LecturePlayFragment">
+        <argument android:name="lectureId"
+            app:argType="integer"
+            app:nullable="false"/>
+        <argument android:name="userId"
+            app:argType="integer"
+            app:nullable="false"/>
+        <argument android:name="subLectureId"
+            app:argType="integer"
+            app:nullable="false"/>
+        <action android:id="@+id/action_ownedLectureDetailFragment_to_lecturePlayFragment"
+            app:destination="@id/lecturePlayFragment"/>
+    </fragment>
+
 
 </navigation>

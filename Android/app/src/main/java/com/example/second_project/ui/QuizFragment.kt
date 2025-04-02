@@ -21,10 +21,10 @@ class QuizFragment : Fragment() {
     private var _binding: FragmentQuizBinding? = null
     private val binding get() = _binding!!
 
-    // navArgs로 lectureId, lectureTitle을 함께 받음
+    // navArgs로 lectureId, userId를 함께 받음
     private val args: QuizFragmentArgs by navArgs()
     private val lectureId by lazy { args.lectureId }
-    private val lectureTitle by lazy { args.lectureTitle }
+    private val userId by lazy { args.userId }
 
     private var timer: CountDownTimer? = null
     private val timerDuration = 30000L // 30초
@@ -179,7 +179,7 @@ class QuizFragment : Fragment() {
             .setView(dialogBinding.root)
             .setCancelable(false)
 
-        dialogBinding.dialogTitle.text = "${lectureTitle}" // 예: lectureTitle 사용 가능
+//        dialogBinding.dialogTitle.text = "${lectureTitle}"
         dialogBinding.dialogImage.setImageResource(resultIcon)
         dialogBinding.dialogMessage.text = resultMessage
 

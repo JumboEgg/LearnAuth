@@ -1,57 +1,39 @@
 package com.example.second_project.ui
 
-import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.Button
-import android.widget.EditText
-import android.widget.RadioGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.second_project.R
 import com.example.second_project.UserSession.userId
 import com.example.second_project.adapter.OwnedLectureDetailAdapter
+import com.example.second_project.adapter.SearchLectureAdapter
 import com.example.second_project.data.ReportItem
 import com.example.second_project.data.model.dto.response.ReportApiResponse
-import com.example.second_project.data.model.dto.response.ReportDetailResponse
 import com.example.second_project.data.repository.LectureDetailRepository
 import com.example.second_project.databinding.DialogReportBinding
-import com.example.second_project.databinding.DialogReportDetailBinding
 import com.example.second_project.databinding.FragmentOwnedLectureDetailBinding
 import com.example.second_project.network.ApiClient
 import com.example.second_project.network.ReportApiService
+import com.example.second_project.ui.LecturePlayFragmentDirections.Companion.actionOwnedLectureDetailFragmentToLecturePlayFragment
 import com.example.second_project.viewmodel.OwnedLectureDetailViewModel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 private const val TAG = "OwnedLecrtureDetailFrag_야옹"
-class OwnedLecrtureDetailFragment : Fragment() {
+class OwnedLectureDetailFragment : Fragment() {
 
     private var _binding: FragmentOwnedLectureDetailBinding? = null
     private val binding get() = _binding!!
-
-//    private val viewModel: OwnedLectureDetailViewModel by viewModels {
-//        object : ViewModelProvider.Factory {
-//            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-//                if (modelClass.isAssignableFrom(OwnedLectureDetailViewModel::class.java)) {
-//                    return OwnedLectureDetailViewModel(LectureDetailRepository()) as T
-//                }
-//                throw IllegalArgumentException("Unknown ViewModel class")
-//            }
-//        }
-//    }
+    private var recentSubLectureId: Int? = null
 
     private val viewModel: OwnedLectureDetailViewModel by lazy {
         OwnedLectureDetailViewModel(LectureDetailRepository())
@@ -73,26 +55,9 @@ class OwnedLecrtureDetailFragment : Fragment() {
         val lectureDetailName = binding.lectureDetailName
         lectureDetailName.isSelected = true
 
-//        // RecyclerView 설정
-//        val lectureList = listOf(
-//            LectureItem("1강", "Kotlin 기초", R.drawable.sample_plzdelete),
-//            LectureItem("2강", "Android Studio 활용", R.drawable.sample_plzdelete),
-//            LectureItem("3강", "Jetpack Compose 소개", R.drawable.sample_plzdelete),
-//            LectureItem("4강", "RecyclerView 사용법", R.drawable.sample_plzdelete),
-//            LectureItem("5강", "Coroutine 기초", R.drawable.sample_plzdelete)
-//        )
-//
-//        val adapter = OwnedLectureAdapter(lectureList)
-//        binding.myLectureDetailList.adapter = adapter
-//        binding.myLectureDetailList.layoutManager = object : LinearLayoutManager(requireContext()) {
-//            override fun canScrollVertically(): Boolean {
-//                return false
-//            }
-//        }
-
         val lectureId = arguments?.getInt("lectureId") ?: return
-//        val userId = 1 //임시 고정값, 수정 필요
         val userId = userId
+        var subLectureId: Int? = null
 
         viewModel.fetchLectureDetail(lectureId, userId)
         binding.loadingProgressBar.visibility = View.VISIBLE
@@ -100,6 +65,8 @@ class OwnedLecrtureDetailFragment : Fragment() {
 
         viewModel.lectureDetail.observe(viewLifecycleOwner) { detail ->
             detail?.let {
+                recentSubLectureId = it.data.recentLectureId
+
                 // 로딩이 끝났으면 ProgressBar 숨기기
                 binding.loadingProgressBar.visibility = View.GONE
 
@@ -111,21 +78,61 @@ class OwnedLecrtureDetailFragment : Fragment() {
 
                 // "수료 완료한 강의인지 아닌지 조건문 추가 필요"
                 if (it.data.recentLectureId != 0 ) {
-                    binding.ownedDetailPlayBtn.text = "${it.data.recentLectureId}강 - 이어 보기"
+                    binding.ownedDetailPlayBtn.text = "${recentSubLectureId}강 - 이어보기"
+                    subLectureId = it.data.recentLectureId
                 } else {
                     binding.ownedDetailPlayBtn.text = "수강하기"
+
                 }
 
-
-//                val subLectures = it.data.subLectures ?: emptyList()
-//                val adapter = LectureDetailAdapter(subLectureList = subLectures)
-//                binding.lectureDetailList.adapter = adapter
-//                binding.lectureDetailListCount.text = "총 ${ subLectures.size }강"
-
                 val subLectures = it.data.subLectures ?: emptyList()
-                val adapter = OwnedLectureDetailAdapter(subLectureList = subLectures)
+                val adapter = OwnedLectureDetailAdapter(
+                    subLectureList = subLectures,
+                    onItemClick = { subLecture ->
+                        val lectureId = arguments?.getInt("lectureId") ?: return@OwnedLectureDetailAdapter
+                        val userId = arguments?.getInt("userId") ?: return@OwnedLectureDetailAdapter
+                        val subLectureId = subLecture.subLectureId
+
+                        val action = OwnedLectureDetailFragmentDirections
+                            .actionOwnedLectureDetailFragmentToLecturePlayFragment(lectureId, userId, subLectureId)
+                        findNavController().navigate(action)
+                    }
+                )
+
                 binding.myLectureDetailList.layoutManager = LinearLayoutManager(requireContext())
                 binding.myLectureDetailList.adapter = adapter
+
+
+                // 상단 이어보기 버튼 (파란색)
+                binding.ownedDetailPlayBtn.setOnClickListener {
+                    val lectureId = arguments?.getInt("lectureId") ?: return@setOnClickListener
+                    val userId = arguments?.getInt("userId") ?: return@setOnClickListener
+                    val subLectureId = recentSubLectureId
+
+
+                    // 수강'중'이 아닐 경우 혹은 수강 완전히 완료한 경우 subLectureId가 무용할 수 있음,
+                    // 이때는 첫 영상 틀어주도록 처리 필요... api에 index값 들어오면 추가
+
+                    val action = OwnedLectureDetailFragmentDirections
+                        .actionOwnedLectureDetailFragmentToLecturePlayFragment(
+                            lectureId = lectureId,
+                            userId = userId,
+                            subLectureId = recentSubLectureId!!
+                        )
+
+                    findNavController().navigate(action)
+
+                }
+
+                binding.quizBtn.setOnClickListener {
+                    val lectureId = arguments?.getInt("lectureId") ?: return@setOnClickListener
+                    val userId = userId
+
+                    val action = OwnedLectureDetailFragmentDirections
+                        .actionOwnedLectureDetailFragmentToQuizFragment(lectureId, userId)
+                    findNavController().navigate(action)
+                }
+
             }
         }
 
@@ -136,10 +143,21 @@ class OwnedLecrtureDetailFragment : Fragment() {
             }
         })
 
+        binding.lectureDetailBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
 
         binding.declarationBtn.setOnClickListener {
             showReportDialog(userId, lectureId)
         }
+
+        //뒤로가기 처리
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                findNavController().popBackStack()
+            }
+        })
+
 
     }
 
@@ -209,7 +227,6 @@ class OwnedLecrtureDetailFragment : Fragment() {
                     } else {
                         Log.e(TAG, "신고 접수 실패 - 응답 코드: ${response.code()}")  // 응답 코드 출력
                         Log.e(TAG, "신고 접수 실패 - 응답 메시지: ${response.message()}") // 기본 메시지
-                        Toast.makeText(requireContext(), "신고 접수 실패: ${response.code()}", Toast.LENGTH_SHORT).show()
                     }
                 }
 

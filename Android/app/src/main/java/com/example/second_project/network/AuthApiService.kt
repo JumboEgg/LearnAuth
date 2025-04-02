@@ -7,5 +7,8 @@ import retrofit2.http.POST
 
 interface AuthApiService {
     @POST("/api/auth/logout")
-    fun logout(@Header("Authorization") token: String): Call<LogoutResponse>
+    fun logout(@Header("Refresh") refreshToken: String): Call<Void>
+
+    @POST("api/auth/refresh")
+    fun refreshToken(@Header("Refresh") refreshToken: String) : Call<Void>
 }

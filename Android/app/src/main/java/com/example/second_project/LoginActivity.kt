@@ -66,7 +66,9 @@ class LoginActivity : AppCompatActivity() {
 
                     val loginData = response.body()!!.data
                     UserSession.userId = loginData.userId
-                    UserSession.nickname = loginData.nickname  // 닉네임 저장
+                    UserSession.nickname = loginData.nickname
+                    UserSession.name = loginData.name
+                    Log.d("TAG", "onResponse 이름: ${UserSession.name}")
 
                     Toast.makeText(this@LoginActivity, "로그인 성공", Toast.LENGTH_SHORT).show()
 
