@@ -48,7 +48,7 @@ class LecturePlayFragment: Fragment() {
         val args: LecturePlayFragmentArgs by navArgs()
         currentLectureId = args.lectureId
         currentSubLectureId = args.subLectureId
-//        currentSubLectureId = 16 //확인용 임시 
+//        currentSubLectureId = 16 //확인용 임시
         val userId = args.userId
 
 
@@ -67,10 +67,12 @@ class LecturePlayFragment: Fragment() {
                     binding.playLectureName.text = it.data.title
                 }
 
+                Log.d(TAG, "야호: $subLecture")
+
                 // subLecture가 null이 아닐 경우, 제목 설정
                 if (subLecture != null) {
                     binding.playTitle.text = subLecture.subLectureTitle
-                    binding.playNum.text = "${subLecture.subLectureId}강"
+                    binding.playNum.text = "${subLecture.lectureOrder}강"
                 } else {
                     binding.playTitle.text = "강의 제목 없음"
                     binding.playNum.text = " "
@@ -130,7 +132,7 @@ class LecturePlayFragment: Fragment() {
         val subLecture = allSubLectures.find { it.subLectureId == subLectureId }
         if (subLecture != null) {
             binding.playTitle.text = subLecture.subLectureTitle
-            binding.playNum.text = "${subLecture.subLectureId}강"
+            binding.playNum.text = "${subLecture.lectureOrder}강"
         }
     }
 

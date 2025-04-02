@@ -17,6 +17,7 @@ import com.example.second_project.adapter.OwnedLectureDetailAdapter
 import com.example.second_project.adapter.SearchLectureAdapter
 import com.example.second_project.data.ReportItem
 import com.example.second_project.data.model.dto.response.ReportApiResponse
+import com.example.second_project.data.model.dto.response.SubLecture
 import com.example.second_project.data.repository.LectureDetailRepository
 import com.example.second_project.databinding.DialogReportBinding
 import com.example.second_project.databinding.FragmentOwnedLectureDetailBinding
@@ -66,6 +67,8 @@ class OwnedLectureDetailFragment : Fragment() {
         viewModel.lectureDetail.observe(viewLifecycleOwner) { detail ->
             detail?.let {
                 recentSubLectureId = it.data.recentLectureId
+//                recentSubLectureId = 16 //임시
+                val allSubLectures: List<SubLecture> = it.data.subLectures
 
                 // 로딩이 끝났으면 ProgressBar 숨기기
                 binding.loadingProgressBar.visibility = View.GONE
@@ -76,9 +79,11 @@ class OwnedLectureDetailFragment : Fragment() {
                 binding.lectureDetailTeacher.text = it.data.lecturer ?: "강의자 미정"
                 binding.lectureDetailGoal.text = it.data.goal
 
-                // "수료 완료한 강의인지 아닌지 조건문 추가 필요"
-                if (it.data.recentLectureId != 0 ) {
-                    binding.ownedDetailPlayBtn.text = "${recentSubLectureId}강 - 이어보기"
+                val foundSubLecture = allSubLectures.find { sub -> sub.subLectureId == recentSubLectureId }
+
+                // "완강한 강의인지 아닌지 조건문 추가 필요"
+                if ( foundSubLecture != null ) {
+                    binding.ownedDetailPlayBtn.text = "${foundSubLecture.lectureOrder}강 - 이어보기"
                     subLectureId = it.data.recentLectureId
                 } else {
                     binding.ownedDetailPlayBtn.text = "수강하기"
