@@ -101,6 +101,7 @@ class LecturePlayFragment: Fragment() {
                 )
                 binding.playLectureList.layoutManager = LinearLayoutManager(requireContext())
                 binding.playLectureList.adapter = adapter
+                binding.playLectureList.isNestedScrollingEnabled = false
                 
                 //이전/다음 ui 업데이트
                 updateBtnColors()
