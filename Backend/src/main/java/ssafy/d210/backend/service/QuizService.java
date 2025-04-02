@@ -15,6 +15,6 @@ public interface QuizService {
     ResponseSuccessDto<List<QuizResponse>> getQuizzes(Long lectureId);
 
     // 퀴즈 제출
-    ResponseSuccessDto<Boolean> submitQuiz(Long lectureId, QuizResultRequest request);
+    ResponseSuccessDto<Boolean> submitQuiz(Long lectureId, Long userId, QuizResultRequest request);
 
 }
