@@ -52,6 +52,7 @@ class RegisterSublectureAdapter (
             // 삭제 버튼
             binding.btnDeleteSubLecture.setOnClickListener {
                 isExpandedList.removeAt(position)
+                tempSubLectures.removeAt(position)
                 onDeleteClick(position)
                 notifyItemRemoved(position)
                 notifyItemRangeChanged(position, itemCount)
@@ -85,9 +86,32 @@ class RegisterSublectureAdapter (
 
             // 영상 불러오기 버튼 클릭
             binding.btnConfirm.setOnClickListener {
-                val url = binding.editURL.editText?.text.toString()
-                onLoadVideoClick(position, url)
+                item.inputUrl = binding.editURL.editText?.text.toString()
+
+                if (item.isLocked) {
+                    // 🔁 수정하기 모드 진입: 다시 입력 가능하게 만들기
+                    item.isLocked = false
+                    item.videoTitle = ""
+                    item.videoId = ""
+                    item.thumbnailUrl = ""
+                    item.duration = 0
+                    notifyItemChanged(position)
+                } else {
+                    // 📥 불러오기 진행
+                    val url = binding.editURL.editText?.text.toString()
+                    onLoadVideoClick(position, url)
+                }
             }
+
+            // 링크 입력창 상태 변경
+            binding.editURL.editText?.apply {
+                isFocusable = !item.isLocked
+                isFocusableInTouchMode = !item.isLocked
+                isEnabled = !item.isLocked
+            }
+
+            // 버튼 텍스트 변경
+            binding.btnConfirm.text = if (item.isLocked) "수정하기" else "불러오기"
 
         }
     }
@@ -124,4 +148,16 @@ class RegisterSublectureAdapter (
         isExpandedList.addAll(List(tempList.size) { true })
         notifyDataSetChanged()
     }
+
+    fun updateItem(position: Int, item: RegisterTempSubLecture) {
+        if (position in tempSubLectures.indices) {
+            tempSubLectures[position] = item
+            notifyItemChanged(position)
+        }
+    }
+
+    fun getItemAt(position: Int): RegisterTempSubLecture {
+        return tempSubLectures[position]
+    }
+
 }

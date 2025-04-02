@@ -23,6 +23,8 @@ class RegisterUploadFragment: Fragment(), RegisterStepSavable {
 
     private var _binding: FragmentRegisterUploadBinding? = null
     private val binding get() = _binding!!
+
+    // 파일 데이터 관리
     private val PICK_FILE_REQUEST_CODE = 100
     private var selectedFileUri: Uri? = null
 
@@ -39,11 +41,12 @@ class RegisterUploadFragment: Fragment(), RegisterStepSavable {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 작성 중이던 내용 복원
         viewModel.selectedLectureFileName?.let {
             binding.textFile.text = it
         }
 
-        // 파일 업로드 레이아웃 클릭 시
+        // 파일 업로드 레이아웃 클릭 시 파일 선택기 열기
         binding.constraintUploadFile.setOnClickListener {
             openFilePicker()
         }
@@ -53,30 +56,32 @@ class RegisterUploadFragment: Fragment(), RegisterStepSavable {
         }
     }
 
-    // 인터페이스 구현!
+    // 프래그먼트 전환 시 ViewModel에 현재 입력값 저장 (임시 저장 용도)
     override fun saveDataToViewModel(): Boolean {
         viewModel.selectedLectureFileName = binding.textFile.text.toString()
         viewModel.selectedLectureFileUri = selectedFileUri
         return true
     }
 
+    // 파일은 zip만 저장할 수 있음
     private fun openFilePicker() {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.type = "application/zip"
         startActivityForResult(intent, PICK_FILE_REQUEST_CODE)
     }
 
+    // 파일 선택 완료
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == PICK_FILE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             selectedFileUri = data?.data
             selectedFileUri?.let {
-                // 선택된 파일 처리 (ex. 파일명 보여주기, 서버 업로드 등)
-                Toast.makeText(requireContext(), "파일 선택됨: ${it.lastPathSegment}", Toast.LENGTH_SHORT).show()
 
                 // 만약 파일명 표시하려면 TextView 하나 추가해서 보여줄 수도 있음
                 val fileName = FileUtils.getFileNameFromUri(requireContext(), it)
                 binding.textFile.text = "선택된 파일: $fileName"
+
+                Toast.makeText(requireContext(), "파일 선택 완료: $fileName", Toast.LENGTH_SHORT).show()
             }
         }
     }

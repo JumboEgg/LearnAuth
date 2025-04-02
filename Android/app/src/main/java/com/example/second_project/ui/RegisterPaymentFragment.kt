@@ -40,7 +40,7 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
         binding.recyclerParticipants.visibility = View.VISIBLE
         binding.recyclerParticipants.layoutManager = LinearLayoutManager(requireContext())
 
-        // 어댑터 초기화 (내부 데이터 직접 관리)
+        // 어댑터 초기화
         adapter = RegisterParticipantsAdapter(
             onLecturerToggle = { /* 필요 시 구현 가능 */ },
             onDeleteClick = { position -> adapter.removeItem(position) },
@@ -82,8 +82,10 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
             adapter.addItem()
         }
 
-        // 기존 가격 설정
+
+        // 가격 설정
         binding.editTextPrice.editText?.setText(viewModel.price.toString())
+
 
         // 기존 참여자 정보가 있을 경우 초기화
         if (viewModel.ratios.isNotEmpty()) {
@@ -106,7 +108,19 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
     override fun saveDataToViewModel(): Boolean  {
         // 가격 저장
         val priceText = binding.editTextPrice.editText?.text.toString()
-        viewModel.price = priceText.toIntOrNull() ?: 0
+        if (priceText.isBlank()) {
+            Toast.makeText(requireContext(), "가격을 입력해주세요. 0원도 가능합니다.", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
+        val price = priceText.toIntOrNull()
+        if (price == null || price < 0) {
+            Toast.makeText(requireContext(), "올바른 금액을 입력해주세요.", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
+        viewModel.price = price
+
 
         val participantData = adapter.getParticipantData()
         // ❗ 빈 이메일 존재 확인
@@ -123,6 +137,14 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
                 viewModel.ratios.add(Ratio(email, ratio, isLecturer))
             }
         }
+
+        val totalRatio = participantData.sumOf { it.second }
+        if (totalRatio != 100) {
+            Toast.makeText(requireContext(), "정산 비율의 총합은 반드시 100이어야 합니다.", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
+
         return true
     }
 

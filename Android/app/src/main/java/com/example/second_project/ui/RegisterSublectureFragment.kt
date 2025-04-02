@@ -54,14 +54,15 @@ class RegisterSublectureFragment: Fragment(), RegisterStepSavable {
                             val thumbnailUrl = YoutubeUtil.getThumbnailUrl(videoId)
 
                             // 어댑터의 특정 위치 아이템 업데이트
-                            val tempList = sublectureAdapter.getTempSubLectures().toMutableList()
-                            val item = tempList[position]
-                            item.videoTitle = title
-                            item.duration = durationSeconds
-                            item.videoId = videoId
-                            item.thumbnailUrl = thumbnailUrl
+                            val item = sublectureAdapter.getItemAt(position).copy(
+                                videoTitle = title,
+                                duration = durationSeconds,
+                                videoId = videoId,
+                                thumbnailUrl = YoutubeUtil.getThumbnailUrl(videoId),
+                                isLocked = true
+                            )
+                            sublectureAdapter.updateItem(position, item)
 
-                            sublectureAdapter.setItems(tempList)
                         },
                         onError = { message ->
                             Toast.makeText(requireContext(), "유튜브 정보 불러오기 실패: $message", Toast.LENGTH_SHORT).show()
@@ -99,15 +100,27 @@ class RegisterSublectureFragment: Fragment(), RegisterStepSavable {
         val tempLectures = sublectureAdapter.getTempSubLectures()
 
         tempLectures.forEachIndexed { index, lecture ->
+            if (lecture.title.isBlank()) {
+                Toast.makeText(requireContext(), "${index + 1}번째 개별 강의의 제목을 입력해주세요.", Toast.LENGTH_SHORT).show()
+                return false
+            }
+
             val videoId = YoutubeUtil.extractVideoId(lecture.inputUrl)
             if (videoId.isNullOrBlank()) {
                 Toast.makeText(requireContext(), "${index + 1}번째 강의의 유효한 링크를 입력해주세요.", Toast.LENGTH_SHORT).show()
                 return false
             }
+
+            // ✅ 🔒 영상 정보가 확정되지 않았을 때는 넘어가면 안됨!
+            if (!lecture.isLocked) {
+                Toast.makeText(requireContext(), "${index + 1}번째 강의의 영상을 불러와주세요.", Toast.LENGTH_SHORT).show()
+                return false
+            }
+
             lecture.videoId = videoId // 추출된 ID로 업데이트
         }
 
-        // ✅ ViewModel에 임시 저장만 해두자
+        // ViewModel에 임시 저장
         viewModel.tempSubLectures.clear()
         viewModel.tempSubLectures.addAll(tempLectures)
 

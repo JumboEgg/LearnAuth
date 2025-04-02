@@ -85,20 +85,70 @@ class RegisterViewModel : ViewModel(){
         )
     }
 
+//    fun isValid(): Boolean {
+//        return title.isNotBlank()
+//                && categoryName.isNotBlank()
+//                && goal.isNotBlank()
+//                && description.isNotBlank()
+//                && price >= 0
+//                && ratios.isNotEmpty()
+//                && ratios.any { it.lecturer }
+//                && subLectures.isNotEmpty()
+//                && quizzes.size >= 3
+//                && quizzes.all { quiz ->
+//            quiz.quizOptions.size == 3 && quiz.quizOptions.count { it.isCorrect } == 1
+//        }
+//    }
+
     fun isValid(): Boolean {
-        return title.isNotBlank()
-                && categoryName.isNotBlank()
-                && goal.isNotBlank()
-                && description.isNotBlank()
-                && price > 0
-                && ratios.isNotEmpty()
-                && ratios.any { it.lecturer }
-                && subLectures.isNotEmpty()
-                && quizzes.size >= 3
-                && quizzes.all { quiz ->
-            quiz.quizOptions.size == 3 && quiz.quizOptions.count { it.isCorrect } == 1
+        if (title.isBlank()) {
+            Log.e("isValid", "제목이 비어있음")
+            return false
         }
+        if (categoryName.isBlank()) {
+            Log.e("isValid", "카테고리명이 비어있음")
+            return false
+        }
+        if (goal.isBlank()) {
+            Log.e("isValid", "목표가 비어있음")
+            return false
+        }
+        if (description.isBlank()) {
+            Log.e("isValid", "설명이 비어있음")
+            return false
+        }
+        if (price < 0) {
+            Log.e("isValid", "가격이 0 이하임")
+            return false
+        }
+        if (ratios.isEmpty()) {
+            Log.e("isValid", "참여자 비율 정보 없음")
+            return false
+        }
+        if (!ratios.any { it.lecturer }) {
+            Log.e("isValid", "강의자로 지정된 사람이 없음")
+            return false
+        }
+        if (subLectures.isEmpty()) {
+            Log.e("isValid", "개별 강의 정보 없음")
+            return false
+        }
+        if (quizzes.size < 3) {
+            Log.e("isValid", "퀴즈가 3개 미만임")
+            return false
+        }
+        if (!quizzes.all { it.quizOptions.size == 3 }) {
+            Log.e("isValid", "퀴즈 중 보기 3개가 아닌 항목 있음")
+            return false
+        }
+        if (!quizzes.all { quiz -> quiz.quizOptions.count { it.isCorrect } == 1 }) {
+            Log.e("isValid", "퀴즈 중 정답이 하나가 아닌 항목 있음")
+            return false
+        }
+
+        return true
     }
+
 
     fun fetchYoutubeMetaData(
         videoId: String,
