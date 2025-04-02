@@ -112,6 +112,7 @@ class OwnedLectureDetailFragment : Fragment() {
                         binding.quizBtnVisible.isEnabled = true
                         binding.quizBtn.isClickable = true
                         binding.quizBtn.isEnabled = true
+                        Log.d(TAG, "onViewCreated: 퀴즈 버튼 활성화됨")
                     } else {
                         binding.quizBtnGone.visibility = View.VISIBLE
                         binding.quizBtnVisible.visibility = View.GONE
@@ -119,6 +120,7 @@ class OwnedLectureDetailFragment : Fragment() {
                         binding.quizBtnGone.isEnabled = false
                         binding.quizBtn.isClickable = false
                         binding.quizBtn.isEnabled = false
+                        Log.d(TAG, "onViewCreated: 퀴즈 버튼 비활성화됨")
                     }
                 }
 
@@ -179,11 +181,6 @@ class OwnedLectureDetailFragment : Fragment() {
                 binding.ownedDetailPlayBtn.setOnClickListener {
                     val lectureId = arguments?.getInt("lectureId") ?: return@setOnClickListener
                     val userId = arguments?.getInt("userId") ?: return@setOnClickListener
-                    val subLectureId = recentSubLectureId
-
-
-                    // 수강'중'이 아닐 경우 혹은 수강 완전히 완료한 경우 subLectureId가 무용할 수 있음,
-                    // 이때는 첫 영상 틀어주도록 처리 필요... api에 index값 들어오면 추가
 
                     val action = OwnedLectureDetailFragmentDirections
                         .actionOwnedLectureDetailFragmentToLecturePlayFragment(
@@ -196,9 +193,10 @@ class OwnedLectureDetailFragment : Fragment() {
 
                 }
 
-                binding.quizBtn.setOnClickListener {
+                binding.quizBtnVisible.setOnClickListener {
+                    Log.d(TAG, "onViewCreated: 퀴즈 버튼 클릭됨")
                     if (binding.quizBtnVisible.visibility == View.VISIBLE) {
-                        Log.d(TAG, "onViewCreated: 퀴즈 풀기 버튼 눌림 ")
+                        Log.d(TAG, "onViewCreated: 퀴즈 풀기 버튼 눌림")
                         val lectureId = arguments?.getInt("lectureId") ?: return@setOnClickListener
                         val userId = userId
 
@@ -206,11 +204,9 @@ class OwnedLectureDetailFragment : Fragment() {
                             .actionOwnedLectureDetailFragmentToQuizFragment(lectureId, userId)
                         findNavController().navigate(action)
                     } else {
+                        Log.d(TAG, "onViewCreated: 퀴즈 버튼 비활성화 상태")
                         Toast.makeText(requireContext(), "퀴즈를 진행할 수 없습니다.", Toast.LENGTH_SHORT).show()
                     }
-
-
-
                 }
 
             }

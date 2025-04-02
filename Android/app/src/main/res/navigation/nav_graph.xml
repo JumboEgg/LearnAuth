@@ -123,7 +123,14 @@
         </action>
         <action
             android:id="@+id/action_ownedLectureDetailFragment_to_quizFragment"
-            app:destination="@+id/quizFragment"/>
+            app:destination="@+id/quizFragment">
+            <argument
+                android:name="lectureId"
+                app:argType="integer"/>
+            <argument
+                android:name="userId"
+                app:argType="integer"/>
+        </action>
         <argument
             android:name="lectureId"
             app:argType="integer"

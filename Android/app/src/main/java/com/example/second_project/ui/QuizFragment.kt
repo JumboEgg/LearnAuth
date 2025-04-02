@@ -14,8 +14,14 @@ import androidx.navigation.fragment.navArgs
 import androidx.navigation.navOptions
 import com.example.second_project.R
 import com.example.second_project.data.QuizQuestion
+import com.example.second_project.data.model.dto.response.QuizData
+import com.example.second_project.data.model.dto.response.QuizResponse
 import com.example.second_project.databinding.DialogQuizResultBinding
 import com.example.second_project.databinding.FragmentQuizBinding
+import com.example.second_project.network.ApiClient
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class QuizFragment : Fragment() {
     private var _binding: FragmentQuizBinding? = null
@@ -32,14 +38,8 @@ class QuizFragment : Fragment() {
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
     private var userHasAnswered = false
-
-    private var selectedOption: Int? =null
-
-    private val questions = listOf(
-        QuizQuestion("1번 문제", "눈을 뜰 때 적절한 눈동자의 각도는?", "37도", "79도", "183도"),
-        QuizQuestion("2번 문제", "두 번째 문제 내용은 무엇일까요?", "옵션 A", "옵션 B", "옵션 C"),
-        QuizQuestion("3번 문제", "세 번째 문제의 정답은?", "옵션 X", "옵션 Y", "옵션 Z")
-    )
+    private var selectedOption: Int? = null
+    private var quizDataList: List<QuizData> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,8 +53,13 @@ class QuizFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        showQuestion()
-        startTimer()
+        // 뒤로가기 버튼 설정
+        binding.btnBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
+
+        // 퀴즈 데이터 가져오기
+        fetchQuizData()
 
         // 옵션 클릭 리스너
         binding.option1.setOnClickListener {
@@ -83,36 +88,76 @@ class QuizFragment : Fragment() {
             }
 
             userHasAnswered = true
-            if (selectedOption == 1) {
-                correctAnswers++
-            }
+            checkAnswer()
             timer?.cancel()
             moveToNextOrResult()
-
         }
     }
 
-    private fun moveToNextOrResult() {
-        if (currentQuestionIndex < questions.size - 1) {
-            currentQuestionIndex++
-            userHasAnswered = false
-            showQuestion()
-            startTimer()
-        } else {
-            showResultDialog()
-        }
+    private fun fetchQuizData() {
+        ApiClient.quizService.getQuiz(lectureId).enqueue(object : Callback<QuizResponse> {
+            override fun onResponse(call: Call<QuizResponse>, response: Response<QuizResponse>) {
+                if (response.isSuccessful) {
+                    response.body()?.let { quizResponse ->
+                        quizDataList = quizResponse.data
+                        if (quizDataList.isNotEmpty()) {
+                            showQuestion()
+                            startTimer()
+                        } else {
+                            Toast.makeText(requireContext(), "퀴즈 데이터가 없습니다.", Toast.LENGTH_SHORT).show()
+                            findNavController().popBackStack()
+                        }
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "퀴즈 데이터를 가져오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    findNavController().popBackStack()
+                }
+            }
+
+            override fun onFailure(call: Call<QuizResponse>, t: Throwable) {
+                Toast.makeText(requireContext(), "네트워크 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+                findNavController().popBackStack()
+            }
+        })
     }
 
     private fun showQuestion() {
-        val question = questions[currentQuestionIndex]
-        binding.quizNum.text = question.title
-        binding.problemContent.text = question.content
-        binding.option1.text = question.option1
-        binding.option2.text = question.option2
-        binding.option3.text = question.option3
+        if (currentQuestionIndex >= quizDataList.size) return
+
+        val quizData = quizDataList[currentQuestionIndex]
+        binding.quizNum.text = "${currentQuestionIndex + 1}번 문제"
+        binding.problemContent.text = quizData.question
+
+        // 옵션 설정 (최대 3개까지만 표시)
+        quizData.quizOptions.take(3).forEachIndexed { index, option ->
+            when (index) {
+                0 -> {
+                    binding.option1.text = option.quizOption
+                    binding.option1.visibility = View.VISIBLE
+                }
+                1 -> {
+                    binding.option2.text = option.quizOption
+                    binding.option2.visibility = View.VISIBLE
+                }
+                2 -> {
+                    binding.option3.text = option.quizOption
+                    binding.option3.visibility = View.VISIBLE
+                }
+            }
+        }
+
+        // 3개 미만인 경우 나머지 옵션 숨기기
+        when (quizData.quizOptions.size) {
+            1 -> {
+                binding.option2.visibility = View.GONE
+                binding.option3.visibility = View.GONE
+            }
+            2 -> {
+                binding.option3.visibility = View.GONE
+            }
+        }
 
         resetOptionSelection()
-
         binding.timerText.text = "30"
         binding.progressBar.max = 30
         binding.progressBar.progress = 30
@@ -123,9 +168,19 @@ class QuizFragment : Fragment() {
         selectedOption = null
     }
 
+    private fun checkAnswer() {
+        if (currentQuestionIndex >= quizDataList.size) return
+
+        val quizData = quizDataList[currentQuestionIndex]
+        val selectedOptionIndex = selectedOption?.minus(1) ?: return
+        val selectedQuizOption = quizData.quizOptions.getOrNull(selectedOptionIndex)
+
+        if (selectedQuizOption?.isCorrect == 1) {  // 1이 정답
+            correctAnswers++
+        }
+    }
 
     private fun startTimer() {
-
         timer = object : CountDownTimer(timerDuration, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 val secondsRemaining = millisUntilFinished / 1000
@@ -143,7 +198,7 @@ class QuizFragment : Fragment() {
                         if (selectedOption == 1) {
                             correctAnswers++
                         }
-                        if (currentQuestionIndex == questions.size -1){
+                        if (currentQuestionIndex == quizDataList.size -1){
                             showResultDialog()
                         }else {
                             moveToNextOrResult()
@@ -163,13 +218,24 @@ class QuizFragment : Fragment() {
         }.start()
     }
 
+    private fun moveToNextOrResult() {
+        if (currentQuestionIndex < quizDataList.size - 1) {
+            currentQuestionIndex++
+            userHasAnswered = false
+            showQuestion()
+            startTimer()
+        } else {
+            showResultDialog()
+        }
+    }
+
     private fun showResultDialog() {
         // 1) 정답 여부에 따른 메시지와 아이콘 결정
-        val isPass = (correctAnswers >= 2)
+        val isPass = (correctAnswers >= quizDataList.size * 0.7)  // 70% 이상 맞으면 통과
         val resultMessage = if (isPass) {
-            "${questions.size}문제 중 ${correctAnswers}문제 통과\n축하합니다!"
+            "${quizDataList.size}문제 중 ${correctAnswers}문제 통과\n축하합니다!"
         } else {
-            "${questions.size}문제 중 ${correctAnswers}문제 통과\n다시 시도하세요!"
+            "${quizDataList.size}문제 중 ${correctAnswers}문제 통과\n다시 시도하세요!"
         }
         val resultIcon = if (isPass) R.drawable.pass_check else R.drawable.fail_check
 
@@ -179,7 +245,6 @@ class QuizFragment : Fragment() {
             .setView(dialogBinding.root)
             .setCancelable(false)
 
-//        dialogBinding.dialogTitle.text = "${lectureTitle}"
         dialogBinding.dialogImage.setImageResource(resultIcon)
         dialogBinding.dialogMessage.text = resultMessage
 
@@ -199,7 +264,6 @@ class QuizFragment : Fragment() {
         dialog.show()
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

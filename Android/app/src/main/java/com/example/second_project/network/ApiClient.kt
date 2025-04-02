@@ -20,4 +20,5 @@ object ApiClient {
         .build()
 
     val registerService: RegisterService = retrofit.create(RegisterService::class.java)
+    val quizService: QuizApiService = retrofit.create(QuizApiService::class.java)
 }
