@@ -9,6 +9,7 @@ object UserSession {
     private const val KEY_ACCESS_TOKEN = "access_token"
     private const val KEY_REFRESH_TOKEN = "refresh_token"
     private const val KEY_NICKNAME = "nickname"
+    private const val KEY_USER_NAME = "name"
 
     private lateinit var preferences: SharedPreferences
 
@@ -39,6 +40,12 @@ object UserSession {
         get() = preferences.getString(KEY_NICKNAME, "")
         set(value) {
             preferences.edit().putString(KEY_NICKNAME, value).apply()
+        }
+
+    var name: String?
+        get() = preferences.getString(KEY_USER_NAME, "")
+        set(value){
+            preferences.edit().putString(KEY_USER_NAME, value).apply()
         }
 
     // 로그아웃 등 세션 종료 시 모든 데이터를 초기화합니다.
