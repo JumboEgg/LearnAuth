@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -47,6 +48,7 @@ class LecturePlayFragment: Fragment() {
         val args: LecturePlayFragmentArgs by navArgs()
         currentLectureId = args.lectureId
         currentSubLectureId = args.subLectureId
+//        currentSubLectureId = 16 //확인용 임시 
         val userId = args.userId
 
 
@@ -83,25 +85,30 @@ class LecturePlayFragment: Fragment() {
                 )
                 binding.playLectureList.layoutManager = LinearLayoutManager(requireContext())
                 binding.playLectureList.adapter = adapter
+                
+                //이전/다음 ui 업데이트
+                updateBtnColors()
             }
         }
 
         // 이전, 다음 버튼
-        binding.playPreviousBtn.setOnClickListener {
+        binding.playPreviousBtnVisible.setOnClickListener {
             val previousSubLecture = allSubLectures.find { it.subLectureId == currentSubLectureId - 1 }
             if (previousSubLecture != null) {
                 currentSubLectureId--
                 updateLectureContent(currentSubLectureId)
+                updateBtnColors()
             } else {
                 Toast.makeText(requireContext(), "이전 강의가 없습니다.", Toast.LENGTH_SHORT).show()
             }
         }
 
-        binding.playNextBtn.setOnClickListener {
+        binding.playNextBtnVisible.setOnClickListener {
             val nextSubLecture = allSubLectures.find { it.subLectureId == currentSubLectureId + 1 }
             if (nextSubLecture != null) {
                 currentSubLectureId++
                 updateLectureContent(currentSubLectureId)
+                updateBtnColors()
             } else {
                 Toast.makeText(requireContext(), "다음 강의가 없습니다.", Toast.LENGTH_SHORT).show()
             }
@@ -125,6 +132,34 @@ class LecturePlayFragment: Fragment() {
             binding.playTitle.text = subLecture.subLectureTitle
             binding.playNum.text = "${subLecture.subLectureId}강"
         }
+    }
+
+    private fun updateBtnColors() {
+        val previousSubLecture = allSubLectures.find { it.subLectureId == currentSubLectureId - 1 }
+        val nextSubLecture = allSubLectures.find { it.subLectureId == currentSubLectureId + 1 }
+
+        Log.d(TAG, "updateBtnColors: allSubLectures size = ${allSubLectures.size}")
+        allSubLectures.forEach {
+            Log.d(TAG, "SubLecture: id=${it.subLectureId}, title=${it.subLectureTitle}")
+        }
+        Log.d(TAG, "updateBtnColors: $previousSubLecture, $nextSubLecture")
+
+        if (previousSubLecture != null) {
+            binding.playPreviousBtnVisible.visibility = View.VISIBLE
+            binding.playPreviousGone.visibility = View.GONE
+        } else {
+            binding.playPreviousBtnVisible.visibility = View.GONE
+            binding.playPreviousGone.visibility = View.VISIBLE
+        }
+
+        if (nextSubLecture != null) {
+            binding.playNextBtnVisible.visibility = View.VISIBLE
+            binding.playNextBtnGone.visibility = View.GONE
+        } else {
+            binding.playNextBtnVisible.visibility = View.GONE
+            binding.playNextBtnGone.visibility = View.VISIBLE
+        }
+
     }
 
 }

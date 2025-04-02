@@ -65,7 +65,22 @@
                     android:layout_gravity="center_vertical">
 
                     <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/playPreviousBtn"
+                        android:id="@+id/playPreviousGone"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="이전"
+                        android:background="@drawable/bg_radius_20"
+                        android:backgroundTint="@color/button_white_gray"
+                        android:textColor="@color/text_white_gray"
+                        android:fontFamily="@font/pretendard_bold"
+                        android:textSize="16sp"
+                        android:letterSpacing="-0.02"
+                        android:elevation="4dp"
+                        android:visibility="gone"/>
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/playPreviousBtnVisible"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -76,14 +91,29 @@
                         android:fontFamily="@font/pretendard_bold"
                         android:textSize="16sp"
                         android:letterSpacing="-0.02"
-                        android:elevation="4dp"/>
+                        android:elevation="4dp"
+                        android:visibility="visible"/>
 
                     <View
                         android:layout_width="8dp"
                         android:layout_height="0dp"/>
 
                     <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/playNextBtn"
+                        android:id="@+id/playNextBtnGone"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="다음"
+                        android:background="@drawable/bg_radius_20"
+                        android:backgroundTint="@color/button_white_gray"
+                        android:textColor="@color/text_white_gray"
+                        android:fontFamily="@font/pretendard_bold"
+                        android:textSize="16sp"
+                        android:letterSpacing="-0.02"
+                        android:visibility="gone"/>
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/playNextBtnVisible"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -93,7 +123,8 @@
                         android:textColor="@color/white"
                         android:fontFamily="@font/pretendard_bold"
                         android:textSize="16sp"
-                        android:letterSpacing="-0.02"/>
+                        android:letterSpacing="-0.02"
+                        android:visibility="visible"/>
 
                 </LinearLayout>
 
