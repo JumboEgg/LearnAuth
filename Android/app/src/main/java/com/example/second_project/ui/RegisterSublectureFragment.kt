@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.second_project.BuildConfig
 import com.example.second_project.R
 import com.example.second_project.adapter.RegisterSublectureAdapter
 import com.example.second_project.databinding.FragmentRegisterSublectureBinding
@@ -49,7 +50,7 @@ class RegisterSublectureFragment: Fragment(), RegisterStepSavable {
                 if (videoId != null) {
                     viewModel.fetchYoutubeMetaData(
                         videoId = videoId,
-                        apiKey = "AIzaSyBoQEjW4Cx2Z6p0DB5OniYbA8caxC88WYc", // string 리소스에서 불러오거나 BuildConfig 사용
+                        apiKey = BuildConfig.YOUTUBE_API_KEY,
                         onResult = { title, durationSeconds ->
                             val thumbnailUrl = YoutubeUtil.getThumbnailUrl(videoId)
 
