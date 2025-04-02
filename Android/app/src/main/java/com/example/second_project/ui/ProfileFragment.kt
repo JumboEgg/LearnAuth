@@ -62,19 +62,18 @@ class ProfileFragment : Fragment() {
     }
 
     private fun logout() {
-        val token = UserSession.accessToken
-        if (token.isNullOrEmpty()) {
-            Toast.makeText(requireContext(), "Access token is missing", Toast.LENGTH_SHORT).show()
+        val refreshToken = UserSession.refreshToken
+        if (refreshToken.isNullOrEmpty()) {
+            Toast.makeText(requireContext(), "Refresh token is missing", Toast.LENGTH_SHORT).show()
             return
         }
 
+        Log.d("ProfileFragment", "Stored refreshToken: $refreshToken")
+
         val authApiService = ApiClient.retrofit.create(AuthApiService::class.java)
-        authApiService.logout("Bearer $token").enqueue(object : Callback<LogoutResponse> {
-            override fun onResponse(
-                call: Call<LogoutResponse>,
-                response: Response<LogoutResponse>
-            ) {
-                if (response.isSuccessful && response.body() != null && response.body()!!.data) {
+        authApiService.logout(refreshToken).enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
                     // 로그아웃 성공: 세션 초기화 후 LoginActivity로 이동
                     UserSession.clear()
                     val intent = Intent(requireContext(), LoginActivity::class.java)
@@ -83,10 +82,15 @@ class ProfileFragment : Fragment() {
                 } else {
                     val errorBody = response.errorBody()?.string() ?: "No error details"
                     Log.e("Logout", "Logout failed. Code: ${response.code()}, Error: $errorBody")
+                    Toast.makeText(
+                        requireContext(),
+                        "로그아웃 실패: 코드 ${response.code()}, 에러: $errorBody",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
 
-            override fun onFailure(call: Call<LogoutResponse>, t: Throwable) {
+            override fun onFailure(call: Call<Void>, t: Throwable) {
                 Log.e("Logout", "Logout error", t)
                 Toast.makeText(requireContext(), "로그아웃 오류: ${t.message}", Toast.LENGTH_SHORT).show()
             }

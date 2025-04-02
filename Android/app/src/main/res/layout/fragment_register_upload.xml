@@ -25,6 +25,7 @@
                 style="@style/heading2" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintUploadFile"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="50dp"
@@ -33,6 +34,7 @@
                 android:layout_marginVertical="20dp">
 
                 <TextView
+                    android:id="@+id/textFile"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="파일 업로드하기"

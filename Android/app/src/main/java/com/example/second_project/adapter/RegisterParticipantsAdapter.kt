@@ -7,14 +7,55 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.second_project.R
 import com.example.second_project.databinding.ItemRegisterParticipantsBinding
+import androidx.core.widget.addTextChangedListener
+
 
 class RegisterParticipantsAdapter(
-    private val participantNames: MutableList<String>,
     private val onDeleteClick: (Int) -> Unit,
     private val onNameClick: (Int) -> Unit,
-    private val onLecturerToggle: (Int) -> Unit,
-    private val isLecturerFlags: MutableList<Boolean>,
+    private val onLecturerToggle: (Int) -> Unit
 )  : RecyclerView.Adapter<RegisterParticipantsAdapter.ViewHolder>() {
+    private val participantNames = mutableListOf<String>()
+    private val isLecturerFlags = mutableListOf<Boolean>()
+    private val ratioList = mutableListOf<Int>()
+
+    fun addItem(name: String = "", isLecturer: Boolean = false, ratio: Int = 0) {
+        participantNames.add(name)
+        isLecturerFlags.add(isLecturer)
+        ratioList.add(ratio)
+        notifyItemInserted(participantNames.size - 1)
+    }
+
+    fun removeItem(position: Int) {
+        if (position in participantNames.indices) {
+            participantNames.removeAt(position)
+            isLecturerFlags.removeAt(position)
+            ratioList.removeAt(position)
+            notifyItemRemoved(position)
+        }
+    }
+
+    fun setItems(names: List<String>, lecturers: List<Boolean>, ratios: List<Int>? = null) {
+        participantNames.clear()
+        isLecturerFlags.clear()
+        ratioList.clear()
+
+        participantNames.addAll(names)
+        isLecturerFlags.addAll(lecturers)
+        ratioList.addAll(ratios ?: List(names.size) { 0 })
+
+        notifyDataSetChanged()
+    }
+
+    fun getParticipantData(): List<Triple<String, Int, Boolean>> {
+        return participantNames.indices.map { i ->
+            Triple(participantNames[i], ratioList[i], isLecturerFlags[i])
+        }
+    }
+
+
+
+
 
     inner class ViewHolder(private val binding: ItemRegisterParticipantsBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -35,8 +76,17 @@ class RegisterParticipantsAdapter(
                     onDeleteClick(position)
                 }
 
-                // 강의자 체크 이미지 토글
+                binding.editTextRatioParticipants.editText?.setText(ratioList.getOrNull(position)?.toString() ?: "")
 
+                binding.editTextRatioParticipants.editText?.addTextChangedListener {
+                    val ratio = it.toString().toIntOrNull() ?: 0
+                    if (adapterPosition in ratioList.indices) {
+                        ratioList[adapterPosition] = ratio
+                    }
+                }
+
+
+                // 강의자 체크 이미지 토글
                 // 초기 체크 상태 UI 설정
                 val isChecked = isLecturerFlags[position]
                 binding.isLecturer.getChildAt(0)?.let { imageView ->
@@ -77,5 +127,16 @@ class RegisterParticipantsAdapter(
     }
 
     override fun getItemCount(): Int = participantNames.size
+
+    fun getRatioForPosition(position: Int): Int? {
+        return ratioList.getOrNull(position)
+    }
+    fun updateParticipantName(position: Int, newName: String) {
+        if (position in participantNames.indices) {
+            participantNames[position] = newName
+            notifyItemChanged(position)
+        }
+    }
+
 
 }
