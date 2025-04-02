@@ -5,6 +5,8 @@ import com.example.second_project.data.model.dto.response.LectureResponse
 import com.example.second_project.data.model.dto.response.LectureSearchResponse
 import com.example.second_project.data.model.dto.response.MostCompletedLecturesResponse
 import com.example.second_project.data.model.dto.response.MostRecentLecturesResponse
+import com.example.second_project.data.model.dto.response.OwnedLectureResponse
+import com.example.second_project.data.model.dto.response.ParticipatedLectureResponse
 import com.example.second_project.data.model.dto.response.RandomLecturesResponse
 import retrofit2.Call
 import retrofit2.http.GET
@@ -45,4 +47,16 @@ interface LectureApiService {
         @Query("keyword") keyword: String,
         @Query("page") page: Int
     ): Call<LectureSearchResponse>
+
+    // 내가 참여한 강의
+    @GET("/api/lecture/participated")
+    fun getParticipatedLectures(
+        @Query("userId") userId:Int
+    ) :Call<ParticipatedLectureResponse>
+
+    // 내가 보유한 강의
+    @GET("/api/lecture/owned")
+    fun getOwnedLectures(
+        @Query("userId") userId:Int
+    ) : Call<OwnedLectureResponse>
 }
