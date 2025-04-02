@@ -55,31 +55,32 @@ class SearchFragment : Fragment() {
             addItemDecoration(HorizontalSpacingItemDecoration(spacing))
         }
 
-        // SearchLectureAdapter 생성 (강의 클릭 시 NavGraph를 통해 화면 이동)
-//        val searchLectureAdapter = SearchLectureAdapter { lectureId, lectureTitle ->
-//            val action = SearchFragmentDirections.actionNavSearchToQuizFragment(
-//                lectureId = lectureId,
-//                lectureTitle = lectureTitle
-//            )
-//        val searchLectureAdapter = SearchLectureAdapter { lectureId, userId ->
-//            val action = SearchFragmentDirections.actionNavSearchToLectureDetailFragment(
-//                lectureId = lectureId,
-//                userId = userId
-//            )
-//            findNavController().navigate(action)
-//        }
-
-//        val searchLectureAdapter = SearchLectureAdapter { lectureId, userId ->
-//            val action = SearchFragmentDirections.actionNavSearchToOwnedLectureDetailFragment(
-//                lectureId = lectureId,
-//                userId = userId
-//            )
-//            findNavController().navigate(action)
-//        }
-
         val searchLectureAdapter = SearchLectureAdapter { lectureId, userId ->
+
+
             // 강의를 클릭했을 때, 강의 상세 정보를 불러옵니다.
             viewModel.loadLectureDetail(lectureId, userId)
+
+            viewModel.lectureDetail.observe(viewLifecycleOwner) { lectureDetail ->
+                lectureDetail?.let {
+                    val action = if (it.data.owned == false) {
+                        // 보유하지 않은 강의라면
+                        Log.d(TAG, "onViewCreated: 보유?? ${it.data.owned}, ${it.data.lectureId}")
+                        SearchFragmentDirections.actionNavSearchToLectureDetailFragment(
+                            lectureId = it.data?.lectureId ?: 0,
+                            userId = userId
+                        )
+                    } else {
+                        // 보유한 강의라면
+                        Log.d(TAG, "onViewCreated: 보유?? ${it.data.owned}, ${it.data.lectureId}")
+                        SearchFragmentDirections.actionNavSearchToOwnedLectureDetailFragment(
+                            lectureId = it.data?.lectureId ?: 0,
+                            userId = userId
+                        )
+                    }
+                    findNavController().navigate(action)
+                }
+            }
         }
 
         binding.lectureList.apply {
@@ -97,27 +98,27 @@ class SearchFragment : Fragment() {
             Log.d(TAG, "onViewCreated: ${lectureList}")
         }
 
-        viewModel.lectureDetail.observe(viewLifecycleOwner) { lectureDetail ->
-            lectureDetail?.let {
-                val action = if (it.data.owned == false) {
-                    // 보유하지 않은 강의라면
-                    Log.d(TAG, "onViewCreated: 보유?? ${it.data.owned}, ${it.data.lectureId}")
-                    SearchFragmentDirections.actionNavSearchToLectureDetailFragment(
-                        lectureId = it.data?.lectureId ?: 0,
-                        userId = userId
-                    )
-                } else {
-                    // 보유한 강의라면
-                    Log.d(TAG, "onViewCreated: 보유?? ${it.data.owned}, ${it.data.lectureId}")
-                    SearchFragmentDirections.actionNavSearchToOwnedLectureDetailFragment(
-                        lectureId = it.data?.lectureId ?: 0,
-                        userId = userId
-                    )
-                }
-
-                findNavController().navigate(action)
-            }
-        }
+//        viewModel.lectureDetail.observe(viewLifecycleOwner) { lectureDetail ->
+//            lectureDetail?.let {
+//                val action = if (it.data.owned == false) {
+//                    // 보유하지 않은 강의라면
+//                    Log.d(TAG, "onViewCreated: 보유?? ${it.data.owned}, ${it.data.lectureId}")
+//                    SearchFragmentDirections.actionNavSearchToLectureDetailFragment(
+//                        lectureId = it.data?.lectureId ?: 0,
+//                        userId = userId
+//                    )
+//                } else {
+//                    // 보유한 강의라면
+//                    Log.d(TAG, "onViewCreated: 보유?? ${it.data.owned}, ${it.data.lectureId}")
+//                    SearchFragmentDirections.actionNavSearchToOwnedLectureDetailFragment(
+//                        lectureId = it.data?.lectureId ?: 0,
+//                        userId = userId
+//                    )
+//                }
+//
+//                findNavController().navigate(action)
+//            }
+//        }
 
 
             // 초기 로딩: 기본값은 "전체"로 모든 강의 데이터 로드

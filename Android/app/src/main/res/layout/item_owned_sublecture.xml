@@ -34,7 +34,8 @@
             android:text="1강"
             style="@style/semibold16"
             android:layout_marginStart="16dp"
-            app:layout_constraintTop_toTopOf="@id/eachThumnail"/>
+            app:layout_constraintTop_toTopOf="@id/eachThumnail"
+            android:layout_marginVertical="6dp"/>
 
         <TextView
             android:id="@+id/eachTitle"
@@ -50,21 +51,44 @@
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"/>
 
-        <com.google.android.material.button.MaterialButton
+<!--        <com.google.android.material.button.MaterialButton-->
+<!--            android:id="@+id/eachWatchBtn"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="0dp"-->
+<!--            android:text="이어보기"-->
+<!--            style="@style/semibold14"-->
+<!--            android:padding="0dp"-->
+<!--            app:layout_constraintStart_toStartOf="@id/eachNum"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintTop_toBottomOf="@id/eachNum"-->
+<!--            app:layout_constraintBottom_toBottomOf="@id/eachThumnail"-->
+<!--            android:backgroundTint="@color/button_white_blue"-->
+<!--            android:textColor="@color/text_white_blue"-->
+<!--            android:layout_marginTop="4dp"-->
+<!--            android:layout_marginEnd="8dp"-->
+<!--            android:visibility="gone"/>-->
+
+        <TextView
             android:id="@+id/eachWatchBtn"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="이어보기"
-            style="@style/semibold14"
-            android:padding="0dp"
-            app:layout_constraintStart_toStartOf="@id/eachNum"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/eachNum"
-            app:layout_constraintBottom_toBottomOf="@id/eachThumnail"
-            android:backgroundTint="@color/button_white_blue"
-            android:textColor="@color/text_white_blue"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="8dp"/>
+            app:layout_constraintEnd_toStartOf="@id/goIcon"
+            app:layout_constraintTop_toTopOf="@id/goIcon"
+            app:layout_constraintBottom_toBottomOf="@id/goIcon"
+            android:textColor="@color/primary_color"
+            style="@style/semibold16"
+            android:layout_marginEnd="4dp"/>
+
+        <ImageView
+            android:id="@+id/goIcon"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/arrow_forward"
+            app:layout_constraintEnd_toEndOf="@id/eachTitle"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="12dp"
+            app:tint="@color/primary_color" />
 
 
         
