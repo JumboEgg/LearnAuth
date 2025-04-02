@@ -10,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
+import com.example.second_project.R
 import com.example.second_project.UserSession
 import com.example.second_project.databinding.DialogCertConfirmBinding
 import com.example.second_project.databinding.FragmentCertDetailBinding
@@ -77,6 +78,10 @@ class CertDetailFragment : Fragment() {
         val dialog = AlertDialog.Builder(requireContext())
             .setView(dialogBinding.root)
             .create()
+
+        dialog.window?.apply {
+            setBackgroundDrawableResource(R.drawable.bg_radius_20)
+        }
 
         dialog.show()
 

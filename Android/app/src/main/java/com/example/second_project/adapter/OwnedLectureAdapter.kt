@@ -2,34 +2,56 @@ package com.example.second_project.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.second_project.databinding.ItemOwnedSublectureBinding
+import com.example.second_project.data.model.dto.response.OwnedLecture
+import com.example.second_project.databinding.IteLectureBinding
 
-private const val TAG = "OwnedLectureAdapter_야옹"
-class OwnedLectureAdapter(private val items: List<LectureItem>) :
-    RecyclerView.Adapter<OwnedLectureAdapter.ViewHolder>() {
+class OwnedLectureAdapter(
+    private val onItemClick: ((OwnedLecture) -> Unit)? = null
+) : ListAdapter<OwnedLecture, OwnedLectureAdapter.OwnedLectureViewHolder>(DiffCallback()) {
 
-    class ViewHolder(private val binding: ItemOwnedSublectureBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: LectureItem) {
-            binding.eachNum.text = item.lectureNum
-            binding.eachTitle.text = item.lectureTitle
-            binding.eachThumnail.setImageResource(item.thumbnailResId)
+    inner class OwnedLectureViewHolder(
+        private val binding: IteLectureBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: OwnedLecture) {
+            // "과목"은 categoryName로 표시합니다.
+            binding.subject.text = item.categoryName
+            // 강의 제목
+            binding.lectureTitle.text = item.title
+            // 학습률: learningRate가 Double이라면, 백분율로 변환하여 표시
+            val percentage = String.format("%.0f", item.learningRate * 100)
+            binding.progressBar.text = "학습률 ${percentage}%"
+            // 이어보기 버튼: isLecturer에 따라 텍스트를 다르게 설정합니다.
+            binding.lectureButton.text = if (item.isLecturer) "이어서 보기" else "수강하기"
+            // 아이템 클릭 이벤트: OwnedLecture 객체 전체를 전달
+            binding.root.setOnClickListener {
+                onItemClick?.invoke(item)
+            }
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = ItemOwnedSublectureBinding.inflate(
-            LayoutInflater.from(parent.context), parent, false
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OwnedLectureViewHolder {
+        val binding = IteLectureBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
         )
-        return ViewHolder(binding)
+        return OwnedLectureViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(items[position])
+    override fun onBindViewHolder(holder: OwnedLectureViewHolder, position: Int) {
+        holder.bind(getItem(position))
     }
 
-    override fun getItemCount(): Int = items.size
+    private class DiffCallback : DiffUtil.ItemCallback<OwnedLecture>() {
+        override fun areItemsTheSame(oldItem: OwnedLecture, newItem: OwnedLecture): Boolean {
+            return oldItem.lectureId == newItem.lectureId
+        }
+
+        override fun areContentsTheSame(oldItem: OwnedLecture, newItem: OwnedLecture): Boolean {
+            return oldItem == newItem
+        }
+    }
 }
-
-data class LectureItem(val lectureNum: String, val lectureTitle: String, val thumbnailResId: Int)

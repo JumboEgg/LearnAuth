@@ -29,6 +29,7 @@ data class SubLecture(
     val subLectureTitle: String,
     val lectureUrl: String,
     val lectureLength: Int,
+    val lectureOrder: Int,
     val continueWatching: String,
     val endFlag: Boolean
 )

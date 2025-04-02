@@ -28,7 +28,11 @@ class MainActivity : AppCompatActivity() {
         // nav 바 없어져야 하는 페이지
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.certDetailFragment,R.id.registerMainFragment -> {
+                R.id.certDetailFragment
+                    ,R.id.registerMainFragment
+                    , R.id.lectureDetailFragment
+                    , R.id.ownedLectureDetailFragment
+                    , R.id.lecturePlayFragment -> {
                     binding.bottomNavigation.visibility = View.GONE
                 }
                 else -> {

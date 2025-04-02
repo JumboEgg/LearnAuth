@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/ownedLectureDetailRootLayout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -22,6 +24,7 @@
         android:fillViewport="true"> <!-- fillViewport: 화면의 크기에 맞게 ScrollView를 확장 -->
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/ownedLectureDetailContentLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -60,11 +63,12 @@
     <ImageView
         android:id="@+id/lectureDetailThumb"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintDimensionRatio="H, 16:9"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="16:9"
         app:layout_constraintTop_toTopOf="parent"
-        android:src="@drawable/sample_plzdelete"
-        android:scaleType="centerCrop"/>
+        android:src="@drawable/white"
+        android:scaleType="centerCrop"
+        android:adjustViewBounds="true"/>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/lectureNameCategoryArea"
@@ -167,7 +171,7 @@
                 android:id="@+id/watchBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/primary_color"
+                android:backgroundTint="@color/button_white_blue"
                 app:cardCornerRadius="20dp"
                 app:cardElevation="1dp"
                 app:layout_constraintTop_toBottomOf="@id/lectureDetailTeacher"
@@ -178,12 +182,14 @@
                     android:id="@+id/ownedDetailPlayBtn"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:text="n강 - 이어보기"
+                    android:text=" "
                     android:fontFamily="@font/pretendard_bold"
                     android:textSize="16sp"
                     android:letterSpacing="-0.02"
                     android:paddingVertical="12dp"
-                    android:layout_gravity="center"/>
+                    android:layout_gravity="center"
+                    android:backgroundTint="@color/button_white_blue"
+                    android:textColor="@color/primary_color"/>
 
             </androidx.cardview.widget.CardView>
 
@@ -201,6 +207,7 @@
                 >
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/quizBtnGone"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:text="퀴즈 풀기"
@@ -211,7 +218,23 @@
                     android:background="@drawable/transparent"
                     android:paddingVertical="12dp"
                     android:layout_gravity="center"
-                    android:clickable="false"/>
+                    android:clickable="false"
+                    android:visibility="visible"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/quizBtnVisible"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="퀴즈 풀기"
+                    android:fontFamily="@font/pretendard_bold"
+                    android:textSize="16sp"
+                    android:textColor="@color/primary_color"
+                    android:letterSpacing="-0.02"
+                    android:background="@drawable/transparent"
+                    android:paddingVertical="12dp"
+                    android:layout_gravity="center"
+                    android:clickable="true"
+                    android:visibility="gone"/>
 
             </androidx.cardview.widget.CardView>
 
@@ -230,11 +253,11 @@
                 app:cardCornerRadius="20dp"
                 app:cardElevation="1dp"
                 android:clickable="true"
-
                 android:visibility="gone"
                 >
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/ownedCertBtnVisible"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:text="수료증 보기"

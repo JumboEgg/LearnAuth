@@ -1,12 +1,16 @@
 package com.example.second_project.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.example.second_project.R
 import com.example.second_project.data.model.dto.response.SubLecture
 import com.example.second_project.databinding.ItemOwnedSublectureBinding
-import com.example.second_project.databinding.ItemSubLectureBinding
+import com.example.second_project.utils.YoutubeUtil
 
+private const val TAG = "OwnedLectureDetailAdapter_야옹"
 class OwnedLectureDetailAdapter(
     private val subLectureList: List<SubLecture>,
     private val onItemClick: (SubLecture) -> Unit
@@ -18,6 +22,23 @@ class OwnedLectureDetailAdapter(
             binding.eachNum.text = "${position +1}강"
             binding.eachTitle.text = subLecture.subLectureTitle
             binding.root.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+
+            // 썸네일 설정
+            val videoId = if (subLecture.lectureUrl.contains("youtube.com") || subLecture.lectureUrl.contains("youtu.be")) {
+                YoutubeUtil.getThumbnailUrl(subLecture.lectureUrl)
+            } else {
+                subLecture.lectureUrl  // 이미 비디오 ID인 경우
+            }
+
+            if (videoId != null) {
+                val thumbnailUrl = YoutubeUtil.getThumbnailUrl(videoId, YoutubeUtil.ThumbnailQuality.MEDIUM)
+                Glide.with(binding.root.context)
+                    .load(thumbnailUrl)
+                    .placeholder(R.drawable.white)
+                    .into(binding.eachThumnail)
+            } else {
+                Log.e(TAG, "유효한 유튜브 URL이 아님: ${subLecture.lectureUrl}")
+            }
 
             if(subLecture.endFlag == false && subLecture.continueWatching == "00:00:00") {
                 binding.eachWatchBtn.text = "수강하기"

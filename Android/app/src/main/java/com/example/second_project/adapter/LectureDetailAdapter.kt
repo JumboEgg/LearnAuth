@@ -4,7 +4,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.second_project.R
 import com.example.second_project.data.model.dto.response.SubLecture
 import com.example.second_project.databinding.ItemSubLectureBinding
 
