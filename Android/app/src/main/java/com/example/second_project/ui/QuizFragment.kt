@@ -272,8 +272,7 @@ class QuizFragment : Fragment() {
         dialogBinding.dialogImage.setImageResource(resultIcon)
         dialogBinding.dialogMessage.text = resultMessage
         // 퀴즈 통과 시 certificate = true로 설정
-        val request = QuizCompleteRequest(completeQuiz = true, userId = userId)
-        ApiClient.quizService.completeQuiz(lectureId, request).enqueue(object : Callback<QuizResponse> {
+        ApiClient.quizService.completeQuiz(lectureId, userId).enqueue(object : Callback<QuizResponse> {
             override fun onResponse(call: Call<QuizResponse>, response: Response<QuizResponse>) {
                 if (response.isSuccessful) {
                     Log.d(TAG, "퀴즈 완료 처리 성공")
@@ -290,13 +289,7 @@ class QuizFragment : Fragment() {
         val dialog = builder.create()
         dialogBinding.dialogButton.setOnClickListener {
             dialog.dismiss()
-            findNavController().navigate(
-                R.id.nav_profile,
-                null,
-                navOptions {
-                    popUpTo(R.id.nav_graph) { inclusive = true }
-                }
-            )
+            findNavController().popBackStack()
         }
 
         // 5) 실제로 다이얼로그 표시

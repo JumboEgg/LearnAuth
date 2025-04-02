@@ -6,6 +6,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Body
+import retrofit2.http.Query
 
 interface QuizApiService {
     @GET("/api/lecture/{lectureId}/quiz")
@@ -14,7 +15,7 @@ interface QuizApiService {
     @POST("/api/lecture/{lectureId}/quiz")
     fun completeQuiz(
         @Path("lectureId") lectureId: Int,
-        @Body request: QuizCompleteRequest
+        @Query("userId") userId: Int
     ): Call<QuizResponse>
 }
 

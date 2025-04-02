@@ -257,6 +257,7 @@
                 >
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/ownedCertBtnVisible"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:text="수료증 보기"

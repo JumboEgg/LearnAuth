@@ -8,6 +8,7 @@
     android:gravity="center"
     android:padding="24dp"
     android:background="@drawable/bg_dialog_rounded"
+    android:backgroundTint="@color/background_color"
     >
 
     <!-- 다이얼로그 제목 (예: "눈 뜨고 차이는 법") -->
