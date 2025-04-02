@@ -38,6 +38,7 @@ public class UserServiceImpl implements UserService {
     private final ResponseUtil responseUtil;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    @Override
     @DistributedLock(key = "#userSignupRequest.email")
     public ResponseSuccessDto<SignupResponse> signup(SignupRequest userSignupRequest) {
 
