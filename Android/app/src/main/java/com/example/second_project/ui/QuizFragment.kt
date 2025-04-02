@@ -3,6 +3,7 @@ package com.example.second_project.ui
 import android.app.AlertDialog
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,11 +19,14 @@ import com.example.second_project.data.model.dto.response.QuizData
 import com.example.second_project.data.model.dto.response.QuizResponse
 import com.example.second_project.databinding.DialogQuizResultBinding
 import com.example.second_project.databinding.FragmentQuizBinding
+import com.example.second_project.databinding.DialogTimeoutBinding
 import com.example.second_project.network.ApiClient
+import com.example.second_project.network.QuizCompleteRequest
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
+private const val TAG = "QuizFragment_야옹"
 class QuizFragment : Fragment() {
     private var _binding: FragmentQuizBinding? = null
     private val binding get() = _binding!!
@@ -63,22 +67,25 @@ class QuizFragment : Fragment() {
 
         // 옵션 클릭 리스너
         binding.option1.setOnClickListener {
-            if (selectedOption == null) {
-                selectedOption = 1
-                binding.optionsGroup.check(binding.option1.id)
-            }
+            selectedOption = 1
+            binding.optionsGroup.check(binding.option1.id)
+            val quizData = quizDataList[currentQuestionIndex]
+            val selectedOption = quizData.quizOptions.getOrNull(0)
+            Log.d(TAG, "선택한 답: ${selectedOption?.quizOption}")
         }
         binding.option2.setOnClickListener {
-            if (selectedOption == null) {
-                selectedOption = 2
-                binding.optionsGroup.check(binding.option2.id)
-            }
+            selectedOption = 2
+            binding.optionsGroup.check(binding.option2.id)
+            val quizData = quizDataList[currentQuestionIndex]
+            val selectedOption = quizData.quizOptions.getOrNull(1)
+            Log.d(TAG, "선택한 답: ${selectedOption?.quizOption}")
         }
         binding.option3.setOnClickListener {
-            if (selectedOption == null) {
-                selectedOption = 3
-                binding.optionsGroup.check(binding.option3.id)
-            }
+            selectedOption = 3
+            binding.optionsGroup.check(binding.option3.id)
+            val quizData = quizDataList[currentQuestionIndex]
+            val selectedOption = quizData.quizOptions.getOrNull(2)
+            Log.d(TAG, "선택한 답: ${selectedOption?.quizOption}")
         }
 
         binding.nextButton.setOnClickListener {
@@ -86,6 +93,12 @@ class QuizFragment : Fragment() {
                 Toast.makeText(requireContext(), "답을 선택해주세요", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+
+            // 최종 선택된 옵션으로 정답 체크
+            val quizData = quizDataList[currentQuestionIndex]
+            val selectedOptionIndex = selectedOption?.minus(1) ?: return@setOnClickListener
+            val selectedQuizOption = quizData.quizOptions.getOrNull(selectedOptionIndex)
+            Log.d(TAG, "최종 제출한 답: ${selectedQuizOption?.quizOption}")
 
             userHasAnswered = true
             checkAnswer()
@@ -175,7 +188,8 @@ class QuizFragment : Fragment() {
         val selectedOptionIndex = selectedOption?.minus(1) ?: return
         val selectedQuizOption = quizData.quizOptions.getOrNull(selectedOptionIndex)
 
-        if (selectedQuizOption?.isCorrect == 1) {  // 1이 정답
+        // 선택한 옵션이 정답인지 확인 (isCorrect=1인 옵션이 정답)
+        if (selectedQuizOption?.isCorrect == 1) {
             correctAnswers++
         }
     }
@@ -195,23 +209,33 @@ class QuizFragment : Fragment() {
                 if (!userHasAnswered) {
                     if (selectedOption != null) {
                         userHasAnswered = true
-                        if (selectedOption == 1) {
-                            correctAnswers++
-                        }
+                        checkAnswer()  // 정답 체크 함수 호출
                         if (currentQuestionIndex == quizDataList.size -1){
                             showResultDialog()
                         }else {
                             moveToNextOrResult()
                         }
                     } else {
-                        AlertDialog.Builder(requireContext())
-                            .setTitle("시간초과입니다!")
-                            .setMessage("시간 내에 답을 선택하지 않으셨습니다.")
-                            .setPositiveButton("확인") { dialog, _ ->
-                                dialog.dismiss()
-                                moveToNextOrResult()
-                            }
-                            .show()
+                        // 시간 초과 시 정답 체크
+                        val quizData = quizDataList[currentQuestionIndex]
+                        val correctOption = quizData.quizOptions.find { it.isCorrect == 1 }
+                        if (correctOption != null) {
+                            correctAnswers++
+                        }
+                        
+                        val dialogBinding = DialogTimeoutBinding.inflate(layoutInflater)
+                        val builder = AlertDialog.Builder(requireContext())
+                            .setView(dialogBinding.root)
+                            .setCancelable(false)
+
+                        val dialog = builder.create()
+                        dialogBinding.dialogButton.setOnClickListener {
+                            dialog.dismiss()
+                            moveToNextOrResult()
+                        }
+
+                        dialog.show()
+                        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
                     }
                 }
             }
@@ -231,7 +255,7 @@ class QuizFragment : Fragment() {
 
     private fun showResultDialog() {
         // 1) 정답 여부에 따른 메시지와 아이콘 결정
-        val isPass = (correctAnswers >= quizDataList.size * 0.7)  // 70% 이상 맞으면 통과
+        val isPass = (correctAnswers >= quizDataList.size * 0.6)
         val resultMessage = if (isPass) {
             "${quizDataList.size}문제 중 ${correctAnswers}문제 통과\n축하합니다!"
         } else {
@@ -247,6 +271,21 @@ class QuizFragment : Fragment() {
 
         dialogBinding.dialogImage.setImageResource(resultIcon)
         dialogBinding.dialogMessage.text = resultMessage
+        // 퀴즈 통과 시 certificate = true로 설정
+        val request = QuizCompleteRequest(completeQuiz = true, userId = userId)
+        ApiClient.quizService.completeQuiz(lectureId, request).enqueue(object : Callback<QuizResponse> {
+            override fun onResponse(call: Call<QuizResponse>, response: Response<QuizResponse>) {
+                if (response.isSuccessful) {
+                    Log.d(TAG, "퀴즈 완료 처리 성공")
+                } else {
+                    Log.e(TAG, "퀴즈 완료 처리 실패: ${response.code()}")
+                }
+            }
+
+            override fun onFailure(call: Call<QuizResponse>, t: Throwable) {
+                Log.e(TAG, "퀴즈 완료 처리 실패: ${t.message}")
+            }
+        })
 
         val dialog = builder.create()
         dialogBinding.dialogButton.setOnClickListener {
