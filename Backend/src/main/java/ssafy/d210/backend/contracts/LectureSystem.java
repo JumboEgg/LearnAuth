@@ -29,7 +29,7 @@ import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.BaseEventResponse;
 import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.tuples.generated.Tuple3;
+import org.web3j.tuples.generated.Tuple2;
 import org.web3j.tx.Contract;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
@@ -51,9 +51,9 @@ public class LectureSystem extends Contract {
 
     public static final String FUNC_DEFAULT_ADMIN_ROLE = "DEFAULT_ADMIN_ROLE";
 
-    public static final String FUNC_LECTURE_ROLE = "LECTURE_ROLE";
-
     public static final String FUNC_ADDUSER = "addUser";
+
+    public static final String FUNC_ADMIN = "admin";
 
     public static final String FUNC_APPROVE = "approve";
 
@@ -69,7 +69,11 @@ public class LectureSystem extends Contract {
 
     public static final String FUNC_GETAPPROVED = "getApproved";
 
+    public static final String FUNC_GETOWNEROFNFT = "getOwnerOfNFT";
+
     public static final String FUNC_GETROLEADMIN = "getRoleAdmin";
+
+    public static final String FUNC_GETTOKENURI = "getTokenURI";
 
     public static final String FUNC_GETUSERPURCHASES = "getUserPurchases";
 
@@ -99,8 +103,6 @@ public class LectureSystem extends Contract {
 
     public static final String FUNC_SETAPPROVALFORALL = "setApprovalForAll";
 
-    public static final String FUNC_SETTLELECTURE = "settleLecture";
-
     public static final String FUNC_SUPPORTSINTERFACE = "supportsInterface";
 
     public static final String FUNC_SYMBOL = "symbol";
@@ -125,7 +127,7 @@ public class LectureSystem extends Contract {
             Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}, new TypeReference<Uint256>() {}));
 
     public static final Event LECTURECREATED_EVENT = new Event("LectureCreated", 
-            Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}, new TypeReference<Utf8String>() {}, new TypeReference<Address>() {}));
+            Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}, new TypeReference<Utf8String>() {}));
 
     public static final Event LECTUREPURCHASED_EVENT = new Event("LecturePurchased", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>(true) {}, new TypeReference<Uint256>() {}, new TypeReference<Utf8String>() {}));
@@ -133,7 +135,7 @@ public class LectureSystem extends Contract {
     public static final Event LECTURESETTLED_EVENT = new Event("LectureSettled", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Uint16>(true) {}, new TypeReference<Uint16>(true) {}, new TypeReference<Uint256>() {}, new TypeReference<Utf8String>() {}));
 
-    public static final Event METADATAUPDATE_EVENT = new Event("MetadataUpdate",
+    public static final Event METADATAUPDATE_EVENT = new Event("MetadataUpdate", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
 
     public static final Event NFTISSUED_EVENT = new Event("NFTIssued", 
@@ -276,7 +278,7 @@ public class LectureSystem extends Contract {
 
     public Flowable<BatchMetadataUpdateEventResponse> batchMetadataUpdateEventFlowable(
             EthFilter filter) {
-        return web3j.ethLogFlowable(filter).map(LectureSystem::getBatchMetadataUpdateEventFromLog);
+        return web3j.ethLogFlowable(filter).map(log -> getBatchMetadataUpdateEventFromLog(log));
     }
 
     public Flowable<BatchMetadataUpdateEventResponse> batchMetadataUpdateEventFlowable(
@@ -295,7 +297,6 @@ public class LectureSystem extends Contract {
             typedResponse.log = eventValues.getLog();
             typedResponse.lectureId = (BigInteger) eventValues.getNonIndexedValues().get(0).getValue();
             typedResponse.title = (String) eventValues.getNonIndexedValues().get(1).getValue();
-            typedResponse.lectureWallet = (String) eventValues.getNonIndexedValues().get(2).getValue();
             responses.add(typedResponse);
         }
         return responses;
@@ -307,12 +308,11 @@ public class LectureSystem extends Contract {
         typedResponse.log = log;
         typedResponse.lectureId = (BigInteger) eventValues.getNonIndexedValues().get(0).getValue();
         typedResponse.title = (String) eventValues.getNonIndexedValues().get(1).getValue();
-        typedResponse.lectureWallet = (String) eventValues.getNonIndexedValues().get(2).getValue();
         return typedResponse;
     }
 
     public Flowable<LectureCreatedEventResponse> lectureCreatedEventFlowable(EthFilter filter) {
-        return web3j.ethLogFlowable(filter).map(LectureSystem::getLectureCreatedEventFromLog);
+        return web3j.ethLogFlowable(filter).map(log -> getLectureCreatedEventFromLog(log));
     }
 
     public Flowable<LectureCreatedEventResponse> lectureCreatedEventFlowable(
@@ -348,7 +348,7 @@ public class LectureSystem extends Contract {
     }
 
     public Flowable<LecturePurchasedEventResponse> lecturePurchasedEventFlowable(EthFilter filter) {
-        return web3j.ethLogFlowable(filter).map(LectureSystem::getLecturePurchasedEventFromLog);
+        return web3j.ethLogFlowable(filter).map(log -> getLecturePurchasedEventFromLog(log));
     }
 
     public Flowable<LecturePurchasedEventResponse> lecturePurchasedEventFlowable(
@@ -386,7 +386,7 @@ public class LectureSystem extends Contract {
     }
 
     public Flowable<LectureSettledEventResponse> lectureSettledEventFlowable(EthFilter filter) {
-        return web3j.ethLogFlowable(filter).map(LectureSystem::getLectureSettledEventFromLog);
+        return web3j.ethLogFlowable(filter).map(log -> getLectureSettledEventFromLog(log));
     }
 
     public Flowable<LectureSettledEventResponse> lectureSettledEventFlowable(
@@ -418,7 +418,7 @@ public class LectureSystem extends Contract {
     }
 
     public Flowable<MetadataUpdateEventResponse> metadataUpdateEventFlowable(EthFilter filter) {
-        return web3j.ethLogFlowable(filter).map(LectureSystem::getMetadataUpdateEventFromLog);
+        return web3j.ethLogFlowable(filter).map(log -> getMetadataUpdateEventFromLog(log));
     }
 
     public Flowable<MetadataUpdateEventResponse> metadataUpdateEventFlowable(
@@ -452,7 +452,7 @@ public class LectureSystem extends Contract {
     }
 
     public Flowable<NFTIssuedEventResponse> nFTIssuedEventFlowable(EthFilter filter) {
-        return web3j.ethLogFlowable(filter).map(LectureSystem::getNFTIssuedEventFromLog);
+        return web3j.ethLogFlowable(filter).map(log -> getNFTIssuedEventFromLog(log));
     }
 
     public Flowable<NFTIssuedEventResponse> nFTIssuedEventFlowable(DefaultBlockParameter startBlock,
@@ -488,7 +488,7 @@ public class LectureSystem extends Contract {
     }
 
     public Flowable<RoleAdminChangedEventResponse> roleAdminChangedEventFlowable(EthFilter filter) {
-        return web3j.ethLogFlowable(filter).map(LectureSystem::getRoleAdminChangedEventFromLog);
+        return web3j.ethLogFlowable(filter).map(log -> getRoleAdminChangedEventFromLog(log));
     }
 
     public Flowable<RoleAdminChangedEventResponse> roleAdminChangedEventFlowable(
@@ -524,7 +524,7 @@ public class LectureSystem extends Contract {
     }
 
     public Flowable<RoleGrantedEventResponse> roleGrantedEventFlowable(EthFilter filter) {
-        return web3j.ethLogFlowable(filter).map(LectureSystem::getRoleGrantedEventFromLog);
+        return web3j.ethLogFlowable(filter).map(log -> getRoleGrantedEventFromLog(log));
     }
 
     public Flowable<RoleGrantedEventResponse> roleGrantedEventFlowable(
@@ -560,7 +560,7 @@ public class LectureSystem extends Contract {
     }
 
     public Flowable<RoleRevokedEventResponse> roleRevokedEventFlowable(EthFilter filter) {
-        return web3j.ethLogFlowable(filter).map(LectureSystem::getRoleRevokedEventFromLog);
+        return web3j.ethLogFlowable(filter).map(log -> getRoleRevokedEventFromLog(log));
     }
 
     public Flowable<RoleRevokedEventResponse> roleRevokedEventFlowable(
@@ -596,7 +596,7 @@ public class LectureSystem extends Contract {
     }
 
     public Flowable<TokenDepositedEventResponse> tokenDepositedEventFlowable(EthFilter filter) {
-        return web3j.ethLogFlowable(filter).map(LectureSystem::getTokenDepositedEventFromLog);
+        return web3j.ethLogFlowable(filter).map(log -> getTokenDepositedEventFromLog(log));
     }
 
     public Flowable<TokenDepositedEventResponse> tokenDepositedEventFlowable(
@@ -632,7 +632,7 @@ public class LectureSystem extends Contract {
     }
 
     public Flowable<TokenWithdrawnEventResponse> tokenWithdrawnEventFlowable(EthFilter filter) {
-        return web3j.ethLogFlowable(filter).map(LectureSystem::getTokenWithdrawnEventFromLog);
+        return web3j.ethLogFlowable(filter).map(log -> getTokenWithdrawnEventFromLog(log));
     }
 
     public Flowable<TokenWithdrawnEventResponse> tokenWithdrawnEventFlowable(
@@ -668,7 +668,7 @@ public class LectureSystem extends Contract {
     }
 
     public Flowable<TransferEventResponse> transferEventFlowable(EthFilter filter) {
-        return web3j.ethLogFlowable(filter).map(LectureSystem::getTransferEventFromLog);
+        return web3j.ethLogFlowable(filter).map(log -> getTransferEventFromLog(log));
     }
 
     public Flowable<TransferEventResponse> transferEventFlowable(DefaultBlockParameter startBlock,
@@ -692,13 +692,6 @@ public class LectureSystem extends Contract {
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 
-    public RemoteFunctionCall<byte[]> LECTURE_ROLE() {
-        final Function function = new Function(FUNC_LECTURE_ROLE, 
-                Arrays.<Type>asList(), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {}));
-        return executeRemoteCallSingleValueReturn(function, byte[].class);
-    }
-
     public RemoteFunctionCall<TransactionReceipt> addUser(BigInteger _userId, String _userAddress) {
         final Function function = new Function(
                 FUNC_ADDUSER, 
@@ -706,6 +699,13 @@ public class LectureSystem extends Contract {
                 new org.web3j.abi.datatypes.Address(160, _userAddress)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
+    }
+
+    public RemoteFunctionCall<String> admin() {
+        final Function function = new Function(FUNC_ADMIN, 
+                Arrays.<Type>asList(), 
+                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
+        return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
     public RemoteFunctionCall<TransactionReceipt> approve(String to, BigInteger tokenId) {
@@ -739,13 +739,12 @@ public class LectureSystem extends Contract {
     }
 
     public RemoteFunctionCall<TransactionReceipt> createLecture(BigInteger lectureId, String title,
-            List<Participant> participants, String lectureWallet) {
+            List<Participant> participants) {
         final Function function = new Function(
                 FUNC_CREATELECTURE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint16(lectureId), 
                 new org.web3j.abi.datatypes.Utf8String(title), 
-                new org.web3j.abi.datatypes.DynamicArray<Participant>(Participant.class, participants), 
-                new org.web3j.abi.datatypes.Address(160, lectureWallet)), 
+                new org.web3j.abi.datatypes.DynamicArray<Participant>(Participant.class, participants)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
@@ -767,11 +766,25 @@ public class LectureSystem extends Contract {
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
+    public RemoteFunctionCall<String> getOwnerOfNFT(BigInteger tokenId) {
+        final Function function = new Function(FUNC_GETOWNEROFNFT, 
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(tokenId)), 
+                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
+        return executeRemoteCallSingleValueReturn(function, String.class);
+    }
+
     public RemoteFunctionCall<byte[]> getRoleAdmin(byte[] role) {
         final Function function = new Function(FUNC_GETROLEADMIN, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(role)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {}));
         return executeRemoteCallSingleValueReturn(function, byte[].class);
+    }
+
+    public RemoteFunctionCall<String> getTokenURI(BigInteger tokenId) {
+        final Function function = new Function(FUNC_GETTOKENURI, 
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(tokenId)), 
+                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+        return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
     public RemoteFunctionCall<List> getUserPurchases(String userAddress) {
@@ -830,19 +843,18 @@ public class LectureSystem extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public RemoteFunctionCall<Tuple3<String, String, Boolean>> lectures(BigInteger param0) {
+    public RemoteFunctionCall<Tuple2<String, Boolean>> lectures(BigInteger param0) {
         final Function function = new Function(FUNC_LECTURES, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint16(param0)), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}, new TypeReference<Address>() {}, new TypeReference<Bool>() {}));
-        return new RemoteFunctionCall<Tuple3<String, String, Boolean>>(function,
-                new Callable<Tuple3<String, String, Boolean>>() {
+                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}, new TypeReference<Bool>() {}));
+        return new RemoteFunctionCall<Tuple2<String, Boolean>>(function,
+                new Callable<Tuple2<String, Boolean>>() {
                     @Override
-                    public Tuple3<String, String, Boolean> call() throws Exception {
+                    public Tuple2<String, Boolean> call() throws Exception {
                         List<Type> results = executeCallMultipleValueReturn(function);
-                        return new Tuple3<String, String, Boolean>(
+                        return new Tuple2<String, Boolean>(
                                 (String) results.get(0).getValue(), 
-                                (String) results.get(1).getValue(), 
-                                (Boolean) results.get(2).getValue());
+                                (Boolean) results.get(1).getValue());
                     }
                 });
     }
@@ -924,16 +936,8 @@ public class LectureSystem extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public RemoteFunctionCall<TransactionReceipt> settleLecture(BigInteger lectureId) {
-        final Function function = new Function(
-                FUNC_SETTLELECTURE, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint16(lectureId)), 
-                Collections.<TypeReference<?>>emptyList());
-        return executeRemoteCallTransaction(function);
-    }
-
     public RemoteFunctionCall<Boolean> supportsInterface(byte[] interfaceId) {
-        final Function function = new Function(FUNC_SUPPORTSINTERFACE,
+        final Function function = new Function(FUNC_SUPPORTSINTERFACE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes4(interfaceId)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
@@ -1055,8 +1059,6 @@ public class LectureSystem extends Contract {
         public BigInteger lectureId;
 
         public String title;
-
-        public String lectureWallet;
     }
 
     public static class LecturePurchasedEventResponse extends BaseEventResponse {
