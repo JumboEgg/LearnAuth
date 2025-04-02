@@ -60,7 +60,7 @@ class LectureDetailFragment: Fragment(R.layout.fragment_lecture_detail) {
 
         //뒤로가기 버튼 설정
         binding.lectureDetailBack.setOnClickListener {
-            requireActivity().onBackPressed()
+            findNavController().popBackStack()
         }
 
         val lectureId = arguments?.getInt("lectureId") ?: return

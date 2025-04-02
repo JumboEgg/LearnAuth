@@ -113,7 +113,7 @@
                     android:id="@+id/playNum"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="n강"
+                    android:text=" "
                     style="@style/heading3"
                     android:layout_marginEnd="8dp"/>
 
@@ -124,7 +124,7 @@
                     android:maxWidth="200dp"
                     style="@style/heading3"
                     android:fontFamily="@font/pretendard_semibold"
-                    android:text="이거는 강의 제목이 들어갈 자리 길면 이렇게"
+                    android:text=" "
                     android:singleLine="true"/>
 
             </LinearLayout>
@@ -140,7 +140,7 @@
                 android:focusableInTouchMode="true"
                 android:scrollHorizontally="true"
                 android:freezesText="true"
-                android:text="강의 제목이 진짜진짜진짜 길면 어떡하지 바로 이렇게 처리합니다."
+                android:text=" "
                 android:background="@drawable/bg_radius_12"
                 android:backgroundTint="@color/button_white_blue"
                 app:layout_constraintTop_toBottomOf="@id/nowPlaying"
@@ -155,10 +155,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toBottomOf="@id/playLectureName"
-                app:layout_constraintBottom_toBottomOf="parent"
                 android:layout_marginHorizontal="24dp"
                 android:layout_marginTop="16dp"
-                android:layout_marginBottom="100dp"
                 />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
