@@ -78,7 +78,7 @@ class OwnedLectureDetailFragment : Fragment() {
 
                 // "수료 완료한 강의인지 아닌지 조건문 추가 필요"
                 if (it.data.recentLectureId != 0 ) {
-                    binding.ownedDetailPlayBtn.text = "${recentSubLectureId}강 - 이어 보기"
+                    binding.ownedDetailPlayBtn.text = "${recentSubLectureId}강 - 이어보기"
                     subLectureId = it.data.recentLectureId
                 } else {
                     binding.ownedDetailPlayBtn.text = "수강하기"
@@ -150,6 +150,14 @@ class OwnedLectureDetailFragment : Fragment() {
         binding.declarationBtn.setOnClickListener {
             showReportDialog(userId, lectureId)
         }
+
+        //뒤로가기 처리
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                findNavController().popBackStack()
+            }
+        })
+
 
     }
 

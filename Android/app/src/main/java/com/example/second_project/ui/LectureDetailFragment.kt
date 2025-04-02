@@ -102,9 +102,10 @@ class LectureDetailFragment: Fragment(R.layout.fragment_lecture_detail) {
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                findNavController().popBackStack(R.id.nav_search, true)
+                findNavController().popBackStack()
             }
         })
+
     }
 
     fun showChargeDialog() {
