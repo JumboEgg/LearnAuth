@@ -7,8 +7,10 @@ import com.example.second_project.data.model.dto.response.SubLecture
 import com.example.second_project.databinding.ItemOwnedSublectureBinding
 import com.example.second_project.databinding.ItemSubLectureBinding
 
-class OwnedLectureDetailAdapter(private val subLectureList: List<SubLecture>) :
-    RecyclerView.Adapter<OwnedLectureDetailAdapter.LectureViewHolder>() {
+class OwnedLectureDetailAdapter(
+    private val subLectureList: List<SubLecture>,
+    private val onItemClick: (SubLecture) -> Unit
+) : RecyclerView.Adapter<OwnedLectureDetailAdapter.LectureViewHolder>() {
 
     inner class LectureViewHolder(private val binding: ItemOwnedSublectureBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -23,6 +25,10 @@ class OwnedLectureDetailAdapter(private val subLectureList: List<SubLecture>) :
                 binding.eachWatchBtn.text = "이어보기"
             } else if (subLecture.endFlag == true) {
                 binding.eachWatchBtn.text = "다시보기"
+            }
+
+            binding.root.setOnClickListener {
+                onItemClick(subLecture)
             }
         }
     }

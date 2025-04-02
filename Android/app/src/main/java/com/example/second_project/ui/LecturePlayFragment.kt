@@ -7,7 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.second_project.R
 import com.example.second_project.adapter.OwnedLectureDetailAdapter
 import com.example.second_project.data.model.dto.response.SubLecture
 import com.example.second_project.data.repository.LectureDetailRepository
@@ -39,11 +42,12 @@ class LecturePlayFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
-        val args = arguments?.let { LecturePlayFragmentArgs.fromBundle(it) }
-        currentLectureId = args?.lectureId ?: 0
-        val userId = args?.userId ?: 0
-        currentSubLectureId = 6 //임시!!! 입니다. 현재 DB가 안정화되지 않아 기입합니다.
+
+        val args: LecturePlayFragmentArgs by navArgs()
+        currentLectureId = args.lectureId
+        currentSubLectureId = args.subLectureId
+        val userId = args.userId
+
 
         Log.d(TAG, "onViewCreated: $currentLectureId, $userId, $currentSubLectureId")
 
@@ -70,7 +74,12 @@ class LecturePlayFragment: Fragment() {
                 }
 
                 // RecyclerView 설정
-                val adapter = OwnedLectureDetailAdapter(subLectureList = allSubLectures)
+                val adapter = OwnedLectureDetailAdapter(
+                    subLectureList = allSubLectures,
+                    onItemClick = { subLecture ->
+                        updateLectureContent(subLecture.subLectureId)
+                    }
+                )
                 binding.playLectureList.layoutManager = LinearLayoutManager(requireContext())
                 binding.playLectureList.adapter = adapter
             }

@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.second_project.R
 import com.example.second_project.UserSession.userId
 import com.example.second_project.adapter.OwnedLectureDetailAdapter
+import com.example.second_project.adapter.SearchLectureAdapter
 import com.example.second_project.data.ReportItem
 import com.example.second_project.data.model.dto.response.ReportApiResponse
 import com.example.second_project.data.repository.LectureDetailRepository
@@ -32,6 +33,7 @@ class OwnedLectureDetailFragment : Fragment() {
 
     private var _binding: FragmentOwnedLectureDetailBinding? = null
     private val binding get() = _binding!!
+    private var recentSubLectureId: Int? = null
 
     private val viewModel: OwnedLectureDetailViewModel by lazy {
         OwnedLectureDetailViewModel(LectureDetailRepository())
@@ -63,6 +65,8 @@ class OwnedLectureDetailFragment : Fragment() {
 
         viewModel.lectureDetail.observe(viewLifecycleOwner) { detail ->
             detail?.let {
+                recentSubLectureId = it.data.recentLectureId
+
                 // 로딩이 끝났으면 ProgressBar 숨기기
                 binding.loadingProgressBar.visibility = View.GONE
 
@@ -74,21 +78,27 @@ class OwnedLectureDetailFragment : Fragment() {
 
                 // "수료 완료한 강의인지 아닌지 조건문 추가 필요"
                 if (it.data.recentLectureId != 0 ) {
-                    binding.ownedDetailPlayBtn.text = "${it.data.recentLectureId}강 - 이어 보기"
+                    binding.ownedDetailPlayBtn.text = "${recentSubLectureId}강 - 이어 보기"
                     subLectureId = it.data.recentLectureId
                 } else {
                     binding.ownedDetailPlayBtn.text = "수강하기"
 
                 }
 
-
-//                val subLectures = it.data.subLectures ?: emptyList()
-//                val adapter = LectureDetailAdapter(subLectureList = subLectures)
-//                binding.lectureDetailList.adapter = adapter
-//                binding.lectureDetailListCount.text = "총 ${ subLectures.size }강"
-
                 val subLectures = it.data.subLectures ?: emptyList()
-                val adapter = OwnedLectureDetailAdapter(subLectureList = subLectures)
+                val adapter = OwnedLectureDetailAdapter(
+                    subLectureList = subLectures,
+                    onItemClick = { subLecture ->
+                        val lectureId = arguments?.getInt("lectureId") ?: return@OwnedLectureDetailAdapter
+                        val userId = arguments?.getInt("userId") ?: return@OwnedLectureDetailAdapter
+                        val subLectureId = subLecture.subLectureId
+
+                        val action = OwnedLectureDetailFragmentDirections
+                            .actionOwnedLectureDetailFragmentToLecturePlayFragment(lectureId, userId, subLectureId)
+                        findNavController().navigate(action)
+                    }
+                )
+
                 binding.myLectureDetailList.layoutManager = LinearLayoutManager(requireContext())
                 binding.myLectureDetailList.adapter = adapter
 
@@ -96,16 +106,22 @@ class OwnedLectureDetailFragment : Fragment() {
                 // 상단 이어보기 버튼 (파란색)
                 binding.ownedDetailPlayBtn.setOnClickListener {
                     val lectureId = arguments?.getInt("lectureId") ?: return@setOnClickListener
-                    val userId = userId
-                    val subLectureId = subLectureId
+                    val userId = arguments?.getInt("userId") ?: return@setOnClickListener
+                    val subLectureId = recentSubLectureId
 
 
                     // 수강'중'이 아닐 경우 혹은 수강 완전히 완료한 경우 subLectureId가 무용할 수 있음,
                     // 이때는 첫 영상 틀어주도록 처리 필요... api에 index값 들어오면 추가
 
                     val action = OwnedLectureDetailFragmentDirections
-                        .actionOwnedLectureDetailFragmentToLecturePlayFragment(lectureId, userId, subLectureId ?: 1)
+                        .actionOwnedLectureDetailFragmentToLecturePlayFragment(
+                            lectureId = lectureId,
+                            userId = userId,
+                            subLectureId = recentSubLectureId!!
+                        )
+
                     findNavController().navigate(action)
+
                 }
 
                 binding.quizBtn.setOnClickListener {
