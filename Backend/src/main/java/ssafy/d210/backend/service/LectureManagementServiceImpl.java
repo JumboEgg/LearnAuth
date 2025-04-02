@@ -3,6 +3,7 @@ package ssafy.d210.backend.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.request.lecture.LectureRegisterRequest;
 import ssafy.d210.backend.dto.request.lecture.SubLectureRequest;
 import ssafy.d210.backend.dto.request.payment.RatioRequest;
@@ -10,8 +11,11 @@ import ssafy.d210.backend.dto.request.quiz.QuizOptionRequest;
 import ssafy.d210.backend.dto.request.quiz.QuizRequest;
 import ssafy.d210.backend.entity.*;
 import ssafy.d210.backend.enumeration.CategoryName;
+import ssafy.d210.backend.enumeration.response.HereStatus;
+import ssafy.d210.backend.exception.service.*;
 import ssafy.d210.backend.repository.*;
 import ssafy.d210.backend.util.AES256Util;
+import ssafy.d210.backend.util.ResponseUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,6 +24,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class LectureManagementServiceImpl implements LectureManagementService {
 
     private final LectureRepository lectureRepository;
@@ -31,10 +36,10 @@ public class LectureManagementServiceImpl implements LectureManagementService {
     private final PaymentRatioRepository paymentRatioRepository;
     private final UserLectureRepository userLectureRepository;
     private final UserLectureTimeRepository userLectureTimeRepository;
+    private final ResponseUtil<Boolean> responseUtil;
 
     @Override
-    @Transactional
-    public boolean registerLecture(LectureRegisterRequest request) {
+    public ResponseSuccessDto<Boolean> registerLecture(LectureRegisterRequest request) {
         try {
             // 예외 처리
             // 한나 : 더 찾으면 알려주세요
@@ -44,28 +49,28 @@ public class LectureManagementServiceImpl implements LectureManagementService {
                     || request.getGoal() == null || request.getGoal().isBlank()
                     || request.getDescription() == null || request.getDescription().isBlank()
                     || request.getPrice() < 1) {
-                throw new IllegalArgumentException("강의 필수 정보 누락, 가격 1미만");
+                throw new InvalidLectureDataException("강의 필수 정보 누락, 가격 1미만");
             }
 
             // 2. 퀴즈 최소 3개 이상 등록
             if (request.getQuizzes() == null || request.getQuizzes().size() < 3 ) {
-                throw new IllegalArgumentException("퀴즈는 최소 3개 이상 등록해야 합니다.");
+                throw new InvalidQuizDataException("퀴즈는 최소 3개 이상 등록해야 합니다.");
             }
 
             // 3. SubLecture 최소 1개 이상 등록
             if (request.getSubLectures() == null || request.getSubLectures().isEmpty()) {
-                throw new IllegalArgumentException("SubLecture은 최소 1개 이상 등록해야 합니다.");
+                throw new InvalidLectureDataException("SubLecture은 최소 1개 이상 등록해야 합니다.");
             }
 
             // 4. Ratio 최소 1명 + 중복 이메일 금지 + 강의자 1명
             if (request.getRatios() == null || request.getRatios().isEmpty()) {
-                throw new IllegalArgumentException("수익 분배는 최소 1명 이상 등록해야 합니다.");
+                throw new InvalidRatioDataException("수익 분배는 최소 1명 이상 등록해야 합니다.");
             }
             Set<String> emailset = new HashSet<>();
             int lecturerCount = 0;
             for (RatioRequest ratioRequest : request.getRatios()) {
                 if (!emailset.add(ratioRequest.getEmail())) {
-                    throw new IllegalArgumentException("수익 분배 대상자 이메일이 중복 됐습니다. : " + ratioRequest.getEmail());
+                    throw new DuplicatedValueException("수익 분배 대상자 이메일이 중복 됐습니다. : " + ratioRequest.getEmail());
                 }
                 if (ratioRequest.isLecturer()) {
                     lecturerCount++;
@@ -73,7 +78,7 @@ public class LectureManagementServiceImpl implements LectureManagementService {
             }
             // 강의 등록자 무조건 1명
             if (lecturerCount != 1) {
-                throw new IllegalArgumentException("등록자는 반드시 한 명이어야 하고, ratio에서 lecturer=true로 설정 되어야 한다.");
+                throw new InvalidRatioDataException("등록자는 반드시 한 명이어야 하고, ratio에서 lecturer=true로 설정 되어야 한다.");
             }
 
 
@@ -81,7 +86,7 @@ public class LectureManagementServiceImpl implements LectureManagementService {
             CategoryName categoryEnum = mapCategoryName(request.getCategoryName());
             Category category = categoryRepository.findByCategoryName(categoryEnum)
                     // 카테고리는 프론트에서 지정된 값만 줄거라 필요 없을 수도
-                    .orElseThrow(() -> new RuntimeException("해당 카테고리가 없습니다 : " + categoryEnum));
+                    .orElseThrow(() -> new EntityIsNullException("해당 카테고리가 없습니다 : " + categoryEnum));
 
             // 2. Lecture entity 생성
             Lecture lecture = new Lecture();
@@ -98,7 +103,7 @@ public class LectureManagementServiceImpl implements LectureManagementService {
             for (SubLectureRequest subReq : request.getSubLectures()) {
                 // 개별 강의 1초 이상이어야 한다.
                 if (subReq.getSubLectureLength() <= 0) {
-                    throw new IllegalArgumentException("개별 강의 길이는 1초 이상이어야 한다.");
+                    throw new InvalidLectureDataException("개별 강의 길이는 1초 이상이어야 한다.");
                 }
                 SubLecture subLecture = new SubLecture();
                 subLecture.setSubLectureTitle(subReq.getSubLectureTitle());
@@ -112,7 +117,7 @@ public class LectureManagementServiceImpl implements LectureManagementService {
             // 4. Quiz, QuizOption 저장 + 옵션은 3개만 허용 + 정답은 무조건 하나 + 퀴즈 옵션 내용 비어있으면 안된다.
             for (QuizRequest quizReq : request.getQuizzes()) {
                 if (quizReq.getQuizOptions() == null || quizReq.getQuizOptions().size() != 3) {
-                    throw new IllegalArgumentException("퀴즈 옵션은 정확히 3개만 등록해야 합니다.");
+                    throw new InvalidQuizDataException("퀴즈 옵션은 정확히 3개만 등록해야 합니다.");
                 }
                 // 정답 개수 세기
                 long correctCount = quizReq.getQuizOptions().stream()
@@ -120,7 +125,7 @@ public class LectureManagementServiceImpl implements LectureManagementService {
                         .count();
 
                 if (correctCount != 1) {
-                    throw new IllegalArgumentException("퀴즈 옵션에는 정확히 하나의 정답이 있어야 합니다.");
+                    throw new InvalidQuizDataException("퀴즈 옵션에는 정확히 하나의 정답이 있어야 합니다.");
                 }
 
                 Quiz quiz = new Quiz();
@@ -131,7 +136,7 @@ public class LectureManagementServiceImpl implements LectureManagementService {
                 List<QuizOption> quizOptions = new ArrayList<>();
                 for (QuizOptionRequest optionReq : quizReq.getQuizOptions()) {
                     if (optionReq.getQuizOption() == null || optionReq.getQuizOption().isBlank()) {
-                        throw new IllegalArgumentException(("퀴즈 옵션 내용은 비어 있을 수 없다."));
+                        throw new InvalidQuizDataException(("퀴즈 옵션 내용은 비어 있을 수 없다."));
                     }
                     QuizOption quizOption = new QuizOption();
                     quizOption.setOptionText(optionReq.getQuizOption());
@@ -147,7 +152,7 @@ public class LectureManagementServiceImpl implements LectureManagementService {
             List<PaymentRatio> paymentRatios = new ArrayList<>();
             for (RatioRequest ratioReq : request.getRatios()) {
                 User user = userRepository.findOptionalUserByEmail(ratioReq.getEmail())
-                        .orElseThrow(() -> new RuntimeException("해당 이메일로 유저를 찾을 수 없습니다. : " + ratioReq.getEmail()));
+                        .orElseThrow(() -> new EntityIsNullException("해당 이메일로 유저를 찾을 수 없습니다. : " + ratioReq.getEmail()));
                 // PaymentRatio 저장
                 PaymentRatio paymentRatio = new PaymentRatio();
                 paymentRatio.setLecture(savedLecture);
@@ -172,11 +177,11 @@ public class LectureManagementServiceImpl implements LectureManagementService {
             }
             paymentRatioRepository.saveAll(paymentRatios);
 
-            return true;
+            return responseUtil.successResponse(true, HereStatus.SUCCESS_LECTURE_REGISTERED);
         } catch (Exception e) {
             // 워낙 예외 처리가 많아서 printStackTrace 적어둡니다.
             e.printStackTrace();
-            return false;
+            return responseUtil.successResponse(false, HereStatus.FAIL_LECTURE_REGISTERED);
         }
     }
 
@@ -185,7 +190,7 @@ public class LectureManagementServiceImpl implements LectureManagementService {
             try {
                 return CategoryName.valueOf(input);
             } catch (IllegalArgumentException e) {
-                throw new RuntimeException("유효하지 않은 카테고리입니다. : " + input);
+                throw new InvalidLectureDataException("유효하지 않은 카테고리입니다. : " + input);
             }
         }
     }

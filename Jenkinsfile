@@ -18,6 +18,16 @@ pipeline {
 
         JWT_SECRET = credentials('JWT_SECRET')
         AES_256 = credentials('AES_256')
+        REDIS = credentials('REDIS')
+
+        SPRING_DATA_REDIS_HOST = '172.19.0.3'
+        SPRING_DATA_REDIS_PORT = '6379'
+        REDIS_PASSWORD = credentials('REDIS_PASSWORD')
+
+        BC_PRIVATE_KEY = credentials('BC_PRIVATE_KEY')
+        BC_FORWARDER = credentials('BC_FORWARDER')
+        BC_TOKEN = credentials('BC_TOKEN')
+        BC_LECTURE = credentials('BC_LECTURE')
 
         JAVA_HOME = '/opt/java/openjdk'
         GRADLE_HOME = '/opt/gradle/gradle-8.13'
@@ -95,6 +105,14 @@ pipeline {
                                       -e SPRING_PROFILES_ACTIVE=dev \
                                       -e PORT=${DOCKER_PORT} \
                                       -e JWT_SECRET=${JWT_SECRET} \
+                                      -e BC_PRIVATE_KEY=${BC_PRIVATE_KEY} \
+                                      -e BC_FORWARDER=${BC_FORWARDER} \
+                                      -e BC_TOKEN=${BC_TOKEN} \
+                                      -e BC_LECTURE=${BC_LECTURE} \
+                                      -e AES_256=${AES_256} \
+                                      -e SPRING_DATA_REDIS_HOST="${SPRING_DATA_REDIS_HOST}" \
+                                      -e SPRING_DATA_REDIS_PORT="${SPRING_DATA_REDIS_PORT}" \
+                                      -e SPRING_DATA_REDIS_PASSWORD="${REDIS_PASSWORD}" \
                                       -e DB_URL="${DB_URL}" \
                                       -e DB_USERNAME=${DB_USERNAME} \
                                       -e DB_PASSWORD=${DB_PASSWORD} \

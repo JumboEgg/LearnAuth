@@ -39,17 +39,7 @@ public class LectureManagementController {
     public ResponseEntity<ResponseSuccessDto<Boolean>> registerLecture(
             @RequestBody LectureRegisterRequest request
     ) {
-        // 로직 실행
-        boolean result = lectureManagementService.registerLecture(request);
-        // 이 부분 형식 맞추기 필요
-        return ResponseEntity.ok(
-                ResponseSuccessDto.<Boolean>builder()
-                    .data(result)
-                    .timestamp(ZonedDateTime.now())
-                    .code(200)
-                    .status("ok")
-                    .build()
-        );
+        return ResponseEntity.ok(lectureManagementService.registerLecture(request));
     }
 
     // "강의 등록 이메일 찾기" 는 "회원 가입 이메일 중복 확인"입니다.

@@ -184,10 +184,10 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
              join category c
              on l.category_category_id = c.category_id
              and l.lecture_id = :lectureId
-             left join payment_ratio p
+             join payment_ratio p
              on l.lecture_id = p.lecture_lecture_id
              and p.lecturer = true
-             left join user u
+             join user u
              on p.user_user_id = u.user_id
              left join (
                 select sl1.lecture_lecture_id,
@@ -221,14 +221,17 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             sl.sub_lecture_title as subLectureTitle,
             sl.sub_lecture_url as lectureUrl,
             sl.sub_lecture_length as lectureLength,
-            ult.continue_watching as continueWatching
+            ROW_NUMBER() OVER (ORDER BY sl.sub_lecture_id) AS lectureOrder,
+            ult.continue_watching as continueWatching,
+            ult.end_flag as endFlag
         from sub_lecture sl
-        join user_lecture_time as ult
+        left join user_lecture_time as ult
         on sl.sub_lecture_id = ult.sub_lecture_sub_lecture_id
-        and sl.sub_lecture_id in (:subLectureIdList)
+        where sl.sub_lecture_id in (:subLectureIdList)
+        and ult.user_lecture_user_lecture_id = :userLectureId
         order by sl.sub_lecture_id;
     """, nativeQuery = true)
-    List<SubLectureDetailResponse> getUserLectureTime(@Param("subLectureIdList") List<Integer> subLectureIdList);
+    List<SubLectureDetailResponse> getUserLectureTime(@Param("subLectureIdList") List<Integer> subLectureIdList, @Param("userLectureId") Long userLectureId);
 
     // 강의 검색
     // 검색어 기반 강의 리스트 반환
@@ -239,7 +242,10 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
                 SELECT sl.subLectureUrl
                 FROM SubLecture sl
                 WHERE sl.lecture.id = l.id
-                ORDER BY sl.id ASC
+                    AND sl.id = (
+                    SELECT MIN(sl2.id)
+                    FROM SubLecture sl2
+                    WHERE sl2.lecture.id = l.id)
             ), c.categoryName)
         FROM Lecture l
         JOIN l.category c

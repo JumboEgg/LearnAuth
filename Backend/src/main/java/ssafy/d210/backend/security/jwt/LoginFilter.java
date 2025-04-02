@@ -136,6 +136,7 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
 
         // 사용자 정보
         String nickname = user.getNickname() != null ? user.getNickname() : "";
+        String name = user.getName();
 
         List<UserLecture> userLectureList = userLectureService.findAllByUserId(user.getId());
         log.info("userLectureList {}", userLectureList.size());
@@ -150,6 +151,7 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
                         "\"status\":\"" + status + "\"," +
                         "\"data\":{" +
                         "\"userId\":" + userId + "," +
+                        "\"name\":\"" + name + "\"," +
                         "\"nickname\":\"" + nickname + "\"," +
                         "\"certificateCount\":" + userLectureList.size() + "," +
                         "\"wallet\":\"" + wallet + "\"" +

@@ -2,10 +2,12 @@ package ssafy.d210.backend.service;
 //
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PaymentServiceImpl implements PaymentService{
     @Override
     public ResponseSuccessDto<Boolean> decreaseToken(long userId, int quantity) {

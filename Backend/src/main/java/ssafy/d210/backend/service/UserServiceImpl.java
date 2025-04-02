@@ -15,6 +15,8 @@ import ssafy.d210.backend.entity.UserLecture;
 import ssafy.d210.backend.enumeration.response.HereStatus;
 import ssafy.d210.backend.exception.DefaultException;
 import ssafy.d210.backend.exception.service.DuplicatedValueException;
+import ssafy.d210.backend.exception.service.PasswordIsNotAllowed;
+import ssafy.d210.backend.redis.DistributedLock;
 import ssafy.d210.backend.repository.UserLectureRepository;
 import ssafy.d210.backend.repository.UserRepository;
 import ssafy.d210.backend.security.entity.Token;
@@ -36,6 +38,7 @@ public class UserServiceImpl implements UserService {
     private final ResponseUtil responseUtil;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    @DistributedLock(key = "#userSignupRequest.email")
     public ResponseSuccessDto<SignupResponse> signup(SignupRequest userSignupRequest) {
 
         // 이름 본인인증
@@ -47,6 +50,11 @@ public class UserServiceImpl implements UserService {
 
         // 닉네임 중복 확인
         isNicknameDuplicated(newUser);
+
+        if (userSignupRequest.getPassword().length() < 8 || userSignupRequest.getPassword().length() > 100) {
+            log.error("비밀번호가 8자보다 작거나 100자 보다 큽니다.");
+            throw new PasswordIsNotAllowed("비밀번호가 8자보다 작거나 100자 보다 큽니다.");
+        }
 
         newUser.setPassword(bCryptPasswordEncoder.encode(userSignupRequest.getPassword()));
         userRepository.save(newUser);

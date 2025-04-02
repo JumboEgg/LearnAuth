@@ -1,6 +1,9 @@
 package ssafy.d210.backend.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
@@ -47,7 +50,9 @@ public class UserController {
     }
 
     @PostMapping("/logout")
-    @Operation(summary = "로그아웃", description = "로그아웃을 합니다.")
+    @Operation(summary = "로그아웃", description = "로그아웃을 합니다.", parameters = {
+            @Parameter(name = "Refresh", description = "Refresh Token", required = true, schema = @Schema(type = "string"), in = ParameterIn.HEADER)
+    })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "로그아웃 성공"),
             @ApiResponse(responseCode = "400", description = "유효하지 않은 토큰 또는 토큰 없음")
@@ -57,7 +62,9 @@ public class UserController {
     }
 
     @PostMapping("/refresh")
-    @Operation(summary = "토큰 갱신", description = "리프레시 토큰을 사용해 액세스 토큰을 갱신합니다.")
+    @Operation(summary = "토큰 갱신", description = "리프레시 토큰을 사용해 액세스 토큰을 갱신합니다.", parameters = {
+            @Parameter(name = "Refresh", description = "Refresh Token", required = true, schema = @Schema(type = "string"), in = ParameterIn.HEADER)
+    })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "토큰 갱신 성공"),
             @ApiResponse(responseCode = "401", description = "유효하지 않은 리프레시 토큰")
