@@ -143,6 +143,9 @@ class OwnedLectureDetailFragment : Fragment() {
             }
         })
 
+        binding.lectureDetailBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
 
         binding.declarationBtn.setOnClickListener {
             showReportDialog(userId, lectureId)

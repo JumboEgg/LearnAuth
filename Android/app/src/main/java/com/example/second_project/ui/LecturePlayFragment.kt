@@ -105,6 +105,10 @@ class LecturePlayFragment: Fragment() {
                 Toast.makeText(requireContext(), "다음 강의가 없습니다.", Toast.LENGTH_SHORT).show()
             }
         }
+
+        binding.lectureDetailBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
     }
 
     private fun updateLectureContent(subLectureId: Int) {
