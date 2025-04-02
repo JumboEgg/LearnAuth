@@ -99,6 +99,16 @@ class OwnedLectureDetailFragment : Fragment() {
                     // 수료 완료시
                     binding.quizBtn.visibility = View.GONE
                     binding.ownedCertBtn.visibility = View.VISIBLE
+
+                    binding.ownedCertBtnVisible.setOnClickListener {
+                        val action = OwnedLectureDetailFragmentDirections
+                            .actionOwnedLectureDetailFragmentToCertDetailFragment(
+                                lectureId = lectureId,
+                                userId = userId
+                            )
+                        findNavController().navigate(action)
+                    }
+
                 } else {
                     // 미수료 상태라면
                     binding.quizBtn.visibility = View.VISIBLE
