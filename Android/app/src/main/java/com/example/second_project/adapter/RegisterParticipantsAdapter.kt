@@ -19,19 +19,26 @@ class RegisterParticipantsAdapter(
     private val isLecturerFlags = mutableListOf<Boolean>()
     private val ratioList = mutableListOf<Int>()
 
-    fun addItem(name: String = "", isLecturer: Boolean = false, ratio: Int = 0) {
+    fun addItem(name: String = "", isLecturer: Boolean? = null, ratio: Int? = null) {
         participantNames.add(name)
-        isLecturerFlags.add(isLecturer)
-        ratioList.add(ratio)
+        isLecturerFlags.add(isLecturer ?: (participantNames.size == 1)) // 첫 번째만 true
+        ratioList.add(ratio ?: 0)
         notifyItemInserted(participantNames.size - 1)
     }
+
 
     fun removeItem(position: Int) {
         if (position in participantNames.indices) {
             participantNames.removeAt(position)
             isLecturerFlags.removeAt(position)
             ratioList.removeAt(position)
-            notifyItemRemoved(position)
+
+            // ✅ 삭제 후 강의자 없는 경우 → 첫 번째 사람을 강의자로 설정
+            if (!isLecturerFlags.contains(true) && isLecturerFlags.isNotEmpty()) {
+                isLecturerFlags[0] = true
+            }
+
+            notifyDataSetChanged()
         }
     }
 
