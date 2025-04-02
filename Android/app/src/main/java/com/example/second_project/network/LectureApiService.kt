@@ -2,6 +2,7 @@ package com.example.second_project.network
 
 import com.example.second_project.data.model.dto.response.LectureDetailResponse
 import com.example.second_project.data.model.dto.response.LectureResponse
+import com.example.second_project.data.model.dto.response.LectureSearchResponse
 import com.example.second_project.data.model.dto.response.MostCompletedLecturesResponse
 import com.example.second_project.data.model.dto.response.MostRecentLecturesResponse
 import com.example.second_project.data.model.dto.response.RandomLecturesResponse
@@ -37,4 +38,11 @@ interface LectureApiService {
     // 랜덤 강의 10개 (추천용)
     @GET("/api/lecture/random")
     fun getRandomLectures(): Call<RandomLecturesResponse>
+
+    // 강의 검색
+    @GET("/api/lecture/search")
+    fun getSearchLectures(
+        @Query("keyword") keyword: String,
+        @Query("page") page: Int
+    ): Call<LectureSearchResponse>
 }
