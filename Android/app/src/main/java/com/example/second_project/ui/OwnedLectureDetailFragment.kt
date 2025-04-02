@@ -11,6 +11,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.example.second_project.R
 import com.example.second_project.UserSession.userId
 import com.example.second_project.adapter.OwnedLectureDetailAdapter
@@ -24,6 +25,7 @@ import com.example.second_project.databinding.FragmentOwnedLectureDetailBinding
 import com.example.second_project.network.ApiClient
 import com.example.second_project.network.ReportApiService
 import com.example.second_project.ui.LecturePlayFragmentDirections.Companion.actionOwnedLectureDetailFragmentToLecturePlayFragment
+import com.example.second_project.utils.YoutubeUtil
 import com.example.second_project.viewmodel.OwnedLectureDetailViewModel
 import retrofit2.Call
 import retrofit2.Callback
@@ -78,6 +80,8 @@ class OwnedLectureDetailFragment : Fragment() {
                 binding.lectureDetailCategory.text = it.data.categoryName
                 binding.lectureDetailTeacher.text = it.data.lecturer ?: "강의자 미정"
                 binding.lectureDetailGoal.text = it.data.goal
+                
+                
 
                 val foundSubLecture = allSubLectures.find { sub -> sub.subLectureId == recentSubLectureId }
 
@@ -103,6 +107,18 @@ class OwnedLectureDetailFragment : Fragment() {
                         findNavController().navigate(action)
                     }
                 )
+                
+                val firstSubLecture = subLectures.get(0)
+                val videoId = firstSubLecture.lectureUrl
+                if(videoId != null) {
+                    val thumbnailUrl = YoutubeUtil.getThumbnailUrl(videoId, YoutubeUtil.ThumbnailQuality.HIGH)
+                    Glide.with(this)
+                        .load(thumbnailUrl)
+                        .placeholder(R.drawable.sample_plzdelete)
+                        .into(binding.lectureDetailThumb)
+                } else {
+                    Log.e(TAG, "onViewCreated: 유효한 유튜브 URL이 아님.", )
+                }
 
                 binding.myLectureDetailList.layoutManager = LinearLayoutManager(requireContext())
                 binding.myLectureDetailList.adapter = adapter

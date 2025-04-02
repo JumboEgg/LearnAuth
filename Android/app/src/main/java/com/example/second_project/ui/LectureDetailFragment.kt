@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.example.second_project.R
 import com.example.second_project.UserSession.userId
 import com.example.second_project.adapter.LectureDetailAdapter
@@ -23,6 +24,7 @@ import com.example.second_project.data.repository.LectureDetailRepository
 import com.example.second_project.data.repository.LectureRepository
 import com.example.second_project.databinding.FragmentLectureDetailBinding
 import com.example.second_project.databinding.FragmentOwnedLectureDetailBinding
+import com.example.second_project.utils.YoutubeUtil
 import com.example.second_project.viewmodel.LectureDetailViewModel
 
 private const val TAG = "LectureDetailFragment_야옹"
@@ -87,6 +89,19 @@ class LectureDetailFragment: Fragment(R.layout.fragment_lecture_detail) {
                 val adapter = LectureDetailAdapter(subLectureList = subLectures)
                 binding.lectureDetailList.adapter = adapter
                 binding.lectureDetailListCount.text = "총 ${ subLectures.size }강"
+
+                val firstSubLecture = subLectures.get(0)
+                val videoId = firstSubLecture.lectureUrl
+                if(videoId != null) {
+                    val thumbnailUrl = YoutubeUtil.getThumbnailUrl(videoId, YoutubeUtil.ThumbnailQuality.HIGH)
+                    Glide.with(this)
+                        .load(thumbnailUrl)
+                        .placeholder(R.drawable.sample_plzdelete)
+                        .into(binding.lectureDetailThumb)
+                } else {
+                    Log.e(TAG, "onViewCreated: 유효한 유튜브 URL이 아님.", )
+                }
+
             } ?: run {
                 // detail이 null인 경우 처리
                 binding.loadingProgressBar.visibility = View.GONE

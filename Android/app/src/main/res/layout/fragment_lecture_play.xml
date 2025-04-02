@@ -47,14 +47,15 @@
             <ImageView
                 android:id="@+id/lecturePlayThumb"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintDimensionRatio="H, 16:9"
+                android:layout_height="0dp"
+                app:layout_constraintDimensionRatio="16:9"
                 app:layout_constraintTop_toTopOf="parent"
-                android:src="@drawable/sample_plzdelete"
-                android:scaleType="centerCrop"/>
+                android:src="@drawable/white"
+                android:scaleType="centerCrop"
+                android:adjustViewBounds="true"/>
 
 
-                <LinearLayout
+            <LinearLayout
                     android:id="@+id/previousNextBtn"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
