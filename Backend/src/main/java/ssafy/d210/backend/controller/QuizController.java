@@ -44,8 +44,9 @@ public class QuizController {
     })
     public ResponseEntity<ResponseSuccessDto<Boolean>> submitQuiz(
             @PathVariable("lectureId") Long lectureId,
+            @RequestParam("userId") Long userId,
             @RequestBody QuizResultRequest request
     ) {
-        return ResponseEntity.ok(quizService.submitQuiz(lectureId, request));
+        return ResponseEntity.ok(quizService.submitQuiz(lectureId, userId, request));
     }
 }

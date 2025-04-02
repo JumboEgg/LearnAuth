@@ -7,5 +7,4 @@ import lombok.Setter;
 @Setter
 public class QuizResultRequest {
     private boolean completeQuiz;
-    private long userId;
 }
