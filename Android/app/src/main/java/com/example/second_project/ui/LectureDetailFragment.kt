@@ -96,7 +96,7 @@ class LectureDetailFragment: Fragment(R.layout.fragment_lecture_detail) {
                     val thumbnailUrl = YoutubeUtil.getThumbnailUrl(videoId, YoutubeUtil.ThumbnailQuality.HIGH)
                     Glide.with(this)
                         .load(thumbnailUrl)
-                        .placeholder(R.drawable.sample_plzdelete)
+                        .placeholder(R.drawable.white)
                         .into(binding.lectureDetailThumb)
                 } else {
                     Log.e(TAG, "onViewCreated: 유효한 유튜브 URL이 아님.", )

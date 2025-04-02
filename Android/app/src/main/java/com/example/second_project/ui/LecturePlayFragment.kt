@@ -82,7 +82,7 @@ class LecturePlayFragment: Fragment() {
                         Log.d(TAG, "onViewCreated: $thumbnailUrl")
                         Glide.with(this)
                             .load(thumbnailUrl)
-                            .placeholder(R.drawable.sample_plzdelete)
+                            .placeholder(R.drawable.white)
                             .into(binding.lecturePlayThumb)
                     } else {
                         Log.e(TAG, "onViewCreated: 유효한 유튜브 URL이 아님.", )
@@ -155,7 +155,7 @@ class LecturePlayFragment: Fragment() {
                 Log.d(TAG, "썸네일 URL: $thumbnailUrl")
                 Glide.with(this)
                     .load(thumbnailUrl)
-                    .placeholder(R.drawable.sample_plzdelete)
+                    .placeholder(R.drawable.white)
                     .into(binding.lecturePlayThumb)
             } else {
                 Log.e(TAG, "updateLectureContent: 유효한 유튜브 URL이 아님.")

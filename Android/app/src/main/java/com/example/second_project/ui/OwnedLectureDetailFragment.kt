@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -80,8 +81,6 @@ class OwnedLectureDetailFragment : Fragment() {
                 binding.lectureDetailCategory.text = it.data.categoryName
                 binding.lectureDetailTeacher.text = it.data.lecturer ?: "강의자 미정"
                 binding.lectureDetailGoal.text = it.data.goal
-                
-                
 
                 val foundSubLecture = allSubLectures.find { sub -> sub.subLectureId == recentSubLectureId }
 
@@ -91,7 +90,36 @@ class OwnedLectureDetailFragment : Fragment() {
                     subLectureId = it.data.recentLectureId
                 } else {
                     binding.ownedDetailPlayBtn.text = "수강하기"
+                }
 
+                // 모든 강의가 완강 상태인지
+                val allCompleted = allSubLectures.all {sub -> sub.endFlag}
+
+                if (it.data.certificate) {
+                    // 수료 완료시
+                    binding.quizBtn.visibility = View.GONE
+                    binding.ownedCertBtn.visibility = View.VISIBLE
+                } else {
+                    // 미수료 상태라면
+                    binding.quizBtn.visibility = View.VISIBLE
+                    binding.ownedCertBtn.visibility = View.GONE
+
+                    // 완강 상태인지 아닌지에 따라
+                    if (allCompleted) {
+                        binding.quizBtnVisible.visibility = View.VISIBLE
+                        binding.quizBtnGone.visibility = View.GONE
+                        binding.quizBtnVisible.isClickable = true
+                        binding.quizBtnVisible.isEnabled = true
+                        binding.quizBtn.isClickable = true
+                        binding.quizBtn.isEnabled = true
+                    } else {
+                        binding.quizBtnGone.visibility = View.VISIBLE
+                        binding.quizBtnVisible.visibility = View.GONE
+                        binding.quizBtnGone.isClickable = false
+                        binding.quizBtnGone.isEnabled = false
+                        binding.quizBtn.isClickable = false
+                        binding.quizBtn.isEnabled = false
+                    }
                 }
 
                 val subLectures = it.data.subLectures ?: emptyList()
@@ -114,7 +142,7 @@ class OwnedLectureDetailFragment : Fragment() {
                     val thumbnailUrl = YoutubeUtil.getThumbnailUrl(videoId, YoutubeUtil.ThumbnailQuality.HIGH)
                     Glide.with(this)
                         .load(thumbnailUrl)
-                        .placeholder(R.drawable.sample_plzdelete)
+                        .placeholder(R.drawable.white)
                         .into(binding.lectureDetailThumb)
                 } else {
                     Log.e(TAG, "onViewCreated: 유효한 유튜브 URL이 아님.", )
@@ -123,6 +151,29 @@ class OwnedLectureDetailFragment : Fragment() {
                 binding.myLectureDetailList.layoutManager = LinearLayoutManager(requireContext())
                 binding.myLectureDetailList.adapter = adapter
 
+                // RecyclerView의 위치를 동적으로 조정
+                val contentLayout = binding.ownedLectureDetailContentLayout
+                val constraintSet = ConstraintSet()
+                constraintSet.clone(contentLayout)
+                
+                if (binding.quizBtn.visibility == View.GONE) {
+                    constraintSet.connect(
+                        R.id.myLectureDetailList,
+                        ConstraintSet.TOP,
+                        R.id.ownedCertBtn,
+                        ConstraintSet.BOTTOM,
+                        20
+                    )
+                } else {
+                    constraintSet.connect(
+                        R.id.myLectureDetailList,
+                        ConstraintSet.TOP,
+                        R.id.quizBtn,
+                        ConstraintSet.BOTTOM,
+                        20
+                    )
+                }
+                constraintSet.applyTo(contentLayout)
 
                 // 상단 이어보기 버튼 (파란색)
                 binding.ownedDetailPlayBtn.setOnClickListener {
@@ -146,12 +197,20 @@ class OwnedLectureDetailFragment : Fragment() {
                 }
 
                 binding.quizBtn.setOnClickListener {
-                    val lectureId = arguments?.getInt("lectureId") ?: return@setOnClickListener
-                    val userId = userId
+                    if (binding.quizBtnVisible.visibility == View.VISIBLE) {
+                        Log.d(TAG, "onViewCreated: 퀴즈 풀기 버튼 눌림 ")
+                        val lectureId = arguments?.getInt("lectureId") ?: return@setOnClickListener
+                        val userId = userId
 
-                    val action = OwnedLectureDetailFragmentDirections
-                        .actionOwnedLectureDetailFragmentToQuizFragment(lectureId, userId)
-                    findNavController().navigate(action)
+                        val action = OwnedLectureDetailFragmentDirections
+                            .actionOwnedLectureDetailFragmentToQuizFragment(lectureId, userId)
+                        findNavController().navigate(action)
+                    } else {
+                        Toast.makeText(requireContext(), "퀴즈를 진행할 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    }
+
+
+
                 }
 
             }

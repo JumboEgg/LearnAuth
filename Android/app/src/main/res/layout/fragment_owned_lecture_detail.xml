@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/ownedLectureDetailRootLayout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -22,6 +24,7 @@
         android:fillViewport="true"> <!-- fillViewport: 화면의 크기에 맞게 ScrollView를 확장 -->
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/ownedLectureDetailContentLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -202,6 +205,7 @@
                 >
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/quizBtnGone"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:text="퀴즈 풀기"
@@ -212,7 +216,23 @@
                     android:background="@drawable/transparent"
                     android:paddingVertical="12dp"
                     android:layout_gravity="center"
-                    android:clickable="false"/>
+                    android:clickable="false"
+                    android:visibility="visible"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/quizBtnVisible"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="퀴즈 풀기"
+                    android:fontFamily="@font/pretendard_bold"
+                    android:textSize="16sp"
+                    android:textColor="@color/primary_color"
+                    android:letterSpacing="-0.02"
+                    android:background="@drawable/transparent"
+                    android:paddingVertical="12dp"
+                    android:layout_gravity="center"
+                    android:clickable="true"
+                    android:visibility="gone"/>
 
             </androidx.cardview.widget.CardView>
 
@@ -231,7 +251,6 @@
                 app:cardCornerRadius="20dp"
                 app:cardElevation="1dp"
                 android:clickable="true"
-
                 android:visibility="gone"
                 >
 
