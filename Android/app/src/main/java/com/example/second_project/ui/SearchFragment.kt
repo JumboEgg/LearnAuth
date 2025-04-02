@@ -82,8 +82,8 @@ class SearchFragment : Fragment() {
         // 2. 강의 결과 RecyclerView 설정 (Grid 레이아웃, 2열)
         searchLectureAdapter = SearchLectureAdapter { lectureId, userId ->
             // 강의 클릭 시, 강의 상세 정보 불러오기 및 상세 페이지 이동
-            viewModel.loadLectureDetail(lectureId, userId)
-            viewModel.lectureDetail.observe(viewLifecycleOwner) { lectureDetail ->
+            val lectureDetailLiveData = viewModel.loadLectureDetail(lectureId, userId)
+            lectureDetailLiveData.observe(viewLifecycleOwner) { lectureDetail ->
                 lectureDetail?.let {
                     val action = if (it.data.owned == false) {
                         SearchFragmentDirections.actionNavSearchToLectureDetailFragment(
