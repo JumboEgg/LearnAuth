@@ -69,7 +69,7 @@ public class CustomLogoutFilter extends GenericFilter {
 
         tokenRepository.deleteByRefresh(refresh);
 
-        response.setHeader("Refresh", null);
+        response.setHeader("refresh", null);
         response.setStatus(HttpServletResponse.SC_OK);
 
     }
