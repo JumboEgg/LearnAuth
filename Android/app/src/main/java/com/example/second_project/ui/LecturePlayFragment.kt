@@ -17,7 +17,9 @@ import com.example.second_project.adapter.OwnedLectureDetailAdapter
 import com.example.second_project.data.model.dto.response.SubLecture
 import com.example.second_project.data.repository.LectureDetailRepository
 import com.example.second_project.databinding.FragmentLecturePlayBinding
+import com.example.second_project.utils.YoutubeUtil
 import com.example.second_project.viewmodel.OwnedLectureDetailViewModel
+import com.bumptech.glide.Glide
 
 private const val TAG = "LecturePlayFragment_야옹"
 class LecturePlayFragment: Fragment() {
@@ -67,12 +69,24 @@ class LecturePlayFragment: Fragment() {
                     binding.playLectureName.text = it.data.title
                 }
 
-                Log.d(TAG, "야호: $subLecture")
-
                 // subLecture가 null이 아닐 경우, 제목 설정
                 if (subLecture != null) {
                     binding.playTitle.text = subLecture.subLectureTitle
                     binding.playNum.text = "${subLecture.lectureOrder}강"
+
+                    val videoId = subLecture.lectureUrl
+                    Log.d(TAG, "onViewCreated: ${subLecture.lectureUrl}")
+                    Log.d(TAG, "썸네일: $videoId")
+                    if (videoId != null) {
+                        val thumbnailUrl = YoutubeUtil.getThumbnailUrl(videoId, YoutubeUtil.ThumbnailQuality.HIGH)
+                        Log.d(TAG, "onViewCreated: $thumbnailUrl")
+                        Glide.with(this)
+                            .load(thumbnailUrl)
+                            .placeholder(R.drawable.sample_plzdelete)
+                            .into(binding.lecturePlayThumb)
+                    } else {
+                        Log.e(TAG, "onViewCreated: 유효한 유튜브 URL이 아님.", )
+                    }
                 } else {
                     binding.playTitle.text = "강의 제목 없음"
                     binding.playNum.text = " "
@@ -131,8 +145,23 @@ class LecturePlayFragment: Fragment() {
     private fun updateLectureContent(subLectureId: Int) {
         val subLecture = allSubLectures.find { it.subLectureId == subLectureId }
         if (subLecture != null) {
+            currentSubLectureId = subLectureId
+
             binding.playTitle.text = subLecture.subLectureTitle
             binding.playNum.text = "${subLecture.lectureOrder}강"
+            val videoId = subLecture.lectureUrl
+            if (!videoId.isNullOrEmpty()) {
+                val thumbnailUrl = YoutubeUtil.getThumbnailUrl(videoId, YoutubeUtil.ThumbnailQuality.HIGH)
+                Log.d(TAG, "썸네일 URL: $thumbnailUrl")
+                Glide.with(this)
+                    .load(thumbnailUrl)
+                    .placeholder(R.drawable.sample_plzdelete)
+                    .into(binding.lecturePlayThumb)
+            } else {
+                Log.e(TAG, "updateLectureContent: 유효한 유튜브 URL이 아님.")
+            }
+
+            updateBtnColors()
         }
     }
 
