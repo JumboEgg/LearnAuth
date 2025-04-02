@@ -43,11 +43,12 @@
     <ImageView
         android:id="@+id/lectureDetailThumb"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintDimensionRatio="H, 16:9"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="16:9"
         app:layout_constraintTop_toTopOf="parent"
-        android:src="@drawable/sample_plzdelete"
-        android:scaleType="centerCrop"/>
+        android:src="@drawable/white"
+        android:scaleType="centerCrop"
+        android:adjustViewBounds="true"/>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/lectureNameCategoryArea"

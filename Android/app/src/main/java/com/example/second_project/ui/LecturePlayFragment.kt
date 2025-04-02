@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -16,7 +17,9 @@ import com.example.second_project.adapter.OwnedLectureDetailAdapter
 import com.example.second_project.data.model.dto.response.SubLecture
 import com.example.second_project.data.repository.LectureDetailRepository
 import com.example.second_project.databinding.FragmentLecturePlayBinding
+import com.example.second_project.utils.YoutubeUtil
 import com.example.second_project.viewmodel.OwnedLectureDetailViewModel
+import com.bumptech.glide.Glide
 
 private const val TAG = "LecturePlayFragment_야옹"
 class LecturePlayFragment: Fragment() {
@@ -47,6 +50,7 @@ class LecturePlayFragment: Fragment() {
         val args: LecturePlayFragmentArgs by navArgs()
         currentLectureId = args.lectureId
         currentSubLectureId = args.subLectureId
+//        currentSubLectureId = 16 //확인용 임시
         val userId = args.userId
 
 
@@ -68,7 +72,21 @@ class LecturePlayFragment: Fragment() {
                 // subLecture가 null이 아닐 경우, 제목 설정
                 if (subLecture != null) {
                     binding.playTitle.text = subLecture.subLectureTitle
-                    binding.playNum.text = "${subLecture.subLectureId}강"
+                    binding.playNum.text = "${subLecture.lectureOrder}강"
+
+                    val videoId = subLecture.lectureUrl
+                    Log.d(TAG, "onViewCreated: ${subLecture.lectureUrl}")
+                    Log.d(TAG, "썸네일: $videoId")
+                    if (videoId != null) {
+                        val thumbnailUrl = YoutubeUtil.getThumbnailUrl(videoId, YoutubeUtil.ThumbnailQuality.HIGH)
+                        Log.d(TAG, "onViewCreated: $thumbnailUrl")
+                        Glide.with(this)
+                            .load(thumbnailUrl)
+                            .placeholder(R.drawable.white)
+                            .into(binding.lecturePlayThumb)
+                    } else {
+                        Log.e(TAG, "onViewCreated: 유효한 유튜브 URL이 아님.", )
+                    }
                 } else {
                     binding.playTitle.text = "강의 제목 없음"
                     binding.playNum.text = " "
@@ -83,25 +101,30 @@ class LecturePlayFragment: Fragment() {
                 )
                 binding.playLectureList.layoutManager = LinearLayoutManager(requireContext())
                 binding.playLectureList.adapter = adapter
+                
+                //이전/다음 ui 업데이트
+                updateBtnColors()
             }
         }
 
         // 이전, 다음 버튼
-        binding.playPreviousBtn.setOnClickListener {
+        binding.playPreviousBtnVisible.setOnClickListener {
             val previousSubLecture = allSubLectures.find { it.subLectureId == currentSubLectureId - 1 }
             if (previousSubLecture != null) {
                 currentSubLectureId--
                 updateLectureContent(currentSubLectureId)
+                updateBtnColors()
             } else {
                 Toast.makeText(requireContext(), "이전 강의가 없습니다.", Toast.LENGTH_SHORT).show()
             }
         }
 
-        binding.playNextBtn.setOnClickListener {
+        binding.playNextBtnVisible.setOnClickListener {
             val nextSubLecture = allSubLectures.find { it.subLectureId == currentSubLectureId + 1 }
             if (nextSubLecture != null) {
                 currentSubLectureId++
                 updateLectureContent(currentSubLectureId)
+                updateBtnColors()
             } else {
                 Toast.makeText(requireContext(), "다음 강의가 없습니다.", Toast.LENGTH_SHORT).show()
             }
@@ -122,9 +145,52 @@ class LecturePlayFragment: Fragment() {
     private fun updateLectureContent(subLectureId: Int) {
         val subLecture = allSubLectures.find { it.subLectureId == subLectureId }
         if (subLecture != null) {
+            currentSubLectureId = subLectureId
+
             binding.playTitle.text = subLecture.subLectureTitle
-            binding.playNum.text = "${subLecture.subLectureId}강"
+            binding.playNum.text = "${subLecture.lectureOrder}강"
+            val videoId = subLecture.lectureUrl
+            if (!videoId.isNullOrEmpty()) {
+                val thumbnailUrl = YoutubeUtil.getThumbnailUrl(videoId, YoutubeUtil.ThumbnailQuality.HIGH)
+                Log.d(TAG, "썸네일 URL: $thumbnailUrl")
+                Glide.with(this)
+                    .load(thumbnailUrl)
+                    .placeholder(R.drawable.white)
+                    .into(binding.lecturePlayThumb)
+            } else {
+                Log.e(TAG, "updateLectureContent: 유효한 유튜브 URL이 아님.")
+            }
+
+            updateBtnColors()
         }
+    }
+
+    private fun updateBtnColors() {
+        val previousSubLecture = allSubLectures.find { it.subLectureId == currentSubLectureId - 1 }
+        val nextSubLecture = allSubLectures.find { it.subLectureId == currentSubLectureId + 1 }
+
+        Log.d(TAG, "updateBtnColors: allSubLectures size = ${allSubLectures.size}")
+        allSubLectures.forEach {
+            Log.d(TAG, "SubLecture: id=${it.subLectureId}, title=${it.subLectureTitle}")
+        }
+        Log.d(TAG, "updateBtnColors: $previousSubLecture, $nextSubLecture")
+
+        if (previousSubLecture != null) {
+            binding.playPreviousBtnVisible.visibility = View.VISIBLE
+            binding.playPreviousGone.visibility = View.GONE
+        } else {
+            binding.playPreviousBtnVisible.visibility = View.GONE
+            binding.playPreviousGone.visibility = View.VISIBLE
+        }
+
+        if (nextSubLecture != null) {
+            binding.playNextBtnVisible.visibility = View.VISIBLE
+            binding.playNextBtnGone.visibility = View.GONE
+        } else {
+            binding.playNextBtnVisible.visibility = View.GONE
+            binding.playNextBtnGone.visibility = View.VISIBLE
+        }
+
     }
 
 }
