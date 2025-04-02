@@ -10,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
+import com.example.second_project.UserSession
 import com.example.second_project.databinding.DialogCertConfirmBinding
 import com.example.second_project.databinding.FragmentCertDetailBinding
 import com.example.second_project.viewmodel.CertDetailViewModel
@@ -45,11 +46,10 @@ class CertDetailFragment : Fragment() {
                 binding.textTitleCertDetail.text = detail.title
                 binding.textLectureTitle.text = detail.title  // 강의 제목이 detail.title이라면, 또는 별도의 강의 제목이 있다면 수정하세요.
 
-//                binding.textNma
-
                 // 강사명 및 강사 정보를 원하는 뷰에 바인딩 (예시로 아래와 같이)
                 binding.textNameLecturer.text = detail.teacherName
                 // 필요 시 강사 지갑 주소 등 다른 정보도 바인딩 가능
+                binding.textNameStudent.text = UserSession.name
 
                 // QR 코드 이미지 로딩: detail.qrCode가 이미지 URL인 경우 Glide 사용
                 Glide.with(this)

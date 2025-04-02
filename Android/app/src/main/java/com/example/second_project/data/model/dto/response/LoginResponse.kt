@@ -11,5 +11,6 @@ data class Data(
     val certificateCount: Int,
     val nickname: String,
     val userId: Int,
-    val wallet: String
+    val wallet: String,
+    val name : String
 )
