@@ -6,46 +6,78 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.second_project.R
+import com.example.second_project.data.model.dto.RegisterTempQuiz
 import com.example.second_project.databinding.ItemRegisterQuizDetailBinding
 
 class RegisterQuizAdapter : RecyclerView.Adapter<RegisterQuizAdapter.ViewHolder>() {
 
     private val isExpandedList = mutableListOf<Boolean>()
-    private var selectedAnswerIndexList = mutableListOf<Int>()  // 각 퀴즈별로 선택된 정답 인덱스 (0~2)
+    private val quizList = mutableListOf<RegisterTempQuiz>()
 
     inner class ViewHolder(private val binding: ItemRegisterQuizDetailBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(position: Int) {
-            // 퀴즈 제목: 퀴즈 1, 퀴즈 2, ...
+            val quiz = quizList[position]
+
+            // 퀴즈 제목
             binding.textQuizIndex.text = "퀴즈 ${position + 1}"
 
-            // 펼침/접힘 상태 설정
+            // 펼침/접힘
             binding.linearToggleArea.visibility = if (isExpandedList[position]) View.VISIBLE else View.GONE
-
-            // 토글 아이콘 변경
             val iconRes = if (isExpandedList[position]) R.drawable.keyboard_arrow_up_24px
             else R.drawable.keyboard_arrow_down_24px
             binding.btnToggleSubLecture.setImageResource(iconRes)
 
-            // 토글 버튼 클릭
             binding.btnToggleSubLecture.setOnClickListener {
                 isExpandedList[position] = !isExpandedList[position]
                 notifyItemChanged(position)
             }
 
-            // 정답 선택 로직: 항상 하나만 체크되게 설정
+            // 문제 내용
+            binding.editTextTitle.editText?.setText(quiz.question)
+            binding.editTextTitle.editText?.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus) {
+                    quiz.question = binding.editTextTitle.editText?.text.toString()
+                }
+            }
+
+            // 선택지 1
+            binding.editAnswer1.editText?.setText(quiz.options[0])
+            binding.editAnswer1.editText?.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus) {
+                    quiz.options[0] = binding.editAnswer1.editText?.text.toString()
+                }
+            }
+
+            // 선택지 2
+            binding.editAnswer2.editText?.setText(quiz.options[1])
+            binding.editAnswer2.editText?.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus) {
+                    quiz.options[1] = binding.editAnswer2.editText?.text.toString()
+                }
+            }
+
+            // 선택지 3
+            binding.editAnswer3.editText?.setText(quiz.options[2])
+            binding.editAnswer3.editText?.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus) {
+                    quiz.options[2] = binding.editAnswer3.editText?.text.toString()
+                }
+            }
+
+            // 정답 선택: 1개만 체크되도록
             val answerViews = listOf(binding.isAnswer1, binding.isAnswer2, binding.isAnswer3)
 
             answerViews.forEachIndexed { index, container ->
                 val imageView = container.getChildAt(0) as? ImageView
-                val isChecked = selectedAnswerIndexList[position] == index
+                val isChecked = quiz.correctAnswerIndex == index
                 imageView?.setImageResource(
                     if (isChecked) R.drawable.ic_process_checked else R.drawable.ic_process_unchecked
                 )
 
                 container.setOnClickListener {
-                    selectedAnswerIndexList[position] = index
+                    quiz.correctAnswerIndex = index
                     notifyItemChanged(position)
                 }
             }
@@ -63,23 +95,31 @@ class RegisterQuizAdapter : RecyclerView.Adapter<RegisterQuizAdapter.ViewHolder>
         holder.bind(position)
     }
 
-    override fun getItemCount(): Int = isExpandedList.size
+    override fun getItemCount(): Int = quizList.size
 
     fun addQuiz() {
+        quizList.add(RegisterTempQuiz())
         isExpandedList.add(true)
-        selectedAnswerIndexList.add(-1)  // 아직 정답 선택 안함
-        notifyItemInserted(isExpandedList.size - 1)
+        notifyItemInserted(quizList.size - 1)
     }
 
     fun addInitialQuizzes(count: Int) {
-        repeat(count) {
-            addQuiz()
-        }
+        repeat(count) { addQuiz() }
     }
 
-    fun removeAll() {
+    fun setItems(tempList: List<RegisterTempQuiz>) {
+        quizList.clear()
+        quizList.addAll(tempList)
         isExpandedList.clear()
-        selectedAnswerIndexList.clear()
+        isExpandedList.addAll(List(tempList.size) { true })
+        notifyDataSetChanged()
+    }
+
+    fun getItems(): List<RegisterTempQuiz> = quizList
+
+    fun removeAll() {
+        quizList.clear()
+        isExpandedList.clear()
         notifyDataSetChanged()
     }
 }

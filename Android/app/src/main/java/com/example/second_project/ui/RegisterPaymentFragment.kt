@@ -2,21 +2,29 @@ package com.example.second_project.ui
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.second_project.adapter.RegisterParticipantsAdapter
 import com.example.second_project.adapter.RegisterSearchParticipantsAdapter
+import com.example.second_project.data.model.dto.request.Ratio
 import com.example.second_project.databinding.DialogRegisterSearchParticipantsBinding
 import com.example.second_project.databinding.FragmentRegisterPaymentBinding
+import com.example.second_project.interfaces.RegisterStepSavable
+import com.example.second_project.viewmodel.RegisterViewModel
 
-class RegisterPaymentFragment: Fragment() {
+class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
 
     private var _binding: FragmentRegisterPaymentBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: RegisterParticipantsAdapter
+
+    private val viewModel: RegisterViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -32,32 +40,18 @@ class RegisterPaymentFragment: Fragment() {
         binding.recyclerParticipants.visibility = View.VISIBLE
         binding.recyclerParticipants.layoutManager = LinearLayoutManager(requireContext())
 
-        binding.btnToSubLecture.setOnClickListener {
-            (parentFragment as? RegisterMainFragment)?.moveToStep(3)
-        }
-
-        val participantNames = mutableListOf<String>()
-        val isLecturerFlags = mutableListOf<Boolean>()
-
+        // 어댑터 초기화 (내부 데이터 직접 관리)
         adapter = RegisterParticipantsAdapter(
-            participantNames,
-            onLecturerToggle = { position ->
-                // 여기에 "강의자 바뀜"에 대한 동작 작성
-            },
-            onDeleteClick = { position ->
-                participantNames.removeAt(position)
-                isLecturerFlags.removeAt(position)
-                adapter.notifyDataSetChanged()
-            },
+            onLecturerToggle = { /* 필요 시 구현 가능 */ },
+            onDeleteClick = { position -> adapter.removeItem(position) },
             onNameClick = { position ->
-
                 val dialogBinding = DialogRegisterSearchParticipantsBinding.inflate(layoutInflater)
                 val dialog = AlertDialog.Builder(requireContext())
                     .setView(dialogBinding.root)
                     .create()
 
-                val dummyUsers = listOf("ssafy@naver.com", "hello@world.com", "test@domain.com")
-                var selectedEmail: String? = null  // 선택된 이메일 저장 변수
+                val dummyUsers = listOf("user1@example.com", "user2@example.com", "user3@example.com")
+                var selectedEmail: String? = null
 
                 val dialogAdapter = RegisterSearchParticipantsAdapter(dummyUsers) { email ->
                     dialogBinding.editSearchParticipants.editText?.setText(email)
@@ -72,32 +66,68 @@ class RegisterPaymentFragment: Fragment() {
 
                 dialogBinding.btnRegisterParticipants.setOnClickListener {
                     selectedEmail?.let {
-                        participantNames[position] = it
-                        adapter.notifyItemChanged(position)
+                        adapter.updateParticipantName(position, it)
                     }
                     dialog.dismiss()
                 }
+
                 dialog.show()
-            },
-            isLecturerFlags = isLecturerFlags
+            }
         )
 
         binding.recyclerParticipants.adapter = adapter
 
+        // 추가 버튼
         binding.btnAddParticipants.setOnClickListener {
-            participantNames.add("") // 빈 문자열
-            isLecturerFlags.add(false)
-            adapter.notifyItemInserted(participantNames.size - 1)
+            adapter.addItem()
         }
 
+        // 기존 가격 설정
+        binding.editTextPrice.editText?.setText(viewModel.price.toString())
 
+        // 기존 참여자 정보가 있을 경우 초기화
+        if (viewModel.ratios.isNotEmpty()) {
+            val names = viewModel.ratios.map { it.email }
+            val lecturers = viewModel.ratios.map { it.lecturer }
+            val ratios = viewModel.ratios.map { it.ratio }
+            adapter.setItems(names, lecturers, ratios)
+        }
 
+        // 다음 버튼
+        binding.btnToSubLecture.setOnClickListener {
+            val saved = saveDataToViewModel()
+            if (saved) {
+                (parentFragment as? RegisterMainFragment)?.moveToStep(3)
+            }
+        }
+    }
 
+    // 인터페이스 구현
+    override fun saveDataToViewModel(): Boolean  {
+        // 가격 저장
+        val priceText = binding.editTextPrice.editText?.text.toString()
+        viewModel.price = priceText.toIntOrNull() ?: 0
+
+        val participantData = adapter.getParticipantData()
+        // ❗ 빈 이메일 존재 확인
+        val hasInvalidEmail = participantData.any { it.first.isBlank() }
+        if (hasInvalidEmail) {
+            Toast.makeText(requireContext(), "참여자 이메일을 모두 입력해주세요.", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
+        // 참여자 정보 저장
+        viewModel.ratios.clear()
+        adapter.getParticipantData().forEach { (email, ratio, isLecturer) ->
+            if (email.isNotBlank()) {
+                viewModel.ratios.add(Ratio(email, ratio, isLecturer))
+            }
+        }
+        return true
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-
     }
 }
