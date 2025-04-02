@@ -19,4 +19,5 @@ public class LectureResponse {
     private Boolean isLecturer;
     private Long recentId;
     private Double learningRate;
+    private String lectureUrl;
 }

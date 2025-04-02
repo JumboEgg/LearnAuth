@@ -253,7 +253,7 @@ public class LectureServiceImpl implements LectureService{
     private LectureResponse convertToLectureResponse(LectureProfile profile) {
         int subLectureCount = subLectureRepository.countSubLecturesByLectureId(profile.getLectureId());
         int finishedSubLectureCount = userLectureTimeRepository.countUserLectureTimesByLectureId(profile.getLectureId());
-
+        SubLecture subLectureUrl = subLectureRepository.findFirstByLectureId(profile.getLectureId());
         return LectureResponse.builder()
                 .isLecturer(profile.getIsLecturer())
                 .title(profile.getTitle())
@@ -261,6 +261,7 @@ public class LectureServiceImpl implements LectureService{
                 .categoryName(profile.getCategoryName())
                 .lectureId(profile.getLectureId())
                 .learningRate(subLectureCount * 1.0 / finishedSubLectureCount)
+                .lectureUrl(subLectureUrl.getSubLectureUrl())
                 .build();
     }
 }

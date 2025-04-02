@@ -13,6 +13,7 @@ import ssafy.d210.backend.entity.*;
 import ssafy.d210.backend.enumeration.CategoryName;
 import ssafy.d210.backend.enumeration.response.HereStatus;
 import ssafy.d210.backend.exception.service.*;
+import ssafy.d210.backend.redis.DistributedLock;
 import ssafy.d210.backend.repository.*;
 import ssafy.d210.backend.util.AES256Util;
 import ssafy.d210.backend.util.ResponseUtil;
@@ -39,6 +40,7 @@ public class LectureManagementServiceImpl implements LectureManagementService {
     private final ResponseUtil<Boolean> responseUtil;
 
     @Override
+    @DistributedLock(key = "#registerLecture")
     public ResponseSuccessDto<Boolean> registerLecture(LectureRegisterRequest request) {
         try {
             // 예외 처리
