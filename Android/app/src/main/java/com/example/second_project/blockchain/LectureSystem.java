@@ -1007,25 +1007,25 @@ public class LectureSystem extends Contract {
     }
 
     @Deprecated
-    public static LectureSystem load(String contractAddress, Web3j web3j, Credentials credentials,
-            BigInteger gasPrice, BigInteger gasLimit) {
-        return new LectureSystem(contractAddress, web3j, credentials, gasPrice, gasLimit);
+    public static com.example.second_project.blockchain.LectureSystem load(String contractAddress, Web3j web3j, Credentials credentials,
+                                                                                   BigInteger gasPrice, BigInteger gasLimit) {
+        return new com.example.second_project.blockchain.LectureSystem(contractAddress, web3j, credentials, gasPrice, gasLimit);
     }
 
     @Deprecated
-    public static LectureSystem load(String contractAddress, Web3j web3j,
-            TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
-        return new LectureSystem(contractAddress, web3j, transactionManager, gasPrice, gasLimit);
+    public static com.example.second_project.blockchain.LectureSystem load(String contractAddress, Web3j web3j,
+                                                                                   TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
+        return new com.example.second_project.blockchain.LectureSystem(contractAddress, web3j, transactionManager, gasPrice, gasLimit);
     }
 
-    public static LectureSystem load(String contractAddress, Web3j web3j, Credentials credentials,
-            ContractGasProvider contractGasProvider) {
-        return new LectureSystem(contractAddress, web3j, credentials, contractGasProvider);
+    public static com.example.second_project.blockchain.LectureSystem load(String contractAddress, Web3j web3j, Credentials credentials,
+                                                                                   ContractGasProvider contractGasProvider) {
+        return new com.example.second_project.blockchain.LectureSystem(contractAddress, web3j, credentials, contractGasProvider);
     }
 
-    public static LectureSystem load(String contractAddress, Web3j web3j,
-            TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
-        return new LectureSystem(contractAddress, web3j, transactionManager, contractGasProvider);
+    public static com.example.second_project.blockchain.LectureSystem load(String contractAddress, Web3j web3j,
+                                                                                   TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
+        return new com.example.second_project.blockchain.LectureSystem(contractAddress, web3j, transactionManager, contractGasProvider);
     }
 
     public static class Participant extends StaticStruct {

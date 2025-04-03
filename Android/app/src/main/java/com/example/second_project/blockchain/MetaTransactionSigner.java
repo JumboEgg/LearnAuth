@@ -1,8 +1,12 @@
 package com.example.second_project.blockchain;
 
-import org.web3j.crypto.*;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.ECKeyPair;
+import org.web3j.crypto.Sign;
+import org.web3j.crypto.StructuredData;
 import org.web3j.crypto.StructuredData.EIP712Domain;
 import org.web3j.crypto.StructuredData.Entry;
+import org.web3j.crypto.StructuredDataEncoder;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.EthChainId;
 import org.web3j.utils.Numeric;
