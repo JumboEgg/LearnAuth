@@ -7,12 +7,17 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.second_project.BuildConfig
 import com.example.second_project.adapter.RegisterQuizAdapter
 import com.example.second_project.data.model.dto.RegisterTempQuiz
 import com.example.second_project.databinding.FragmentRegisterQuizBinding
 import com.example.second_project.interfaces.RegisterStepSavable
+import com.example.second_project.utils.ApiKeyProvider
+import com.example.second_project.viewmodel.IpfsUploadState
 import com.example.second_project.viewmodel.RegisterViewModel
+import kotlinx.coroutines.launch
 
 class RegisterQuizFragment: Fragment(), RegisterStepSavable {
 
@@ -61,18 +66,74 @@ class RegisterQuizFragment: Fragment(), RegisterStepSavable {
                 return@setOnClickListener
             }
 
-            // ✅ 등록 요청
-            viewModel.registerLecture(
-                onSuccess = {
-                    Toast.makeText(requireContext(), "강의가 성공적으로 등록되었습니다!", Toast.LENGTH_SHORT).show()
-                    viewModel.reset()
-                    requireActivity().supportFragmentManager.popBackStack()
-                },
-                onError = { message ->
-                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-                }
-            )
+            // 파일이 선택되었는지 확인
+            if (viewModel.selectedLectureFileUri == null) {
+                Toast.makeText(requireContext(), "강의 자료 파일을 선택해주세요.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // IPFS 업로드 진행
+            uploadFileToIpfs()
         }
+
+        // IPFS 업로드 상태 관찰
+        viewModel.ipfsUploadState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is IpfsUploadState.Loading -> {
+                    binding.btnDone.isEnabled = false
+                    binding.btnDone.text = "업로드 중..."
+                }
+                is IpfsUploadState.Success -> {
+                    binding.btnDone.isEnabled = true
+                    binding.btnDone.text = "강의 등록 완료하기"
+                    // IPFS 업로드 성공 후 강의 등록 진행
+                    registerLecture()
+                }
+                is IpfsUploadState.Error -> {
+                    binding.btnDone.isEnabled = true
+                    binding.btnDone.text = "강의 등록 완료하기"
+                    Toast.makeText(requireContext(), "파일 업로드 실패: ${state.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    /**
+     * IPFS에 파일을 업로드합니다.
+     */
+    private fun uploadFileToIpfs() {
+        val pinataApiKey = ApiKeyProvider.getPinataApiKey()
+        if (pinataApiKey.isBlank()) {
+            Toast.makeText(requireContext(), "API 키를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        viewModel.uploadFileToIpfs(
+            context = requireContext(),
+            apiKey = pinataApiKey,
+            onSuccess = { hash ->
+                Toast.makeText(requireContext(), "파일 업로드 성공: $hash", Toast.LENGTH_SHORT).show()
+            },
+            onError = { message ->
+                Toast.makeText(requireContext(), "파일 업로드 실패: $message", Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+
+    /**
+     * 강의를 등록합니다.
+     */
+    private fun registerLecture() {
+        viewModel.registerLecture(
+            onSuccess = {
+                Toast.makeText(requireContext(), "강의가 성공적으로 등록되었습니다!", Toast.LENGTH_SHORT).show()
+                viewModel.reset()
+                requireActivity().supportFragmentManager.popBackStack()
+            },
+            onError = { message ->
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            }
+        )
     }
 
     override fun saveDataToViewModel(): Boolean {
@@ -84,6 +145,5 @@ class RegisterQuizFragment: Fragment(), RegisterStepSavable {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-
     }
 }

@@ -25,6 +25,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "BASE_URL", "\"https://j12d210.p.ssafy.io\"")
         buildConfigField("String", "YOUTUBE_API_KEY", properties["YOUTUBE_API_KEY"] as String)
+        buildConfigField("String", "PINATA_API_KEY", properties["PINATA_API_KEY"] as String)
     }
     buildTypes {
         release {
@@ -126,6 +127,10 @@ dependencies {
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
     kapt("com.github.bumptech.glide:compiler:4.16.0")
 
+    // IPFS 관련 의존성
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
+    implementation("com.squareup.retrofit2:adapter-rxjava3:2.9.0")
+    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
 

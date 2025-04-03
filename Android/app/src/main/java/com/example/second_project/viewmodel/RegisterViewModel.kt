@@ -15,11 +15,10 @@ import com.example.second_project.data.model.dto.request.SubLecture
 import com.example.second_project.data.model.dto.response.CategoryResponse
 import com.example.second_project.network.ApiClient.registerService
 import com.example.second_project.network.YoutubeApiClient
+import com.example.second_project.utils.IpfsUtils
 import com.example.second_project.utils.YoutubeUtil
 import kotlinx.coroutines.launch
 import com.example.second_project.data.model.dto.request.QuizOption
-
-
 
 class RegisterViewModel : ViewModel(){
 
@@ -27,6 +26,13 @@ class RegisterViewModel : ViewModel(){
     private val _categoryList = MutableLiveData<List<CategoryResponse>>()
     val categoryList: LiveData<List<CategoryResponse>> = _categoryList
     val tempSubLectures = mutableListOf<RegisterTempSubLecture>()
+
+    // IPFS 업로드 상태
+    private val _ipfsUploadState = MutableLiveData<IpfsUploadState>()
+    val ipfsUploadState: LiveData<IpfsUploadState> = _ipfsUploadState
+
+    // IPFS 해시 저장
+    private var ipfsHash: String? = null
 
     fun fetchCategories() {
         viewModelScope.launch {
@@ -70,6 +76,9 @@ class RegisterViewModel : ViewModel(){
         quizzes.clear()
         tempSubLectures.clear()
         tempQuizzes.clear()
+        selectedLectureFileName = null
+        selectedLectureFileUri = null
+        ipfsHash = null
     }
 
     fun toRequest(): RegisterLectureRequest {
@@ -215,6 +224,49 @@ class RegisterViewModel : ViewModel(){
         )
     }
 
+    /**
+     * IPFS에 파일을 업로드합니다.
+     * @param context 컨텍스트
+     * @param apiKey Pinata API 키
+     * @param onSuccess 성공 시 호출될 콜백
+     * @param onError 실패 시 호출될 콜백
+     */
+    fun uploadFileToIpfs(
+        context: android.content.Context,
+        apiKey: String,
+        onSuccess: (String) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val fileUri = selectedLectureFileUri ?: run {
+            Log.e("uploadFileToIpfs", "파일 URI가 null입니다")
+            onError("업로드할 파일이 선택되지 않았습니다.")
+            return
+        }
+
+        _ipfsUploadState.value = IpfsUploadState.Loading
+
+        viewModelScope.launch {
+            try {
+                Log.d("uploadFileToIpfs", "파일 업로드 시작: $fileUri")
+                val hash = IpfsUtils.uploadFileToIpfs(context, fileUri, apiKey)
+                if (hash != null) {
+                    Log.d("uploadFileToIpfs", "파일 업로드 성공: $hash")
+                    ipfsHash = hash
+                    _ipfsUploadState.value = IpfsUploadState.Success(hash)
+                    onSuccess(hash)
+                } else {
+                    Log.e("uploadFileToIpfs", "파일 업로드 실패: hash가 null입니다")
+                    _ipfsUploadState.value = IpfsUploadState.Error("파일 업로드 실패")
+                    onError("파일 업로드 실패")
+                }
+            } catch (e: Exception) {
+                Log.e("uploadFileToIpfs", "파일 업로드 중 예외 발생: ${e.message}", e)
+                _ipfsUploadState.value = IpfsUploadState.Error(e.message ?: "알 수 없는 오류")
+                onError(e.message ?: "알 수 없는 오류")
+            }
+        }
+    }
+
     fun registerLecture(
         onSuccess: () -> Unit,
         onError: (String) -> Unit
@@ -241,13 +293,13 @@ class RegisterViewModel : ViewModel(){
             }
         }
     }
+}
 
-
-
-
-
-
-
-
-
+/**
+ * IPFS 업로드 상태를 나타내는 sealed class
+ */
+sealed class IpfsUploadState {
+    object Loading : IpfsUploadState()
+    data class Success(val hash: String) : IpfsUploadState()
+    data class Error(val message: String) : IpfsUploadState()
 }

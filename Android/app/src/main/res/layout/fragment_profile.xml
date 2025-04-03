@@ -71,7 +71,8 @@
                 android:id="@+id/profileImg"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                android:src="@drawable/sample_plzdelete_profile"/>
+                android:scaleType="centerCrop"
+                android:src="@drawable/white"/>
 
         </androidx.cardview.widget.CardView>
 
