@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class LectureTimeRequest {
     // String으로 10m23s으로 오면 second로 계산해서 int 저장
-    private String continueWatching;
+    private Integer continueWatching;
 
     private boolean endFlag;
 }

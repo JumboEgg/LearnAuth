@@ -10,10 +10,10 @@ public class SubLectureDetailResponse {
     private String lectureUrl;
     private int lectureLength;
     private Long lectureOrder;
-    private String continueWatching;
+    private Integer continueWatching;
     private Boolean endFlag;
 
-    public SubLectureDetailResponse(long subLectureId, String subLectureTitle, String lectureUrl, int lectureLength, Long  lectureOrder, String continueWatching, Integer endFlag) {
+    public SubLectureDetailResponse(long subLectureId, String subLectureTitle, String lectureUrl, int lectureLength, Long  lectureOrder, Integer continueWatching, Integer endFlag) {
         this.subLectureId = subLectureId;
         this.subLectureTitle = subLectureTitle;
         this.lectureUrl = lectureUrl;

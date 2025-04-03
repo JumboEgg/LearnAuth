@@ -22,7 +22,7 @@ public class QUserLectureTime extends EntityPathBase<UserLectureTime> {
 
     public static final QUserLectureTime userLectureTime = new QUserLectureTime("userLectureTime");
 
-    public final StringPath continueWatching = createString("continueWatching");
+    public final NumberPath<Integer> continueWatching = createNumber("continueWatching", Integer.class);
 
     public final NumberPath<Integer> endFlag = createNumber("endFlag", Integer.class);
 
