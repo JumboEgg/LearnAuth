@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
+import ssafy.d210.backend.dto.request.lecture.SubLectureRequest;
 
 import java.util.List;
 
@@ -37,4 +38,14 @@ public class SubLecture {
 
     @OneToMany(mappedBy = "subLecture")
     private List<UserLectureTime> userLectureTimeList;
+
+
+    public static SubLecture from(SubLectureRequest subReq, Lecture savedLecture) {
+        SubLecture subLecture = new SubLecture();
+        subLecture.setSubLectureTitle(subReq.getSubLectureTitle());
+        subLecture.setSubLectureUrl(subReq.getSubLectureUrl());
+        subLecture.setSubLectureLength(subReq.getSubLectureLength());
+        subLecture.setLecture(savedLecture);
+        return subLecture;
+    }
 }

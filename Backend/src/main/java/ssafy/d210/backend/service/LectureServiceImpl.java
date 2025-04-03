@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.web3j.abi.datatypes.Int;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.response.lecture.*;
 import ssafy.d210.backend.entity.*;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -35,11 +37,12 @@ public class LectureServiceImpl implements LectureService{
     private final ResponseUtil responseUtil;
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public ResponseSuccessDto<List<LectureInfoListResponse>> getLecturesByCategory(int categoryId, int page) {
         // 카테고리별 강의 목록 조회
         int offset = (page - 1) * 12;
-        List<LectureInfoListResponse> lectures = lectureRepository.getLecturesByCategory(categoryId, offset);
+        List<LectureInfoListResponse> lectures = findLectureByCategory(categoryId, offset);
+
         log.info("Category {} page {} lectures: {}", categoryId, page, lectures);
 
         // 결과 검증 및 로깅
@@ -47,56 +50,65 @@ public class LectureServiceImpl implements LectureService{
             log.warn("No lectures found for category {}", categoryId);
         }
 
-        ResponseSuccessDto<List<LectureInfoListResponse>> res = responseUtil.successResponse(lectures, HereStatus.SUCCESS_LECTURE_CATEGORY);
-        return res;
+        return responseUtil.successResponse(lectures, HereStatus.SUCCESS_LECTURE_CATEGORY);
+
+    }
+    @Transactional(readOnly = true)
+    protected List<LectureInfoListResponse> findLectureByCategory(int categoryId, int offset) {
+        return lectureRepository.getLecturesByCategory(categoryId, offset);
     }
 
     @Override
     @Transactional(readOnly = true)
     public ResponseSuccessDto<RecommendedLectureResponse> getRecommendedLectures() {
+        // 비동기 처리
+        CompletableFuture<List<LectureInfoListResponse>> mostCompletedLectures =
+                CompletableFuture.supplyAsync(lectureRepository::getMostFinishedLectures);
+
+        CompletableFuture<List<LectureInfoListResponse>> randomLectures =
+                CompletableFuture.supplyAsync(lectureRepository::getRandomLectures);
+
+        CompletableFuture<List<LectureInfoListResponse>> recentLectures =
+                CompletableFuture.supplyAsync(lectureRepository::getNewestLectures);
+
+        CompletableFuture.allOf(mostCompletedLectures, randomLectures, recentLectures);
 
         RecommendedLectureResponse lectures = new RecommendedLectureResponse();
-        List<LectureInfoListResponse> mostCompletedLectures = lectureRepository.getMostFinishedLectures();
-        List<LectureInfoListResponse> randomLectures = lectureRepository.getRandomLectures();
-        List<LectureInfoListResponse> recentLectures = lectureRepository.getNewestLectures();
+        lectures.setMostCompletedLectures(mostCompletedLectures.join());
+        lectures.setRandomLectures(randomLectures.join());
+        lectures.setRecentLectures(recentLectures.join());
 
-        lectures.setMostCompletedLectures(mostCompletedLectures);
-        lectures.setRandomLectures(randomLectures);
-        lectures.setRecentLectures(recentLectures);
-
-        ResponseSuccessDto<RecommendedLectureResponse> res = responseUtil.successResponse(lectures, HereStatus.SUCCESS_LECTURE);
-        return res;
+        return responseUtil.successResponse(lectures, HereStatus.SUCCESS_LECTURE);
     }
 
     @Override
     @Transactional(readOnly = true)
     public ResponseSuccessDto<List<LectureInfoListResponse>> getMostCompletedLectures() {
         List<LectureInfoListResponse> mostCompletedLectures = lectureRepository.getMostFinishedLectures();
-        ResponseSuccessDto<List<LectureInfoListResponse>> res = responseUtil.successResponse(mostCompletedLectures, HereStatus.SUCCESS_LECTURE);
-        return res;
+        return responseUtil.successResponse(mostCompletedLectures, HereStatus.SUCCESS_LECTURE);
     }
 
     @Override
     @Transactional(readOnly = true)
     public ResponseSuccessDto<List<LectureInfoListResponse>> getRandomLectures() {
         List<LectureInfoListResponse> randomLectures = lectureRepository.getRandomLectures();
-        ResponseSuccessDto<List<LectureInfoListResponse>> res = responseUtil.successResponse(randomLectures, HereStatus.SUCCESS_LECTURE);
-        return res;
+        return responseUtil.successResponse(randomLectures, HereStatus.SUCCESS_LECTURE);
     }
 
     @Override
     @Transactional(readOnly = true)
     public ResponseSuccessDto<List<LectureInfoListResponse>> getMostRecentLectures() {
         List<LectureInfoListResponse> newestLectures = lectureRepository.getNewestLectures();
-        ResponseSuccessDto<List<LectureInfoListResponse>> res = responseUtil.successResponse(newestLectures, HereStatus.SUCCESS_LECTURE);
-        return res;
+        return responseUtil.successResponse(newestLectures, HereStatus.SUCCESS_LECTURE);
     }
 
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public ResponseSuccessDto<LectureDetailResponse> getLectureDetail(Long lectureId, Long userId) {
-        LectureDetail lecture = lectureRepository.getLectureById(lectureId);
+
+        LectureDetail lecture = findLectureById(lectureId);
+
         log.info("result: {}", lecture.getTitle());
 
         if (lecture == null) {
@@ -106,9 +118,15 @@ public class LectureServiceImpl implements LectureService{
 
         LectureDetailResponse lectureDetail = convertToLectureDetailResponse(lecture);
 //        LectureDetailResponse lectureDetail = LectureDetailResponse.builder().build();
-        List<Integer> subLectureIdList = lectureRepository.getSublecturesById(lectureId);
+        CompletableFuture<List<Integer>> subLectureIdListFuture = CompletableFuture.supplyAsync(() ->
+                lectureRepository.getSublecturesById(lectureId));
+        CompletableFuture<UserLecture> userLectureFuture = CompletableFuture.supplyAsync(() ->
+                userLectureRepository.getUserLectureById(lectureId, userId));
 
-        UserLecture userLecture = userLectureRepository.getUserLectureById(lectureId, userId);
+        CompletableFuture.allOf(subLectureIdListFuture, userLectureFuture);
+
+        List<Integer> subLectureIdList = subLectureIdListFuture.join();
+        UserLecture userLecture = userLectureFuture.join();
 
         if (userLecture == null) {
             log.warn("No userLecture found for lectureId {} and userId {}", lectureId, userId);
@@ -122,12 +140,14 @@ public class LectureServiceImpl implements LectureService{
         if (subLectureIdList.isEmpty()) {
             log.warn("No subLecture found for lectureId {}", lectureId);
         } else if (userLecture != null){
-            List<SubLectureDetailResponse> subLectureDetail = lectureRepository.getUserLectureTime(subLectureIdList, userLecture.getId());
+            List<SubLectureDetailResponse> subLectureDetail = findUserLectureTime(subLectureIdList, userLecture.getId());
+
             if (subLectureDetail.isEmpty()) log.warn("No userLectureTime found for subLectureIdList {}", subLectureIdList);
             lectureDetail.setSubLectures(subLectureDetail);
             log.info("subLectureDetail: {}", subLectureDetail.get(0));
         } else {
-            List<SubLecture> subLectures = subLectureRepository.findSubLectureByLectureIdOrderById(lectureId);
+            List<SubLecture> subLectures = findSubLecture(lectureId);
+
             List<SubLectureDetailResponse> subLectureDetail = IntStream.range(0, subLectures.size())
                     .mapToObj(index -> {
                         SubLecture subLecture = subLectures.get(index);
@@ -146,17 +166,32 @@ public class LectureServiceImpl implements LectureService{
 
         }
 
-        int studentCount = userLectureRepository.countUserLectureByLectureId(lectureId);
+        int studentCount = FindCountUserLectureByLectureId(lectureId);
+
         lectureDetail.setStudentCount(studentCount);
 
         log.info("Lecture Detail : {}", lectureDetail);
 
-        ResponseSuccessDto<LectureDetailResponse> res = responseUtil.successResponse(lectureDetail, HereStatus.SUCCESS_LECTURE_DETAIL);
-        return res;
+        return responseUtil.successResponse(lectureDetail, HereStatus.SUCCESS_LECTURE_DETAIL);
+    }
+
+    @Transactional(readOnly = true)
+    protected int FindCountUserLectureByLectureId(Long lectureId) {
+        return userLectureRepository.countUserLectureByLectureId(lectureId);
+    }
+
+    @Transactional(readOnly = true)
+    protected List<SubLectureDetailResponse> findUserLectureTime(List<Integer> subLectureIdList, Long userLectureId) {
+        return lectureRepository.getUserLectureTime(subLectureIdList, userLectureId);
+    }
+
+    @Transactional(readOnly = true)
+    protected LectureDetail findLectureById(Long lectureId) {
+        return lectureRepository.getLectureById(lectureId);
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public ResponseSuccessDto<LectureSearchResponse> searchLectures(String keyword, int page) {
         int pageSize = 12;
 
@@ -167,7 +202,7 @@ public class LectureServiceImpl implements LectureService{
         Pageable pageable = PageRequest.of(page-1, pageSize);
 
         // 페이징 처리된 검색 결과 조회
-        List<LectureInfoResponse> pagedList = lectureRepository.searchLecturesByKeywordPaged(keyword, pageable);
+        List<LectureInfoResponse> pagedList = findSearch(keyword, pageable);
 
 
         LectureSearchResponse response = new LectureSearchResponse();
@@ -177,51 +212,64 @@ public class LectureServiceImpl implements LectureService{
         return responseUtil.successResponse(response, HereStatus.SUCCESS_LECTURE_SEARCH);
     }
 
+    @Transactional(readOnly = true)
+    protected List<LectureInfoResponse> findSearch(String keyword, Pageable pageable) {
+        return lectureRepository.searchLecturesByKeywordPaged(keyword, pageable);
+    }
+
     @Override
     public ResponseSuccessDto<Object> purchaseLecture(Long userId, Long lectureId) {
         UserLecture userLecture = new UserLecture();
-        Optional<User> user = userRepository.findById(userId);
-        Optional<Lecture> lecture = lectureRepository.findById(lectureId);
+        Optional<User> user = findUser(userId);
+
+        Optional<Lecture> lecture = findLecture(lectureId);
+
         userLecture.createUserLecture(user.get(), lecture.get());
 
-        UserLecture savedUserLecture = userLectureRepository.save(userLecture);
+        UserLecture savedUserLecture = findUserLecture(userLecture);
 
-        List<SubLecture> subLectureList = subLectureRepository.findSubLectureByLectureIdOrderById(lectureId);
+        List<SubLecture> subLectureList = findSubLecture(lectureId);
 
-        for (SubLecture subLecture : subLectureList) {
-            UserLectureTime userLectureTime = new UserLectureTime();
-            userLectureTime.createUserLectureTime(savedUserLecture, subLecture);
-            userLectureTimeRepository.save(userLectureTime);
-        }
+        List<UserLectureTime> userLectureTimes = subLectureList.stream()
+                .map(subLecture -> {
+                    UserLectureTime userLectureTime = new UserLectureTime();
+                    userLectureTime.createUserLectureTime(savedUserLecture, subLecture);
+                    return userLectureTime;
+                })
+                .collect(Collectors.toList());
+
+        userLectureTimeRepository.saveAll(userLectureTimes);
+
         ResponseSuccessDto<Object> res = responseUtil.successResponse("ok", HereStatus.SUCCESS_LECTURE_BUY);
         return res;
     }
 
-    @Override
     @Transactional(readOnly = true)
-    public ResponseSuccessDto<List<LectureResponse>> getPurchasedLectures(Long userId) {
-        // 사용자 ID로 구매한 강의 목록 조회
-        List<LectureProfile> lectureProfiles = lectureRepository.getPurchasedLectures(userId);
-        log.info("UserId: {} lectures: {}", userId, lectureProfiles);
+    protected Optional<Lecture> findLecture(Long lectureId) {
+        return lectureRepository.findById(lectureId);
+    }
 
-        // 결과 검증 및 로깅
-        if (lectureProfiles.isEmpty()) {
-            log.warn("No lectures found for userId {}", userId);
-        }
+    @Transactional(readOnly = true)
+    protected Optional<User> findUser(Long userId) {
+        return userRepository.findById(userId);
+    }
 
-        List<LectureResponse> lectures = lectureProfiles.stream()
-                .map(this::convertToLectureResponse)
-                .toList();
+    @Transactional(readOnly = true)
+    protected List<SubLecture> findSubLecture(Long lectureId) {
+        return subLectureRepository.findSubLectureByLectureIdOrderById(lectureId);
+    }
 
-        ResponseSuccessDto<List<LectureResponse>> res = responseUtil.successResponse(lectures, HereStatus.SUCCESS_LECTURE);
-        return res;
+    @Transactional(readOnly = true)
+    protected UserLecture findUserLecture(UserLecture userLecture) {
+        return userLectureRepository.save(userLecture);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public ResponseSuccessDto<List<LectureResponse>> getParticipatedLectures(Long userId) {
-        // 사용자가 참여한 강의 목록 조회
-        List<LectureProfile> lectureProfiles = lectureRepository.getParticipatedLectures(userId);
+    @Transactional
+    public ResponseSuccessDto<List<LectureResponse>> getPurchasedLectures(Long userId) {
+        // 사용자 ID로 구매한 강의 목록 조회
+        List<LectureProfile> lectureProfiles = findPurchasedLectures(userId);
+
         log.info("UserId: {} lectures: {}", userId, lectureProfiles);
 
         // 결과 검증 및 로깅
@@ -233,8 +281,37 @@ public class LectureServiceImpl implements LectureService{
                 .map(this::convertToLectureResponse)
                 .toList();
 
-        ResponseSuccessDto<List<LectureResponse>> res = responseUtil.successResponse(lectures, HereStatus.SUCCESS_LECTURE);
-        return res;
+        return responseUtil.successResponse(lectures, HereStatus.SUCCESS_LECTURE);
+    }
+
+    @Transactional(readOnly = true)
+    protected List<LectureProfile> findPurchasedLectures(Long userId) {
+        return lectureRepository.getPurchasedLectures(userId);
+    }
+
+    @Override
+    @Transactional
+    public ResponseSuccessDto<List<LectureResponse>> getParticipatedLectures(Long userId) {
+        // 사용자가 참여한 강의 목록 조회
+        List<LectureProfile> lectureProfiles = findParticipatedLectures(userId);
+
+        log.info("UserId: {} lectures: {}", userId, lectureProfiles);
+
+        // 결과 검증 및 로깅
+        if (lectureProfiles.isEmpty()) {
+            log.warn("No lectures found for userId {}", userId);
+        }
+
+        List<LectureResponse> lectures = lectureProfiles.stream()
+                .map(this::convertToLectureResponse)
+                .toList();
+
+        return responseUtil.successResponse(lectures, HereStatus.SUCCESS_LECTURE);
+    }
+
+    @Transactional(readOnly = true)
+    protected List<LectureProfile> findParticipatedLectures(Long userId) {
+        return lectureRepository.getParticipatedLectures(userId);
     }
 
     private LectureDetailResponse convertToLectureDetailResponse(LectureDetail lectureDetail) {
@@ -251,10 +328,21 @@ public class LectureServiceImpl implements LectureService{
                 .build();
     }
 
+    // 병렬처리
     private LectureResponse convertToLectureResponse(LectureProfile profile) {
-        int subLectureCount = subLectureRepository.countSubLecturesByLectureId(profile.getLectureId());
-        int finishedSubLectureCount = userLectureTimeRepository.countUserLectureTimesByLectureId(profile.getLectureId());
-        SubLecture subLectureUrl = subLectureRepository.findFirstByLectureId(profile.getLectureId());
+
+        CompletableFuture<Integer> subLectureCountFuture = CompletableFuture.supplyAsync(() ->
+                subLectureRepository.countSubLecturesByLectureId(profile.getLectureId()));
+        CompletableFuture<Integer> finishedSubLectureCountFuture = CompletableFuture.supplyAsync(() ->
+                userLectureTimeRepository.countUserLectureTimesByLectureId(profile.getLectureId()));
+        CompletableFuture<SubLecture> subLectureUrlFuture = CompletableFuture.supplyAsync(() ->
+                subLectureRepository.findFirstByLectureId(profile.getLectureId()));
+        CompletableFuture.allOf(subLectureCountFuture, finishedSubLectureCountFuture, subLectureUrlFuture);
+
+        int subLectureCount = subLectureCountFuture.join();
+        int finishedSubLectureCount = finishedSubLectureCountFuture.join();
+        SubLecture subLectureUrl = subLectureUrlFuture.join();
+
         return LectureResponse.builder()
                 .isLecturer(profile.getIsLecturer())
                 .title(profile.getTitle())
