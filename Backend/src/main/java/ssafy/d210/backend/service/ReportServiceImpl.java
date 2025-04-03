@@ -12,12 +12,14 @@ import ssafy.d210.backend.entity.UserLecture;
 import ssafy.d210.backend.enumeration.response.HereStatus;
 import ssafy.d210.backend.exception.service.EntityIsNullException;
 import ssafy.d210.backend.exception.service.LectureNotFoundException;
+import ssafy.d210.backend.redis.DistributedLock;
 import ssafy.d210.backend.repository.ReportRepository;
 import ssafy.d210.backend.repository.UserLectureRepository;
 import ssafy.d210.backend.util.ResponseUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,29 +36,35 @@ public class ReportServiceImpl implements ReportService{
     private final ResponseUtil responseUtil;
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public ResponseSuccessDto<List<ReportResponse>> getReports(Long userId) {
         // ReportRequest, 200ok
         // userId를 이용해 UserLecture와 연관된 Report들 조회 (ReportRepository에 커스텀 메서드 추가)
-        List<Report> reports = reportRepository.findByUserLectureUserId(userId);
+        List<Report> reports = findReports(userId);
+
         System.out.println("조회된 신고 개수 = " + reports.size());
         // 클라이언트에 반환할 DTO 리스트 만드는 변수
-        List<ReportResponse> responseList = new ArrayList<>();
-        // 조회된 report 순회하면서 제목 가져오기, ReportResponse DTO 생성해서 리스트 추가
-        for (Report report : reports) {
-            String title = report.getUserLecture().getLecture().getTitle();
-            responseList.add(new ReportResponse(report.getId(), title, report.getReportType()));
-        }
+        List<ReportResponse> responseList = reports.stream()
+                .map(report -> new ReportResponse(
+                        report.getId(),
+                        report.getUserLecture().getLecture().getTitle(),
+                        report.getReportType()))
+                .collect(Collectors.toList());
 
         return responseUtil.successResponse(responseList, HereStatus.SUCCESS_REPORT_LIST);
     }
 
-    @Override
     @Transactional(readOnly = true)
+    protected List<Report> findReports(Long userId) {
+        return reportRepository.findByUserLectureUserId(userId);
+    }
+
+    @Override
+    @Transactional
     public ResponseSuccessDto<ReportDetailResponse> getReportDetail(Long reportId) {
         // reportId로 DB에서 report entity 찾기
-        Report report = reportRepository.findById(reportId)
-                .orElseThrow(() -> new EntityIsNullException("해당 신고 id가 없습니다."));
+        Report report = findReport(reportId);
+
         // 왜 신고 내역 없는지 확인
         if (report.getUserLecture().getLecture() == null) {
             throw new LectureNotFoundException("해당 신고에 연결된 강의 정보가 없습니다.");
@@ -73,12 +81,11 @@ public class ReportServiceImpl implements ReportService{
     }
 
     @Override
+    @DistributedLock(key = "#createReport")
     public ResponseSuccessDto<Void> createReport(ReportRequest request, Long userId) {
 
         // JWTToken으로 사용자 정보 가져오기 : 수정 필요할 수도
-        UserLecture userLecture = userLectureRepository
-                .findByUserIdAndLectureId(userId, request.getLectureId())
-                .orElseThrow(() -> new EntityIsNullException("해당 유저와 강의에 연결된 UserLecture가 없습니다."));
+        UserLecture userLecture = findUserLecture(userId, request.getLectureId());
 
         // 새 report entity 생성
         Report report = new Report();
@@ -90,9 +97,19 @@ public class ReportServiceImpl implements ReportService{
         userLecture.setReport(savedReport);
         userLectureRepository.save(userLecture);
 
-//        String title = userLecture.getLecture().getTitle();
-//        ReportResponse response = new ReportResponse(savedReport.getId(), title, savedReport.getReportType());
-
         return responseUtil.successResponse(null, HereStatus.SUCCESS_REPORT_CREATED);
+    }
+
+    @Transactional(readOnly = true)
+    protected UserLecture findUserLecture(Long userId, Long lectureId) {
+        return userLectureRepository
+                .findByUserIdAndLectureId(userId, lectureId)
+                .orElseThrow(() -> new EntityIsNullException("해당 유저와 강의에 연결된 UserLecture가 없습니다."));
+    }
+
+    @Transactional(readOnly = true)
+    protected Report findReport(Long reportId) {
+        return reportRepository.findById(reportId)
+                .orElseThrow(() -> new EntityIsNullException("해당 신고 id가 없습니다."));
     }
 }

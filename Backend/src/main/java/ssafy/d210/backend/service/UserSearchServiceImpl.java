@@ -28,7 +28,7 @@ public class UserSearchServiceImpl implements UserSearchService{
     // 검색 금지어 넣기
     private static final List<String> BLOCKED_KEYWORDS = List.of("google", "naver", "com");
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public ResponseSuccessDto<UserSearchResponse> searchUsers(String keyword, int page) {
         int pageSize = 12;
 
@@ -40,7 +40,7 @@ public class UserSearchServiceImpl implements UserSearchService{
 
         PageRequest pageable = PageRequest.of(page - 1, pageSize);
 
-        Page<User> userPage = userRepository.findByEmailContainingIgnoreCaseOrNicknameContainingIgnoreCaseOrNameContainingIgnoreCase(keyword, keyword, keyword, pageable);
+        Page<User> userPage = findSearch(keyword, keyword, keyword, pageable);
 
         List<UserInfoResponse> searchResults = userPage.getContent().stream()
                 .map(user -> new UserInfoResponse(user.getEmail(), user.getNickname(), user.getName()))
@@ -52,5 +52,10 @@ public class UserSearchServiceImpl implements UserSearchService{
         response.setSearchResults(searchResults);
 
         return responseUtil.successResponse(response, HereStatus.SUCCESS_USER_SEARCH);
+    }
+
+    @Transactional(readOnly = true)
+    protected Page<User> findSearch(String email, String nickname, String name, PageRequest pageable) {
+        return userRepository.findByEmailContainingIgnoreCaseOrNicknameContainingIgnoreCaseOrNameContainingIgnoreCase(email, nickname, name, pageable);
     }
 }
