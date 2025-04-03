@@ -3,6 +3,7 @@ package com.example.second_project.data.repository
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.example.second_project.data.model.dto.request.SaveTimeRequest
 import com.example.second_project.data.model.dto.response.LectureDetailResponse
 import com.example.second_project.network.ApiClient
 import com.example.second_project.network.LectureApiService
@@ -39,5 +40,52 @@ class LectureDetailRepository {
 
         return lectureDetailLiveData
     }
+
+    // 영상 시청 시간 저장
+    fun saveWatchTime(
+        userLectureId: Int,
+        subLectureId: Int,
+        continueWatching: Int,
+        endFlag: Boolean
+    ): LiveData<Boolean> {
+        val result = MutableLiveData<Boolean>()
+        val requestBody = SaveTimeRequest(continueWatching, endFlag)
+
+        lectureApiService.saveWatchTime(userLectureId, subLectureId, requestBody)
+            .enqueue(object : Callback<Void> {
+                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                    Log.d("saveWatchTime", "isSuccessful: ${response.isSuccessful}, code: ${response.code()}")
+                    result.postValue(response.isSuccessful)
+                }
+
+                override fun onFailure(call: Call<Void>, t: Throwable) {
+                    result.postValue(false)
+                    Log.d("saveWatchTime", "시청 시간 저장 실패: ${t.message}")
+                }
+            })
+        return result
+    }
+
+    // 마지막으로 본 개별 강의 업데이트
+    fun updateLastViewedLecture(
+        userLectureId: Int,
+        subLectureId: Int
+    ): LiveData<Boolean> {
+        val result = MutableLiveData<Boolean>()
+        lectureApiService.updateLastViewedLecture(userLectureId, subLectureId)
+            .enqueue(object : Callback<Void> {
+                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                    result.postValue(response.isSuccessful)
+                }
+
+                override fun onFailure(call: Call<Void>, t: Throwable) {
+                    Log.e(TAG, "마지막 시청 강의 업데이트 실패: ${t.message}")
+                    result.postValue(false)
+                }
+            })
+        return result
+    }
+
+
 
 }

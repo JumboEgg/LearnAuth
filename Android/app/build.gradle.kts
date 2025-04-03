@@ -88,8 +88,11 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.1.2")
     implementation("androidx.datastore:datastore-preferences-core:1.1.2")
 
-    // 이미지 불러오기 (Glide 사용)
+    // 이미지 불러오기 (Glide 사용) 및 youtube data v3 api
     implementation("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
-    kapt("com.github.bumptech.glide:compiler:4.16.0")
+//    kapt("com.github.bumptech.glide:compiler:4.16.0")
+
+    // youtube iframe api
+    implementation ("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.1")
 }

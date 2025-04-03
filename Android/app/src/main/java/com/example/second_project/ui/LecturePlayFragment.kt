@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -20,6 +19,8 @@ import com.example.second_project.databinding.FragmentLecturePlayBinding
 import com.example.second_project.utils.YoutubeUtil
 import com.example.second_project.viewmodel.OwnedLectureDetailViewModel
 import com.bumptech.glide.Glide
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 
 private const val TAG = "LecturePlayFragment_야옹"
 class LecturePlayFragment: Fragment() {
@@ -33,6 +34,10 @@ class LecturePlayFragment: Fragment() {
     private val viewModel: OwnedLectureDetailViewModel by lazy {
         OwnedLectureDetailViewModel(LectureDetailRepository())
     }
+
+    private var youTubePlayer: YouTubePlayer? = null
+    private var lastKnownSecondWatched: Int = 0
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -60,6 +65,11 @@ class LecturePlayFragment: Fragment() {
 
         binding.playLectureName.isSelected = true
 
+        // YouTubePlayerView 생명주기 등록
+        binding.youtubePlayerView.apply {
+            lifecycle.addObserver(this)
+        }
+
         viewModel.lectureDetail.observe(viewLifecycleOwner) { detail ->
             detail?.let {
                 allSubLectures = it.data.subLectures ?: emptyList()
@@ -78,12 +88,16 @@ class LecturePlayFragment: Fragment() {
                     Log.d(TAG, "onViewCreated: ${subLecture.lectureUrl}")
                     Log.d(TAG, "썸네일: $videoId")
                     if (videoId != null) {
-                        val thumbnailUrl = YoutubeUtil.getThumbnailUrl(videoId, YoutubeUtil.ThumbnailQuality.HIGH)
-                        Log.d(TAG, "onViewCreated: $thumbnailUrl")
-                        Glide.with(this)
-                            .load(thumbnailUrl)
-                            .placeholder(R.drawable.white)
-                            .into(binding.lecturePlayThumb)
+                        // ▶️ 유튜브 영상 로딩
+                        binding.youtubePlayerView.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
+                            override fun onReady(player: YouTubePlayer) {
+                                youTubePlayer = player
+                                player.cueVideo(videoId, 0f)
+                            }
+                            override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
+                                lastKnownSecondWatched = second.toInt()
+                            }
+                        })
                     } else {
                         Log.e(TAG, "onViewCreated: 유효한 유튜브 URL이 아님.", )
                     }
@@ -96,13 +110,14 @@ class LecturePlayFragment: Fragment() {
                 val adapter = OwnedLectureDetailAdapter(
                     subLectureList = allSubLectures,
                     onItemClick = { subLecture ->
+                        saveCurrentWatchTime()
                         updateLectureContent(subLecture.subLectureId)
                     }
                 )
                 binding.playLectureList.layoutManager = LinearLayoutManager(requireContext())
                 binding.playLectureList.adapter = adapter
                 binding.playLectureList.isNestedScrollingEnabled = false
-                
+
                 //이전/다음 ui 업데이트
                 updateBtnColors()
             }
@@ -113,6 +128,7 @@ class LecturePlayFragment: Fragment() {
             val previousSubLecture = allSubLectures.find { it.subLectureId == currentSubLectureId - 1 }
             if (previousSubLecture != null) {
                 currentSubLectureId--
+                saveCurrentWatchTime()
                 updateLectureContent(currentSubLectureId)
                 updateBtnColors()
             } else {
@@ -124,6 +140,7 @@ class LecturePlayFragment: Fragment() {
             val nextSubLecture = allSubLectures.find { it.subLectureId == currentSubLectureId + 1 }
             if (nextSubLecture != null) {
                 currentSubLectureId++
+                saveCurrentWatchTime()
                 updateLectureContent(currentSubLectureId)
                 updateBtnColors()
             } else {
@@ -132,11 +149,13 @@ class LecturePlayFragment: Fragment() {
         }
 
         binding.lectureDetailBack.setOnClickListener {
+            saveCurrentWatchTime()
             findNavController().popBackStack()
         }
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
+                saveCurrentWatchTime()
                 findNavController().popBackStack()
             }
         })
@@ -152,12 +171,7 @@ class LecturePlayFragment: Fragment() {
             binding.playNum.text = "${subLecture.lectureOrder}강"
             val videoId = subLecture.lectureUrl
             if (!videoId.isNullOrEmpty()) {
-                val thumbnailUrl = YoutubeUtil.getThumbnailUrl(videoId, YoutubeUtil.ThumbnailQuality.HIGH)
-                Log.d(TAG, "썸네일 URL: $thumbnailUrl")
-                Glide.with(this)
-                    .load(thumbnailUrl)
-                    .placeholder(R.drawable.white)
-                    .into(binding.lecturePlayThumb)
+                youTubePlayer?.cueVideo(videoId, 0f)
             } else {
                 Log.e(TAG, "updateLectureContent: 유효한 유튜브 URL이 아님.")
             }
@@ -193,5 +207,21 @@ class LecturePlayFragment: Fragment() {
         }
 
     }
+
+    private fun saveCurrentWatchTime() {
+        val lectureData = viewModel.lectureDetail.value?.data ?: return
+        val userLectureId = lectureData.userLectureId
+        val subLecture = lectureData.subLectures.find { it.subLectureId == currentSubLectureId } ?: return
+        val lectureLength = subLecture.lectureLength
+
+        val currentTimeSec = lastKnownSecondWatched
+        val endFlag = currentTimeSec >= lectureLength * 0.98
+
+        viewModel.saveWatchTime(userLectureId, currentSubLectureId, currentTimeSec, endFlag)
+        viewModel.updateLastViewedLecture(userLectureId, currentSubLectureId)
+    }
+
+
+
 
 }

@@ -20,4 +20,28 @@ class OwnedLectureDetailViewModel(private val repository: LectureDetailRepositor
             Log.d(TAG, "fetchLectureDetail: ${_lectureDetail.value?.data?.title}")
         }
     }
+
+    // 시청 시간 저장 결과
+    private val _saveWatchTimeResult = MutableLiveData<Boolean>()
+    val saveWatchTimeResult: LiveData<Boolean> get() = _saveWatchTimeResult
+
+    // 마지막 시청 강의 업데이트 결과
+    private val _updateLastViewedResult = MutableLiveData<Boolean>()
+    val updateLastViewedResult: LiveData<Boolean> get() = _updateLastViewedResult
+
+    // 시청 시간 저장 요청
+    fun saveWatchTime(userLectureId: Int, subLectureId: Int, continueWatching: Int, endFlag: Boolean) {
+        Log.d("saveWatchTime", "userLectureId: ${userLectureId}, subLectureId: ${subLectureId}, continueWatching: ${continueWatching}, endFlag: ${endFlag}")
+        repository.saveWatchTime(userLectureId, subLectureId, continueWatching, endFlag).observeForever {
+            _saveWatchTimeResult.postValue(it)
+        }
+    }
+
+    // 마지막 시청 강의 업데이트 요청
+    fun updateLastViewedLecture(userLectureId: Int, subLectureId: Int) {
+        repository.updateLastViewedLecture(userLectureId, subLectureId).observeForever {
+            _updateLastViewedResult.postValue(it)
+        }
+    }
+
 }

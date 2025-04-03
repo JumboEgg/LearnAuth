@@ -30,6 +30,6 @@ data class SubLecture(
     val lectureUrl: String,
     val lectureLength: Int,
     val lectureOrder: Int,
-    val continueWatching: String,
+    val continueWatching: Int,
     val endFlag: Boolean
 )
