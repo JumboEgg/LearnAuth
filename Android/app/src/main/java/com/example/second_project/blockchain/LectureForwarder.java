@@ -34,7 +34,7 @@ import org.web3j.tuples.generated.Tuple7;
 import org.web3j.tx.Contract;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
-import ssafy.d210.backend.dto.request.transaction.ForwardRequest;
+//import ssafy.d210.backend.dto.request.transaction.ForwardRequest;
 
 /**
  * <p>Auto generated code.
