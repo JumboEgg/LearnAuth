@@ -96,6 +96,7 @@ public class LectureManagementServiceImpl implements LectureManagementService {
             lecture.setGoal(request.getGoal());
             lecture.setDescription(request.getDescription());
             lecture.setPrice(request.getPrice());
+            lecture.setCID(request.getCID());
 //            lecture.setWalletKey(aes256Util.encrypt(request.getWalletKey()));
             lecture.setCategory(category);
             Lecture savedLecture = lectureRepository.save(lecture);

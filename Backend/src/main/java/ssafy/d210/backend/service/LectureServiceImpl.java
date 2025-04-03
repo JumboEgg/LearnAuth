@@ -247,6 +247,7 @@ public class LectureServiceImpl implements LectureService{
                 .description(lectureDetail.getDescription())
                 .lectureId(lectureDetail.getLectureId())
                 .categoryName(lectureDetail.getCategoryName())
+                .CID(lectureDetail.getCID())
                 .build();
     }
 

@@ -39,6 +39,8 @@ public class Lecture {
     @NotNull
     private int price;
 
+    private String CID;
+
 // 강의 자체 지갑 삭제
 //    @Null
 //    private String walletKey;
