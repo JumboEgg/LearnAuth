@@ -24,6 +24,8 @@ public class QLecture extends EntityPathBase<Lecture> {
 
     public final QCategory category;
 
+    public final StringPath CID = createString("CID");
+
     public final StringPath description = createString("description");
 
     public final StringPath goal = createString("goal");

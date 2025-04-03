@@ -179,7 +179,8 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
                    l.description as description,
                    u.name as lecturer,
                    sl.sub_lecture_url as lectureUrl,
-                   c.category_name as categoryName
+                   c.category_name as categoryName,
+                   l.CID as CID
              from lecture l
              join category c
              on l.category_category_id = c.category_id

@@ -16,6 +16,7 @@ public class LectureRegisterRequest {
     private String goal;
     private String description;
     private int price;
+    private String CID;
 //    private String walletKey;
     private List<RatioRequest> ratios = new ArrayList<>();
     private List<SubLectureRequest> subLectures = new ArrayList<>();

@@ -21,4 +21,5 @@ public class LectureDetail {
     private String lecturer;
     private String lectureUrl;
     private String categoryName;
+    private String CID;
 }
