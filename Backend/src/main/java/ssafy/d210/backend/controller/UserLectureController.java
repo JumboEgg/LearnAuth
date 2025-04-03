@@ -36,4 +36,16 @@ public class UserLectureController {
         return ResponseEntity.ok(userLectureService.updateLectureTime(userLectureId, subLectureId, request));
     }
 
+    // 최근 수강한 개별 강의 업데이트
+    @PatchMapping("{userLectureId}/lastviewd")
+    @Operation(summary = "최근 수강한 개별 강의 업데이트", description = "userLectureId, subLectureId를 받아 가장 최근에 본 강의 정보를 업데이트 합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "최근 수강한 개별 강의 정보 업데이트")
+    })
+    public ResponseEntity<ResponseSuccessDto<Object>> updateLastViewedLecture(
+            @PathVariable("userLectureId") Long userLectureId,
+            @RequestParam("subLectureId") Long subLectureId
+    ) {
+        return ResponseEntity.ok(userLectureService.updateLastViewedLecture(userLectureId, subLectureId));
+    }
 }

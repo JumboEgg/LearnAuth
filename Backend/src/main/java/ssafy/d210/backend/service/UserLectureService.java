@@ -13,4 +13,7 @@ public interface UserLectureService {
 
     // 강의 재생 시간 저장
     ResponseSuccessDto<Boolean> updateLectureTime(Long userLectureId, Long subLectureId, LectureTimeRequest request);
+
+    // 최근 수강 개별 강의 업데이트
+    ResponseSuccessDto<Object> updateLastViewedLecture(Long userLectureId, Long subLectureId);
 }

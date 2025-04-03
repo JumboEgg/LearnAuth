@@ -9,11 +9,13 @@ import ssafy.d210.backend.dto.request.lecture.LectureTimeRequest;
 import ssafy.d210.backend.entity.UserLecture;
 import ssafy.d210.backend.entity.UserLectureTime;
 import ssafy.d210.backend.enumeration.response.HereStatus;
+import ssafy.d210.backend.exception.service.UserLectureNotFoundException;
 import ssafy.d210.backend.repository.UserLectureRepository;
 import ssafy.d210.backend.repository.UserLectureTimeRepository;
 import ssafy.d210.backend.util.ResponseUtil;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -41,5 +43,21 @@ public class UserLectureServiceImpl implements UserLectureService{
         ResponseSuccessDto<Boolean> res = responseUtil.successResponse(true, HereStatus.SUCCESS_LECTURE_SAVEPLAYTIME);
 
         return res;
+    }
+
+    @Override
+    public ResponseSuccessDto<Object> updateLastViewedLecture(Long userLectureId, Long subLectureId) {
+        Optional<UserLecture> optional = userLectureRepository.findById(userLectureId);
+
+        if (optional.isEmpty()) {
+            throw new UserLectureNotFoundException("해당 userLectureId가 존재하지 않습니다." + userLectureId);
+
+        }
+
+        UserLecture userLecture = optional.get();
+        userLecture.setRecentLectureId(subLectureId);
+        userLectureRepository.save(userLecture);
+
+        return responseUtil.successResponse(null, HereStatus.SUCCESS_LECTURE_UPDATE);
     }
 }
