@@ -133,6 +133,7 @@
                     android:id="@+id/imageViewThumbnail"
                     android:layout_width="160dp"
                     android:layout_height="90dp"
+                    android:scaleType="centerCrop"
                     android:background="@color/button_white_blue"/>
 
                 <TextView

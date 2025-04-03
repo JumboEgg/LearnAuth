@@ -33,17 +33,41 @@
                 android:backgroundTint="@color/button_white_blue"
                 android:layout_marginVertical="20dp">
 
-                <TextView
-                    android:id="@+id/textFile"
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="파일 업로드하기"
+                    android:orientation="vertical"
+                    android:gravity="center"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    style="@style/semibold16"
-                    android:textColor="@color/text_gray"/>
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <ImageView
+                        android:id="@+id/uploadIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/uploadicon"
+                        app:tint="@color/text_gray"/>
+
+                    <TextView
+                        android:id="@+id/textFile"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="파일 업로드하기"
+                        android:layout_marginTop="8dp"
+                        style="@style/semibold16"
+                        android:textColor="@color/text_gray"/>
+
+                    <TextView
+                        android:id="@+id/textFile2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=".zip 형태의 파일만 업로드할 수 있습니다."
+                        style="@style/medium16"
+                        android:textColor="@color/text_gray"/>
+
+                </LinearLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

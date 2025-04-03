@@ -84,7 +84,8 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
 
 
         // 가격 설정
-        binding.editTextPrice.editText?.setText(viewModel.price.toString())
+        binding.editTextPrice.editText?.setText(if (viewModel.price == 0) "" else viewModel.price.toString())
+
 
 
         // 기존 참여자 정보가 있을 경우 초기화
