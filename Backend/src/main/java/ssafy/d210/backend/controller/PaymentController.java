@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.request.payment.TokenRequest;
+import ssafy.d210.backend.dto.request.transaction.SignedRequest;
 import ssafy.d210.backend.service.PaymentService;
 
 @RestController
@@ -30,9 +31,9 @@ public class PaymentController {
             @ApiResponse(responseCode = "200", description = "토큰 차감 완료")
     })
     public ResponseEntity<ResponseSuccessDto<Boolean>> withdrawToken(
-            @RequestBody TokenRequest tokenRequest
-    ) {
-        return ResponseEntity.ok(ResponseSuccessDto.<Boolean>builder().data(true).build());
+            @RequestBody SignedRequest signedRequest
+            ) {
+        return ResponseEntity.ok(paymentService.decreaseToken(signedRequest));
     }
 
     // 토큰 차감
@@ -41,6 +42,6 @@ public class PaymentController {
     public ResponseEntity<ResponseSuccessDto<Boolean>> depositToken(
             @RequestBody TokenRequest tokenRequest
     ) {
-        return ResponseEntity.ok(ResponseSuccessDto.<Boolean>builder().data(true).build());
+        return ResponseEntity.ok(paymentService.increaseToken(tokenRequest.getUserId(), tokenRequest.getQuantity()));
     }
 }

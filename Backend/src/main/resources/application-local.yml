@@ -51,6 +51,7 @@ logging:
 blockchain:
   rpc:
     url: https://rpc-amoy.polygon.technology/
+    chain-id: 80002
   relayer:
     private-key: ${BC_PRIVATE_KEY}
   forwarder:

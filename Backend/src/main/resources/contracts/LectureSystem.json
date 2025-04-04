@@ -222,12 +222,6 @@
         "internalType": "string",
         "name": "title",
         "type": "string"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "lectureWallet",
-        "type": "address"
       }
     ],
     "name": "LectureCreated",
@@ -498,19 +492,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "LECTURE_ROLE",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "uint16",
@@ -526,6 +507,19 @@
     "name": "addUser",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "admin",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -625,11 +619,6 @@
         "internalType": "struct LectureSystem.Participant[]",
         "name": "participants",
         "type": "tuple[]"
-      },
-      {
-        "internalType": "address",
-        "name": "lectureWallet",
-        "type": "address"
       }
     ],
     "name": "createLecture",
@@ -677,6 +666,25 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getOwnerOfNFT",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "bytes32",
         "name": "role",
         "type": "bytes32"
@@ -688,6 +696,25 @@
         "internalType": "bytes32",
         "name": "",
         "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getTokenURI",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
       }
     ],
     "stateMutability": "view",
@@ -829,11 +856,6 @@
         "internalType": "string",
         "name": "title",
         "type": "string"
-      },
-      {
-        "internalType": "address",
-        "name": "lectureWallet",
-        "type": "address"
       },
       {
         "internalType": "bool",
@@ -1000,19 +1022,6 @@
       }
     ],
     "name": "setApprovalForAll",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint16",
-        "name": "lectureId",
-        "type": "uint16"
-      }
-    ],
-    "name": "settleLecture",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

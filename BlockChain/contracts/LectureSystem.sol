@@ -13,6 +13,9 @@ import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
     // Roles
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+
+    // admin
+    address public admin;
     
     // Token
     IERC20 public catToken;
@@ -58,8 +61,10 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
     {
         catToken = IERC20(_catToken);
         
-        _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        _grantRole(ADMIN_ROLE, _msgSender());
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(ADMIN_ROLE, msg.sender);
+
+        admin = msg.sender;
     }
 
     // ================ Token Management Functions ================
@@ -73,7 +78,7 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
         require(amount > 0, "Amount must be greater than zero");
         
         address sender = _msgSender();
-        require(catToken.transferFrom(sender, address(this), amount), "Token transfer failed");
+        require(catToken.transferFrom(sender, admin, amount), "Token transfer failed");
         
         emit TokenWithdrawn(userId, amount, "withdrawn");
     }
@@ -91,7 +96,7 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
             require(hasRole(ADMIN_ROLE, sender), "Only user or admin can deposit tokens");
         }
         
-        require(catToken.transfer(users[userId], amount), "Token transfer failed");
+        require(catToken.transferFrom(admin, users[userId], amount), "Token transfer failed");
         
         emit TokenDeposited(userId, amount, "deposit");
     }
@@ -203,7 +208,10 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
      * @param cid IPFS CID for the NFT metadata
      */
     function issueNFT(uint16 userId, string memory cid) external {
-        address recipient = _msgSender();
+        address sender = _msgSender();
+        require(hasRole(ADMIN_ROLE, sender), "Only admin allowed");
+        address recipient = users[userId];
+        require(recipient != address(0), "invalid userId");
         
         // Mint new NFT
         uint256 tokenId = _tokenIdCounter;
@@ -212,12 +220,19 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
         
         // Set token URI
         string memory tokenURI = string(abi.encodePacked("ipfs://", cid));
-
-        // private 저장 공간에 저장하기 때문에 front에서 cid와 IPFS key를 조합해 조회한다.
-        // string memory tokenURI = string(abi.encodePacked(cid));
         _setTokenURI(tokenId, tokenURI);
         
         emit NFTIssued(userId, tokenId);
+    }
+
+    // 특정 tokenId의 소유자를 반환하는 함수
+    function getOwnerOfNFT(uint256 tokenId) external view returns (address) {
+        return ownerOf(tokenId);
+    }
+
+    // 특정 tokenId의 메타데이터 URI를 반환하는 함수
+    function getTokenURI(uint256 tokenId) external view returns (string memory) {
+        return tokenURI(tokenId);
     }
     
     // ================ ERC2771Context Overrides ================
