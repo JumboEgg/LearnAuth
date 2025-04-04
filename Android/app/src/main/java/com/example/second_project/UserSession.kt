@@ -2,6 +2,8 @@ package com.example.second_project
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.example.second_project.blockchain.BlockChainManager
+import java.io.File
 
 object UserSession {
     private const val PREFS_NAME = "user_session_prefs"
@@ -10,6 +12,8 @@ object UserSession {
     private const val KEY_REFRESH_TOKEN = "refresh_token"
     private const val KEY_NICKNAME = "nickname"
     private const val KEY_USER_NAME = "name"
+    private const val KEY_WALLET_PATH = "wallet_path"
+    private const val KEY_WALLET_PASSWORD = "wallet_password"
 
     private lateinit var preferences: SharedPreferences
 
@@ -44,9 +48,32 @@ object UserSession {
 
     var name: String?
         get() = preferences.getString(KEY_USER_NAME, "")
-        set(value){
+        set(value) {
             preferences.edit().putString(KEY_USER_NAME, value).apply()
         }
+
+    var walletFilePath: String?
+        get() = preferences.getString(KEY_WALLET_PATH, null)
+        set(value) {
+            preferences.edit().putString(KEY_WALLET_PATH, value).apply()
+        }
+
+    var walletPassword: String?
+        get() = preferences.getString(KEY_WALLET_PASSWORD, null)
+        set(value) {
+            preferences.edit().putString(KEY_WALLET_PASSWORD, value).apply()
+        }
+
+    // ✅ 세션 기반으로 BlockChainManager 생성
+    fun getBlockchainManagerIfAvailable(context: Context): BlockChainManager? {
+        val path = walletFilePath
+        val password = walletPassword
+        return if (!path.isNullOrEmpty() && !password.isNullOrEmpty()) {
+            val walletFile = File(context.filesDir, path)
+            BlockChainManager(password, walletFile)
+        } else null
+    }
+
 
     // 로그아웃 등 세션 종료 시 모든 데이터를 초기화합니다.
     fun clear() {

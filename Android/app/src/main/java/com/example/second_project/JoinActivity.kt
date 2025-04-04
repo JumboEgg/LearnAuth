@@ -45,6 +45,11 @@ class JoinActivity : AppCompatActivity() {
                     val credentials = WalletUtils.loadCredentials(walletPassword, walletFile)
                     val walletAddress = credentials.address
 
+                    // 2. UserSession에 저장
+                    UserSession.walletFilePath = walletFileName // 내부 저장소 기준 상대경로
+                    UserSession.walletPassword = walletPassword
+
+
                     // 2. 회원가입 request 객체 생성 (입력한 email, password, nickname, name 정보 사용)
                     val signupRequest = SignupRequest(
                         email = binding.joinEmail.text.toString(),
