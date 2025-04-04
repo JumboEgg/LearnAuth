@@ -70,19 +70,19 @@ dependencies {
     implementation("com.google.android.material:material")
 
     // web3j
-    implementation("org.web3j:core:4.8.7")
-    implementation ("org.web3j:contracts:4.8.7")
+    implementation("org.web3j:core:4.12.3")
+    implementation("org.web3j:contracts:4.12.3")
+    implementation("org.web3j:crypto:4.12.3")
+
 
     // 네트워크통신 (OkHttp, Retrofit)
-    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
-    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
     // RxJava3
-    implementation ("io.reactivex.rxjava3:rxjava:3.0.13")
-    implementation ("io.reactivex.rxjava3:rxkotlin:3.0.1")
-
-
+    implementation("io.reactivex.rxjava3:rxjava:3.0.13")
+    implementation("io.reactivex.rxjava3:rxkotlin:3.0.1")
 
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.1.2")
@@ -91,8 +91,15 @@ dependencies {
     // 이미지 불러오기 (Glide 사용) 및 youtube data v3 api
     implementation("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
-//    kapt("com.github.bumptech.glide:compiler:4.16.0")
 
     // youtube iframe api
     implementation ("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.1")
+
+    // IPFS 관련 의존성
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
+    implementation("com.squareup.retrofit2:adapter-rxjava3:2.9.0")
+    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
+
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
+
 }

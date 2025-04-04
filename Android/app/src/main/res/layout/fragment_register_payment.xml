@@ -50,7 +50,7 @@
                     android:textColorHint="@color/text_gray"
                     app:boxStrokeColor="@color/button_gray"
                     app:boxStrokeWidth="1dp"
-                    android:layout_weight="5">
+                    android:layout_weight="1">
 
                     <com.google.android.material.textfield.TextInputEditText
                         style="@style/body1"
@@ -65,11 +65,10 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:text="CAT"
                     style="@style/heading2"
-                    android:layout_weight="1"
                     android:gravity="center_vertical"
                     android:layout_marginStart="10dp"
                     android:layout_marginTop="10dp"

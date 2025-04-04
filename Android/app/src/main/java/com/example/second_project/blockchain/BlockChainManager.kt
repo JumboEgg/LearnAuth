@@ -1,9 +1,9 @@
 package com.example.second_project.blockchain
 
-import LecturePurchaseEvent
-import LectureSystem
-import TransactionEvent
 import android.util.Log
+import com.example.second_project.blockchain.monitor.LecturePurchaseEvent
+import com.example.second_project.blockchain.monitor.LectureSystem
+import com.example.second_project.blockchain.monitor.TransactionEvent
 import io.reactivex.rxjava3.core.Flowable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

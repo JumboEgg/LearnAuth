@@ -2,14 +2,18 @@ package com.example.second_project.ui
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.second_project.R
 import com.example.second_project.adapter.RegisterParticipantsAdapter
 import com.example.second_project.adapter.RegisterSearchParticipantsAdapter
 import com.example.second_project.data.model.dto.request.Ratio
@@ -49,6 +53,15 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
                 val dialog = AlertDialog.Builder(requireContext())
                     .setView(dialogBinding.root)
                     .create()
+                dialog.window?.apply {
+                    setBackgroundDrawableResource(R.drawable.bg_radius_20)
+
+                    val params = attributes
+                    params.width =
+                        (resources.displayMetrics.widthPixels * 0.6).toInt()
+                    params.height = WindowManager.LayoutParams.WRAP_CONTENT
+                    attributes = params
+                }
 
                 val dummyUsers = listOf("user1@example.com", "user2@example.com", "user3@example.com")
                 var selectedEmail: String? = null
@@ -70,6 +83,9 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
                     }
                     dialog.dismiss()
                 }
+                dialogBinding.btnCancel.setOnClickListener {
+                    dialog.dismiss()
+                }
 
                 dialog.show()
             }
@@ -84,7 +100,29 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
 
 
         // 가격 설정
-        binding.editTextPrice.editText?.setText(viewModel.price.toString())
+//        binding.editTextPrice.editText?.setText(if (viewModel.price == 0) "" else viewModel.price.toString())
+        binding.editTextPrice.editText?.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                val priceText = s.toString().trim()
+
+                if (priceText.isEmpty()) {
+                    // 공란을 유지하지만, 내부적으로는 0을 저장
+                    viewModel.price = 0
+                } else {
+                    viewModel.price = try {
+                        priceText.toInt()
+                    } catch (e: NumberFormatException) {
+                        0 // 예외 발생 시 기본값 설정
+                    }
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+
+
+
 
 
         // 기존 참여자 정보가 있을 경우 초기화

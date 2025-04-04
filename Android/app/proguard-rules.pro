@@ -19,3 +19,11 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keep class com.example.second_project.utils.ApiKeyProvider {
+    *;
+}
+-keepclassmembers class com.example.second_project.utils.ApiKeyProvider {
+    private static final java.lang.String KEY;
+    private static final java.lang.String ENCRYPTED_API_KEY;
+}

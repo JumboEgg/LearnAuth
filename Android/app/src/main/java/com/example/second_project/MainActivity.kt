@@ -1,11 +1,13 @@
 package com.example.second_project
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.ui.setupWithNavController
 import com.example.second_project.blockchain.BlockChainManager
 import com.example.second_project.databinding.ActivityMainBinding
+import com.example.second_project.utils.ApiKeyProvider
 
 private const val TAG = "MainActivity_야옹"
 class MainActivity : AppCompatActivity() {

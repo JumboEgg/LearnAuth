@@ -6,9 +6,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.example.second_project.R
 import com.example.second_project.UserSession.userId
 import com.example.second_project.data.model.dto.request.Lecture
 import com.example.second_project.databinding.ItemSearchLectureBinding
+import com.example.second_project.utils.YoutubeUtil
 
 private const val TAG = "SearchLectureAdapter_야옹"
 class SearchLectureAdapter(
@@ -26,8 +29,22 @@ class SearchLectureAdapter(
             binding.lectureTeacherName.text = lecture.lecturer ?: "강의자 미정"
             // 강의 가격
             binding.lecturePrice.text = "${lecture.price}원"
-            // 이미지의 경우 XML에서 기본 샘플 이미지(@drawable/sample_plzdelete)가 지정되어 있으므로,
-            // 별도의 이미지 로딩 라이브러리 사용 시 여기서 lecture의 이미지 URL을 처리하면 됨.
+
+            // 썸네일 설정
+            Log.d(TAG, "bind: lecture = $lecture")
+            
+            lecture.lectureUrl?.let { videoId ->
+                Log.d(TAG, "bind: videoId = $videoId")
+                val thumbnailUrl = YoutubeUtil.getThumbnailUrl(videoId, YoutubeUtil.ThumbnailQuality.MEDIUM)
+                Log.d(TAG, "bind: thumbnailUrl = $thumbnailUrl")
+                Glide.with(binding.root.context)
+                    .load(thumbnailUrl)
+                    .placeholder(R.drawable.white)
+                    .into(binding.lectureImg)
+            } ?: run {
+                Log.d(TAG, "bind: lectureUrl이 null임")
+            }
+
             binding.root.setOnClickListener {
                 onItemClick(lecture.lectureId, userId)
                 Log.d(TAG, "bind: ${lecture.lectureId}, ${lecture.title}")

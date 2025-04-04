@@ -13,31 +13,29 @@ class SearchViewModel : ViewModel() {
 
     private val repository = LectureRepository()
     private val lectureDetailRepository = LectureDetailRepository()
-
-    private val searchRepository = SearchRepository;
+    private val searchRepository = SearchRepository
 
     private val _lectures = MutableLiveData<List<Lecture>>()
     val lectures: LiveData<List<Lecture>> = _lectures
 
-    private val _lectureDetail = MutableLiveData<LectureDetailResponse?>()
-    val lectureDetail: LiveData<LectureDetailResponse?> = _lectureDetail
-
-    // 검색 결과 (새로운 기능)
     private val _searchResults = MutableLiveData<List<Lecture>>()
     val searchResults: LiveData<List<Lecture>> = _searchResults
 
-    // API 호출하여 강의 목록을 가져옵니다.
+    // 강의 상세 정보를 위한 새로운 LiveData 생성 함수
+    fun loadLectureDetail(lectureId: Int, userId: Int): LiveData<LectureDetailResponse?> {
+        val lectureDetailLiveData = MutableLiveData<LectureDetailResponse?>()
+        lectureDetailRepository.fetchLectureDetail(lectureId, userId).observeForever { response ->
+            lectureDetailLiveData.value = response
+        }
+        return lectureDetailLiveData
+    }
+
     fun loadLectures(categoryId: Int, page: Int) {
         repository.fetchLectures(categoryId, page).observeForever { lectureList ->
             _lectures.value = lectureList
         }
     }
 
-    fun loadLectureDetail(lectureId: Int, userId: Int) {
-        lectureDetailRepository.fetchLectureDetail(lectureId, userId).observeForever { response ->
-            _lectureDetail.value = response
-        }
-    }
     fun searchLectures(keyword: String, page: Int) {
         searchRepository.searchLectures(keyword, page).observeForever { searchData ->
             _searchResults.value = searchData?.searchResults ?: emptyList()
@@ -60,8 +58,6 @@ class SearchViewModel : ViewModel() {
     fun clearSearchResults() {
         _searchResults.value = emptyList()
     }
-
-
 
     // observeForever 사용 시 ViewModel 소멸 시 리소스 해제 고려 필요
     override fun onCleared() {
