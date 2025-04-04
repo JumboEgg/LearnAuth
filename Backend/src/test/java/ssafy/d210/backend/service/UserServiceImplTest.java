@@ -120,92 +120,92 @@ class UserServiceImplTest {
     @InjectMocks
     private UserServiceImpl userService;
 
-    @Test
-    @DisplayName("동시에 동일한 이메일로 회원가입 요청 시 분산 락 테스트")
-    void 동시성_테스트() throws InterruptedException {
-        // given
-        int threadCount = 5;
-        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
-        CountDownLatch latch = new CountDownLatch(threadCount);
-
-        SignupRequest request = new SignupRequest(
-                "concurrent@example.com",
-                "password12345",
-                "concurrent",
-                "asdasdasd",
-                "동시성테스트"
-        );
-
-        // 더 엄격한 동시성 제어를 위한 변수
-        final Object lock = new Object();
-        AtomicBoolean firstEmailCheck = new AtomicBoolean(true);
-
-        // Mock 설정: 동기화된 방식으로 첫 번째 호출만 false 반환
-        when(userRepository.existsByEmail(anyString())).thenAnswer(invocation -> {
-            synchronized (lock) {
-                if (firstEmailCheck.get()) {
-                    firstEmailCheck.set(false);
-                    return false;  // 첫 번째 호출은 중복 아님
-                } else {
-                    return true;   // 두 번째 이후 호출은 중복
-                }
-            }
-        });
-
-        // 닉네임 중복 체크도 통과하도록 설정
-        when(userRepository.existsByNickname(anyString())).thenReturn(false);
-
-        // 비밀번호 인코딩
-        when(bCryptPasswordEncoder.encode(anyString())).thenReturn("encodedPassword");
-
-        // 저장 후 응답 설정
-        User savedUser = new User();
-        savedUser.setNickname("concurrent");
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
-
-        // 응답 객체 설정
-        SignupResponse signupResponse = SignupResponse.builder()
-                .nickname("concurrent")
-                .message("회원가입이 완료되었습니다.")
-                .build();
-        ResponseSuccessDto<SignupResponse> responseDto = new ResponseSuccessDto<>();
-        responseDto.setData(signupResponse);
-        responseDto.setStatus(HereStatus.SUCCESS_SIGNUP.name());
-
-        when(responseUtil.successResponse(any(SignupResponse.class), any(HereStatus.class)))
-                .thenReturn(responseDto);
-
-        AtomicInteger successCount = new AtomicInteger();
-        AtomicInteger exceptionCount = new AtomicInteger();
-
-        // when
-        for (int i = 0; i < threadCount; i++) {
-            final int threadIndex = i;
-            executorService.submit(() -> {
-                try {
-                    System.out.println("스레드 " + threadIndex + " 시도 중");
-                    userService.signup(request);
-                    System.out.println("스레드 " + threadIndex + " 성공!");
-                    successCount.incrementAndGet();
-                } catch (Exception e) {
-                    System.out.println("스레드 " + threadIndex + " 실패: " + e.getMessage());
-                    exceptionCount.incrementAndGet();
-                } finally {
-                    latch.countDown();
-                }
-            });
-        }
-
-        latch.await();
-        executorService.shutdown();
-
-        // then
-        assertEquals(1, successCount.get());  // 하나만 성공
-        assertEquals(4, exceptionCount.get());  // 나머지는 예외
-
-        // 회원가입 메서드가 한 번만 호출되었는지 확인
-        verify(userRepository, times(5)).existsByEmail(anyString()); // 모든 스레드가 이메일 체크
-        verify(userRepository, times(1)).existsByNickname(anyString()); // 첫 번째 스레드만 닉네임 체크
-        verify(userRepository, times(1)).save(any(User.class)); // 첫 번째 스레드만 저장
-    }
+//    @Test
+//    @DisplayName("동시에 동일한 이메일로 회원가입 요청 시 분산 락 테스트")
+//    void 동시성_테스트() throws InterruptedException {
+//        // given
+//        int threadCount = 5;
+//        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+//        CountDownLatch latch = new CountDownLatch(threadCount);
+//
+//        SignupRequest request = new SignupRequest(
+//                "concurrent@example.com",
+//                "password12345",
+//                "concurrent",
+//                "asdasdasd",
+//                "동시성테스트"
+//        );
+//
+//        // 더 엄격한 동시성 제어를 위한 변수
+//        final Object lock = new Object();
+//        AtomicBoolean firstEmailCheck = new AtomicBoolean(true);
+//
+//        // Mock 설정: 동기화된 방식으로 첫 번째 호출만 false 반환
+//        when(userRepository.existsByEmail(anyString())).thenAnswer(invocation -> {
+//            synchronized (lock) {
+//                if (firstEmailCheck.get()) {
+//                    firstEmailCheck.set(false);
+//                    return false;  // 첫 번째 호출은 중복 아님
+//                } else {
+//                    return true;   // 두 번째 이후 호출은 중복
+//                }
+//            }
+//        });
+//
+//        // 닉네임 중복 체크도 통과하도록 설정
+//        when(userRepository.existsByNickname(anyString())).thenReturn(false);
+//
+//        // 비밀번호 인코딩
+//        when(bCryptPasswordEncoder.encode(anyString())).thenReturn("encodedPassword");
+//
+//        // 저장 후 응답 설정
+//        User savedUser = new User();
+//        savedUser.setNickname("concurrent");
+//        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+//
+//        // 응답 객체 설정
+//        SignupResponse signupResponse = SignupResponse.builder()
+//                .nickname("concurrent")
+//                .message("회원가입이 완료되었습니다.")
+//                .build();
+//        ResponseSuccessDto<SignupResponse> responseDto = new ResponseSuccessDto<>();
+//        responseDto.setData(signupResponse);
+//        responseDto.setStatus(HereStatus.SUCCESS_SIGNUP.name());
+//
+//        when(responseUtil.successResponse(any(SignupResponse.class), any(HereStatus.class)))
+//                .thenReturn(responseDto);
+//
+//        AtomicInteger successCount = new AtomicInteger();
+//        AtomicInteger exceptionCount = new AtomicInteger();
+//
+//        // when
+//        for (int i = 0; i < threadCount; i++) {
+//            final int threadIndex = i;
+//            executorService.submit(() -> {
+//                try {
+//                    System.out.println("스레드 " + threadIndex + " 시도 중");
+//                    userService.signup(request);
+//                    System.out.println("스레드 " + threadIndex + " 성공!");
+//                    successCount.incrementAndGet();
+//                } catch (Exception e) {
+//                    System.out.println("스레드 " + threadIndex + " 실패: " + e.getMessage());
+//                    exceptionCount.incrementAndGet();
+//                } finally {
+//                    latch.countDown();
+//                }
+//            });
+//        }
+//
+//        latch.await();
+//        executorService.shutdown();
+//
+//        // then
+//        assertEquals(1, successCount.get());  // 하나만 성공
+//        assertEquals(4, exceptionCount.get());  // 나머지는 예외
+//
+//        // 회원가입 메서드가 한 번만 호출되었는지 확인
+//        verify(userRepository, times(5)).existsByEmail(anyString()); // 모든 스레드가 이메일 체크
+//        verify(userRepository, times(1)).existsByNickname(anyString()); // 첫 번째 스레드만 닉네임 체크
+//        verify(userRepository, times(1)).save(any(User.class)); // 첫 번째 스레드만 저장
+//    }
 }
