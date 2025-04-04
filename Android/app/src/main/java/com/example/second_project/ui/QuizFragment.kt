@@ -17,6 +17,7 @@ import com.example.second_project.R
 import com.example.second_project.data.QuizQuestion
 import com.example.second_project.data.model.dto.response.QuizData
 import com.example.second_project.data.model.dto.response.QuizResponse
+import com.example.second_project.data.model.dto.response.QuizCompleteResponse
 import com.example.second_project.databinding.DialogQuizResultBinding
 import com.example.second_project.databinding.FragmentQuizBinding
 import com.example.second_project.databinding.DialogTimeoutBinding
@@ -272,8 +273,9 @@ class QuizFragment : Fragment() {
         dialogBinding.dialogImage.setImageResource(resultIcon)
         dialogBinding.dialogMessage.text = resultMessage
         // 퀴즈 통과 시 certificate = true로 설정
-        ApiClient.quizService.completeQuiz(lectureId, userId).enqueue(object : Callback<QuizResponse> {
-            override fun onResponse(call: Call<QuizResponse>, response: Response<QuizResponse>) {
+        ApiClient.quizService.completeQuiz(lectureId, userId, QuizCompleteRequest(userId)).enqueue(object : Callback<QuizCompleteResponse> {
+
+            override fun onResponse(call: Call<QuizCompleteResponse>, response: Response<QuizCompleteResponse>) {
                 if (response.isSuccessful) {
                     Log.d(TAG, "퀴즈 완료 처리 성공")
                 } else {
@@ -281,7 +283,7 @@ class QuizFragment : Fragment() {
                 }
             }
 
-            override fun onFailure(call: Call<QuizResponse>, t: Throwable) {
+            override fun onFailure(call: Call<QuizCompleteResponse>, t: Throwable) {
                 Log.e(TAG, "퀴즈 완료 처리 실패: ${t.message}")
             }
         })

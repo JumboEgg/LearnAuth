@@ -15,11 +15,14 @@ interface QuizApiService {
     @POST("/api/lecture/{lectureId}/quiz")
     fun completeQuiz(
         @Path("lectureId") lectureId: Int,
-        @Query("userId") userId: Int
+        @Query("userId") userId: Int,
+        @Body request: QuizCompleteRequest
     ): Call<QuizResponse>
 }
 
 data class QuizCompleteRequest(
-    val completeQuiz: Boolean,
-    val userId: Int
+    val timeStamp: String,
+    val code: Int,
+    val status: String?,
+    val data: Boolean
 ) 
