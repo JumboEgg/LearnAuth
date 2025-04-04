@@ -44,6 +44,7 @@ class JoinActivity : AppCompatActivity() {
                     val walletFile = File(filesDir, walletFileName)
                     val credentials = WalletUtils.loadCredentials(walletPassword, walletFile)
                     val walletAddress = credentials.address
+                    Log.d(TAG, "생성된 지갑 주소: $walletAddress")
 
                     // 2. UserSession에 저장
                     UserSession.walletFilePath = walletFileName // 내부 저장소 기준 상대경로
