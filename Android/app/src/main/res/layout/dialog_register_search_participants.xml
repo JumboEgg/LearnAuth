@@ -38,6 +38,7 @@
             android:textColor="@color/text_gray"
             android:fontFamily="@font/pretendard_medium"
             android:maxLines="1"
+            android:singleLine="true"
             android:drawableEnd="@drawable/search"/>
     </com.google.android.material.textfield.TextInputLayout>
 

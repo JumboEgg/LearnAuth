@@ -112,10 +112,10 @@ class RegisterQuizFragment: Fragment(), RegisterStepSavable {
             context = requireContext(),
             apiKey = pinataApiKey,
             onSuccess = { hash ->
-                Toast.makeText(requireContext(), "파일 업로드 성공: $hash", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(requireContext(), "파일 업로드 성공: $hash", Toast.LENGTH_SHORT).show()
             },
             onError = { message ->
-                Toast.makeText(requireContext(), "파일 업로드 실패: $message", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(requireContext(), "파일 업로드 실패: $message", Toast.LENGTH_SHORT).show()
             }
         )
     }

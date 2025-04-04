@@ -90,7 +90,8 @@ class RegisterViewModel : ViewModel(){
             price = price,
             ratios = ratios,
             subLectures = subLectures,
-            quizzes = quizzes
+            quizzes = quizzes,
+            cid = ipfsHash
         )
     }
 
