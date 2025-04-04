@@ -10,5 +10,5 @@ public class SubLectureDetailRequest {
     private String subLectureTitle;
     private String lectureUrl;
     private int lectureLength;
-    private int continueWatching;
+    private Integer continueWatching;
 }
