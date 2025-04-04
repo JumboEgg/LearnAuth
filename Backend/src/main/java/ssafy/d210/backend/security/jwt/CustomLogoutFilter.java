@@ -2,11 +2,11 @@ package ssafy.d210.backend.security.jwt;
 //
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.*;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import ssafy.d210.backend.security.repository.TokenRepository;
 
 import java.io.IOException;
@@ -17,6 +17,7 @@ public class CustomLogoutFilter extends GenericFilter {
 
     private final JwtUtil jwtUtil;
     private final TokenRepository tokenRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse reesponse, FilterChain chain) throws IOException, ServletException {
@@ -60,17 +61,19 @@ public class CustomLogoutFilter extends GenericFilter {
             return;
         }
 
-        Boolean isExist = tokenRepository.existsByRefresh(refresh);
-        if (!isExist) {
+        // 토큰 검증 부분 수정
+        String redisKey = "refresh:" + refresh;
+        boolean hasKey = Boolean.TRUE.equals(redisTemplate.hasKey(redisKey));
+
+        if (!hasKey) {
             log.error("Refresh 토큰이 DB에 없습니다.");
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-
-        tokenRepository.deleteByRefresh(refresh);
+        // Redis에서 직접 삭제
+        redisTemplate.delete(redisKey);
 
         response.setHeader("refresh", null);
         response.setStatus(HttpServletResponse.SC_OK);
-
     }
 }

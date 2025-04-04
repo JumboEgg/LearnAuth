@@ -2,9 +2,12 @@ package ssafy.d210.backend.security.config;
 //
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,7 +17,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
-import ssafy.d210.backend.repository.UserLectureRepository;
 import ssafy.d210.backend.repository.UserRepository;
 import ssafy.d210.backend.security.jwt.*;
 import ssafy.d210.backend.security.repository.TokenRepository;
@@ -33,6 +35,7 @@ public class SecurityConfig {
     private final ResponseUtil responseUtil;
     private final UserLectureService userLectureService;
     private final ObjectMapper objectMapper;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Bean
     public AuthenticationManager authenticationManager() throws Exception {
@@ -71,17 +74,17 @@ public class SecurityConfig {
         AuthenticationManager authManager = authenticationManager();
 
         // LoginFilter 먼저 추가
-        LoginFilter loginFilter = new LoginFilter(authManager, jwtUtil, userRepository, tokenRepository, responseUtil, userLectureService);
+        LoginFilter loginFilter = new LoginFilter(authManager, jwtUtil, userRepository, tokenRepository, userLectureService);
         http.addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class);
 
         // 그 후 JwtFilter 추가
         http.addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         // 리프레시 토큰 필터
-        http.addFilterAt(new JwtRefreshFilter(jwtUtil, tokenRepository, userRepository, responseUtil, objectMapper), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAt(new JwtRefreshFilter(jwtUtil, userRepository, responseUtil, objectMapper, redisTemplate), UsernamePasswordAuthenticationFilter.class);
 
         // 로그아웃 필터 추가
-        http.addFilterBefore(new CustomLogoutFilter(jwtUtil, tokenRepository), LogoutFilter.class);
+        http.addFilterBefore(new CustomLogoutFilter(jwtUtil, tokenRepository ,redisTemplate), LogoutFilter.class);
 
         return http.build();
     }

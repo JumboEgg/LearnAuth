@@ -22,16 +22,10 @@ import ssafy.d210.backend.exception.service.BlockchainException;
 import ssafy.d210.backend.exception.service.DuplicatedValueException;
 import ssafy.d210.backend.exception.service.PasswordIsNotAllowed;
 import ssafy.d210.backend.redis.DistributedLock;
-import ssafy.d210.backend.repository.UserLectureRepository;
 import ssafy.d210.backend.repository.UserRepository;
-import ssafy.d210.backend.security.entity.Token;
-import ssafy.d210.backend.security.jwt.JwtUtil;
-import ssafy.d210.backend.security.repository.TokenRepository;
 import ssafy.d210.backend.util.ResponseUtil;
 
 import java.math.BigInteger;
-import java.util.Date;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
