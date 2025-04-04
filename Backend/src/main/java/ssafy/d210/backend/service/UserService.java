@@ -6,5 +6,4 @@ import ssafy.d210.backend.dto.request.user.SignupRequest;
 import ssafy.d210.backend.dto.response.user.SignupResponse;
 public interface UserService {
     ResponseSuccessDto<SignupResponse> signup(SignupRequest userSignupRequest);
-    public TransactionReceipt addUserToContract(Long userId, String userAddress);
 }

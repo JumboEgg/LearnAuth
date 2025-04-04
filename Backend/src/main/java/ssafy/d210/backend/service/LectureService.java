@@ -32,7 +32,6 @@ public interface LectureService {
     public ResponseSuccessDto<LectureSearchResponse> searchLectures(String keyword, int page);
 
     // 강의 구매
-    // 정은이 화이팅!
     public ResponseSuccessDto<Object> purchaseLecture(Long userId, Long lectureId);
 
     // 보유 강의 목록 조회
