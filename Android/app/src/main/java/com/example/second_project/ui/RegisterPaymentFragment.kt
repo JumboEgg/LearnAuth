@@ -123,7 +123,10 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
 
 
 
-
+        // 가격 복원 (ViewModel에 저장된 값이 있을 경우)
+        if (viewModel.price >= 0) {
+            binding.editTextPrice.editText?.setText(viewModel.price.toString())
+        }
 
         // 기존 참여자 정보가 있을 경우 초기화
         if (viewModel.ratios.isNotEmpty()) {

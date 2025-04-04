@@ -42,9 +42,9 @@ class MainFragment : Fragment() {
         val walletPath = UserSession.walletFilePath
         val walletPassword = UserSession.walletPassword
 
-        val walletFile = File(requireContext().filesDir, walletPath)
-        val contents = walletFile.readText()
-        Log.d("MainFragment", "🧾 Keystore JSON 내용: $contents")
+//        val walletFile = File(requireContext().filesDir, walletPath)
+//        val contents = walletFile.readText()
+//        Log.d("MainFragment", "🧾 Keystore JSON 내용: $contents")
         val nickname = UserSession.nickname ?: "(닉네임)"
         binding.recommendTitle.text = "${nickname}님을 위한 추천 강의"
 
