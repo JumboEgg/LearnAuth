@@ -192,6 +192,14 @@ public class LectureForwarder extends Contract {
         return executeRemoteCallTransaction(function, weiValue);
     }
 
+    public RemoteFunctionCall<TransactionReceipt> execute(ForwardRequestData requestData, BigInteger weiValue) {
+        final Function function = new Function(
+                FUNC_EXECUTE,
+                Arrays.<Type>asList(requestData),
+                Collections.<TypeReference<?>>emptyList());
+        return executeRemoteCallTransaction(function, weiValue);
+    }
+
     public RemoteFunctionCall<TransactionReceipt> executeBatch(List<ForwardRequestData> requests,
             String refundReceiver, BigInteger weiValue) {
         final Function function = new Function(

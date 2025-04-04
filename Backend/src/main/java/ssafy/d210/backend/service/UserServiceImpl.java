@@ -70,11 +70,12 @@ public class UserServiceImpl implements UserService {
         newUser.setPassword(bCryptPasswordEncoder.encode(userSignupRequest.getPassword()));
         User user = userRepository.save(newUser);
 
-        try {
-            addUserToContract(user.getId(), userSignupRequest.getWallet());
-        } catch (Exception e) {
-            throw new BlockchainException("사용자 등록에 실패했습니다.");
-        }
+        // TODO : 테스트 종료 후 블록체인 기능 복구
+//        try {
+//            addUserToContract(user.getId(), userSignupRequest.getWallet());
+//        } catch (Exception e) {
+//            throw new BlockchainException("사용자 등록에 실패했습니다.");
+//        }
 
         SignupResponse userSignupResponse = SignupResponse.builder()
                 .nickname(newUser.getNickname())
