@@ -65,6 +65,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="등록할 개별 강의의 이름을 작성하세요"
+                    android:fontFamily="@font/pretendard_medium"
                     android:paddingStart="14dp"
                     android:textColor="@color/text_gray"
                     android:maxLines="1"
@@ -105,7 +106,8 @@
                         android:paddingStart="14dp"
                         android:textColor="@color/text_gray"
                         android:maxLines="1"
-                        android:singleLine="true"/>
+                        android:singleLine="true"
+                        android:fontFamily="@font/pretendard_medium" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <androidx.appcompat.widget.AppCompatButton
@@ -119,7 +121,8 @@
                     android:layout_marginStart="5dp"
                     android:text="불러오기"
                     android:textColor="@color/primary_color"
-                    style="@style/heading3"/>
+                    style="@style/heading3"
+                    android:textSize="16sp"/>
                     
             </LinearLayout>
 
@@ -133,6 +136,7 @@
                     android:id="@+id/imageViewThumbnail"
                     android:layout_width="160dp"
                     android:layout_height="90dp"
+                    android:scaleType="centerCrop"
                     android:background="@color/button_white_blue"/>
 
                 <TextView
