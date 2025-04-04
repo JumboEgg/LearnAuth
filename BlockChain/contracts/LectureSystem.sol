@@ -61,10 +61,10 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
     {
         catToken = IERC20(_catToken);
         
-        _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        _grantRole(ADMIN_ROLE, _msgSender());
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(ADMIN_ROLE, msg.sender);
 
-        admin = _msgSender();
+        admin = msg.sender;
     }
 
     // ================ Token Management Functions ================
@@ -96,7 +96,7 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
             require(hasRole(ADMIN_ROLE, sender), "Only user or admin can deposit tokens");
         }
         
-        require(catToken.transfer(users[userId], amount), "Token transfer failed");
+        require(catToken.transferFrom(admin, users[userId], amount), "Token transfer failed");
         
         emit TokenDeposited(userId, amount, "deposit");
     }

@@ -5,6 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.web3j.crypto.Credentials;
+import org.web3j.protocol.Web3j;
+import ssafy.d210.backend.contracts.LectureForwarder;
+import ssafy.d210.backend.contracts.LectureSystem;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.request.user.LoginRequest;
 import ssafy.d210.backend.dto.request.user.SignupRequest;
@@ -14,6 +18,7 @@ import ssafy.d210.backend.entity.User;
 import ssafy.d210.backend.entity.UserLecture;
 import ssafy.d210.backend.enumeration.response.HereStatus;
 import ssafy.d210.backend.exception.DefaultException;
+import ssafy.d210.backend.exception.service.BlockchainException;
 import ssafy.d210.backend.exception.service.DuplicatedValueException;
 import ssafy.d210.backend.exception.service.PasswordIsNotAllowed;
 import ssafy.d210.backend.redis.DistributedLock;
@@ -24,9 +29,13 @@ import ssafy.d210.backend.security.jwt.JwtUtil;
 import ssafy.d210.backend.security.repository.TokenRepository;
 import ssafy.d210.backend.util.ResponseUtil;
 
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +45,11 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ResponseUtil responseUtil;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final Web3j web3j;
+    private final Credentials credentials;
+    private final LectureForwarder lectureForwarder;
+    private final LectureSystem lectureSystem;
+
 
     @Override
     @Transactional
@@ -76,6 +90,33 @@ public class UserServiceImpl implements UserService {
         if (nicknameExists) {
             log.error("중복 닉네임: {}", nickname);
             throw new DuplicatedValueException("이미 사용중인 닉네임입니다.");
+        }
+    }
+
+    // 이메일 중복 확인
+    private void isEmailDuplicated(User newUser) {
+        if (userRepository.existsByEmail(newUser.getEmail())) {
+            log.error("중복 이메일: {}", newUser.getEmail());
+            throw new DuplicatedValueException("이미 사용중인 이메일입니다.");
+        }
+    }
+
+    // Lecture System 컨트랙트에 사용자 지갑 등록
+    public TransactionReceipt addUserToContract(Long userId, String userAddress) {
+        log.info("Adding user with userId {} and wallet address {} to blockchain", userId, userAddress);
+
+        try {
+            BigInteger userIdBigInt = BigInteger.valueOf(userId);
+
+            CompletableFuture<TransactionReceipt> future = lectureSystem
+                    .addUser(userIdBigInt, userAddress)
+                    .sendAsync();
+
+            TransactionReceipt receipt = future.get();
+            log.info("User with userId {} added successfully. Transaction Hash: {}", userId, receipt.getTransactionHash());
+            return receipt;
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 }

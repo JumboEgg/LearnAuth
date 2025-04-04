@@ -119,45 +119,59 @@ public class LectureSystem extends Contract {
 
     public static final Event APPROVAL_EVENT = new Event("Approval", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Address>(true) {}, new TypeReference<Address>(true) {}, new TypeReference<Uint256>(true) {}));
+    ;
 
     public static final Event APPROVALFORALL_EVENT = new Event("ApprovalForAll", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Address>(true) {}, new TypeReference<Address>(true) {}, new TypeReference<Bool>() {}));
+    ;
 
     public static final Event BATCHMETADATAUPDATE_EVENT = new Event("BatchMetadataUpdate", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}, new TypeReference<Uint256>() {}));
+    ;
 
     public static final Event LECTURECREATED_EVENT = new Event("LectureCreated", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}, new TypeReference<Utf8String>() {}));
+    ;
 
     public static final Event LECTUREPURCHASED_EVENT = new Event("LecturePurchased", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>(true) {}, new TypeReference<Uint256>() {}, new TypeReference<Utf8String>() {}));
+    ;
 
     public static final Event LECTURESETTLED_EVENT = new Event("LectureSettled", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Uint16>(true) {}, new TypeReference<Uint16>(true) {}, new TypeReference<Uint256>() {}, new TypeReference<Utf8String>() {}));
+    ;
 
     public static final Event METADATAUPDATE_EVENT = new Event("MetadataUpdate", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+    ;
 
     public static final Event NFTISSUED_EVENT = new Event("NFTIssued", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}, new TypeReference<Uint256>() {}));
+    ;
 
     public static final Event ROLEADMINCHANGED_EVENT = new Event("RoleAdminChanged", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>(true) {}, new TypeReference<Bytes32>(true) {}, new TypeReference<Bytes32>(true) {}));
+    ;
 
     public static final Event ROLEGRANTED_EVENT = new Event("RoleGranted", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>(true) {}, new TypeReference<Address>(true) {}, new TypeReference<Address>(true) {}));
+    ;
 
     public static final Event ROLEREVOKED_EVENT = new Event("RoleRevoked", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>(true) {}, new TypeReference<Address>(true) {}, new TypeReference<Address>(true) {}));
+    ;
 
     public static final Event TOKENDEPOSITED_EVENT = new Event("TokenDeposited", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>(true) {}, new TypeReference<Uint256>() {}, new TypeReference<Utf8String>() {}));
+    ;
 
     public static final Event TOKENWITHDRAWN_EVENT = new Event("TokenWithdrawn", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>(true) {}, new TypeReference<Uint256>() {}, new TypeReference<Utf8String>() {}));
+    ;
 
     public static final Event TRANSFER_EVENT = new Event("Transfer", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Address>(true) {}, new TypeReference<Address>(true) {}, new TypeReference<Uint256>(true) {}));
+    ;
 
     @Deprecated
     protected LectureSystem(String contractAddress, Web3j web3j, Credentials credentials,

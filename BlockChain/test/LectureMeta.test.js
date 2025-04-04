@@ -37,6 +37,7 @@ describe("LectureSystem with LectureForwarder", function () {
     // Mint tokens to users
     await catToken.mint(user1.address, INITIAL_MINT);
     await catToken.mint(user2.address, INITIAL_MINT);
+    await catToken.mint(deployer.address, INITIAL_MINT);
     
     // Add users to the system
     await lectureSystem.addUser(USER1_ID, user1.address);
@@ -287,6 +288,19 @@ describe("LectureSystem with LectureForwarder", function () {
       const lecture = await lectureSystem.lectures(LECTURE_ID);
       expect(lecture.exists).to.be.true;
       expect(lecture.title).to.equal("Test Lecture");
+    })
+
+    it("Can deposit token to user", async function () {
+      const mintAmount = ethers.utils.parseUnits("500", 18);
+      await catToken.connect(deployer).approve(lectureSystem.address, mintAmount);
+      
+      await lectureSystem.depositToken(
+        USER1_ID,
+        mintAmount
+      );
+
+      const balance = await lectureSystem.checkBalance(user1.address);
+      expect(balance).equal(ethers.utils.parseUnits("1860", 18))
     })
   });
 });
