@@ -36,17 +36,50 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = "11"
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+
+        isCoreLibraryDesugaringEnabled = true
+
     }
     buildFeatures {
         viewBinding = true
         buildConfig = true  // 이 줄을 추가합니다.
 
     }
+
+    // ✅ 이거 추가: global-synthetics 꺼버리기
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+        freeCompilerArgs += listOf(
+            "-Xno-param-assertions",
+            "-Xno-call-assertions",
+            "-Xjvm-default=all"
+        )
+    }
+
+    packaging {
+        resources {
+            pickFirsts += listOf(
+                "META-INF/INDEX.LIST",
+                "META-INF/DEPENDENCIES",
+                "META-INF/LICENSE",
+                "META-INF/LICENSE.txt",
+                "META-INF/NOTICE",
+                "META-INF/NOTICE.txt",
+                "META-INF/FastDoubleParser-LICENSE",
+                "META-INF/DISCLAIMER",
+                "META-INF/FastDoubleParser-NOTICE",
+                "META-INF/io.netty.versions.properties"
+            )
+        }
+    }
+
 }
 
 dependencies {
@@ -88,17 +121,13 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.1.2")
     implementation("androidx.datastore:datastore-preferences-core:1.1.2")
 
-    // 이미지 불러오기 (Glide 사용) 및 youtube data v3 api
+    // 이미지 불러오기 (Glide 사용)
     implementation("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+    kapt("com.github.bumptech.glide:compiler:4.16.0")
 
     // youtube iframe api
     implementation ("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.1")
-
-    // IPFS 관련 의존성
-    implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
-    implementation("com.squareup.retrofit2:adapter-rxjava3:2.9.0")
-    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
 
