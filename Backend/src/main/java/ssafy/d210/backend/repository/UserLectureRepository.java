@@ -29,7 +29,8 @@ public interface UserLectureRepository extends JpaRepository<UserLecture, Long> 
             select l.lecture_id as lectureId,
                    l.title as title,
                    c.category_name as categoryName,
-                   ul.certificate as certificate
+                   ul.certificate as certificate,
+                   ul.certificate_date as certificateDate
             from lecture l
             join user_lecture ul
             on l.lecture_id = ul.lecture_lecture_id

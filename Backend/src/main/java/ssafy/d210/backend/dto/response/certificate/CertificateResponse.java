@@ -10,4 +10,5 @@ public class CertificateResponse {
     private String title;
     private String categoryName;
     private Integer certificate;
+    private String certificateDate;
 }
