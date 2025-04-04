@@ -2,6 +2,7 @@ package com.example.second_project.utils
 
 import android.content.Context
 import android.net.Uri
+import android.os.Environment
 import android.util.Log
 import com.example.second_project.network.PinataApiClient
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -11,6 +12,10 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
+import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 object IpfsUtils {
     private const val TAG = "IpfsUtils"
@@ -45,6 +50,45 @@ object IpfsUtils {
             }
         } catch (e: Exception) {
             Log.e(TAG, "파일 업로드 중 오류 발생", e)
+            return null
+        }
+    }
+    
+    /**
+     * IPFS에서 파일을 다운로드합니다.
+     * @param context 컨텍스트
+     * @param cid IPFS CID (Content Identifier)
+     * @param fileName 다운로드할 파일 이름 (확장자 포함)
+     * @return 다운로드된 파일의 Uri 또는 null (실패 시)
+     */
+    suspend fun downloadFileFromIpfs(context: Context, cid: String, fileName: String): Uri? {
+        try {
+            // 다운로드 URL 생성 (Pinata Gateway 사용)
+            val ipfsUrl = "https://gateway.pinata.cloud/ipfs/$cid"
+            Log.d(TAG, "다운로드 URL: $ipfsUrl")
+            
+            // 다운로드 디렉토리 생성
+            val downloadDir = File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "LectureMaterials")
+            if (!downloadDir.exists()) {
+                downloadDir.mkdirs()
+            }
+            
+            // 파일 이름에 타임스탬프 추가
+            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+            val finalFileName = "${fileName.substringBeforeLast(".")}_$timestamp.${fileName.substringAfterLast(".")}"
+            val file = File(downloadDir, finalFileName)
+            
+            // 파일 다운로드
+            URL(ipfsUrl).openStream().use { input ->
+                FileOutputStream(file).use { output ->
+                    input.copyTo(output)
+                }
+            }
+            
+            Log.d(TAG, "파일 다운로드 성공: ${file.absolutePath}")
+            return Uri.fromFile(file)
+        } catch (e: Exception) {
+            Log.e(TAG, "파일 다운로드 중 오류 발생", e)
             return null
         }
     }

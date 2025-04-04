@@ -1,5 +1,7 @@
 package com.example.second_project.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,7 +11,10 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -26,18 +31,25 @@ import com.example.second_project.databinding.FragmentOwnedLectureDetailBinding
 import com.example.second_project.network.ApiClient
 import com.example.second_project.network.ReportApiService
 import com.example.second_project.ui.LecturePlayFragmentDirections.Companion.actionOwnedLectureDetailFragmentToLecturePlayFragment
+import com.example.second_project.utils.IpfsUtils
 import com.example.second_project.utils.YoutubeUtil
 import com.example.second_project.viewmodel.OwnedLectureDetailViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 private const val TAG = "OwnedLecrtureDetailFrag_야옹"
+private const val PERMISSION_REQUEST_CODE = 1001
+
 class OwnedLectureDetailFragment : Fragment() {
 
     private var _binding: FragmentOwnedLectureDetailBinding? = null
     private val binding get() = _binding!!
     private var recentSubLectureId: Int? = null
+    private var lectureCid: String? = null
 
     private val viewModel: OwnedLectureDetailViewModel by lazy {
         OwnedLectureDetailViewModel(LectureDetailRepository())
@@ -81,6 +93,10 @@ class OwnedLectureDetailFragment : Fragment() {
                 binding.lectureDetailCategory.text = it.data.categoryName
                 binding.lectureDetailTeacher.text = it.data.lecturer ?: "강의자 미정"
                 binding.lectureDetailGoal.text = it.data.goal
+                
+                // CID 저장
+                lectureCid = it.data.cid
+                Log.d(TAG, "강의 CID: $lectureCid")
 
                 val foundSubLecture = allSubLectures.find { sub -> sub.subLectureId == recentSubLectureId }
 
@@ -220,6 +236,11 @@ class OwnedLectureDetailFragment : Fragment() {
                     }
                 }
 
+                // 다운로드 버튼 클릭 이벤트
+                binding.downloadBtn.setOnClickListener {
+                    downloadLectureMaterial(lectureId, detail.data.title)
+                }
+
             }
         }
 
@@ -248,7 +269,104 @@ class OwnedLectureDetailFragment : Fragment() {
 
     }
 
-
+    /**
+     * 강의 자료를 다운로드합니다.
+     * @param lectureId 강의 ID
+     * @param lectureTitle 강의 제목
+     */
+    private fun downloadLectureMaterial(lectureId: Int, lectureTitle: String) {
+        // CID가 없는 경우 처리
+        if (lectureCid.isNullOrEmpty()) {
+            Toast.makeText(requireContext(), "다운로드할 자료가 없습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        // 저장소 권한 확인
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            != PackageManager.PERMISSION_GRANTED) {
+            // 권한 요청
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                PERMISSION_REQUEST_CODE
+            )
+            return
+        }
+        
+        // 다운로드 진행
+        binding.loadingProgressBar.visibility = View.VISIBLE
+        binding.downloadBtn.isEnabled = false
+        
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                // 파일 이름 설정 (강의 제목 사용)
+                val fileName = "${lectureTitle.replace(" ", "_")}.pdf"
+                
+                // IPFS에서 파일 다운로드
+                val fileUri = IpfsUtils.downloadFileFromIpfs(requireContext(), lectureCid!!, fileName)
+                
+                withContext(Dispatchers.Main) {
+                    binding.loadingProgressBar.visibility = View.GONE
+                    binding.downloadBtn.isEnabled = true
+                    
+                    if (fileUri != null) {
+                        Toast.makeText(
+                            requireContext(),
+                            "강의 자료가 다운로드되었습니다.\n저장 위치: ${fileUri.path}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    } else {
+                        Toast.makeText(
+                            requireContext(),
+                            "강의 자료 다운로드에 실패했습니다.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "강의 자료 다운로드 중 오류 발생", e)
+                withContext(Dispatchers.Main) {
+                    binding.loadingProgressBar.visibility = View.GONE
+                    binding.downloadBtn.isEnabled = true
+                    Toast.makeText(
+                        requireContext(),
+                        "강의 자료 다운로드 중 오류가 발생했습니다: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
+    
+    /**
+     * 권한 요청 결과 처리
+     */
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // 권한이 승인된 경우 다운로드 진행
+                viewModel.lectureDetail.value?.let { detail ->
+                    downloadLectureMaterial(
+                        arguments?.getInt("lectureId") ?: return@let,
+                        detail.data.title
+                    )
+                }
+            } else {
+                // 권한이 거부된 경우
+                Toast.makeText(
+                    requireContext(),
+                    "저장소 접근 권한이 필요합니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
 
     private fun showReportDialog(userId:Int, lectureId: Int) {
         val builder = androidx.appcompat.app.AlertDialog.Builder(requireContext())
@@ -324,7 +442,4 @@ class OwnedLectureDetailFragment : Fragment() {
             })
         }
     }
-
-
-
 }
