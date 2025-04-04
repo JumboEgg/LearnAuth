@@ -58,7 +58,8 @@
                 android:background="@drawable/bg_radius_20"
                 android:textColorHint="@color/text_gray"
                 app:boxStrokeColor="@color/button_gray"
-                app:boxStrokeWidth="1dp">
+                app:boxStrokeWidth="1dp"
+                android:singleLine="true">
 
                 <com.google.android.material.textfield.TextInputEditText
                     style="@style/body1"
@@ -95,7 +96,8 @@
                     android:background="@drawable/bg_radius_20"
                     android:textColorHint="@color/text_gray"
                     app:boxStrokeColor="@color/button_gray"
-                    app:boxStrokeWidth="1dp">
+                    app:boxStrokeWidth="1dp"
+                    android:singleLine="true">
 
                     <com.google.android.material.textfield.TextInputEditText
                         style="@style/body1"
@@ -152,7 +154,8 @@
                         android:hint="선택지 내용을 작성해 주세요."
                         android:paddingStart="14dp"
                         android:textColor="@color/text_gray"
-                        android:maxLines="1"/>
+                        android:maxLines="1"
+                        android:singleLine="true"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -190,7 +193,8 @@
                     android:background="@drawable/bg_radius_20"
                     android:textColorHint="@color/text_gray"
                     app:boxStrokeColor="@color/button_gray"
-                    app:boxStrokeWidth="1dp">
+                    app:boxStrokeWidth="1dp"
+                    android:singleLine="true">
 
                     <com.google.android.material.textfield.TextInputEditText
                         style="@style/body1"

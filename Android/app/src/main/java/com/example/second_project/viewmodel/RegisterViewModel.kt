@@ -282,7 +282,7 @@ class RegisterViewModel : ViewModel(){
                 if (response.isSuccessful) {
                     onSuccess()
                 } else {
-                    val msg = "등록 실패: ${response.code()} - ${response.message()}"
+                    val msg = "등록 실패: ${response.code()} - ${response.message()}" // 이런 거 사용자가 못 보게 다 지워야 합니다.
                     Log.e("registerLecture", msg)
                     onError(msg)
                 }

@@ -4,7 +4,8 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:padding="25dp">
+    android:padding="25dp"
+    android:background="@color/background_color">
 
     <TextView
         android:id="@+id/textTitleSearchParticipants"
@@ -32,9 +33,10 @@
             style="@style/body1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="등록할 강의의 이름을 작성하세요"
+            android:hint="사용자의 이메일을 입력하세요"
             android:paddingStart="14dp"
             android:textColor="@color/text_gray"
+            android:fontFamily="@font/pretendard_medium"
             android:maxLines="1"
             android:drawableEnd="@drawable/search"/>
     </com.google.android.material.textfield.TextInputLayout>

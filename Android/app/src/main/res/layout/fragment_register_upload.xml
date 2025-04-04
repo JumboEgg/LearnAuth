@@ -53,19 +53,23 @@
                     <TextView
                         android:id="@+id/textFile"
                         android:layout_width="wrap_content"
+                        android:maxWidth="300dp"
                         android:layout_height="wrap_content"
                         android:text="파일 업로드하기"
                         android:layout_marginTop="8dp"
                         style="@style/semibold16"
-                        android:textColor="@color/text_gray"/>
+                        android:textColor="@color/text_gray"
+                        android:textAlignment="center"
+                        android:singleLine="true"/>
 
                     <TextView
                         android:id="@+id/textFile2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text=".zip 형태의 파일만 업로드할 수 있습니다."
-                        style="@style/medium16"
-                        android:textColor="@color/text_gray"/>
+                        style="@style/medium12"
+                        android:textColor="@color/text_gray"
+                        android:textAlignment="center"/>
 
                 </LinearLayout>
 
