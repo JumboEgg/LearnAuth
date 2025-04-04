@@ -1,5 +1,6 @@
 package com.example.second_project.ui
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -73,16 +74,30 @@ class ChargeFragment : Fragment() {
                 return@setOnClickListener
             }
 
+            val limit = BigInteger.valueOf(1_000_000)
+            val total = currentBalance + amount.toBigInteger()
+            // ★ 1) 100만 초과 여부 체크
+            if (total > limit) {
+                // 다이얼로그를 띄운 뒤 결제 요청 중단
+                AlertDialog.Builder(requireContext())
+                    .setTitle("충전 불가")
+                    .setMessage("보유 가능 CAT은 최대 1,000,000까지입니다.\n현재 충전으로 초과됩니다.")
+                    .setPositiveButton("확인", null)
+                    .show()
+                return@setOnClickListener
+            }
+
+            // ★ 2) 여기서부터 실제 충전 로직
             val request = DepositRequest(
                 userId = UserSession.userId,
                 quantity = amount
             )
 
             val service = ApiClient.retrofit.create(PaymentApiService::class.java)
-
             service.deposit(request).enqueue(object : Callback<Void> {
                 override fun onResponse(call: Call<Void>, response: Response<Void>) {
                     if (response.isSuccessful) {
+                        // 충전 성공 시
                         currentBalance += amount.toBigInteger()
                         updateChargeOutput(amount)
                         Toast.makeText(requireContext(), "충전 완료!", Toast.LENGTH_SHORT).show()
@@ -96,11 +111,11 @@ class ChargeFragment : Fragment() {
                 }
 
                 override fun onFailure(call: Call<Void>, t: Throwable) {
-                    Toast.makeText(requireContext(), "통신 오류: ${t.message}", Toast.LENGTH_SHORT)
-                        .show()
+                    Toast.makeText(requireContext(), "통신 오류: ${t.message}", Toast.LENGTH_SHORT).show()
                 }
             })
         }
+
 
 
         // 닫기 버튼

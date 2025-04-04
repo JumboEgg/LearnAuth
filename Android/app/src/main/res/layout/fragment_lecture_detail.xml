@@ -164,11 +164,12 @@
                 style="@style/heading3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
+                android:layout_marginTop="19dp"
                 android:layout_marginEnd="12dp"
                 android:text="CAT"
                 app:layout_constraintBottom_toBottomOf="@id/lectureDetailPrice"
-                app:layout_constraintEnd_toStartOf="@id/lectureDetailPrice" />
+                app:layout_constraintEnd_toStartOf="@id/lectureDetailPrice"
+                app:layout_constraintTop_toTopOf="@+id/lectureDetailPrice" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buyBtn"
