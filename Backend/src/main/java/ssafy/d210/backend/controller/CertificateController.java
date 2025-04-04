@@ -46,19 +46,16 @@ public class CertificateController {
         return ResponseEntity.ok(certificateService.getCertificatesDetail(userId, lectureId));
     }
 
-
-    // 보류. private key 관리 방식에 따라 구현 방식이 달라집니다.
     // 수료증 발급 요청 @PatchMapping("/lecture/{lectureId}/certification")
     @PatchMapping("/lecture/{lectureId}/certification")
     @Operation(summary = "[미완] 수료증 발급 요청", description = "미완료")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "수료증 발급 요청")
     })
-    public ResponseEntity<Boolean> issueCertificate(
+    public ResponseEntity<ResponseSuccessDto<Boolean>> issueCertificate(
             @RequestParam("userId") Long userId,
-            @PathVariable("lectureId") Long lectureId
+            @PathVariable("cid") String cid
     ) {
-        boolean isValid = true; // 일단 냅다 넣어놓음
-        return ResponseEntity.ok(isValid);
+        return ResponseEntity.ok(certificateService.issueCertificate(userId, cid));
     }
 }

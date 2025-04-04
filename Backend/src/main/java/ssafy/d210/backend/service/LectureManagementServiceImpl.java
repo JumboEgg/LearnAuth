@@ -171,20 +171,19 @@ public class LectureManagementServiceImpl implements LectureManagementService {
             paymentRatioRepository.saveAll(paymentRatios);
             userLectureTimeRepository.saveAll(userLectureTimes);
 
-            // TODO : 테스트 완료 후 블록체인 기능 복구
-//            // 블록체인에 강의를 등록하는 기능. 필요에 의해 앞쪽에 삽입될 수도 있습니다.
-//            List<LectureSystem.Participant> participants = paymentRatios.stream().map(
-//                    paymentRatio -> new LectureSystem.Participant(
-//                            BigInteger.valueOf(paymentRatio.getUser().getId()),
-//                            BigInteger.valueOf(paymentRatio.getRatio())
-//                    )
-//            ).toList();
-//            RemoteFunctionCall<TransactionReceipt> tx = lectureSystem.createLecture(
-//                    BigInteger.valueOf(savedLecture.getId()),
-//                    request.getTitle(),
-//                    participants
-//            );
-//            tx.send();
+            // 블록체인에 강의를 등록하는 기능. 필요에 의해 앞쪽에 삽입될 수도 있습니다.
+            List<LectureSystem.Participant> participants = paymentRatios.stream().map(
+                    paymentRatio -> new LectureSystem.Participant(
+                            BigInteger.valueOf(paymentRatio.getUser().getId()),
+                            BigInteger.valueOf(paymentRatio.getRatio())
+                    )
+            ).toList();
+            RemoteFunctionCall<TransactionReceipt> tx = lectureSystem.createLecture(
+                    BigInteger.valueOf(savedLecture.getId()),
+                    request.getTitle(),
+                    participants
+            );
+            tx.send();
 
             return responseUtil.successResponse(true, HereStatus.SUCCESS_LECTURE_REGISTERED);
         } catch (Exception e) {

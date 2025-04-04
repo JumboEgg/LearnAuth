@@ -22,5 +22,5 @@ public interface CertificateService {
     *   Back에서 transaction 실행 후 결과 값(tokenId) 저장
     *   저장한 tokenId와 생성한 qrCode 반환
     */
-    public ResponseSuccessDto<Boolean> issueCertificate(Long lectureId, Long userId);
+    public ResponseSuccessDto<Boolean> issueCertificate(Long userId, String cid);
 }

@@ -59,7 +59,7 @@ public class CertificateServiceImpl implements CertificateService{
     }
 
     @Override
-    public ResponseSuccessDto<Boolean> issueCertificate(Long lectureId, Long userId) {
+    public ResponseSuccessDto<Boolean> issueCertificate(Long userId, String cid) {
         return null;
     }
 }
