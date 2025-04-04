@@ -35,6 +35,7 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.textName.text = "${UserSession.nickname}님,"
         // profileMenu1 -> MyWalletFragment 이동
         binding.profileMenu1.setOnClickListener {
             findNavController().navigate(R.id.action_profileFragment_to_myWalletFragment)
@@ -64,7 +65,12 @@ class ProfileFragment : Fragment() {
         if (manager != null) {
             Thread {
                 try {
+
+                    val address = manager.getMyWalletAddress()
+                    Log.d("ProfileFragment", "📍 내 지갑 주소: $address")
+
                     val balance = manager.getMyCatTokenBalance()
+                    Log.d("ProfileFragment", "💰 CATToken 잔액: $balance")
                     val formattedBalance = balance.toString() // 필요 시 소수점 포맷도 가능
 
                     // UI 업데이트는 메인 스레드에서!

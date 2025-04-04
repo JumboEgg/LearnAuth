@@ -104,7 +104,7 @@ class BlockChainManager(
 
     fun getMyCatTokenBalance(): BigInteger {
         val address = credentials.address
-        return catToken.balanceOf(address).send()
+        return catToken.balanceOf(address).sendAsync().get()
     }
 
     fun getMyWalletAddress(): String {
