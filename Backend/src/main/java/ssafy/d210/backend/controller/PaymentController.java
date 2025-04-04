@@ -14,7 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.request.payment.TokenRequest;
 import ssafy.d210.backend.dto.request.transaction.SignedRequest;
+import ssafy.d210.backend.enumeration.response.HereStatus;
+import ssafy.d210.backend.service.MetaTransactionService;
 import ssafy.d210.backend.service.PaymentService;
+import ssafy.d210.backend.util.ResponseUtil;
 
 @RestController
 @RequestMapping("/api/payment")
@@ -22,7 +25,9 @@ import ssafy.d210.backend.service.PaymentService;
 @Tag(name = "PaymentController", description = "토큰 구매 및 차감")
 public class PaymentController {
 
+    private final ResponseUtil responseUtil;
     private final PaymentService paymentService;
+    private final MetaTransactionService metaTransactionService;
 
     // 토큰 추가
     @PatchMapping("/withdrawal")
@@ -33,7 +38,8 @@ public class PaymentController {
     public ResponseEntity<ResponseSuccessDto<Boolean>> withdrawToken(
             @RequestBody SignedRequest signedRequest
             ) {
-        return ResponseEntity.ok(paymentService.decreaseToken(signedRequest));
+        ResponseSuccessDto<Boolean> res = responseUtil.successResponse(metaTransactionService.executeMetaTransaction(signedRequest), HereStatus.SUCCESS_LECTURE);
+        return ResponseEntity.ok(res);
     }
 
     // 토큰 차감

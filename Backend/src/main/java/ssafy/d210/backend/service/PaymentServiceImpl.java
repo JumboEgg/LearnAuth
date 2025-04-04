@@ -31,22 +31,6 @@ public class PaymentServiceImpl implements PaymentService{
     private final BigInteger BC_ETHER = BigInteger.valueOf((long) Math.pow(10, 18));
 
     @Override
-    public ResponseSuccessDto<Boolean> decreaseToken(SignedRequest request) {
-        ResponseSuccessDto<Boolean> res;
-        try {
-            // TODO : 서명된 contract를 forwarder에서 사용하는 로직으로 수정하기
-            CompletableFuture<TransactionReceipt> tx = depositToken(12L, 999);
-            TransactionReceipt receipt = tx.get();
-            log.info("Token deposit transaction success : {}", receipt);
-            res = new ResponseSuccessDto<>(true);
-        } catch (Exception e) {
-            log.info("Token deposit transaction failed. userId: {}, quantity: {}", 12, 999);
-            res = new ResponseSuccessDto<>(false);
-        }
-        return res;
-    }
-
-    @Override
     public ResponseSuccessDto<Boolean> increaseToken(long userId, int quantity) {
         ResponseSuccessDto<Boolean> res;
         try {

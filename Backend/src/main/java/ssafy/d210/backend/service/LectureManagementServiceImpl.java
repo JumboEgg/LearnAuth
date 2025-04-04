@@ -3,6 +3,9 @@ package ssafy.d210.backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.web3j.protocol.core.RemoteFunctionCall;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import ssafy.d210.backend.contracts.LectureSystem;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.request.lecture.LectureRegisterRequest;
 import ssafy.d210.backend.dto.request.lecture.SubLectureRequest;
@@ -18,6 +21,7 @@ import ssafy.d210.backend.repository.*;
 import ssafy.d210.backend.util.AES256Util;
 import ssafy.d210.backend.util.ResponseUtil;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -39,11 +43,13 @@ public class LectureManagementServiceImpl implements LectureManagementService {
     private final UserLectureRepository userLectureRepository;
     private final UserLectureTimeRepository userLectureTimeRepository;
     private final ResponseUtil<Boolean> responseUtil;
+    private final LectureSystem lectureSystem;
 
     @Override
     @DistributedLock(key = "#registerLecture")
     @Transactional
     public ResponseSuccessDto<Boolean> registerLecture(LectureRegisterRequest request) {
+
         try {
             // 예외 처리
             // 한나 : 더 찾으면 알려주세요
@@ -165,6 +171,20 @@ public class LectureManagementServiceImpl implements LectureManagementService {
             paymentRatioRepository.saveAll(paymentRatios);
             userLectureTimeRepository.saveAll(userLectureTimes);
 
+            // TODO : 테스트 완료 후 블록체인 기능 복구
+//            // 블록체인에 강의를 등록하는 기능. 필요에 의해 앞쪽에 삽입될 수도 있습니다.
+//            List<LectureSystem.Participant> participants = paymentRatios.stream().map(
+//                    paymentRatio -> new LectureSystem.Participant(
+//                            BigInteger.valueOf(paymentRatio.getUser().getId()),
+//                            BigInteger.valueOf(paymentRatio.getRatio())
+//                    )
+//            ).toList();
+//            RemoteFunctionCall<TransactionReceipt> tx = lectureSystem.createLecture(
+//                    BigInteger.valueOf(savedLecture.getId()),
+//                    request.getTitle(),
+//                    participants
+//            );
+//            tx.send();
 
             return responseUtil.successResponse(true, HereStatus.SUCCESS_LECTURE_REGISTERED);
         } catch (Exception e) {

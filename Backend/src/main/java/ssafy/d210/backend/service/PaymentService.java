@@ -6,7 +6,5 @@ import ssafy.d210.backend.dto.request.transaction.SignedRequest;
 
 
 public interface PaymentService {
-    public ResponseSuccessDto<Boolean> decreaseToken(SignedRequest request);
-
     public ResponseSuccessDto<Boolean> increaseToken(long userId, int quantity);
 }
