@@ -69,3 +69,16 @@ blockchain:
     address: ${BC_TOKEN}
   lecture-system:
     address: ${BC_LECTURE}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "prometheus,health,info,metrics"
+  endpoint:
+    health:
+      show-details: "always"
+  prometheus:
+    metrics:
+      export:
+        enabled: true
