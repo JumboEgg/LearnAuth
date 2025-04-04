@@ -73,7 +73,7 @@ interface LectureApiService {
     ): Call<Void>
 
     // 마지막으로 시청한 개별강의 업데이트
-    @PATCH("api/userlecture/{userLectureId}/lastviewed")
+    @PATCH("/api/userlecture/{userLectureId}/lastviewd")
     fun updateLastViewedLecture(
         @Path("userLectureId") userLectureId: Int,
         @Query("subLectureId") subLectureId: Int

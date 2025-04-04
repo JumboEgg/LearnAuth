@@ -76,10 +76,12 @@ class LectureDetailRepository {
             .enqueue(object : Callback<Void> {
                 override fun onResponse(call: Call<Void>, response: Response<Void>) {
                     result.postValue(response.isSuccessful)
+                    Log.d("updateLastViewedLecture", "요청: userLectureId=$userLectureId, subLectureId=$subLectureId")
+                    Log.d("updateLastViewedLecture", " repository 마지막 시청 강의 업데이트 성공:${response.code()}, isSuccessful: ${response.isSuccessful}")
                 }
 
                 override fun onFailure(call: Call<Void>, t: Throwable) {
-                    Log.e(TAG, "마지막 시청 강의 업데이트 실패: ${t.message}")
+                    Log.d("updateLastViewedLecture", " repository 마지막 시청 강의 업데이트 실패: ${t.message}")
                     result.postValue(false)
                 }
             })

@@ -114,7 +114,7 @@ class LecturePlayFragment: Fragment() {
                 val adapter = OwnedLectureDetailAdapter(
                     subLectureList = allSubLectures,
                     onItemClick = { subLecture ->
-                        saveCurrentWatchTime()
+                        saveCurrentWatchTime(subLecture.subLectureId)
                         updateLectureContent(subLecture.subLectureId)
                     }
                 )
@@ -151,13 +151,13 @@ class LecturePlayFragment: Fragment() {
         }
 
         binding.lectureDetailBack.setOnClickListener {
-            saveCurrentWatchTime()
+            saveCurrentWatchTime(currentSubLectureId)
             findNavController().popBackStack()
         }
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                saveCurrentWatchTime()
+                saveCurrentWatchTime(currentSubLectureId)
                 findNavController().popBackStack()
             }
         })
@@ -215,22 +215,24 @@ class LecturePlayFragment: Fragment() {
 
     }
 
-    private fun saveCurrentWatchTime() {
+    private fun saveCurrentWatchTime(forSubLectureId: Int) {
         val lectureData = viewModel.lectureDetail.value?.data ?: return
         val userLectureId = lectureData.userLectureId
-        val subLecture = lectureData.subLectures.find { it.subLectureId == currentSubLectureId } ?: return
+        val subLecture = lectureData.subLectures.find { it.subLectureId == forSubLectureId } ?: return
         val lectureLength = subLecture.lectureLength
 
-        val currentTimeSec = lastKnownSecondWatched
+        val currentTimeSec = watchTimeMap[forSubLectureId]
+            ?: subLecture.continueWatching
         val endFlag = currentTimeSec >= lectureLength * 0.98
 
-        viewModel.saveWatchTime(userLectureId, currentSubLectureId, currentTimeSec, endFlag)
-        viewModel.updateLastViewedLecture(userLectureId, currentSubLectureId)
+        viewModel.saveWatchTime(userLectureId, forSubLectureId, currentTimeSec, endFlag)
+        viewModel.updateLastViewedLecture(userLectureId, forSubLectureId)
     }
 
     private fun saveCurrentWatchTimeAndNavigate(newSubLectureId: Int) {
+        val prevId = currentSubLectureId
         // 현재 진행 상황 먼저 저장
-        saveCurrentWatchTime()
+        saveCurrentWatchTime(prevId)
 
         // 그 다음 새 콘텐츠로 이동
         updateLectureContent(newSubLectureId)
