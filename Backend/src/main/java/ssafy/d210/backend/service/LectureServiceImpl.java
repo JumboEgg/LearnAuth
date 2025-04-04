@@ -2,6 +2,7 @@ package ssafy.d210.backend.service;
 //
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +39,7 @@ public class LectureServiceImpl implements LectureService{
 
     @Override
     @Transactional
+    @Cacheable(value = "lectureCategory", cacheManager = "redisCacheManager")
     public ResponseSuccessDto<List<LectureInfoListResponse>> getLecturesByCategory(int categoryId, int page) {
         // 카테고리별 강의 목록 조회
         int offset = (page - 1) * 12;
