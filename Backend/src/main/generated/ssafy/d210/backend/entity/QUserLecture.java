@@ -22,7 +22,7 @@ public class QUserLecture extends EntityPathBase<UserLecture> {
 
     public static final QUserLecture userLecture = new QUserLecture("userLecture");
 
-    public final StringPath certificate = createString("certificate");
+    public final NumberPath<Integer> certificate = createNumber("certificate", Integer.class);
 
     public final DatePath<java.time.LocalDate> certificateDate = createDate("certificateDate", java.time.LocalDate.class);
 
