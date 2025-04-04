@@ -8,5 +8,6 @@ data class RegisterLectureRequest(
     val price: Int,
     val ratios: List<Ratio>,
     val subLectures: List<SubLecture>,
-    val quizzes: List<Quiz>
+    val quizzes: List<Quiz>,
+    val cid: String? = null
 )

@@ -48,6 +48,7 @@ class LectureAdapter(
         fun bind(item: Lecture) {
             // 강의 제목을 표시 (추가적인 정보도 필요하면 여기서 바인딩)
             binding.lectureTitle.text = item.title
+            binding.lectureTitle.isSelected = true
             binding.lectureTeacherName.text = item.lecturer   // 강의자 정보 바인딩
             binding.lecturePrice.text = "${item.price}원"
             // 클릭 시 lectureId와 title 전달

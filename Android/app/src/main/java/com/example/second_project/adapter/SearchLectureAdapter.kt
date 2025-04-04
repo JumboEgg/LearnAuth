@@ -23,6 +23,8 @@ class SearchLectureAdapter(
         fun bind(lecture: Lecture) {
             // 강의 제목
             binding.lectureTitle.text = lecture.title
+            binding.lectureTitle.isSelected = true
+            
             // 카테고리 (XML에서 TextView에 id="lectureCategory" 추가 권장)
             binding.lectureCategory.text = lecture.categoryName
             // 강의자 (null인 경우 대체 텍스트)

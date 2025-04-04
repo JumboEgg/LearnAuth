@@ -59,6 +59,7 @@ class LectureDetailFragment: Fragment(R.layout.fragment_lecture_detail) {
         _binding = FragmentLectureDetailBinding.bind(view)
 
         binding.lectureDetailList.layoutManager = LinearLayoutManager(requireContext())
+        binding.lectureDetailName.isSelected = true
 
         //뒤로가기 버튼 설정
         binding.lectureDetailBack.setOnClickListener {
