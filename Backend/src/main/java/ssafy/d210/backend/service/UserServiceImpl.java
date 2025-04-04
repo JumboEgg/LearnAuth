@@ -68,7 +68,13 @@ public class UserServiceImpl implements UserService {
         }
 
         newUser.setPassword(bCryptPasswordEncoder.encode(userSignupRequest.getPassword()));
-        userRepository.save(newUser);
+        User user = userRepository.save(newUser);
+
+        try {
+            addUserToContract(user.getId(), userSignupRequest.getWallet());
+        } catch (Exception e) {
+            throw new BlockchainException("사용자 등록에 실패했습니다.");
+        }
 
         SignupResponse userSignupResponse = SignupResponse.builder()
                 .nickname(newUser.getNickname())
@@ -102,7 +108,7 @@ public class UserServiceImpl implements UserService {
     }
 
     // Lecture System 컨트랙트에 사용자 지갑 등록
-    public TransactionReceipt addUserToContract(Long userId, String userAddress) {
+    private TransactionReceipt addUserToContract(Long userId, String userAddress) {
         log.info("Adding user with userId {} and wallet address {} to blockchain", userId, userAddress);
 
         try {

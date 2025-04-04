@@ -9,8 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.request.lecture.PurchaseLectureRequest;
+import ssafy.d210.backend.dto.request.transaction.SignedRequest;
 import ssafy.d210.backend.dto.response.lecture.*;
 import ssafy.d210.backend.service.LectureService;
+import ssafy.d210.backend.service.MetaTransactionService;
 
 import java.util.List;
 //
@@ -21,6 +23,7 @@ import java.util.List;
 public class LectureController {
 
     private final LectureService lectureService;
+    private final MetaTransactionService metaTransactionService;
 
     //전체 강의 조회 @GetMapping
     @GetMapping("")
@@ -112,9 +115,13 @@ public class LectureController {
             @ApiResponse(responseCode = "200", description = "강의 구매 완료")
     })
     public ResponseEntity<ResponseSuccessDto<Object>> purchaseLecture(
-            @RequestBody PurchaseLectureRequest request
+            @RequestBody PurchaseLectureRequest request,
+            @RequestBody SignedRequest signedRequest
     ) {
-        return ResponseEntity.ok(lectureService.purchaseLecture(request.getUserId(), request.getLectureId()));
+        if (metaTransactionService.executeMetaTransaction(signedRequest)) {
+            return ResponseEntity.ok(lectureService.purchaseLecture(request.getUserId(), request.getLectureId()));
+        }
+        return ResponseEntity.ok(ResponseSuccessDto.builder().data(false).build());
     }
 
     // 내가 보유한 강의
