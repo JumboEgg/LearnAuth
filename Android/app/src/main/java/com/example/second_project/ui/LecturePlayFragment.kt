@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -20,6 +19,8 @@ import com.example.second_project.databinding.FragmentLecturePlayBinding
 import com.example.second_project.utils.YoutubeUtil
 import com.example.second_project.viewmodel.OwnedLectureDetailViewModel
 import com.bumptech.glide.Glide
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 
 private const val TAG = "LecturePlayFragment_야옹"
 class LecturePlayFragment: Fragment() {
@@ -33,6 +34,12 @@ class LecturePlayFragment: Fragment() {
     private val viewModel: OwnedLectureDetailViewModel by lazy {
         OwnedLectureDetailViewModel(LectureDetailRepository())
     }
+
+    private var youTubePlayer: YouTubePlayer? = null
+    private var lastKnownSecondWatched: Int = 0
+    private val watchTimeMap = mutableMapOf<Int, Int>() // 각 subLectureId별 시청 시간 저장
+
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -60,6 +67,11 @@ class LecturePlayFragment: Fragment() {
 
         binding.playLectureName.isSelected = true
 
+        // YouTubePlayerView 생명주기 등록
+        binding.youtubePlayerView.apply {
+            lifecycle.addObserver(this)
+        }
+
         viewModel.lectureDetail.observe(viewLifecycleOwner) { detail ->
             detail?.let {
                 allSubLectures = it.data.subLectures ?: emptyList()
@@ -78,12 +90,18 @@ class LecturePlayFragment: Fragment() {
                     Log.d(TAG, "onViewCreated: ${subLecture.lectureUrl}")
                     Log.d(TAG, "썸네일: $videoId")
                     if (videoId != null) {
-                        val thumbnailUrl = YoutubeUtil.getThumbnailUrl(videoId, YoutubeUtil.ThumbnailQuality.HIGH)
-                        Log.d(TAG, "onViewCreated: $thumbnailUrl")
-                        Glide.with(this)
-                            .load(thumbnailUrl)
-                            .placeholder(R.drawable.white)
-                            .into(binding.lecturePlayThumb)
+                        // ▶️ 유튜브 영상 로딩
+                        binding.youtubePlayerView.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
+                            override fun onReady(player: YouTubePlayer) {
+                                youTubePlayer = player
+                                val startSecond = subLecture.continueWatching
+                                player.cueVideo(videoId, startSecond.toFloat())
+                            }
+                            override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
+                                lastKnownSecondWatched = second.toInt()
+                                watchTimeMap[currentSubLectureId] = second.toInt()
+                            }
+                        })
                     } else {
                         Log.e(TAG, "onViewCreated: 유효한 유튜브 URL이 아님.", )
                     }
@@ -96,13 +114,14 @@ class LecturePlayFragment: Fragment() {
                 val adapter = OwnedLectureDetailAdapter(
                     subLectureList = allSubLectures,
                     onItemClick = { subLecture ->
+                        saveCurrentWatchTime(subLecture.subLectureId)
                         updateLectureContent(subLecture.subLectureId)
                     }
                 )
                 binding.playLectureList.layoutManager = LinearLayoutManager(requireContext())
                 binding.playLectureList.adapter = adapter
                 binding.playLectureList.isNestedScrollingEnabled = false
-                
+
                 //이전/다음 ui 업데이트
                 updateBtnColors()
             }
@@ -110,33 +129,35 @@ class LecturePlayFragment: Fragment() {
 
         // 이전, 다음 버튼
         binding.playPreviousBtnVisible.setOnClickListener {
-            val previousSubLecture = allSubLectures.find { it.subLectureId == currentSubLectureId - 1 }
+            val currentLecture = allSubLectures.find { it.subLectureId == currentSubLectureId }
+            val previousSubLecture = allSubLectures.find { it.lectureOrder == (currentLecture?.lectureOrder ?: 0) - 1 }
+
             if (previousSubLecture != null) {
-                currentSubLectureId--
-                updateLectureContent(currentSubLectureId)
-                updateBtnColors()
+                saveCurrentWatchTimeAndNavigate(previousSubLecture.subLectureId)
             } else {
                 Toast.makeText(requireContext(), "이전 강의가 없습니다.", Toast.LENGTH_SHORT).show()
             }
         }
 
         binding.playNextBtnVisible.setOnClickListener {
-            val nextSubLecture = allSubLectures.find { it.subLectureId == currentSubLectureId + 1 }
+            val currentLecture = allSubLectures.find { it.subLectureId == currentSubLectureId }
+            val nextSubLecture = allSubLectures.find { it.lectureOrder == (currentLecture?.lectureOrder ?: 0) + 1 }
+
             if (nextSubLecture != null) {
-                currentSubLectureId++
-                updateLectureContent(currentSubLectureId)
-                updateBtnColors()
+                saveCurrentWatchTimeAndNavigate(nextSubLecture.subLectureId)
             } else {
                 Toast.makeText(requireContext(), "다음 강의가 없습니다.", Toast.LENGTH_SHORT).show()
             }
         }
 
         binding.lectureDetailBack.setOnClickListener {
+            saveCurrentWatchTime(currentSubLectureId)
             findNavController().popBackStack()
         }
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
+                saveCurrentWatchTime(currentSubLectureId)
                 findNavController().popBackStack()
             }
         })
@@ -150,14 +171,14 @@ class LecturePlayFragment: Fragment() {
 
             binding.playTitle.text = subLecture.subLectureTitle
             binding.playNum.text = "${subLecture.lectureOrder}강"
+
             val videoId = subLecture.lectureUrl
+            val startSecond = watchTimeMap[subLectureId] ?: subLecture.continueWatching
             if (!videoId.isNullOrEmpty()) {
-                val thumbnailUrl = YoutubeUtil.getThumbnailUrl(videoId, YoutubeUtil.ThumbnailQuality.HIGH)
-                Log.d(TAG, "썸네일 URL: $thumbnailUrl")
-                Glide.with(this)
-                    .load(thumbnailUrl)
-                    .placeholder(R.drawable.white)
-                    .into(binding.lecturePlayThumb)
+                youTubePlayer?.pause()
+                youTubePlayer?.cueVideo(videoId, startSecond.toFloat())
+                // 디버깅용 로그
+                Log.d("startSecond", "비디오 $subLectureId 로드 중, 위치: $startSecond")
             } else {
                 Log.e(TAG, "updateLectureContent: 유효한 유튜브 URL이 아님.")
             }
@@ -194,4 +215,29 @@ class LecturePlayFragment: Fragment() {
 
     }
 
+    private fun saveCurrentWatchTime(forSubLectureId: Int) {
+        val lectureData = viewModel.lectureDetail.value?.data ?: return
+        val userLectureId = lectureData.userLectureId
+        val subLecture = lectureData.subLectures.find { it.subLectureId == forSubLectureId } ?: return
+        val lectureLength = subLecture.lectureLength
+
+        val currentTimeSec = watchTimeMap[forSubLectureId]
+            ?: subLecture.continueWatching
+        val endFlag = currentTimeSec >= lectureLength * 0.98
+
+        viewModel.saveWatchTime(userLectureId, forSubLectureId, currentTimeSec, endFlag)
+        viewModel.updateLastViewedLecture(userLectureId, forSubLectureId)
+    }
+
+    private fun saveCurrentWatchTimeAndNavigate(newSubLectureId: Int) {
+        val prevId = currentSubLectureId
+        // 현재 진행 상황 먼저 저장
+        saveCurrentWatchTime(prevId)
+
+        // 그 다음 새 콘텐츠로 이동
+        updateLectureContent(newSubLectureId)
+
+        // UI 업데이트
+        updateBtnColors()
+    }
 }

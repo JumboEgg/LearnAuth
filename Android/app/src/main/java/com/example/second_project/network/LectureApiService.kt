@@ -1,5 +1,6 @@
 package com.example.second_project.network
 
+import com.example.second_project.data.model.dto.request.SaveTimeRequest
 import com.example.second_project.data.model.dto.response.LectureDetailResponse
 import com.example.second_project.data.model.dto.response.LectureResponse
 import com.example.second_project.data.model.dto.response.LectureSearchResponse
@@ -9,9 +10,12 @@ import com.example.second_project.data.model.dto.response.OwnedLectureResponse
 import com.example.second_project.data.model.dto.response.ParticipatedLectureResponse
 import com.example.second_project.data.model.dto.response.RandomLecturesResponse
 import retrofit2.Call
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.PATCH
+import retrofit2.http.POST
 
 
 interface LectureApiService {
@@ -59,4 +63,20 @@ interface LectureApiService {
     fun getOwnedLectures(
         @Query("userId") userId:Int
     ) : Call<OwnedLectureResponse>
+
+    // 개별 강의 재생 시간 업데이트
+    @POST("api/userlecture/{userLectureId}/time")
+    fun saveWatchTime(
+        @Path("userLectureId") userLectureId: Int,
+        @Query("subLectureId") subLectureId: Int,
+        @Body body: SaveTimeRequest
+    ): Call<Void>
+
+    // 마지막으로 시청한 개별강의 업데이트
+    @PATCH("/api/userlecture/{userLectureId}/lastviewd")
+    fun updateLastViewedLecture(
+        @Path("userLectureId") userLectureId: Int,
+        @Query("subLectureId") subLectureId: Int
+    ): Call<Void>
+
 }

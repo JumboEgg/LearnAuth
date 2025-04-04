@@ -40,9 +40,9 @@ class OwnedLectureDetailAdapter(
                 Log.e(TAG, "유효한 유튜브 URL이 아님: ${subLecture.lectureUrl}")
             }
 
-            if(subLecture.endFlag == false && subLecture.continueWatching == "00:00:00") {
+            if(subLecture.endFlag == false && subLecture.continueWatching == 0) {
                 binding.eachWatchBtn.text = "수강하기"
-            } else if (subLecture.endFlag == false && subLecture.continueWatching != "00:00:00") {
+            } else if (subLecture.endFlag == false && subLecture.continueWatching != 0) {
                 binding.eachWatchBtn.text = "이어보기"
             } else if (subLecture.endFlag == true) {
                 binding.eachWatchBtn.text = "다시보기"
