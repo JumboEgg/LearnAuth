@@ -1,12 +1,12 @@
 package ssafy.d210.backend.security.repository;
-//
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.transaction.annotation.Transactional;
+
+import org.springframework.data.repository.CrudRepository;
 import ssafy.d210.backend.security.entity.Token;
 
-public interface TokenRepository extends JpaRepository<Token, Long> {
-    boolean existsByRefresh(String refresh);
+import java.util.Optional;
 
-    @Transactional
+public interface TokenRepository extends CrudRepository<Token, String> {
+    boolean existsByRefresh(String refresh);
+    Optional<Token> findByRefresh(String refresh);
     void deleteByRefresh(String refresh);
 }

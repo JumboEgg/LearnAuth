@@ -7,6 +7,7 @@ import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -42,12 +43,11 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
     private final ObjectMapper objectMapper;
-    private final ResponseUtil responseUtil;
     private final UserLectureService userLectureService;
 
     public LoginFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil,
                        UserRepository userRepository, TokenRepository tokenRepository,
-                       ResponseUtil responseUtil, UserLectureService userLectureService) {
+                       UserLectureService userLectureService) {
         super(new AntPathRequestMatcher("/api/auth/login"));
         this.userLectureService = userLectureService;
         setAuthenticationManager(authenticationManager);
@@ -56,7 +56,6 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
         this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
         this.objectMapper = new ObjectMapper();
-        this.responseUtil = responseUtil;
     }
 
     @Override
@@ -116,7 +115,7 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
         String refresh = jwtUtil.createJwt("refresh", email, 4 * 6 * 600000L, userId);
 
         // 리프레시 토큰 저장
-        addRefresh(email, refresh, 86400000L);
+        addRefresh(refresh, email);
 
         // 응답 설정
         response.setHeader("access", access);
@@ -164,14 +163,8 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
         SecurityContextHolder.getContext().setAuthentication(authResult);
     }
 
-    private void addRefresh(String email, String refreshToken, long expiredMs) {
-        Date expirationDate = new Date(System.currentTimeMillis() + expiredMs);
-
-        Token token = new Token();
-        token.setEmail(email);
-        token.setRefresh(refreshToken);
-        token.setExpiration(expirationDate.toString());
-
+    private void addRefresh(String refreshToken, String id) {
+        Token token = new Token(refreshToken, id);
         tokenRepository.save(token);
     }
 

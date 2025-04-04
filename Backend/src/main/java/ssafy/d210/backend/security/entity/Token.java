@@ -1,24 +1,21 @@
 package ssafy.d210.backend.security.entity;
-//
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+
 import lombok.Getter;
 import lombok.Setter;
-
-@Entity
+import org.springframework.data.annotation.Id;
+import org.springframework.data.redis.core.RedisHash;
 @Getter
 @Setter
+@RedisHash(value = "refresh", timeToLive = 14400)
 public class Token {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    private String refresh;
     private String email;
 
-    private String refresh;
-
-    private String expiration;
+    public Token() {}
+    public Token(String refresh, String email) {
+        this.refresh = refresh;
+        this.email = email;
+    }
 }
