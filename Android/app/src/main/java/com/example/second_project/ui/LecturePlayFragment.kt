@@ -37,6 +37,8 @@ class LecturePlayFragment: Fragment() {
 
     private var youTubePlayer: YouTubePlayer? = null
     private var lastKnownSecondWatched: Int = 0
+    private val watchTimeMap = mutableMapOf<Int, Int>() // 각 subLectureId별 시청 시간 저장
+
 
 
     override fun onCreateView(
@@ -92,10 +94,12 @@ class LecturePlayFragment: Fragment() {
                         binding.youtubePlayerView.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
                             override fun onReady(player: YouTubePlayer) {
                                 youTubePlayer = player
-                                player.cueVideo(videoId, 0f)
+                                val startSecond = subLecture.continueWatching
+                                player.cueVideo(videoId, startSecond.toFloat())
                             }
                             override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
                                 lastKnownSecondWatched = second.toInt()
+                                watchTimeMap[currentSubLectureId] = second.toInt()
                             }
                         })
                     } else {
@@ -125,24 +129,22 @@ class LecturePlayFragment: Fragment() {
 
         // 이전, 다음 버튼
         binding.playPreviousBtnVisible.setOnClickListener {
-            val previousSubLecture = allSubLectures.find { it.subLectureId == currentSubLectureId - 1 }
+            val currentLecture = allSubLectures.find { it.subLectureId == currentSubLectureId }
+            val previousSubLecture = allSubLectures.find { it.lectureOrder == (currentLecture?.lectureOrder ?: 0) - 1 }
+
             if (previousSubLecture != null) {
-                currentSubLectureId--
-                saveCurrentWatchTime()
-                updateLectureContent(currentSubLectureId)
-                updateBtnColors()
+                saveCurrentWatchTimeAndNavigate(previousSubLecture.subLectureId)
             } else {
                 Toast.makeText(requireContext(), "이전 강의가 없습니다.", Toast.LENGTH_SHORT).show()
             }
         }
 
         binding.playNextBtnVisible.setOnClickListener {
-            val nextSubLecture = allSubLectures.find { it.subLectureId == currentSubLectureId + 1 }
+            val currentLecture = allSubLectures.find { it.subLectureId == currentSubLectureId }
+            val nextSubLecture = allSubLectures.find { it.lectureOrder == (currentLecture?.lectureOrder ?: 0) + 1 }
+
             if (nextSubLecture != null) {
-                currentSubLectureId++
-                saveCurrentWatchTime()
-                updateLectureContent(currentSubLectureId)
-                updateBtnColors()
+                saveCurrentWatchTimeAndNavigate(nextSubLecture.subLectureId)
             } else {
                 Toast.makeText(requireContext(), "다음 강의가 없습니다.", Toast.LENGTH_SHORT).show()
             }
@@ -169,9 +171,14 @@ class LecturePlayFragment: Fragment() {
 
             binding.playTitle.text = subLecture.subLectureTitle
             binding.playNum.text = "${subLecture.lectureOrder}강"
+
             val videoId = subLecture.lectureUrl
+            val startSecond = watchTimeMap[subLectureId] ?: subLecture.continueWatching
             if (!videoId.isNullOrEmpty()) {
-                youTubePlayer?.cueVideo(videoId, 0f)
+                youTubePlayer?.pause()
+                youTubePlayer?.cueVideo(videoId, startSecond.toFloat())
+                // 디버깅용 로그
+                Log.d("startSecond", "비디오 $subLectureId 로드 중, 위치: $startSecond")
             } else {
                 Log.e(TAG, "updateLectureContent: 유효한 유튜브 URL이 아님.")
             }
@@ -221,7 +228,14 @@ class LecturePlayFragment: Fragment() {
         viewModel.updateLastViewedLecture(userLectureId, currentSubLectureId)
     }
 
+    private fun saveCurrentWatchTimeAndNavigate(newSubLectureId: Int) {
+        // 현재 진행 상황 먼저 저장
+        saveCurrentWatchTime()
 
+        // 그 다음 새 콘텐츠로 이동
+        updateLectureContent(newSubLectureId)
 
-
+        // UI 업데이트
+        updateBtnColors()
+    }
 }
