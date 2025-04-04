@@ -12,6 +12,7 @@ import ssafy.d210.backend.entity.Quiz;
 import ssafy.d210.backend.entity.QuizOption;
 import ssafy.d210.backend.entity.UserLecture;
 import ssafy.d210.backend.enumeration.response.HereStatus;
+import ssafy.d210.backend.redis.DistributedLock;
 import ssafy.d210.backend.repository.QuizOptionRepository;
 import ssafy.d210.backend.repository.QuizRepository;
 import ssafy.d210.backend.repository.UserLectureRepository;
@@ -64,13 +65,22 @@ public class QuizServiceImpl implements QuizService{
     }
 
     @Override
-    public ResponseSuccessDto<Boolean> submitQuiz(Long lectureId, QuizResultRequest request) {
-        UserLecture userLecture = userLectureRepository.getUserLectureById(lectureId, request.getUserId());
+    @DistributedLock(key = "#submitQuiz")
+    @Transactional
+    public ResponseSuccessDto<Boolean> submitQuiz(Long lectureId, Long userId, QuizResultRequest request) {
 
-        userLecture.setCertificateDate(LocalDate.now());
+        UserLecture userLecture = findUserLecture(lectureId, userId);
         userLectureRepository.save(userLecture);
+
         ResponseSuccessDto<Boolean> res = responseUtil.successResponse(true, HereStatus.SUCCESS_QUIZ_SUBMIT);
         return res;
+    }
+
+    @Transactional(readOnly = true)
+    protected UserLecture findUserLecture(Long lectureId, Long userId) {
+        UserLecture userLecture = userLectureRepository.getUserLectureById(lectureId, userId);
+        userLecture.setCertificateDate(LocalDate.now());
+        return userLecture;
     }
 
 

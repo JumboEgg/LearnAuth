@@ -24,7 +24,8 @@ public class UserLectureTime {
     @ManyToOne(fetch = FetchType.LAZY)
     private UserLecture userLecture;
 
-    private String continueWatching;
+    @ColumnDefault("0")
+    private Integer continueWatching;
 
     private int endFlag = 0;
 

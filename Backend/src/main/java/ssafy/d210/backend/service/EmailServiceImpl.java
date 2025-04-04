@@ -36,8 +36,7 @@ public class EmailServiceImpl implements EmailService{
                 .boolEmail(isEmail)
                 .build();
 
-        ResponseSuccessDto<EmailResponse> res = responseUtil.successResponse(emailResponse, HereStatus.SUCCESS_FIND_EMAIL);
-        return res;
+        return responseUtil.successResponse(emailResponse, HereStatus.SUCCESS_FIND_EMAIL);
     }
 
     private boolean validateEmailFormat(String email) {

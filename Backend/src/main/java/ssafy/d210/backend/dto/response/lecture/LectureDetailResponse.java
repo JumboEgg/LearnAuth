@@ -22,5 +22,6 @@ public class LectureDetailResponse {
     private int studentCount;
     private boolean owned;
     private boolean certificate;
+    private String CID;
     private List<SubLectureDetailResponse> subLectures = new ArrayList<>();
 }

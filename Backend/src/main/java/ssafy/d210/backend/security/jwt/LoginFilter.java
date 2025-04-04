@@ -6,7 +6,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,13 +17,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.util.StreamUtils;
-import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.request.user.LoginRequest;
-import ssafy.d210.backend.dto.response.user.LoginResponse;
 import ssafy.d210.backend.entity.User;
 import ssafy.d210.backend.entity.UserLecture;
-import ssafy.d210.backend.enumeration.response.HereStatus;
-import ssafy.d210.backend.repository.UserLectureRepository;
+import ssafy.d210.backend.redis.DistributedLock;
 import ssafy.d210.backend.repository.UserRepository;
 import ssafy.d210.backend.security.entity.Token;
 import ssafy.d210.backend.security.repository.TokenRepository;
@@ -35,11 +31,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 @Slf4j
 public class LoginFilter extends AbstractAuthenticationProcessingFilter {
@@ -66,6 +60,7 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
     }
 
     @Override
+    @DistributedLock(key = "loginFilter")
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException, IOException {
         log.info("Login attempt");

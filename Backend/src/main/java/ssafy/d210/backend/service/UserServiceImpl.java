@@ -30,7 +30,6 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 @Slf4j
 public class UserServiceImpl implements UserService {
 
@@ -38,6 +37,8 @@ public class UserServiceImpl implements UserService {
     private final ResponseUtil responseUtil;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    @Override
+    @Transactional
     @DistributedLock(key = "#userSignupRequest.email")
     public ResponseSuccessDto<SignupResponse> signup(SignupRequest userSignupRequest) {
 
@@ -45,11 +46,7 @@ public class UserServiceImpl implements UserService {
         User newUser = new User();
         newUser.createUser(userSignupRequest);
 
-        // 이메일 중복 확인
-        isEmailDuplicated(newUser);
-
-        // 닉네임 중복 확인
-        isNicknameDuplicated(newUser);
+        checkDuplication(newUser.getEmail() ,newUser.getNickname());
 
         if (userSignupRequest.getPassword().length() < 8 || userSignupRequest.getPassword().length() > 100) {
             log.error("비밀번호가 8자보다 작거나 100자 보다 큽니다.");
@@ -66,19 +63,19 @@ public class UserServiceImpl implements UserService {
         ResponseSuccessDto<SignupResponse> res = responseUtil.successResponse(userSignupResponse, HereStatus.SUCCESS_SIGNUP);
         return res;
     }
-    // 닉네임 중복 확인
-    private void isNicknameDuplicated(User newUser) {
-        if (userRepository.existsByNickname(newUser.getNickname())) {
-            log.error("중복 닉네임: {}", newUser.getNickname());
-            throw new DuplicatedValueException("이미 사용중인 닉네임입니다.");
-        }
-    }
 
-    // 이메일 중복 확인
-    private void isEmailDuplicated(User newUser) {
-        if (userRepository.existsByEmail(newUser.getEmail())) {
-            log.error("중복 이메일: {}", newUser.getEmail());
+    @Transactional(readOnly = true)
+    protected void checkDuplication(String email, String nickname) {
+        boolean emailExists = userRepository.existsByEmail(email);
+        if (emailExists) {
+            log.error("중복 이메일: {}", email);
             throw new DuplicatedValueException("이미 사용중인 이메일입니다.");
+        }
+
+        boolean nicknameExists = userRepository.existsByNickname(nickname);
+        if (nicknameExists) {
+            log.error("중복 닉네임: {}", nickname);
+            throw new DuplicatedValueException("이미 사용중인 닉네임입니다.");
         }
     }
 }
