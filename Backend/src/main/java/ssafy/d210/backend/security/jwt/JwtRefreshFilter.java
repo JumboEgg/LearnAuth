@@ -11,18 +11,21 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.entity.User;
 import ssafy.d210.backend.enumeration.response.HereStatus;
 import ssafy.d210.backend.repository.UserRepository;
+import ssafy.d210.backend.security.entity.Token;
 import ssafy.d210.backend.security.repository.TokenRepository;
 import ssafy.d210.backend.util.ResponseUtil;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 import java.util.TimeZone;
 
 @Slf4j
@@ -30,10 +33,10 @@ import java.util.TimeZone;
 public class JwtRefreshFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
-    private final TokenRepository tokenRepository;
     private final UserRepository userRepository;
     private final ResponseUtil responseUtil;
     private final ObjectMapper objectMapper;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -75,10 +78,11 @@ public class JwtRefreshFilter extends OncePerRequestFilter {
                 sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 토큰 타입입니다.");
                 return;
             }
+            // 토큰 검증 부분 수정
+            String redisKey = "refresh:" + refresh;
+            boolean hasKey = Boolean.TRUE.equals(redisTemplate.hasKey(redisKey));
 
-            // DB에 저장된 토큰인지 확인
-            Boolean isExist = tokenRepository.existsByRefresh(refresh);
-            if (!isExist) {
+            if (!hasKey) {
                 log.error("토큰이 DB에 저장되어 있지 않습니다.");
                 sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "토큰이 DB에 저장되어 있지 않습니다.");
                 return;
