@@ -27,8 +27,7 @@ public class UserLecture {
     @ManyToOne(fetch = FetchType.LAZY)
     private Lecture lecture;
 
-    @Length(max = 64)
-    private String certificate;
+    private Integer certificate;
 
     private LocalDate certificateDate;
 

@@ -23,9 +23,6 @@ import java.util.concurrent.CompletableFuture;
 @Transactional
 public class PaymentServiceImpl implements PaymentService{
 
-    private final Web3j web3j;
-    private final Credentials credentials;
-    private final LectureForwarder lectureForwarder;
     private final LectureSystem lectureSystem;
     private final CATToken catToken;
     private final BigInteger BC_ETHER = BigInteger.valueOf((long) Math.pow(10, 18));

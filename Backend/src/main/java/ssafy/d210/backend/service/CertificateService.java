@@ -5,6 +5,7 @@ import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.response.certificate.CertificateDetailResponse;
 import ssafy.d210.backend.dto.response.certificate.CertificateResponse;
 
+import java.math.BigInteger;
 import java.util.List;
 
 
@@ -22,5 +23,8 @@ public interface CertificateService {
     *   Back에서 transaction 실행 후 결과 값(tokenId) 저장
     *   저장한 tokenId와 생성한 qrCode 반환
     */
-    public ResponseSuccessDto<Boolean> issueCertificate(Long userId, String cid);
+    public BigInteger issueCertificate(Long userId, String cid);
+
+    // 수료증 저장하기
+    public ResponseSuccessDto<Boolean> saveCertificate(BigInteger tokenId, Long lectureId, Long userId);
 }

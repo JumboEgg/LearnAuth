@@ -8,9 +8,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
+import ssafy.d210.backend.dto.request.certificate.CertificateRequest;
 import ssafy.d210.backend.dto.response.certificate.CertificateDetailResponse;
 import ssafy.d210.backend.dto.response.certificate.CertificateResponse;
 import ssafy.d210.backend.service.CertificateService;
+
+import java.math.BigInteger;
 import java.util.List;
 //
 @RestController
@@ -48,14 +51,15 @@ public class CertificateController {
 
     // 수료증 발급 요청 @PatchMapping("/lecture/{lectureId}/certification")
     @PatchMapping("/lecture/{lectureId}/certification")
-    @Operation(summary = "[미완] 수료증 발급 요청", description = "미완료")
+    @Operation(summary = "수료증 발급 요청", description = "{userId}에 {lectureId} 강의에 대한 NFT를 발행한다.\nNFT에 {userId}와 {cid}를 저장한다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "수료증 발급 요청")
     })
     public ResponseEntity<ResponseSuccessDto<Boolean>> issueCertificate(
-            @RequestParam("userId") Long userId,
-            @PathVariable("cid") String cid
+            @RequestBody CertificateRequest request,
+            @PathVariable("lectureId") Long lectureId
     ) {
-        return ResponseEntity.ok(certificateService.issueCertificate(userId, cid));
+        BigInteger tokenId = certificateService.issueCertificate(request.getUserId(), request.getCid());
+        return ResponseEntity.ok(certificateService.saveCertificate(tokenId, lectureId, request.getUserId()));
     }
 }
