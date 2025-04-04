@@ -20,12 +20,17 @@ import com.bumptech.glide.Glide
 import com.example.second_project.R
 import com.example.second_project.UserSession.userId
 import com.example.second_project.adapter.LectureDetailAdapter
+import com.example.second_project.blockchain.SignedRequest
 import com.example.second_project.data.repository.LectureDetailRepository
-import com.example.second_project.data.repository.LectureRepository
 import com.example.second_project.databinding.FragmentLectureDetailBinding
-import com.example.second_project.databinding.FragmentOwnedLectureDetailBinding
+import com.example.second_project.network.ApiClient
+import com.example.second_project.network.MetaTxApiService
 import com.example.second_project.utils.YoutubeUtil
 import com.example.second_project.viewmodel.LectureDetailViewModel
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.math.BigInteger
 
 private const val TAG = "LectureDetailFragment_야옹"
 class LectureDetailFragment: Fragment(R.layout.fragment_lecture_detail) {
@@ -111,10 +116,46 @@ class LectureDetailFragment: Fragment(R.layout.fragment_lecture_detail) {
             }
         }
 
-        binding.buyBtn.setOnClickListener {
-            Log.d(TAG, "onViewCreated: 클릭")
-            showChargeDialog()
-        }
+//        binding.buyBtn.setOnClickListener {
+//            lifecycleScope.launch {
+//                try {
+//                    val chainManager = UserSession.getBlockchainManagerIfAvailable(requireContext())!!
+//                    val credentials = chainManager.getCredentials()
+//                    val web3j = chainManager.getWeb3j()
+//                    val forwarder = chainManager.getForwarder()
+//                    val lectureSystem = chainManager.lectureSystem
+//
+//                    val userId = BigInteger.valueOf(UserSession.userId.toLong())
+//                    val amount = BigInteger.valueOf(viewModel.lectureDetail.value?.data?.price?.toLong() ?: 0)
+////                    val encodedData = lectureSystem.withdrawToken(userId, amount).encodeFunctionCall()
+//
+//                    val blockTime = web3j.ethGetBlockByNumber(
+//                        org.web3j.protocol.core.DefaultBlockParameterName.LATEST, false
+//                    ).send().block.timestamp
+//
+//                    val deadline = blockTime.add(BigInteger.valueOf(600))
+//
+////                    val metaRequest = MetaTxRequest(
+////                        from = credentials.address,
+////                        to = lectureSystem.contractAddress,
+////                        gas = BigInteger.valueOf(1_000_000),
+////                        deadline = deadline,
+////                        data = encodedData
+////                    )
+//
+//                    val signedRequest = MetaTransactionSigner
+//                        .signMetaTxRequest(credentials, forwarder, web3j, metaRequest)
+//                        .get()
+//
+//                    sendMetaTxToBackend(signedRequest)
+//
+//                } catch (e: Exception) {
+//                    Log.e("LectureDetailFragment", "MetaTx Error: ${e.message}")
+//                }
+//            }
+//        }
+
+
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -123,6 +164,42 @@ class LectureDetailFragment: Fragment(R.layout.fragment_lecture_detail) {
         })
 
     }
+
+    fun sendMetaTxToBackend(signed: SignedRequest) {
+        val apiService = ApiClient.retrofit.create(MetaTxApiService::class.java)
+        apiService.sendMetaTransaction(signed).enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    Toast.makeText(context, "결제 성공!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Log.e("MetaTx", "서버 응답 실패: ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Log.e("MetaTx", "네트워크 오류: ${t.message}")
+            }
+        })
+    }
+
+
+    fun showNotEnoughDialog(shortfall: BigInteger) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("잔액 부족")
+            .setMessage("CAT 잔액이 ${shortfall}만큼 부족합니다.\n충전 후 다시 시도해주세요.")
+            .setPositiveButton("확인", null)
+            .show()
+    }
+
+    fun showPaymentConfirmDialog(price: BigInteger, onConfirm: () -> Unit) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("결제 확인")
+            .setMessage("${price} CAT을 사용하여 강의를 구매하시겠습니까?")
+            .setPositiveButton("결제") { _, _ -> onConfirm() }
+            .setNegativeButton("취소", null)
+            .show()
+    }
+
 
     fun showChargeDialog() {
         Log.d(TAG, "showChargeDialog:")

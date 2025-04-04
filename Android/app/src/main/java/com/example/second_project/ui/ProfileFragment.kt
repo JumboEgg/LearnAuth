@@ -59,6 +59,26 @@ class ProfileFragment : Fragment() {
         binding.profileMenu4.setOnClickListener {
             logout()
         }
+
+        val manager = UserSession.getBlockchainManagerIfAvailable(requireContext())
+        if (manager != null) {
+            Thread {
+                try {
+                    val balance = manager.getMyCatTokenBalance()
+                    val formattedBalance = balance.toString() // 필요 시 소수점 포맷도 가능
+
+                    // UI 업데이트는 메인 스레드에서!
+                    requireActivity().runOnUiThread {
+                        binding.moneyCount.text = "$formattedBalance CAT"
+                        Log.d("ProfileFragment", "💰 내 CATToken 잔액: $formattedBalance")
+                    }
+                } catch (e: Exception) {
+                    Log.e("ProfileFragment", "잔액 조회 실패", e)
+                }
+            }.start()
+        } else {
+            Log.w("ProfileFragment", "지갑 정보가 없습니다. 로그인 다시 해주세요")
+        }
     }
 
     private fun logout() {

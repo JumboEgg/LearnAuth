@@ -32,19 +32,35 @@ data class LecturePurchaseEvent(
 class LectureSystem(
     contractAddress: String,
     web3j: Web3j,
-    credentials: Credentials,
+    transactionManager: org.web3j.tx.TransactionManager,
     gasProvider: ContractGasProvider
-) : Contract("", contractAddress, web3j, credentials, gasProvider) {
+) : Contract("", contractAddress, web3j, transactionManager, gasProvider) {
 
     companion object {
-        // 스마트컨트랙트 로드하기
+
+        // ✅ 일반 트랜잭션용 (RawTransactionManager 기반 등)
+        fun load(
+            contractAddress: String,
+            web3j: Web3j,
+            txManager: org.web3j.tx.TransactionManager,
+            gasProvider: ContractGasProvider
+        ): LectureSystem {
+            return LectureSystem(contractAddress, web3j, txManager, gasProvider)
+        }
+
+        // ✅ MetaTx 서명용 - 프론트에서는 Credentials 기반으로 contract 객체 생성 가능
         fun load(
             contractAddress: String,
             web3j: Web3j,
             credentials: Credentials,
             gasProvider: ContractGasProvider
         ): LectureSystem {
-            return LectureSystem(contractAddress, web3j, credentials, gasProvider)
+            return LectureSystem(
+                contractAddress,
+                web3j,
+                org.web3j.tx.ClientTransactionManager(web3j, credentials.address), // read-only
+                gasProvider
+            )
         }
     }
 

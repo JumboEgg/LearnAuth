@@ -1,111 +1,113 @@
 package com.example.second_project.blockchain
 
 import android.util.Log
-import com.example.second_project.blockchain.monitor.LecturePurchaseEvent
 import com.example.second_project.blockchain.monitor.LectureSystem
-import com.example.second_project.blockchain.monitor.TransactionEvent
-import io.reactivex.rxjava3.core.Flowable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.web3j.crypto.Credentials
+import org.web3j.crypto.WalletUtils
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.http.HttpService
+import org.web3j.tx.RawTransactionManager
+import org.web3j.tx.TransactionManager
 import org.web3j.tx.gas.DefaultGasProvider
+import java.io.File
 import java.math.BigInteger
 
 private const val TAG = "BlockChainManager_야옹"
 
-class BlockChainManager {
-    private val web3j: Web3j
-    private val lectureSystem: LectureSystem
-    private val credentials: Credentials
+class BlockChainManager(
+    private val walletPassword: String,
+    private val walletFile: File
+) {
+
+    private val web3j: Web3j = Web3j.build(HttpService("https://rpc-amoy.polygon.technology/"))
+    private val credentials: Credentials = WalletUtils.loadCredentials(walletPassword, walletFile)
+
+    // ✅ EIP-155 적용된 트랜잭션 매니저 사용
+    private val chainId = 80002L // Polygon Amoy 테스트넷
+    private val txManager: TransactionManager = RawTransactionManager(web3j, credentials, chainId)
+
+    val lectureSystem: LectureSystem
+    val catToken: CATToken
+    val forwarder: LectureForwarder
 
     init {
-        // Web3j 설정
-        web3j = Web3j.build(HttpService("https://rpc-amoy.polygon.technology/"))
+        val addresses = mapOf(
+            "LectureForwarder" to "0x4CC8Dcb97755FB7CE165C4ffbd80A5a70B9f6637",
+            "CATToken" to "0x936023c54f6509148C01A8e2C9d5b153A62c8A14",
+            "LectureSystem" to "0x421C88D8A14ad9e389A3F807E563E8D4249c531E"
+        )
 
-        // 배포된 스마트 컨트랙트 주소
-        val lectureSystemAddress = "0x5532EDfa8C6a10e0FA62Cc8f8c221c1573D0fcbc"
-
-        // 테스트용 지갑의 개인 키 (실제 서비스에서는 노출 금지?)
-        credentials = Credentials.create("0000000000000000000000000000000000000000000000000000000000000000")
-
-        // LectureSystem 스마트 컨트랙트 로드
+        // ✅ txManager로 EIP-155 트랜잭션 실행
         lectureSystem = LectureSystem.load(
-            lectureSystemAddress,
+            addresses["LectureSystem"]!!,
             web3j,
-            credentials,
+            txManager,
+            DefaultGasProvider()
+        )
+        catToken = CATToken.load(
+            addresses["CATToken"]!!,
+            web3j,
+            txManager,
+            DefaultGasProvider()
+        )
+        forwarder = LectureForwarder.load(
+            addresses["LectureForwarder"]!!,
+            web3j,
+            txManager,
             DefaultGasProvider()
         )
     }
 
     suspend fun getTransactionHistory(userId: BigInteger) {
         withContext(Dispatchers.IO) {
-            // 입금 이벤트
-            val depositFlowable: Flowable<TransactionEvent> = lectureSystem.tokenDepositedEventFlowable(
+            // 이벤트 구독
+            lectureSystem.tokenDepositedEventFlowable(
                 DefaultBlockParameterName.EARLIEST,
                 DefaultBlockParameterName.LATEST
-            ) ?: Flowable.empty()
-
-            Log.d(TAG, "getTransactionHistory: 입금 이벤트!")
-
-            depositFlowable.subscribe(
-                { event: TransactionEvent ->
+            ).subscribe(
+                { event ->
                     if (event.userId == userId) {
-                        Log.d(TAG, "Deposit: Amount=${event.amount}, Type=${event.activityType}")
+                        Log.d(TAG, "💰 Deposit: ${event.amount}, ${event.activityType}")
                     }
                 },
-                { error ->
-                    Log.e(TAG, "Error fetching deposits", error)
-                },
-                {
-                    Log.d(TAG, "Deposit events fetched.")
-                }
+                { error -> Log.e(TAG, "Error fetching deposits", error) }
             )
 
-            // 출금 이벤트
-            val withdrawalFlowable: Flowable<TransactionEvent> = lectureSystem.tokenWithdrawnEventFlowable(
+            lectureSystem.tokenWithdrawnEventFlowable(
                 DefaultBlockParameterName.EARLIEST,
                 DefaultBlockParameterName.LATEST
-            ) ?: Flowable.empty()
-            Log.d(TAG, "getTransactionHistory: 출금 이벤트!")
-
-            withdrawalFlowable.subscribe(
-                { event: TransactionEvent ->
+            ).subscribe(
+                { event ->
                     if (event.userId == userId) {
-                        Log.d(TAG, "Withdraw: Amount=${event.amount}, Type=${event.activityType}")
+                        Log.d(TAG, "💸 Withdraw: ${event.amount}, ${event.activityType}")
                     }
                 },
-                { error ->
-                    Log.e(TAG, "Error fetching withdrawals", error)
-                },
-                {
-                    Log.d(TAG, "Withdrawal events fetched.")
-                }
+                { error -> Log.e(TAG, "Error fetching withdrawals", error) }
             )
 
-            // 강의 구매 이벤트
-            val purchaseFlowable: Flowable<LecturePurchaseEvent> = lectureSystem.lecturePurchasedEventFlowable(
+            lectureSystem.lecturePurchasedEventFlowable(
                 DefaultBlockParameterName.EARLIEST,
                 DefaultBlockParameterName.LATEST
-            ) ?: Flowable.empty()
-
-            Log.d(TAG, "getTransactionHistory: 강의 구매 이벤트!")
-
-            purchaseFlowable.subscribe(
-                { event: LecturePurchaseEvent ->
+            ).subscribe(
+                { event ->
                     if (event.userId == userId) {
-                        Log.d(TAG, "Purchase: Amount=${event.amount}, Lecture=${event.lectureTitle}")
+                        Log.d(TAG, "🎓 Purchase: ${event.amount}, ${event.lectureTitle}")
                     }
                 },
-                { error ->
-                    Log.e(TAG, "Error fetching purchases", error)
-                },
-                {
-                    Log.d(TAG, "Purchase events fetched.")
-                }
+                { error -> Log.e(TAG, "Error fetching purchases", error) }
             )
         }
+    }
+
+    fun getMyCatTokenBalance(): BigInteger {
+        val address = credentials.address
+        return catToken.balanceOf(address).send()
+    }
+
+    fun getMyWalletAddress(): String {
+        return credentials.address
     }
 }

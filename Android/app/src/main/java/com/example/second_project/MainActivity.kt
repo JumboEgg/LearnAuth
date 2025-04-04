@@ -5,7 +5,6 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.ui.setupWithNavController
-import com.example.second_project.blockchain.BlockChainManager
 import com.example.second_project.databinding.ActivityMainBinding
 import com.example.second_project.utils.ApiKeyProvider
 
@@ -13,14 +12,12 @@ private const val TAG = "MainActivity_야옹"
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding : ActivityMainBinding
-    private lateinit var blockchainManager: BlockChainManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        blockchainManager = BlockChainManager()
 
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as androidx.navigation.fragment.NavHostFragment

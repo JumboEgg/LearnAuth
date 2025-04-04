@@ -3,6 +3,7 @@ package com.example.second_project.ui
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -16,6 +17,7 @@ import com.example.second_project.adapter.BannerAdapter
 import com.example.second_project.adapter.LectureAdapter
 import com.example.second_project.databinding.FragmentMainBinding
 import com.example.second_project.viewmodel.MainViewModel
+import java.io.File
 
 class MainFragment : Fragment() {
 
@@ -37,8 +39,22 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val walletPath = UserSession.walletFilePath
+        val walletPassword = UserSession.walletPassword
+
+        val walletFile = File(requireContext().filesDir, walletPath)
+        val contents = walletFile.readText()
+        Log.d("MainFragment", "🧾 Keystore JSON 내용: $contents")
         val nickname = UserSession.nickname ?: "(닉네임)"
         binding.recommendTitle.text = "${nickname}님을 위한 추천 강의"
+
+        Log.d("MainFragment", "✅ UserSession.userId = ${UserSession.userId}")
+
+
+        Log.d("MainFragment", "✅ UserSession.nickname = $nickname")
+        Log.d("MainFragment", "✅ UserSession.walletFilePath = $walletPath")
+
+        Log.d("MainFragment", "✅ UserSession.walletPassword = $walletPassword")
         // dp -> px 변환
         val spacing = dpToPx(4)
 
