@@ -5,27 +5,31 @@
     android:id="@+id/participatedLectureRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.ParticipatedLectureFragment">
+    tools:context=".ui.ParticipatedLectureFragment"
+    android:background="@color/background_color">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/participatedRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <com.google.android.material.button.MaterialButton
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/btnNewLecture"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:layout_marginHorizontal="30dp"
-        app:cornerRadius="20dp"
-        android:backgroundTint="@color/white"
+        android:backgroundTint="@color/button_white_blue"
         android:text="신규 강의 등록"
         android:textColor="@color/primary_color"
-        app:strokeColor="@color/primary_color"
-        app:strokeWidth="1dp"
+        android:elevation="12dp"
         android:padding="15dp"
-        style="@style/heading4"
-        android:layout_marginBottom="30dp"/>
+        app:elevation="12dp"
+        android:fontFamily="@font/pretendard_bold"
+        android:letterSpacing="-0.02"
+        android:textSize="16sp"
+        android:layout_marginBottom="30dp"
+        app:backgroundTint="@color/button_white_blue"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.MyButton"/>
 
 </FrameLayout>

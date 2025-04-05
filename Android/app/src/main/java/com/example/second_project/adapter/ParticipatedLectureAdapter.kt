@@ -23,7 +23,7 @@ class ParticipatedLectureAdapter(
             // 카테고리
             binding.category.text = item.categoryName
             // 강의 참여 타입 (예시: 강의자로 참여 또는 수강자로 참여)
-            binding.joinText.text = if (item.isLecturer) "강의자로 참여" else "수강자로 참여"
+            binding.joinText.text = if (item.isLecturer) "강의자로 참여" else " "
             // 닉네임 또는 강의자 이름 (필요에 따라 수정)
             binding.myName.text = item.lecturer
 
