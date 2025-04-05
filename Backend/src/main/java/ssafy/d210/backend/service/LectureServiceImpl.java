@@ -227,8 +227,9 @@ public class LectureServiceImpl implements LectureService{
         Optional<User> user = findUser(userId);
 
         Optional<Lecture> lecture = findLecture(lectureId);
+        SubLecture subLec = findFirstByLectureId(lectureId);
 
-        userLecture.createUserLecture(user.get(), lecture.get());
+        userLecture.createUserLecture(user.get(), lecture.get(), subLec.getId());
 
         UserLecture savedUserLecture = findUserLecture(userLecture);
 
@@ -246,6 +247,10 @@ public class LectureServiceImpl implements LectureService{
 
         ResponseSuccessDto<Object> res = responseUtil.successResponse("ok", HereStatus.SUCCESS_LECTURE_BUY);
         return res;
+    }
+
+    private SubLecture findFirstByLectureId(Long lectureId) {
+        return subLectureRepository.findFirstByLectureId(lectureId);
     }
 
     @Transactional(readOnly = true)
