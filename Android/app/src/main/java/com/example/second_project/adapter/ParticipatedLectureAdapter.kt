@@ -1,12 +1,18 @@
 package com.example.second_project.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.example.second_project.R
 import com.example.second_project.data.model.dto.response.ParticipatedLecture
 import com.example.second_project.databinding.ItemParticipatedLectureBinding
+import com.example.second_project.utils.YoutubeUtil
+
+private const val TAG = "ParticipatedLectureAdapter_야옹"
 
 class ParticipatedLectureAdapter(
     private val onItemClick: ((ParticipatedLecture) -> Unit)? = null
@@ -26,6 +32,19 @@ class ParticipatedLectureAdapter(
             binding.joinText.text = if (item.isLecturer) "강의자로 참여" else " "
             // 닉네임 또는 강의자 이름 (필요에 따라 수정)
             binding.myName.text = item.lecturer
+            
+            // 썸네일 로딩
+            item.lectureUrl?.let { videoId ->
+                Log.d(TAG, "bind: videoId = $videoId")
+                val thumbnailUrl = YoutubeUtil.getThumbnailUrl(videoId, YoutubeUtil.ThumbnailQuality.MEDIUM)
+                
+                Glide.with(binding.root.context)
+                    .load(thumbnailUrl)
+                    .placeholder(R.drawable.white)
+                    .into(binding.lectureImage)
+            } ?: run {
+                Log.d(TAG, "bind: lectureUrl이 null임")
+            }
 
             binding.root.setOnClickListener {
                 onItemClick?.invoke(item)
