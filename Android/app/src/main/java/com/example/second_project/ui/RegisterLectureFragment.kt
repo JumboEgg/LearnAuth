@@ -12,6 +12,7 @@ import androidx.fragment.app.activityViewModels
 import com.example.second_project.databinding.FragmentRegisterLectureBinding
 import com.example.second_project.interfaces.RegisterStepSavable
 import com.example.second_project.viewmodel.RegisterViewModel
+import com.example.second_project.utils.setEnterLimit
 
 class RegisterLectureFragment: Fragment(), RegisterStepSavable {
 
@@ -58,6 +59,8 @@ class RegisterLectureFragment: Fragment(), RegisterStepSavable {
         binding.btnToUploadFile.setOnClickListener {
             (parentFragment as? RegisterMainFragment)?.moveToStep(1)
         }
+
+        binding.editTextContent.editText?.setEnterLimit(10)
 
     }
 

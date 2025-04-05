@@ -52,8 +52,10 @@ class RegisterViewModel : ViewModel(){
 
 
     var title: String = ""
+        set(value) { field = value.trim() }
     var categoryName: String = ""
     var goal: String = ""
+        set(value) { field = value.trim() }
     var description: String = ""
     var price: Int = 0
 
@@ -94,21 +96,6 @@ class RegisterViewModel : ViewModel(){
             cid = ipfsHash
         )
     }
-
-//    fun isValid(): Boolean {
-//        return title.isNotBlank()
-//                && categoryName.isNotBlank()
-//                && goal.isNotBlank()
-//                && description.isNotBlank()
-//                && price >= 0
-//                && ratios.isNotEmpty()
-//                && ratios.any { it.lecturer }
-//                && subLectures.isNotEmpty()
-//                && quizzes.size >= 3
-//                && quizzes.all { quiz ->
-//            quiz.quizOptions.size == 3 && quiz.quizOptions.count { it.isCorrect } == 1
-//        }
-//    }
 
     fun isValid(): Boolean {
         if (title.isBlank()) {
