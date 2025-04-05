@@ -85,6 +85,7 @@ public class LectureServiceImpl implements LectureService{
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "lectureMostCompleted", cacheManager = "redisCacheManager")
     public ResponseSuccessDto<List<LectureInfoListResponse>> getMostCompletedLectures() {
         List<LectureInfoListResponse> mostCompletedLectures = lectureRepository.getMostFinishedLectures();
         return responseUtil.successResponse(mostCompletedLectures, HereStatus.SUCCESS_LECTURE);
@@ -99,6 +100,7 @@ public class LectureServiceImpl implements LectureService{
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "lectureRecent", cacheManager = "redisCacheManager")
     public ResponseSuccessDto<List<LectureInfoListResponse>> getMostRecentLectures() {
         List<LectureInfoListResponse> newestLectures = lectureRepository.getNewestLectures();
         return responseUtil.successResponse(newestLectures, HereStatus.SUCCESS_LECTURE);
