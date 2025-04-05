@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_nav_main_to_ownedLectureDetailFragment"
             app:destination="@+id/ownedLectureDetailFragment" />
+        <action
+            android:id="@+id/action_nav_main_to_registerMainFragment"
+            app:destination="@+id/registerMainFragment" />
     </fragment>
 
     <fragment

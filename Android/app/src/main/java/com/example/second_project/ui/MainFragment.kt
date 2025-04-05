@@ -59,6 +59,11 @@ class MainFragment : Fragment() {
         // dp -> px 변환
         val spacing = dpToPx(4)
 
+        // '강의 올리기' 버튼 클릭 이벤트 설정
+        binding.uploadBtn.setOnClickListener {
+            findNavController().navigate(R.id.action_nav_main_to_registerMainFragment)
+        }
+
         // 추천 강의 (랜덤 강의) RecyclerView 설정
         recommendedAdapter = LectureAdapter(mainPage = true) { lectureId, title ->
             // 강의 클릭 시 상세 정보 불러오기 -> 이동

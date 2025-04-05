@@ -58,9 +58,6 @@ class LectureAdapter(
             binding.lectureTeacherName.text = item.lecturer   // 강의자 정보 바인딩
             binding.lecturePrice.text = "${item.price}원"
             
-            // 썸네일 설정
-            Log.d(TAG, "bind: lecture = $item")
-            
             // 첫 번째 subLecture의 URL을 사용하거나, lectureUrl을 사용
             val videoId = if (!item.subLectures.isNullOrEmpty()) {
                 item.subLectures[0].lectureUrl
@@ -69,9 +66,7 @@ class LectureAdapter(
             }
             
             videoId?.let { id ->
-                Log.d(TAG, "bind: videoId = $id")
                 val thumbnailUrl = YoutubeUtil.getThumbnailUrl(id, YoutubeUtil.ThumbnailQuality.MEDIUM)
-                Log.d(TAG, "bind: thumbnailUrl = $thumbnailUrl")
                 
                 Glide.with(binding.root.context)
                     .load(thumbnailUrl)
