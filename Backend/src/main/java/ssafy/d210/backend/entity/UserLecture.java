@@ -43,8 +43,9 @@ public class UserLecture {
     @OneToMany(mappedBy = "userLecture")
     private List<UserLectureTime> userLectureTimeList;
 
-    public void createUserLecture(User user, Lecture lecture) {
+    public void createUserLecture(User user, Lecture lecture, Long recentLectureId) {
         this.user = user;
         this.lecture = lecture;
+        this.recentLectureId = recentLectureId;
     }
 }
