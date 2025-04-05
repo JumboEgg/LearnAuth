@@ -1,75 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="12dp"
-    android:background="@android:color/white">
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginTop="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardUseCompatPadding="true"
+    android:elevation="0.3dp">
 
-    <!-- 왼쪽 고양이 이미지 -->
-    <ImageView
-        android:id="@+id/lectureImage"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_marginEnd="12dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/staricon" />
-
-    <!-- 오른쪽 영역: (과목 + 강의제목) / (학습률 + 이어보기) -->
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:padding="12dp">
 
-        <!-- 상단: 과목(subject) + 강의제목(lectureTitle) -->
-        <LinearLayout
-            android:layout_width="match_parent"
+        <!-- 고양이 이미지 -->
+        <ImageView
+            android:id="@+id/lectureImage"
+            android:layout_width="128dp"
+            android:layout_height="64dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- 카테고리 (법률) -->
+        <TextView
+            android:id="@+id/subject"
+            android:layout_width="52dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:text="데이터"
+            android:textColor="@color/text_white_blue"
+            android:background="@drawable/bg_radius_7"
+            android:backgroundTint="@color/button_white_blue"
+            style="@style/semibold12"
+            android:paddingVertical="4dp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintStart_toEndOf="@id/lectureImage"
+            app:layout_constraintTop_toTopOf="@id/lectureImage"
+            android:textAlignment="center"/>
 
-            <TextView
-                android:id="@+id/subject"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="데이터"
-                android:textSize="14sp"
-                android:textColor="@android:color/darker_gray"
-                android:layout_marginEnd="8dp" />
-
-            <TextView
-                android:id="@+id/lectureTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="8시간 완성 SQLD"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
+        <!-- 강의 제목 -->
+        <TextView
+            android:id="@+id/lectureTitle"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="8dp">
+            android:text="쉽고 유용한 근로기준법"
+            style="@style/semibold16"
+            android:singleLine="true"
+            android:layout_marginStart="8dp"
+            app:layout_constraintStart_toEndOf="@id/subject"
+            app:layout_constraintTop_toTopOf="@id/subject"
+            app:layout_constraintBottom_toBottomOf="@id/subject"
+            android:layout_marginEnd="12dp"/>
+
+        <!-- 학습률 텍스트 -->
+        <TextView
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="학습률 30%"
+            style="@style/semibold16"
+            android:textColor="@color/text_white_blue"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="@id/subject"
+            app:layout_constraintBottom_toBottomOf="@id/lectureImage"/>
+
+
 
             <TextView
-                android:id="@+id/progressBar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="학습률 30%"
-                android:textSize="14sp"
-                android:textColor="@android:color/holo_blue_dark" />
-
-            <Button
                 android:id="@+id/lectureButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:backgroundTint="@android:color/holo_blue_dark"
-                android:text="이어서보기"
-                android:textColor="@android:color/white"
-                android:textSize="14sp" />
-        </LinearLayout>
-    </LinearLayout>
-</LinearLayout>
+                android:text="이어보기"
+                style="@style/heading4"
+                android:textSize="16sp"
+                android:textColor="@color/primary_color"
+                android:layout_marginEnd="4dp"
+                app:layout_constraintEnd_toStartOf="@id/forwardIcon"
+                app:layout_constraintTop_toTopOf="@id/forwardIcon"
+                app:layout_constraintBottom_toBottomOf="@id/forwardIcon"/>
+
+            <ImageView
+                android:id="@+id/forwardIcon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/arrow_forward"
+                app:tint="@color/primary_color"
+                android:layout_gravity="center"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/progressBar"
+                app:layout_constraintBottom_toBottomOf="@id/progressBar"/>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>

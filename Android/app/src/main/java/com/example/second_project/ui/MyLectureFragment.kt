@@ -4,10 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.example.second_project.R
 import com.example.second_project.adapter.LectureViewPagerAdapter
 import com.example.second_project.databinding.FragmentMyLectureBinding
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayout.Tab
 import com.google.android.material.tabs.TabLayoutMediator
 
 class MyLectureFragment : Fragment() {
@@ -33,13 +37,38 @@ class MyLectureFragment : Fragment() {
         val adapter = LectureViewPagerAdapter(this)
         binding.viewPager.adapter = adapter
 
-        // TabLayout과 ViewPager2 연결
+//        // TabLayout과 ViewPager2 연결
+//        TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
+//            when (position) {
+//                0 -> tab.text = "보유한 강의"
+//                1 -> tab.text = "참여한 강의"
+//            }
+//        }.attach()
+
+        val tabTitles = listOf("보유한 강의", "참여한 강의")
+
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
-            when (position) {
-                0 -> tab.text = "보유한 강의"
-                1 -> tab.text = "참여한 강의"
-            }
+            val customTab = LayoutInflater.from(requireContext())
+                .inflate(R.layout.custom_tab, null, false)
+
+            val tabText = customTab.findViewById<TextView>(R.id.tabText)
+          tabText.text = tabTitles[position]
+          tab.customView = tabText
         }.attach()
+
+        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab) {
+                tab.customView?.isSelected = true
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab) {
+                tab.customView?.isSelected = false
+            }
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+
+            }
+        })
     }
 
     override fun onDestroyView() {
