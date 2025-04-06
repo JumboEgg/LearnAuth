@@ -6,6 +6,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.second_project.LoginActivity
 import com.example.second_project.R
@@ -13,8 +14,10 @@ import com.example.second_project.UserSession
 import com.example.second_project.databinding.FragmentProfileBinding
 import com.example.second_project.network.ApiClient
 import com.example.second_project.network.AuthApiService
-import com.example.second_project.data.model.dto.response.LogoutResponse
 import com.example.second_project.viewmodel.ProfileViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -63,28 +66,24 @@ class ProfileFragment : Fragment() {
 
         val manager = UserSession.getBlockchainManagerIfAvailable(requireContext())
         if (manager != null) {
-            Thread {
+            viewLifecycleOwner.lifecycleScope.launch {
                 try {
-
-                    val address = manager.getMyWalletAddress()
+                    val address = withContext(Dispatchers.IO) { manager.getMyWalletAddress() }
                     Log.d("ProfileFragment", "📍 내 지갑 주소: $address")
 
-                    val balance = manager.getMyCatTokenBalance()
+                    val balance = withContext(Dispatchers.IO) { manager.getMyCatTokenBalance() }
                     Log.d("ProfileFragment", "💰 CATToken 잔액: $balance")
-                    val formattedBalance = balance.toString() // 필요 시 소수점 포맷도 가능
 
-                    // UI 업데이트는 메인 스레드에서!
-                    requireActivity().runOnUiThread {
-                        binding.moneyCount.text = "$formattedBalance CAT"
-                        Log.d("ProfileFragment", "💰 내 CATToken 잔액: $formattedBalance")
-                    }
+                    binding.moneyCount.text = "$balance CAT"
                 } catch (e: Exception) {
                     Log.e("ProfileFragment", "잔액 조회 실패", e)
+                    Toast.makeText(requireContext(), "잔액 조회 실패: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
-            }.start()
+            }
         } else {
             Log.w("ProfileFragment", "지갑 정보가 없습니다. 로그인 다시 해주세요")
         }
+
     }
 
     private fun logout() {

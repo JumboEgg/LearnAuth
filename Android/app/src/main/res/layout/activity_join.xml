@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/joinMainLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -78,7 +79,7 @@
                         android:layout_marginTop="4dp"
                         android:background="@drawable/seletor_radio_button"
                         android:hint="실명"
-                        android:inputType="textPassword"
+                        android:inputType="text"
                         android:paddingHorizontal="20dp"
                         android:paddingVertical="12dp"
                         android:singleLine="true"
@@ -184,9 +185,7 @@
                         android:src="@drawable/checkicon"
                         android:visibility="gone"
                         app:tint="#3DCBD6" />
-
                 </LinearLayout>
-
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -219,9 +218,18 @@
                         app:layout_constraintEnd_toEndOf="@id/joinPw"
                         app:layout_constraintTop_toTopOf="@id/joinPw"
                         app:tint="@color/text_white_gray" />
-
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="※ 비밀번호는 8자 이상입니다."
+                    android:textColor="@color/text_gray"
+                    android:textSize="8sp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginLeft="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
             </LinearLayout>
 
             <LinearLayout
@@ -229,7 +237,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="40dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="12dp"
                 android:orientation="vertical"
                 app:layout_constraintTop_toBottomOf="@id/joinPwContainer">
 
