@@ -44,13 +44,18 @@ public class MetaTransactionServiceImpl implements MetaTransactionService{
                 BC_FORWARDER,
                 web3j,
                 txManager,
-                gasProvider.getGasPrice(),
-                gasProvider.getGasLimit()
+                gasProvider
         );
 
         ForwardRequest request = signedRequest.getRequest();
         byte[] signatureBytes = Numeric.hexStringToByteArray(signedRequest.getSignature());
         byte[] dataBytes = Numeric.hexStringToByteArray(request.getData());
+
+        // Check if deadline is valid
+        BigInteger currentTime = BigInteger.valueOf(System.currentTimeMillis() / 1000);
+        if (request.getDeadline().compareTo(currentTime) <= 0) {
+            throw new BlockchainException("Request deadline has expired");
+        }
 
         LectureForwarder.ForwardRequestData requestData = new LectureForwarder.ForwardRequestData(
                 request.getFrom(),
