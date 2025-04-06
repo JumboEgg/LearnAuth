@@ -26,6 +26,8 @@ public class MetaTransactionServiceImpl implements MetaTransactionService{
     private final ContractGasProvider gasProvider;
     private final LectureForwarder lectureForwarder;
 
+    @Value("${blockchain.rpc.chain-id}")
+    private int CHAIN_ID;
     @Value("${blockchain.relayer.private-key}")
     private String BC_PRIVATE_KEY;
     @Value("${blockchain.forwarder.address}")
@@ -34,7 +36,7 @@ public class MetaTransactionServiceImpl implements MetaTransactionService{
     @Override
     public boolean executeMetaTransaction(SignedRequest signedRequest) {
         Credentials credentials = Credentials.create(BC_PRIVATE_KEY);
-        TransactionManager txManager = new RawTransactionManager(web3j, credentials);
+        TransactionManager txManager = new RawTransactionManager(web3j, credentials, CHAIN_ID);
 
         log.info("🚀 트랜잭션 보내는 relayer address: {}", credentials.getAddress());
 
