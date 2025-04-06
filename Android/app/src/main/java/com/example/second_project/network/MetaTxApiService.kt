@@ -6,9 +6,6 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface MetaTxApiService {
-
-    @POST("/meta/execute")
-    fun sendMetaTransaction(
-        @Body signedRequest: SignedRequest
-    ): Call<Void> // 또는 ResponseBody 등으로 받을 수 있음
+    // 이 인터페이스는 더 이상 사용되지 않습니다.
+    // 대신 LectureApiService의 purchaseLecture 메서드를 사용하세요.
 }
