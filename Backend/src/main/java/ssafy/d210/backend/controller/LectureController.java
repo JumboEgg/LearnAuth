@@ -117,7 +117,8 @@ public class LectureController {
     public ResponseEntity<ResponseSuccessDto<Object>> purchaseLecture(
             @RequestBody PurchaseLectureRequest request
     ) {
-        if (metaTransactionService.executeMetaTransaction(request.getSignedRequest())) {
+        if (metaTransactionService.executeMetaTransaction(request.getApproveRequest())
+        && metaTransactionService.executeMetaTransaction(request.getPurchaseRequest())) {
             return ResponseEntity.ok(lectureService.purchaseLecture(request.getUserId(), request.getLectureId()));
         }
         return ResponseEntity.ok(ResponseSuccessDto.builder().data(false).build());
