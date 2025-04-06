@@ -5,8 +5,8 @@ import java.math.BigInteger
 
 class HighGasProvider : ContractGasProvider {
     override fun getGasPrice(contractFunc: String?): BigInteger {
-        // Base fee + priority fee = 25~30 Gwei 추천
-        return BigInteger.valueOf(30_000_000_000L) // 30 Gwei
+        // 테스트넷에서는 적절한 가스 가격 사용
+        return BigInteger.valueOf(25_000_000_000L) // 25 Gwei
     }
 
     override fun getGasPrice(): BigInteger {
@@ -14,7 +14,8 @@ class HighGasProvider : ContractGasProvider {
     }
 
     override fun getGasLimit(contractFunc: String?): BigInteger {
-        return BigInteger.valueOf(500_000) // 여유 있게
+        // 테스트넷에서는 적절한 가스 한도 사용
+        return BigInteger.valueOf(3_000_000) // 3,000,000
     }
 
     override fun getGasLimit(): BigInteger {

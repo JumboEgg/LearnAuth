@@ -11,7 +11,6 @@ import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.http.HttpService
 import org.web3j.tx.RawTransactionManager
 import org.web3j.tx.TransactionManager
-import org.web3j.tx.gas.DefaultGasProvider
 import java.io.File
 import java.math.BigInteger
 
@@ -22,12 +21,15 @@ class BlockChainManager(
     private val walletFile: File
 ) {
 
-    private val web3j: Web3j = Web3j.build(HttpService("https://rpc-amoy.polygon.technology/"))
-    private val credentials: Credentials = WalletUtils.loadCredentials(walletPassword, walletFile)
+    val web3j: Web3j = Web3j.build(HttpService("https://rpc-amoy.polygon.technology/"))
+    val credentials: Credentials = WalletUtils.loadCredentials(walletPassword, walletFile)
 
     // ✅ EIP-155 적용된 트랜잭션 매니저 사용
     private val chainId = 80002L // Polygon Amoy 테스트넷
     private val txManager: TransactionManager = RawTransactionManager(web3j, credentials, chainId)
+    
+    // 고가스 제공자 사용
+    private val gasProvider = HighGasProvider()
 
     val lectureSystem: LectureSystem
     val catToken: CATToken
@@ -45,19 +47,19 @@ class BlockChainManager(
             addresses["LectureSystem"]!!,
             web3j,
             txManager,
-            DefaultGasProvider()
+            gasProvider
         )
         catToken = CATToken.load(
             addresses["CATToken"]!!,
             web3j,
             txManager,
-            DefaultGasProvider()
+            gasProvider
         )
         forwarder = LectureForwarder.load(
             addresses["LectureForwarder"]!!,
             web3j,
             txManager,
-            DefaultGasProvider()
+            gasProvider
         )
     }
 

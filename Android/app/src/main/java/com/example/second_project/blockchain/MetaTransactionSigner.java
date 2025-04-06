@@ -15,6 +15,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class MetaTransactionSigner {
@@ -34,17 +35,19 @@ public class MetaTransactionSigner {
         EthChainId chainIdResponse = web3j.ethChainId().send();
         BigInteger chainId = chainIdResponse.getChainId();
 
-        // Create EIP712 domain
-        EIP712Domain domain = new EIP712Domain(
-                domainName,
-                "1",
-                chainId.toString(),
-                forwarder.getContractAddress(),
-                ""
-        );
-
         // Get nonce from forwarder contract
         BigInteger onChainNonce = forwarder.nonces(input.getFrom()).send();
+
+        // Create forward request object
+        ForwardRequest request = new ForwardRequest(
+            input.getFrom(),
+            input.getTo(),
+            BigInteger.ZERO,
+            input.getGas(),
+            onChainNonce,
+            input.getDeadline(),
+            input.getData()
+        );
 
         // Create typed data structure
         List<Entry> forwardRequestEntries = new ArrayList<>();
@@ -56,36 +59,42 @@ public class MetaTransactionSigner {
         forwardRequestEntries.add(new Entry("deadline", "uint48"));
         forwardRequestEntries.add(new Entry("data", "bytes"));
 
+        List<Entry> eip712DomainEntries = new ArrayList<>();
+        eip712DomainEntries.add(new Entry("name", "string"));
+        eip712DomainEntries.add(new Entry("version", "string"));
+        eip712DomainEntries.add(new Entry("chainId", "uint256"));
+        eip712DomainEntries.add(new Entry("verifyingContract", "address"));
+        eip712DomainEntries.add(new Entry("salt", "string"));
+
         HashMap<String, List<Entry>> types = new HashMap<>();
         types.put("ForwardRequest", forwardRequestEntries);
+        types.put("EIP712Domain", eip712DomainEntries);
 
-        // Create message
-        HashMap<String, Object> message = new HashMap<>();
-        message.put("from", input.getFrom());
-        message.put("to", input.getTo());
-        message.put("value", BigInteger.ZERO);
-        message.put("gas", input.getGas());
-        message.put("nonce", onChainNonce);
-        message.put("deadline", input.getDeadline());
-        message.put("data", input.getData());
+        // Create domain
+        EIP712Domain domain = new EIP712Domain(
+            domainName,
+            "1",
+            chainId.toString(),
+            forwarder.getContractAddress(),
+            ""
+        );
+
+        // Create message with string values for numbers
+        Map<String, Object> message = new HashMap<>();
+        message.put("from", request.getFrom().toLowerCase());
+        message.put("to", request.getTo().toLowerCase());
+        message.put("value", request.getValueAmount().toString());
+        message.put("gas", request.getGas().toString());
+        message.put("nonce", request.getNonce().toString());
+        message.put("deadline", request.getDeadline().toString());
+        message.put("data", request.getData());
 
         // Create structured data
         StructuredData.EIP712Message eip712Message = new StructuredData.EIP712Message(
-                types,
-                "ForwardRequest",
-                message,
-                domain
-        );
-
-        // Create forward request object
-        ForwardRequest request = new ForwardRequest(
-                input.getFrom(),
-                input.getTo(),
-                BigInteger.ZERO,
-                input.getGas(),
-                onChainNonce,
-                input.getDeadline(),
-                input.getData()
+            types,
+            "ForwardRequest",
+            message,
+            domain
         );
 
         // Sign the message
@@ -102,7 +111,6 @@ public class MetaTransactionSigner {
         return future;
     }
 
-    // MetaTransactionSigner2 클래스에 다음 메서드를 추가합니다
     private static String joinSignature(Sign.SignatureData signatureData) {
         byte[] v = signatureData.getV();
         byte[] r = signatureData.getR();
