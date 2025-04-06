@@ -21,6 +21,7 @@ import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.text.DecimalFormat
 
 class ProfileFragment : Fragment() {
     private var _binding: FragmentProfileBinding? = null
@@ -74,10 +75,11 @@ class ProfileFragment : Fragment() {
                     val balance = withContext(Dispatchers.IO) { manager.getMyCatTokenBalance() }
                     Log.d("ProfileFragment", "💰 CATToken 잔액: $balance")
 
-                    binding.moneyCount.text = "$balance CAT"
+                    val decimal = DecimalFormat("#,###")
+                    val myCat = decimal.format(balance)
+                    binding.moneyCount.text = "${myCat} CAT"
                 } catch (e: Exception) {
                     Log.e("ProfileFragment", "잔액 조회 실패", e)
-                    Toast.makeText(requireContext(), "잔액 조회 실패: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         } else {

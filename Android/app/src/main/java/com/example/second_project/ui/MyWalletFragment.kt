@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.second_project.R
 import com.example.second_project.adapter.TransactionAdapter
@@ -48,6 +49,10 @@ class MyWalletFragment : Fragment() {
             transaction.replace(R.id.nav_host_fragment, ChargeFragment())
             transaction.addToBackStack(null)
             transaction.commit()
+        }
+
+        binding.backBtn.setOnClickListener {
+            findNavController().popBackStack()
         }
     }
 
