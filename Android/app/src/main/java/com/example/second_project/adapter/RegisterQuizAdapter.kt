@@ -18,7 +18,7 @@ class RegisterQuizAdapter : RecyclerView.Adapter<RegisterQuizAdapter.ViewHolder>
 
     inner class ViewHolder(private val binding: ItemRegisterQuizDetailBinding) :
         RecyclerView.ViewHolder(binding.root) {
-
+        var itemPosition = -1
         fun bind(position: Int) {
             val quiz = quizList[position]
 
@@ -79,10 +79,16 @@ class RegisterQuizAdapter : RecyclerView.Adapter<RegisterQuizAdapter.ViewHolder>
                 )
 
                 container.setOnClickListener {
+
+                    binding.editAnswer1.editText?.clearFocus()
+                    binding.editAnswer2.editText?.clearFocus()
+                    binding.editAnswer3.editText?.clearFocus()
                     KeyboardUtils.clearFocusAndHideKeyboard(binding.root)
 
-                    quiz.correctAnswerIndex = index
-                    notifyItemChanged(position)
+                    if (itemPosition != -1) {
+                        quizList[itemPosition].correctAnswerIndex = index
+                        notifyItemChanged(itemPosition)
+                    }
                 }
             }
         }
@@ -94,8 +100,8 @@ class RegisterQuizAdapter : RecyclerView.Adapter<RegisterQuizAdapter.ViewHolder>
         )
         return ViewHolder(binding)
     }
-
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.itemPosition = position
         holder.bind(position)
     }
 
