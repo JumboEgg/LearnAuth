@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.second_project.R
 import com.example.second_project.adapter.RegisterParticipantsAdapter
 import com.example.second_project.adapter.RegisterSearchParticipantsAdapter
@@ -38,6 +39,7 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
     private val searchHandler = Handler(Looper.getMainLooper())
     private var searchRunnable: Runnable? = null
     private val debounceDelay = 500L
+    private var isLoading = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -62,6 +64,7 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
             },
             onDeleteClick = { position -> adapter.removeItem(position) },
             onNameClick = { position ->
+                var currentKeyword = ""
                 val dialogBinding = DialogRegisterSearchParticipantsBinding.inflate(layoutInflater)
                 val dialog = AlertDialog.Builder(requireContext())
                     .setView(dialogBinding.root)
@@ -182,6 +185,7 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
                             }
                         }
                     }
+                    currentKeyword = keyword
                     if (keyword.isNotEmpty()) {
                         dialogBinding.recyclerUserList.visibility = View.VISIBLE
                         dialogBinding.layoutSelectedUser.visibility = View.GONE
@@ -189,6 +193,32 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
                     }
 
                 }
+
+                dialogBinding.recyclerUserList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                        super.onScrolled(recyclerView, dx, dy)
+
+                        val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                        val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+                        val totalItemCount = layoutManager.itemCount
+
+                        val isLastItem = lastVisibleItem + 1 >= totalItemCount
+
+                        if (isLastItem && !isLoading) {
+                            val total = viewModel.totalResults.value ?: return
+                            val current = viewModel.searchResults.value?.size ?: 0
+                            val nextPage = (viewModel.currentPage.value ?: 1) + 1
+
+                            if (current < total) {
+                                isLoading = true // 🔒 중복 방지 락
+                                viewModel.searchUsers(currentKeyword, nextPage) {
+                                    isLoading = false // 🔓 호출 후 다시 풀기
+                                }
+                            }
+                        }
+                    }
+                })
+
 
                 dialogBinding.btnCancel.setOnClickListener {
                     dialog.dismiss()
@@ -248,7 +278,6 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
-
 
 
         // 가격 복원 (ViewModel에 저장된 값이 있을 경우)
