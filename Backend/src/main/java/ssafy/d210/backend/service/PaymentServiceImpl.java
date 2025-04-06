@@ -60,7 +60,7 @@ public class PaymentServiceImpl implements PaymentService{
 
             // 토큰 입금 실행
             log.info("Executing deposit transaction");
-            return lectureSystem.depositToken(BigInteger.valueOf(userId), BigInteger.valueOf(amount)).sendAsync()
+            return lectureSystem.depositToken(BigInteger.valueOf(userId), BigInteger.valueOf(amount).multiply(BC_ETHER)).sendAsync()
                     .thenApply(receipt -> {
                         log.info("Deposit transaction completed. Hash: {}", receipt.getTransactionHash());
                         return receipt;
