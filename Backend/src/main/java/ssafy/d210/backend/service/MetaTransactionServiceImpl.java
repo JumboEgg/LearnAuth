@@ -3,8 +3,12 @@ package ssafy.d210.backend.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.datatypes.Function;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.TransactionManager;
 import org.springframework.stereotype.Service;
@@ -16,6 +20,8 @@ import ssafy.d210.backend.dto.request.transaction.SignedRequest;
 import ssafy.d210.backend.exception.service.BlockchainException;
 
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Collections;
 
 @Slf4j
 @Service
@@ -69,6 +75,26 @@ public class MetaTransactionServiceImpl implements MetaTransactionService{
         try {
             log.info("Start Transaction");
             BigInteger weiValue = BigInteger.ZERO; // Value to send with the transaction
+
+            // Execute eth_call
+            // Create function object for the execute method
+            Function function = new Function(
+                    "execute",
+                    Arrays.asList(requestData),
+                    Collections.emptyList());
+
+            // Encode function call data
+            String encodedFunction = FunctionEncoder.encode(function);
+
+            // Create transaction call object
+            Transaction transaction = Transaction.createEthCallTransaction(
+                    credentials.getAddress(),
+                    BC_FORWARDER,
+                    encodedFunction
+            );
+            String result = web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).send().getValue();
+            log.info("eth_call result: {}", result);
+
             var receipt = forwarder.execute(requestData, weiValue).send();
             log.info("Transaction executed: {}", receipt);
         } catch (Exception e) {
