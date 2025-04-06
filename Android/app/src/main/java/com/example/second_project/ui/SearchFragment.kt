@@ -22,6 +22,8 @@ import com.example.second_project.databinding.FragmentSearchBinding
 import com.example.second_project.viewmodel.SearchViewModel
 
 private const val TAG = "SearchFragment_야옹"
+private const val KEY_CURRENT_CATEGORY = "current_category"
+private const val KEY_CURRENT_CATEGORY_POSITION = "current_category_position"
 
 class SearchFragment : Fragment() {
 
@@ -34,6 +36,7 @@ class SearchFragment : Fragment() {
 
     // 현재 선택된 카테고리 (초기값 "전체")
     private var currentCategory: String = "전체"
+    private var currentCategoryPosition: Int = 0
 
     // Handler와 Runnable을 통한 debounce 처리 (실시간 검색)
     private val searchHandler = Handler(Looper.getMainLooper())
@@ -54,11 +57,18 @@ class SearchFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 저장된 상태 복원
+        savedInstanceState?.let {
+            currentCategory = it.getString(KEY_CURRENT_CATEGORY, "전체")
+            currentCategoryPosition = it.getInt(KEY_CURRENT_CATEGORY_POSITION, 0)
+        }
+
         // 1) 카테고리 RecyclerView
         val spacing = dpToPx(8)
         categoryAdapter = CategoryAdapter(categoryList) { position ->
             // 선택된 카테고리를 저장
             currentCategory = categoryList[position]
+            currentCategoryPosition = position
 
             val keyword = binding.searchInputText.text.toString().trim()
             if (keyword.isNotEmpty()) {
@@ -76,6 +86,15 @@ class SearchFragment : Fragment() {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
             adapter = categoryAdapter
             addItemDecoration(HorizontalSpacingItemDecoration(spacing))
+        }
+
+        // 저장된 카테고리 위치로 스크롤
+        binding.categoryRecyclerView.post {
+            if (currentCategoryPosition > 0) {
+                binding.categoryRecyclerView.scrollToPosition(currentCategoryPosition)
+                // 카테고리 선택 상태 복원
+                categoryAdapter.setSelectedPosition(currentCategoryPosition)
+            }
         }
 
         // 2) 강의 결과 RecyclerView (2열 Grid)
@@ -143,7 +162,7 @@ class SearchFragment : Fragment() {
                     } else {
                         // 검색어가 없으면 일반 강의 목록 로드
                         viewModel.resetLectures()
-                        viewModel.loadLectures(0)
+                        viewModel.loadLectures(currentCategoryPosition)
                     }
                 }
                 searchHandler.postDelayed(searchRunnable!!, debounceDelay)
@@ -159,7 +178,7 @@ class SearchFragment : Fragment() {
             viewModel.resetSearchResults()
             // 카테고리는 그대로 두고, 일반 강의 목록 로드
             viewModel.resetLectures()
-            viewModel.loadLectures(categoryList.indexOf(currentCategory))
+            viewModel.loadLectures(currentCategoryPosition)
         }
 
         // 5) 검색 결과 관찰
@@ -180,8 +199,26 @@ class SearchFragment : Fragment() {
         }
 
         // 7) 초기 진입 시 기본 강의 로드
-        viewModel.resetLectures()
-        viewModel.loadLectures(0) // "전체"
+        if (savedInstanceState == null) {
+            // 처음 생성된 경우에만 초기화
+            viewModel.resetLectures()
+            viewModel.loadLectures(currentCategoryPosition) // 저장된 카테고리 위치 또는 "전체"
+        } else {
+            // 상태 복원 시 해당 카테고리의 강의 로드
+            val keyword = binding.searchInputText.text.toString().trim()
+            if (keyword.isNotEmpty()) {
+                viewModel.searchLectures(keyword, currentCategory)
+            } else {
+                viewModel.loadLectures(currentCategoryPosition)
+            }
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        // 현재 상태 저장
+        outState.putString(KEY_CURRENT_CATEGORY, currentCategory)
+        outState.putInt(KEY_CURRENT_CATEGORY_POSITION, currentCategoryPosition)
     }
 
     override fun onDestroyView() {

@@ -226,7 +226,8 @@ class OwnedLectureDetailFragment : Fragment() {
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                findNavController().popBackStack(R.id.nav_search, true)
+                // SearchFragment로 돌아갈 때 상태를 보존하기 위해 popBackStack() 사용
+                findNavController().popBackStack()
             }
         })
 
@@ -237,14 +238,6 @@ class OwnedLectureDetailFragment : Fragment() {
         binding.declarationBtn.setOnClickListener {
             showReportDialog(userId, lectureId)
         }
-
-        //뒤로가기 처리
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                findNavController().popBackStack()
-            }
-        })
-
 
     }
 
