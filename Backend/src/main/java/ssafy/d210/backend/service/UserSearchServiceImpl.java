@@ -40,7 +40,7 @@ public class UserSearchServiceImpl implements UserSearchService{
 
         PageRequest pageable = PageRequest.of(page - 1, pageSize);
 
-        Page<User> userPage = findSearch(keyword, keyword, keyword, pageable);
+        Page<User> userPage = findSearch(keyword, pageable);
 
         List<UserInfoResponse> searchResults = userPage.getContent().stream()
                 .map(user -> new UserInfoResponse(user.getEmail(), user.getNickname(), user.getName()))
@@ -55,7 +55,7 @@ public class UserSearchServiceImpl implements UserSearchService{
     }
 
     @Transactional(readOnly = true)
-    protected Page<User> findSearch(String email, String nickname, String name, PageRequest pageable) {
-        return userRepository.findByEmailContainingIgnoreCaseOrNicknameContainingIgnoreCaseOrNameContainingIgnoreCase(email, nickname, name, pageable);
+    protected Page<User> findSearch(String email, PageRequest pageable) {
+        return userRepository.findByEmailContainingIgnoreCase(email, pageable);
     }
 }
