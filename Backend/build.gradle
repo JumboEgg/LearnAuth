@@ -76,6 +76,12 @@ dependencies {
 	// Prometheus + Grafana 모니터링
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'io.micrometer:micrometer-registry-prometheus'
+
+	// qr 코드
+	implementation 'com.google.zxing:core:3.5.1'
+	implementation 'com.google.zxing:javase:3.5.1'
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+
 }
 
 tasks.named('test') {

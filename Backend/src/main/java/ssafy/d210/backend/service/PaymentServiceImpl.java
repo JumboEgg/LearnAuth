@@ -28,7 +28,7 @@ public class PaymentServiceImpl implements PaymentService{
     private final BigInteger BC_ETHER = BigInteger.valueOf((long) Math.pow(10, 18));
 
     @Override
-    public ResponseSuccessDto<Boolean> increaseToken(long userId, int quantity) {
+    public ResponseSuccessDto<Boolean> increaseToken(long userId, BigInteger quantity) {
         ResponseSuccessDto<Boolean> res;
         try {
             CompletableFuture<TransactionReceipt> tx = depositToken(userId, quantity);
@@ -49,18 +49,18 @@ public class PaymentServiceImpl implements PaymentService{
      * @param amount 입금할 토큰 양 (18자리 소수점을 포함한 값)
      * @return 트랜잭션 영수증
      */
-    public CompletableFuture<TransactionReceipt> depositToken(Long userId, int amount) {
+    public CompletableFuture<TransactionReceipt> depositToken(Long userId, BigInteger amount) {
         try {
-            log.info("Depositing {} tokens to user {}", amount, userId);
+            log.info("Depositing {} tokens to user {}", Convert.fromWei((amount.multiply(BC_ETHER)).toString(), Convert.Unit.ETHER).toPlainString(), userId);
 
             // LectureSystem 컨트랙트에 토큰 사용 승인
             log.info("Approving token usage for lecture system");
-            TransactionReceipt approvalReceipt = catToken.approve(lectureSystem.getContractAddress(), (BigInteger.valueOf(amount)).multiply(BC_ETHER)).send();
+            TransactionReceipt approvalReceipt = catToken.approve(lectureSystem.getContractAddress(), amount).send();
             log.info("Token approval transaction hash: {}", approvalReceipt.getTransactionHash());
 
             // 토큰 입금 실행
             log.info("Executing deposit transaction");
-            return lectureSystem.depositToken(BigInteger.valueOf(userId), (BigInteger.valueOf(amount)).multiply(BC_ETHER)).sendAsync()
+            return lectureSystem.depositToken(BigInteger.valueOf(userId), amount).sendAsync()
                     .thenApply(receipt -> {
                         log.info("Deposit transaction completed. Hash: {}", receipt.getTransactionHash());
                         return receipt;
