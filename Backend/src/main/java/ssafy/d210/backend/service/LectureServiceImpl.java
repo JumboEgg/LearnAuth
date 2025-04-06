@@ -245,11 +245,11 @@ public class LectureServiceImpl implements LectureService{
 
         userLectureTimeRepository.saveAll(userLectureTimes);
 
-        ResponseSuccessDto<Object> res = responseUtil.successResponse("ok", HereStatus.SUCCESS_LECTURE_BUY);
-        return res;
+        return responseUtil.successResponse("ok", HereStatus.SUCCESS_LECTURE_BUY);
     }
 
-    private SubLecture findFirstByLectureId(Long lectureId) {
+    @Transactional(readOnly = true)
+    protected SubLecture findFirstByLectureId(Long lectureId) {
         return subLectureRepository.findFirstByLectureId(lectureId);
     }
 
