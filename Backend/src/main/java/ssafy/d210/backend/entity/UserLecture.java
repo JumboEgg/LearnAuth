@@ -34,6 +34,7 @@ public class UserLecture {
     @ColumnDefault("0")
     private Long recentLectureId;
 
+    @Column(columnDefinition = "TEXT")
     private String qrCode;
 
     @OneToOne
