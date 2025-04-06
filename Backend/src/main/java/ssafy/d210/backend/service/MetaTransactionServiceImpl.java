@@ -36,6 +36,8 @@ public class MetaTransactionServiceImpl implements MetaTransactionService{
         Credentials credentials = Credentials.create(BC_PRIVATE_KEY);
         TransactionManager txManager = new RawTransactionManager(web3j, credentials);
 
+        log.info("🚀 트랜잭션 보내는 relayer address: {}", credentials.getAddress());
+
         LectureForwarder forwarder = LectureForwarder.load(
                 BC_FORWARDER,
                 web3j,
