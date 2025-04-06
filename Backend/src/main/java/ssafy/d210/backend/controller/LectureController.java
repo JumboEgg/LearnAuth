@@ -115,10 +115,9 @@ public class LectureController {
             @ApiResponse(responseCode = "200", description = "강의 구매 완료")
     })
     public ResponseEntity<ResponseSuccessDto<Object>> purchaseLecture(
-            @RequestBody PurchaseLectureRequest request,
-            @RequestBody SignedRequest signedRequest
+            @RequestBody PurchaseLectureRequest request
     ) {
-        if (true || metaTransactionService.executeMetaTransaction(signedRequest)) {
+        if (metaTransactionService.executeMetaTransaction(request.getSignedRequest())) {
             return ResponseEntity.ok(lectureService.purchaseLecture(request.getUserId(), request.getLectureId()));
         }
         return ResponseEntity.ok(ResponseSuccessDto.builder().data(false).build());
