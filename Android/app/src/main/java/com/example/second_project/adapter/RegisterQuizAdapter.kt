@@ -3,11 +3,13 @@ package com.example.second_project.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.second_project.R
 import com.example.second_project.data.model.dto.RegisterTempQuiz
 import com.example.second_project.databinding.ItemRegisterQuizDetailBinding
+import com.example.second_project.utils.KeyboardUtils
 
 class RegisterQuizAdapter : RecyclerView.Adapter<RegisterQuizAdapter.ViewHolder>() {
 
@@ -38,7 +40,7 @@ class RegisterQuizAdapter : RecyclerView.Adapter<RegisterQuizAdapter.ViewHolder>
             binding.editTextTitle.editText?.setText(quiz.question)
             binding.editTextTitle.editText?.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) {
-                    quiz.question = binding.editTextTitle.editText?.text.toString()
+                    quiz.question = binding.editTextTitle.editText?.text.toString().trim()
                 }
             }
 
@@ -46,7 +48,7 @@ class RegisterQuizAdapter : RecyclerView.Adapter<RegisterQuizAdapter.ViewHolder>
             binding.editAnswer1.editText?.setText(quiz.options[0])
             binding.editAnswer1.editText?.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) {
-                    quiz.options[0] = binding.editAnswer1.editText?.text.toString()
+                    quiz.options[0] = binding.editAnswer1.editText?.text.toString().trim()
                 }
             }
 
@@ -54,7 +56,7 @@ class RegisterQuizAdapter : RecyclerView.Adapter<RegisterQuizAdapter.ViewHolder>
             binding.editAnswer2.editText?.setText(quiz.options[1])
             binding.editAnswer2.editText?.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) {
-                    quiz.options[1] = binding.editAnswer2.editText?.text.toString()
+                    quiz.options[1] = binding.editAnswer2.editText?.text.toString().trim()
                 }
             }
 
@@ -62,7 +64,7 @@ class RegisterQuizAdapter : RecyclerView.Adapter<RegisterQuizAdapter.ViewHolder>
             binding.editAnswer3.editText?.setText(quiz.options[2])
             binding.editAnswer3.editText?.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) {
-                    quiz.options[2] = binding.editAnswer3.editText?.text.toString()
+                    quiz.options[2] = binding.editAnswer3.editText?.text.toString().trim()
                 }
             }
 
@@ -77,6 +79,8 @@ class RegisterQuizAdapter : RecyclerView.Adapter<RegisterQuizAdapter.ViewHolder>
                 )
 
                 container.setOnClickListener {
+                    KeyboardUtils.clearFocusAndHideKeyboard(binding.root)
+
                     quiz.correctAnswerIndex = index
                     notifyItemChanged(position)
                 }
