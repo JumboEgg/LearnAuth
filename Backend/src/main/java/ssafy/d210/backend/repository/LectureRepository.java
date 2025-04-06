@@ -65,7 +65,6 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
              join (
                 select lecture_lecture_id, COUNT(*)
                 from user_lecture
-                where certificate_date is not null
                 group by lecture_lecture_id
                 order by COUNT(*) desc
                 limit 3

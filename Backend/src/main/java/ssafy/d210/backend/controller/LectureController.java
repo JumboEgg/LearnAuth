@@ -50,9 +50,9 @@ public class LectureController {
 
     // 최다 이수 강의
     @GetMapping("/mostCompleted")
-    @Operation(summary = "최다 이수 강의 목록 조회", description = "가장 많은 사람이 이수한 강의를 최대 3개 반환한다.")
+    @Operation(summary = "최다 강의 목록 조회", description = "가장 많은 사람이 듣는 강의를 최대 3개 반환한다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "최다 이수 강의 목록 조회 성공")
+            @ApiResponse(responseCode = "200", description = "최다 강의 목록 조회 성공")
     })
     public ResponseEntity<ResponseSuccessDto<List<LectureInfoListResponse>>> getMostCompletedLectures() {
         return ResponseEntity.ok(lectureService.getMostCompletedLectures());
