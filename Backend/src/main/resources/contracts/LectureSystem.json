@@ -685,6 +685,37 @@
   {
     "inputs": [
       {
+        "internalType": "uint16",
+        "name": "lectureId",
+        "type": "uint16"
+      }
+    ],
+    "name": "getParticipants",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint16",
+            "name": "participantId",
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint8",
+            "name": "settlementRatio",
+            "type": "uint8"
+          }
+        ],
+        "internalType": "struct LectureSystem.Participant[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "bytes32",
         "name": "role",
         "type": "bytes32"

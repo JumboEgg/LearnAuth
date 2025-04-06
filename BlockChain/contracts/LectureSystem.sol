@@ -160,6 +160,10 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
         
         emit LectureCreated(lectureId, title);
     }
+
+    function getParticipants(uint16 lectureId) external view returns(Participant[] memory) {
+        return lectures[lectureId].participants;
+    }
     
     /**
      * @dev Purchase a lecture

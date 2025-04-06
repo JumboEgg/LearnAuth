@@ -1,6 +1,7 @@
 package ssafy.d210.backend.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.web3j.protocol.core.RemoteFunctionCall;
@@ -29,6 +30,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LectureManagementServiceImpl implements LectureManagementService {
@@ -183,7 +185,13 @@ public class LectureManagementServiceImpl implements LectureManagementService {
                     request.getTitle(),
                     participants
             );
-            tx.send();
+            TransactionReceipt receipt = tx.send();
+            if (receipt.isStatusOK()) {
+                log.info("Lecture created on blockchain with ID: {}", savedLecture.getId());
+            } else {
+                log.error("Blockchain transaction failed. Status: {}", receipt.getStatus());
+                // 적절한 오류 처리
+            }
 
             return responseUtil.successResponse(true, HereStatus.SUCCESS_LECTURE_REGISTERED);
         } catch (Exception e) {
