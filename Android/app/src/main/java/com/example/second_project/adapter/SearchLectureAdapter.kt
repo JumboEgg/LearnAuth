@@ -12,6 +12,7 @@ import com.example.second_project.UserSession.userId
 import com.example.second_project.data.model.dto.request.Lecture
 import com.example.second_project.databinding.ItemSearchLectureBinding
 import com.example.second_project.utils.YoutubeUtil
+import java.text.DecimalFormat
 
 private const val TAG = "SearchLectureAdapter_야옹"
 class SearchLectureAdapter(
@@ -21,6 +22,8 @@ class SearchLectureAdapter(
     inner class SearchLectureViewHolder(private val binding: ItemSearchLectureBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(lecture: Lecture) {
+            val decimal = DecimalFormat("#,###")
+
             // 강의 제목
             binding.lectureTitle.text = lecture.title
             binding.lectureTitle.isSelected = true
@@ -30,7 +33,8 @@ class SearchLectureAdapter(
             // 강의자 (null인 경우 대체 텍스트)
             binding.lectureTeacherName.text = lecture.lecturer ?: "강의자 미정"
             // 강의 가격
-            binding.lecturePrice.text = "${lecture.price}원"
+            val price = decimal.format(lecture.price)
+            binding.lecturePrice.text = "${price}원"
 
             // 썸네일 설정
             Log.d(TAG, "bind: lecture = $lecture")

@@ -17,6 +17,7 @@
             android:orientation="vertical">
 
     <ImageView
+        android:id="@+id/backBtn"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:src="@drawable/arrow_back_24px"

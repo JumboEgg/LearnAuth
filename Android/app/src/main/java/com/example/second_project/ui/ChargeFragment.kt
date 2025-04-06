@@ -2,6 +2,8 @@ package com.example.second_project.ui
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +19,9 @@ import com.example.second_project.network.PaymentApiService
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.text.DecimalFormat
+import java.text.NumberFormat
+import java.util.Locale
 
 class ChargeFragment : Fragment() {
     private var _binding: FragmentChargeBinding? = null
@@ -25,6 +30,8 @@ class ChargeFragment : Fragment() {
     private var selectedAmount: Int = 5000
     private var currentBalance: BigInteger = BigInteger.ZERO
     private var isCharging = false // ✅ 중복 전송 방지용 flag
+    private val decimalFormat = DecimalFormat("#,###")
+    private var isTextWatcherActive = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,7 +46,8 @@ class ChargeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         selectedAmount = getAmountFromRadioButton()
-        binding.chargeInput.setText(selectedAmount.toString())
+        val num = decimalFormat.format(selectedAmount)
+        binding.chargeInput.setText(num)
 
         // 잔액 불러오기
         val manager = UserSession.getBlockchainManagerIfAvailable(requireContext())
@@ -63,9 +71,56 @@ class ChargeFragment : Fragment() {
         // 라디오 버튼 → 입력창 자동 입력
         binding.chargeOptions.setOnCheckedChangeListener { _, _ ->
             selectedAmount = getAmountFromRadioButton()
-            binding.chargeInput.setText(selectedAmount.toString())
+            val finalSelectedAmount = decimalFormat.format(selectedAmount)
+            binding.chargeInput.setText(finalSelectedAmount)
             updateChargeOutput(selectedAmount)
         }
+
+        // 직접 입력 시 콤마 자동 적용 및 충전단위 업데이트
+        binding.chargeInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            
+            override fun afterTextChanged(s: Editable?) {
+                if (isTextWatcherActive) return
+                
+                isTextWatcherActive = true
+                
+                // 콤마 제거 후 숫자만 추출
+                val cleanString = s.toString().replace(",", "")
+                
+                // 숫자로 변환
+                val amount = cleanString.toIntOrNull() ?: 0
+                
+                // 콤마 적용된 문자열 생성
+                val formattedAmount = if (amount > 0) decimalFormat.format(amount) else ""
+                
+                // 현재 커서 위치 저장
+                val cursorPosition = binding.chargeInput.selectionStart
+                
+                // 텍스트 설정
+                binding.chargeInput.setText(formattedAmount)
+                
+                // 커서 위치 조정 (콤마 추가로 인한 위치 변화 보정)
+                val newCursorPosition = if (cursorPosition > 0) {
+                    val oldLength = s?.length ?: 0
+                    val newLength = formattedAmount.length
+                    val diff = newLength - oldLength
+                    cursorPosition + diff
+                } else {
+                    formattedAmount.length
+                }
+                
+                // 커서 위치 설정
+                binding.chargeInput.setSelection(newCursorPosition.coerceIn(0, formattedAmount.length))
+                
+                // 충전단위 업데이트
+                updateChargeOutput(amount)
+                
+                isTextWatcherActive = false
+            }
+        })
 
         // 결제하기 버튼
         binding.purchaseBtn.setOnClickListener {
@@ -75,7 +130,10 @@ class ChargeFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            val amount = binding.chargeInput.text.toString().toIntOrNull()
+            // 콤마 제거 후 숫자로 변환
+            val cleanString = binding.chargeInput.text.toString().replace(",", "")
+            val amount = cleanString.toIntOrNull()
+            
             if (amount == null || amount <= 0) {
                 Toast.makeText(requireContext(), "올바른 금액을 입력하세요!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -153,9 +211,18 @@ class ChargeFragment : Fragment() {
     }
 
     private fun updateChargeOutput(amount: Int) {
-        binding.chargeOutput.text = "$amount CAT"
+        val finalAmount = decimalFormat.format(amount)
+        binding.chargeOutput.text = "$finalAmount  CAT"
         val total = currentBalance + BigInteger.valueOf(amount.toLong())
-        binding.chargeResult.text = "충전 후 ${total} CAT 보유 예상"
+        val finalTotal = decimalFormat.format(total)
+        if (total.toInt() > 1000000) {
+            binding.chargeResult.text = "1,000,000 CAT을 초과하여 충전할 수 없습니다."
+            binding.purchaseBtn.isEnabled = false
+
+        } else {
+            binding.chargeResult.text = "충전 후 ${finalTotal} CAT 보유 예상"
+            binding.purchaseBtn.isEnabled = true
+        }
     }
 
     override fun onDestroyView() {
