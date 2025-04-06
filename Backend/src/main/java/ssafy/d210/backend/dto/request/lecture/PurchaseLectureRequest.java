@@ -10,5 +10,6 @@ import ssafy.d210.backend.dto.request.transaction.SignedRequest;
 public class PurchaseLectureRequest {
     private long userId;
     private long lectureId;
-    private SignedRequest signedRequest;
+    private SignedRequest approveRequest;
+    private SignedRequest purchaseRequest;
 }
