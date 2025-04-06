@@ -39,7 +39,7 @@ public class LectureServiceImpl implements LectureService{
 
     @Override
     @Transactional
-    @Cacheable(value = "lectureCategory", cacheManager = "redisCacheManager")
+    @Cacheable(value = "lectureCategory", key = "#categoryId + '-' + #page", cacheManager = "redisCacheManager")
     public ResponseSuccessDto<List<LectureInfoListResponse>> getLecturesByCategory(int categoryId, int page) {
         // 카테고리별 강의 목록 조회
         int offset = (page - 1) * 12;
