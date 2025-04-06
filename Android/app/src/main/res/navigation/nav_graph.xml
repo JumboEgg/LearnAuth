@@ -192,7 +192,22 @@
         android:id="@+id/ownedLectureFragment"
         android:name="com.example.second_project.ui.OwnedLectureFragment"
         android:label="fragment_owned_lecture"
-        tools:layout="@layout/fragment_owned_lecture" />
+        tools:layout="@layout/fragment_owned_lecture">
+        <!-- OwnedLectureFragment에서 LecturePlayFragment로 이동하는 액션 추가 -->
+        <action
+            android:id="@+id/action_ownedLectureFragment_to_lecturePlayFragment"
+            app:destination="@id/lecturePlayFragment">
+            <argument
+                android:name="lectureId"
+                app:argType="integer"/>
+            <argument
+                android:name="userId"
+                app:argType="integer"/>
+            <argument
+                android:name="subLectureId"
+                app:argType="integer"/>
+        </action>
+    </fragment>
 
     <!-- 참여 강의 탭 -->
     <fragment
