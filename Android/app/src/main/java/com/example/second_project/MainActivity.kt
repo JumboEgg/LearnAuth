@@ -31,7 +31,9 @@ class MainActivity : AppCompatActivity() {
                     ,R.id.registerMainFragment
                     , R.id.lectureDetailFragment
                     , R.id.ownedLectureDetailFragment
-                    , R.id.lecturePlayFragment -> {
+                    , R.id.lecturePlayFragment
+                    , R.id.chargeFragment
+                    , R.id.myWalletFragment-> {
                     binding.bottomNavigation.visibility = View.GONE
                 }
                 else -> {

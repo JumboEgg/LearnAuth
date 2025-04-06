@@ -24,6 +24,7 @@ class ChargeFragment : Fragment() {
 
     private var selectedAmount: Int = 5000
     private var currentBalance: BigInteger = BigInteger.ZERO
+    private var isCharging = false // ✅ 중복 전송 방지용 flag
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -68,6 +69,12 @@ class ChargeFragment : Fragment() {
 
         // 결제하기 버튼
         binding.purchaseBtn.setOnClickListener {
+
+            if (isCharging) {
+                Toast.makeText(requireContext(), "충전 진행 중입니다!", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val amount = binding.chargeInput.text.toString().toIntOrNull()
             if (amount == null || amount <= 0) {
                 Toast.makeText(requireContext(), "올바른 금액을 입력하세요!", Toast.LENGTH_SHORT).show()
@@ -87,6 +94,10 @@ class ChargeFragment : Fragment() {
                 return@setOnClickListener
             }
 
+            isCharging = true
+            binding.purchaseBtn.isEnabled = false
+            binding.purchaseBtn.text = "충전 중..."
+
             // ★ 2) 여기서부터 실제 충전 로직
             val request = DepositRequest(
                 userId = UserSession.userId,
@@ -96,8 +107,11 @@ class ChargeFragment : Fragment() {
             val service = ApiClient.retrofit.create(PaymentApiService::class.java)
             service.deposit(request).enqueue(object : Callback<Void> {
                 override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                    isCharging = false
+                    binding.purchaseBtn.isEnabled = true
+                    binding.purchaseBtn.text = "충전하기"
+
                     if (response.isSuccessful) {
-                        // 충전 성공 시
                         currentBalance += amount.toBigInteger()
                         updateChargeOutput(amount)
                         Toast.makeText(requireContext(), "충전 완료!", Toast.LENGTH_SHORT).show()
@@ -111,11 +125,15 @@ class ChargeFragment : Fragment() {
                 }
 
                 override fun onFailure(call: Call<Void>, t: Throwable) {
-                    Toast.makeText(requireContext(), "통신 오류: ${t.message}", Toast.LENGTH_SHORT).show()
+                    isCharging = false
+                    binding.purchaseBtn.isEnabled = true
+                    binding.purchaseBtn.text = "충전하기"
+
+                    Toast.makeText(requireContext(), "통신 오류: ${t.message}", Toast.LENGTH_SHORT)
+                        .show()
                 }
             })
         }
-
 
 
         // 닫기 버튼

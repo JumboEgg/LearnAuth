@@ -1,11 +1,17 @@
 package com.example.second_project.adapter
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.example.second_project.R
 import com.example.second_project.data.model.dto.request.Lecture
 import com.example.second_project.databinding.ItemLectureBinding
+import com.example.second_project.utils.YoutubeUtil
+
+private const val TAG = "LectureAdapter_야옹"
 
 class LectureAdapter(
     private val mainPage: Boolean,
@@ -51,6 +57,25 @@ class LectureAdapter(
             binding.lectureTitle.isSelected = true
             binding.lectureTeacherName.text = item.lecturer   // 강의자 정보 바인딩
             binding.lecturePrice.text = "${item.price}원"
+            
+            // 첫 번째 subLecture의 URL을 사용하거나, lectureUrl을 사용
+            val videoId = if (!item.subLectures.isNullOrEmpty()) {
+                item.subLectures[0].lectureUrl
+            } else {
+                item.lectureUrl
+            }
+            
+            videoId?.let { id ->
+                val thumbnailUrl = YoutubeUtil.getThumbnailUrl(id, YoutubeUtil.ThumbnailQuality.MEDIUM)
+                
+                Glide.with(binding.root.context)
+                    .load(thumbnailUrl)
+                    .placeholder(R.drawable.white)
+                    .into(binding.lectureImg)
+            } ?: run {
+                Log.d(TAG, "bind: videoId가 null임")
+            }
+            
             // 클릭 시 lectureId와 title 전달
             binding.root.setOnClickListener {
                 onItemClick?.invoke(item.lectureId, item.title)

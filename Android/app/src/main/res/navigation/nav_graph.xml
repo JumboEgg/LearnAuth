@@ -9,7 +9,17 @@
     <fragment
         android:id="@+id/nav_main"
         android:name="com.example.second_project.ui.MainFragment"
-        android:label="홈" />
+        android:label="홈" >
+        <action
+            android:id="@+id/action_nav_main_to_lectureDetailFragment"
+            app:destination="@+id/lectureDetailFragment" />
+        <action
+            android:id="@+id/action_nav_main_to_ownedLectureDetailFragment"
+            app:destination="@+id/ownedLectureDetailFragment" />
+        <action
+            android:id="@+id/action_nav_main_to_registerMainFragment"
+            app:destination="@+id/registerMainFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_search"
@@ -100,6 +110,9 @@
             android:name="userId"
             app:argType="integer"
             android:defaultValue="0" />
+        <action
+            android:id="@+id/action_lectureDetailFragment_self"
+            app:destination="@id/lectureDetailFragment" />
     </fragment>
 
     <!-- OwnedLectureDetailFragment -->

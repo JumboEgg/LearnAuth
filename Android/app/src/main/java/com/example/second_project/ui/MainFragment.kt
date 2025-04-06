@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import com.example.second_project.R
@@ -58,14 +59,57 @@ class MainFragment : Fragment() {
         // dp -> px 변환
         val spacing = dpToPx(4)
 
+        // '강의 올리기' 버튼 클릭 이벤트 설정
+        binding.uploadBtn.setOnClickListener {
+            findNavController().navigate(R.id.action_nav_main_to_registerMainFragment)
+        }
+
         // 추천 강의 (랜덤 강의) RecyclerView 설정
-        recommendedAdapter = LectureAdapter(mainPage = true)
+        recommendedAdapter = LectureAdapter(mainPage = true) { lectureId, title ->
+            // 강의 클릭 시 상세 정보 불러오기 -> 이동
+            val lectureDetailLiveData = viewModel.loadLectureDetail(lectureId, UserSession.userId)
+            lectureDetailLiveData.observe(viewLifecycleOwner) { lectureDetail ->
+                lectureDetail?.let {
+                    val action = if (it.data.owned == false) {
+                        MainFragmentDirections.actionNavMainToLectureDetailFragment(
+                            lectureId = it.data.lectureId,
+                            userId = UserSession.userId
+                        )
+                    } else {
+                        MainFragmentDirections.actionNavMainToOwnedLectureDetailFragment(
+                            lectureId = it.data.lectureId,
+                            userId = UserSession.userId
+                        )
+                    }
+                    findNavController().navigate(action)
+                }
+            }
+        }
         binding.recommendList.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         binding.recommendList.adapter = recommendedAdapter
         binding.recommendList.addItemDecoration(HorizontalSpacingItemDecoration(spacing))
 
         // 최근 등록 강의 RecyclerView 설정
-        recentAdapter = LectureAdapter(mainPage = true)
+        recentAdapter = LectureAdapter(mainPage = true) { lectureId, title ->
+            // 강의 클릭 시 상세 정보 불러오기 -> 이동
+            val lectureDetailLiveData = viewModel.loadLectureDetail(lectureId, UserSession.userId)
+            lectureDetailLiveData.observe(viewLifecycleOwner) { lectureDetail ->
+                lectureDetail?.let {
+                    val action = if (it.data.owned == false) {
+                        MainFragmentDirections.actionNavMainToLectureDetailFragment(
+                            lectureId = it.data.lectureId,
+                            userId = UserSession.userId
+                        )
+                    } else {
+                        MainFragmentDirections.actionNavMainToOwnedLectureDetailFragment(
+                            lectureId = it.data.lectureId,
+                            userId = UserSession.userId
+                        )
+                    }
+                    findNavController().navigate(action)
+                }
+            }
+        }
         binding.newList.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         binding.newList.adapter = recentAdapter
         binding.newList.addItemDecoration(HorizontalSpacingItemDecoration(spacing))

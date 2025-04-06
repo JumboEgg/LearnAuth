@@ -4,9 +4,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.second_project.data.model.dto.request.Lecture
+import com.example.second_project.data.model.dto.response.LectureDetailResponse
 import com.example.second_project.data.model.dto.response.MostCompletedLecturesResponse
 import com.example.second_project.data.model.dto.response.MostRecentLecturesResponse
 import com.example.second_project.data.model.dto.response.RandomLecturesResponse
+import com.example.second_project.data.repository.LectureDetailRepository
 import com.example.second_project.network.ApiClient
 import com.example.second_project.network.LectureApiService
 import retrofit2.Call
@@ -29,6 +31,10 @@ class MainViewModel : ViewModel() {
     // "(닉네임) 님을 위한 추천 강의" LiveData (random 강의)
     private val _randomLectures = MutableLiveData<List<Lecture>>()
     val randomLectures: LiveData<List<Lecture>> = _randomLectures
+    
+    // LectureDetailRepository 추가
+    private val lectureDetailRepository = LectureDetailRepository()
+    
     init {
         fetchMostCompletedLectures()
         fetchRecentLectures()
@@ -93,5 +99,14 @@ class MainViewModel : ViewModel() {
                 _randomLectures.value = emptyList()
             }
         })
+    }
+    
+    // 강의 상세 정보를 불러오는 메서드 추가
+    fun loadLectureDetail(lectureId: Int, userId: Int): LiveData<LectureDetailResponse?> {
+        val lectureDetailLiveData = MutableLiveData<LectureDetailResponse?>()
+        lectureDetailRepository.fetchLectureDetail(lectureId, userId).observeForever { response ->
+            lectureDetailLiveData.value = response
+        }
+        return lectureDetailLiveData
     }
 }

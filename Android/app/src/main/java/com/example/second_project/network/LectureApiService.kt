@@ -9,13 +9,14 @@ import com.example.second_project.data.model.dto.response.MostRecentLecturesResp
 import com.example.second_project.data.model.dto.response.OwnedLectureResponse
 import com.example.second_project.data.model.dto.response.ParticipatedLectureResponse
 import com.example.second_project.data.model.dto.response.RandomLecturesResponse
+import com.example.second_project.data.model.dto.request.LecturePurchaseRequest
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
-import retrofit2.http.Path
-import retrofit2.http.Query
 import retrofit2.http.PATCH
 import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 
 interface LectureApiService {
@@ -79,4 +80,9 @@ interface LectureApiService {
         @Query("subLectureId") subLectureId: Int
     ): Call<Void>
 
+    // 강의 구매
+    @POST("/api/lecture/purchase")
+    fun purchaseLecture(
+        @Body request: LecturePurchaseRequest
+    ): Call<Void>
 }
