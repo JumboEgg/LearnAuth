@@ -17,7 +17,6 @@ import ssafy.d210.backend.repository.ReportRepository;
 import ssafy.d210.backend.repository.UserLectureRepository;
 import ssafy.d210.backend.util.ResponseUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 

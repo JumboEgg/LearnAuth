@@ -222,6 +222,7 @@ public class LectureServiceImpl implements LectureService{
     }
 
     @Override
+    @Transactional
     public ResponseSuccessDto<Object> purchaseLecture(Long userId, Long lectureId) {
         UserLecture userLecture = new UserLecture();
         Optional<User> user = findUser(userId);

@@ -36,10 +36,10 @@ public class QuizServiceImpl implements QuizService{
     private final UserLectureRepository userLectureRepository;
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public ResponseSuccessDto<List<QuizResponse>> getQuizzes(Long lectureId) {
 
-        List<Quiz> allQuizzes = quizRepository.findAllByLectureId(lectureId);
+        List<Quiz> allQuizzes = findAllByLectureId(lectureId);
 
         Collections.shuffle(allQuizzes);
         List<Quiz> randomQuizzes = allQuizzes.stream()
@@ -50,7 +50,7 @@ public class QuizServiceImpl implements QuizService{
                 .map(Quiz::getId)
                 .collect(Collectors.toList());
 
-        List<QuizOption> options = quizOptionRepository.findByQuizIdIn(randomQuizIds);
+        List<QuizOption> options = findByQuizIdIn(randomQuizIds);
 
         Map<Long, List<QuizOption>> optionsByQuizId = options.stream()
                 .collect(Collectors.groupingBy(option -> option.getQuiz().getId()));
@@ -59,9 +59,17 @@ public class QuizServiceImpl implements QuizService{
                 .map(quiz -> convertToQuizResponse(quiz, optionsByQuizId.getOrDefault(quiz.getId(), Collections.emptyList())))
                 .collect(Collectors.toList());
 
-        ResponseSuccessDto<List<QuizResponse>> res = responseUtil.successResponse(quizResponses, HereStatus.SUCCESS_QUIZ);
+        return responseUtil.successResponse(quizResponses, HereStatus.SUCCESS_QUIZ);
+    }
 
-        return res;
+    @Transactional(readOnly = true)
+    protected List<QuizOption> findByQuizIdIn(List<Long> randomQuizIds) {
+        return quizOptionRepository.findByQuizIdIn(randomQuizIds);
+    }
+
+    @Transactional(readOnly = true)
+    protected List<Quiz> findAllByLectureId(Long lectureId) {
+        return quizRepository.findAllByLectureId(lectureId);
     }
 
     @Override

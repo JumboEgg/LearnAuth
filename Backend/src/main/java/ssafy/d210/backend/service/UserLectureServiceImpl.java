@@ -28,6 +28,7 @@ public class UserLectureServiceImpl implements UserLectureService{
     private final ResponseUtil responseUtil;
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserLecture> findAllByUserId(Long userId) {
         return userLectureRepository.findAllByUserId(userId);
     }
@@ -54,12 +55,12 @@ public class UserLectureServiceImpl implements UserLectureService{
     }
 
     @Override
+    @Transactional
     public ResponseSuccessDto<Object> updateLastViewedLecture(Long userLectureId, Long subLectureId) {
-        Optional<UserLecture> optional = userLectureRepository.findById(userLectureId);
+        Optional<UserLecture> optional = findById(userLectureId);
 
         if (optional.isEmpty()) {
             throw new UserLectureNotFoundException("해당 userLectureId가 존재하지 않습니다." + userLectureId);
-
         }
 
         UserLecture userLecture = optional.get();
@@ -67,5 +68,10 @@ public class UserLectureServiceImpl implements UserLectureService{
         userLectureRepository.save(userLecture);
 
         return responseUtil.successResponse(null, HereStatus.SUCCESS_LECTURE_UPDATE);
+    }
+
+    @Transactional(readOnly = true)
+    protected Optional<UserLecture> findById(Long userLectureId) {
+        return userLectureRepository.findById(userLectureId);
     }
 }
