@@ -46,6 +46,11 @@ class RegisterSublectureFragment: Fragment(), RegisterStepSavable {
             },
             // 불러오기 버튼 클릭
             onLoadVideoClick = { position, url ->
+                if (url.contains("/shorts/")) {
+                    Toast.makeText(requireContext(), "Shorts 링크는 사용할 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    return@RegisterSublectureAdapter
+                }
+
                 val videoId = YoutubeUtil.extractVideoId(url)
                 if (videoId != null) {
                     viewModel.fetchYoutubeMetaData(
@@ -100,9 +105,27 @@ class RegisterSublectureFragment: Fragment(), RegisterStepSavable {
     override fun saveDataToViewModel(): Boolean {
         val tempLectures = sublectureAdapter.getTempSubLectures()
 
+        if (tempLectures.isEmpty()) {
+            Toast.makeText(requireContext(), "최소 1개 이상의 개별 강의를 등록해주세요.", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
         tempLectures.forEachIndexed { index, lecture ->
             if (lecture.title.isBlank()) {
                 Toast.makeText(requireContext(), "${index + 1}번째 개별 강의의 제목을 입력해주세요.", Toast.LENGTH_SHORT).show()
+                return false
+            }
+            if (lecture.title.length > 32) {
+                Toast.makeText(requireContext(), "${index + 1}번째 강의 제목은 32자 이하여야 합니다.", Toast.LENGTH_SHORT).show()
+                return false
+            }
+            if (lecture.inputUrl.length > 100) {
+                Toast.makeText(requireContext(), "${index + 1}번째 강의 링크는 100자 이하여야 합니다.", Toast.LENGTH_SHORT).show()
+                return false
+            }
+
+            if (lecture.inputUrl.contains("/shorts/")) {
+                Toast.makeText(requireContext(), "${index + 1}번째 영상은 Shorts 링크를 사용할 수 없습니다.", Toast.LENGTH_SHORT).show()
                 return false
             }
 

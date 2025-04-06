@@ -244,13 +244,6 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
 
                 val priceText = s.toString().trim()
 
-                // 0으로 시작하면서 길이가 2 이상이면 잘못된 입력 (예: 01, 01234)
-                if (priceText.length > 1 && priceText.startsWith("0")) {
-                    Toast.makeText(requireContext(), "가격은 0으로 시작할 수 없습니다.", Toast.LENGTH_SHORT).show()
-                    binding.editTextPrice.editText?.setText("")
-                    return
-                }
-
                 // 입력이 없으면 내부적으로 0 저장
                 if (priceText.isEmpty()) {
                     viewModel.price = 0
