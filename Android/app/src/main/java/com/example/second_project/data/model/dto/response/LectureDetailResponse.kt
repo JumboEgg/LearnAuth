@@ -21,7 +21,8 @@ data class LectureData(
     val studentCount: Int,
     val owned: Boolean,
     val certificate: Boolean,
-    val subLectures: List<SubLecture>
+    val subLectures: List<SubLecture>,
+    val cid: String
 )
 
 data class SubLecture(

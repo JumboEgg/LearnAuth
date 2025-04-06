@@ -4,7 +4,10 @@ import com.example.second_project.data.model.dto.response.CertificateDetailRespo
 import com.example.second_project.data.model.dto.response.CertificateResponse
 import retrofit2.Call
 import retrofit2.http.GET
+import retrofit2.http.PATCH
+import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.Body
 
 interface CertificateApiService {
     @GET("/api/certificate")
@@ -12,7 +15,13 @@ interface CertificateApiService {
 
     @GET("/api/certificate/detail")
     fun getCertificateDetail(
-        @Query("userId") userId: Int,
-        @Query("lectureId") lectureId: Int
+        @Query("userId") userId: String,
+        @Query("lectureId") lectureId: String
     ): Call<CertificateDetailResponse>
+
+    @PATCH("api/certificate/lecture/{lectureId}/certification")
+    fun issueCertificate(
+        @Path("lectureId") lectureId: String,
+        @Body requestBody: Map<String, Any>
+    ): Call<Unit>
 }

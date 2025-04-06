@@ -16,6 +16,12 @@ interface PinataService {
         @Header("Authorization") apiKey: String,
         @Part file: MultipartBody.Part
     ): Response<PinataResponse>
+
+    @POST("pinning/pinJSONToIPFS")
+    suspend fun pinJSONToIPFS(
+        @Header("Authorization") apiKey: String,
+        @Body jsonData: Map<String, Any>
+    ): Response<PinataResponse>
 }
 
 data class PinataResponse(

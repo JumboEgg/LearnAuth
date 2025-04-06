@@ -1,5 +1,6 @@
 package com.example.second_project.adapter
 
+import TransactionItem
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +12,7 @@ import com.example.second_project.R
 import java.text.DecimalFormat
 
 private const val TAG = "TransactionAdapter_야옹"
-class TransactionAdapter(private val transactionList: List<List<String>>) :
+class TransactionAdapter(private val transactionList: List<TransactionItem>) :
     RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder>() {
 
     class TransactionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -31,7 +32,7 @@ class TransactionAdapter(private val transactionList: List<List<String>>) :
         val item = transactionList[position]
 
         // 카테고리 값에 따른 아이콘 설정
-        val category = item[0].toInt()
+        val category = item.category
         val iconRes = when (category) {
             1 -> R.drawable.dataicon
             2 -> R.drawable.lifeicon
@@ -44,18 +45,11 @@ class TransactionAdapter(private val transactionList: List<List<String>>) :
         holder.categoryIcon.setImageResource(iconRes)
 
         // 거래 내역 설정
-        holder.lectureTitle.text = item[1]  // 강의 제목
-        holder.lectureDate.text = item[2]   // 날짜
+        holder.lectureTitle.text = item.title  // 강의 제목
+        holder.lectureDate.text = item.date   // 날짜
         val decimal = DecimalFormat("#,###")
-        val rawPrice = item[3]
-        val price = try {
-            val number = rawPrice.toString().toInt()
-            decimal.format(number)
-        } catch (e: Exception) {
-            Log.e("Adapter", "가격 포맷 오류: $rawPrice", e)
-            "0"
-        }
-        holder.lecturePrice.text = price
+        val price = decimal.format(item.amount)
+        holder.lecturePrice.text = "${price} CAT"
 
     }
 

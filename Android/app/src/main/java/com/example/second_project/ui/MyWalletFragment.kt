@@ -1,5 +1,6 @@
 package com.example.second_project.ui
 
+import TransactionItem
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -31,11 +32,11 @@ class MyWalletFragment : Fragment() {
 
         // RecyclerView 초기화
         val transactionList = listOf(
-            listOf("1", "데이터 분석 기초", "2025 / 03 / 25", "400 CAT"),
-            listOf("2", "일상 생활 관리", "2025 / 03 / 24", "300 CAT"),
-            listOf("3", "기본 법률 상식", "2025 / 03 / 23", "500 CAT"),
-            listOf("4", "스포츠 심리학", "2025 / 03 / 22", "600 CAT"),
-            listOf("5", "마케팅 전략", "2025 / 03 / 21", "450 CAT")
+            TransactionItem(1, "데이터 분석 기초", "2025 / 03 / 25", 4000),
+            TransactionItem(2, "일상 생활 관리", "2025 / 03 / 24", 30000),
+            TransactionItem(3, "기본 법률 상식", "2025 / 03 / 23", 55000),
+            TransactionItem(4, "스포츠 심리학", "2025 / 03 / 22", 6000),
+            TransactionItem(5, "마케팅 전략", "2025 / 03 / 21", 4500)
         )
 
         transactionAdapter = TransactionAdapter(transactionList)

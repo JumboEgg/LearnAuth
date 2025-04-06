@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.example.second_project.network.PinataApiClient
+import com.example.second_project.network.PinataResponse
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -11,6 +12,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
+import retrofit2.Response
 
 object IpfsUtils {
     private const val TAG = "IpfsUtils"
@@ -46,6 +48,22 @@ object IpfsUtils {
         } catch (e: Exception) {
             Log.e(TAG, "파일 업로드 중 오류 발생", e)
             return null
+        }
+    }
+
+    /**
+     * JSON 데이터를 IPFS에 업로드합니다.
+     * @param apiKey Pinata API 키
+     * @param jsonData 업로드할 JSON 데이터
+     * @return Response<PinataResponse>
+     */
+    suspend fun uploadJsonToIpfs(apiKey: String, jsonData: Map<String, Any>): Response<PinataResponse> {
+        try {
+            // Pinata API 호출
+            return PinataApiClient.pinataService.pinJSONToIPFS(apiKey, jsonData)
+        } catch (e: Exception) {
+            Log.e(TAG, "JSON 업로드 중 오류 발생", e)
+            throw e
         }
     }
     
