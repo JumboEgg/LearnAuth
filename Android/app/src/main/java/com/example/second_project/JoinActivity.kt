@@ -56,6 +56,9 @@ class JoinActivity : AppCompatActivity() {
                 Toast.makeText(this, "모든 항목을 입력해주세요.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+            if (pw.length <8){
+                Toast.makeText(this,"비밀번호는 8자리 이상 부탁드립니다.",Toast.LENGTH_SHORT).show()
+            }
             if (pw != pw2) {
                 Toast.makeText(this, "비밀번호가 일치하지 않습니다.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener

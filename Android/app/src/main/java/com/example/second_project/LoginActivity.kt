@@ -15,6 +15,7 @@ import com.example.second_project.network.LoginApiService
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.File
 
 class LoginActivity : AppCompatActivity() {
 
@@ -80,6 +81,23 @@ class LoginActivity : AppCompatActivity() {
 
                     UserSession.accessToken = accessToken
                     UserSession.refreshToken = refreshToken
+
+                    // 지갑 생성이 필요한 경우 자동 생성
+                    val existingFile = UserSession.walletFilePath?.let {
+                        File(filesDir, it)
+                    }
+
+                    if (existingFile == null || !existingFile.exists()) {
+                        val walletPassword = "user-${UserSession.userId}-pw"
+                        val walletFileName = org.web3j.crypto.WalletUtils.generateLightNewWalletFile(walletPassword, filesDir)
+
+                        UserSession.walletFilePath = walletFileName
+                        UserSession.walletPassword = walletPassword
+
+                        Log.d("LoginActivity", "🪙 지갑 자동 생성됨: $walletFileName")
+                    } else {
+                        Log.d("LoginActivity", "✅ 기존 지갑 있음: ${existingFile.name}")
+                    }
 
                     val intent = Intent(this@LoginActivity, MainActivity::class.java)
                     startActivity(intent)

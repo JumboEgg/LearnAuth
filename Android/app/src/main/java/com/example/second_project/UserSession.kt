@@ -68,11 +68,17 @@ object UserSession {
     fun getBlockchainManagerIfAvailable(context: Context): BlockChainManager? {
         val path = walletFilePath
         val password = walletPassword
-        return if (!path.isNullOrEmpty() && !password.isNullOrEmpty()) {
+        if (!path.isNullOrEmpty() && !password.isNullOrEmpty()) {
             val walletFile = File(context.filesDir, path)
-            BlockChainManager(password, walletFile)
-        } else null
+            return if (walletFile.exists()) {
+                BlockChainManager(password, walletFile)
+            } else {
+                null // ⚠️ 파일이 없으면 null
+            }
+        }
+        return null
     }
+
 
 
     // 로그아웃 등 세션 종료 시 모든 데이터를 초기화합니다.
