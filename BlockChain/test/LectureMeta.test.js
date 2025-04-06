@@ -236,6 +236,11 @@ describe("LectureSystem with LectureForwarder", function () {
 
   // Additional Direct Function Tests
   describe("Direct Function Tests", function () {
+    it("Can check participants of lecture", async function () {
+      const data = await lectureSystem.getParticipants(LECTURE_ID);
+      console.log(data);
+    })
+
     it("Admin can add users", async function () {
       const newUser = await ethers.Wallet.createRandom();
       const newUserId = 9999;

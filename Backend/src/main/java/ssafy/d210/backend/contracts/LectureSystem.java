@@ -71,6 +71,8 @@ public class LectureSystem extends Contract {
 
     public static final String FUNC_GETOWNEROFNFT = "getOwnerOfNFT";
 
+    public static final String FUNC_GETPARTICIPANTS = "getParticipants";
+
     public static final String FUNC_GETROLEADMIN = "getRoleAdmin";
 
     public static final String FUNC_GETTOKENURI = "getTokenURI";
@@ -785,6 +787,21 @@ public class LectureSystem extends Contract {
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(tokenId)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
         return executeRemoteCallSingleValueReturn(function, String.class);
+    }
+
+    public RemoteFunctionCall<List> getParticipants(BigInteger lectureId) {
+        final Function function = new Function(FUNC_GETPARTICIPANTS, 
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint16(lectureId)), 
+                Arrays.<TypeReference<?>>asList(new TypeReference<DynamicArray<Participant>>() {}));
+        return new RemoteFunctionCall<List>(function,
+                new Callable<List>() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public List call() throws Exception {
+                        List<Type> result = (List<Type>) executeCallSingleValueReturn(function, List.class);
+                        return convertToNative(result);
+                    }
+                });
     }
 
     public RemoteFunctionCall<byte[]> getRoleAdmin(byte[] role) {
