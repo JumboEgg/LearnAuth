@@ -162,7 +162,7 @@ public class RedissonConfig {
                     try {
                         return method.get();
                     } catch (Exception e) {
-                        // 다음 메서드로 계속
+
                     }
                 }
 
@@ -192,7 +192,8 @@ public class RedissonConfig {
         RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer))
-                .entryTtl(Duration.ofMinutes(10L));
+                .entryTtl(Duration.ofMinutes(10L))
+                .disableCachingNullValues();
 
         return RedisCacheManager.builder(redisConnectionFactory)
                 .cacheDefaults(redisCacheConfiguration)

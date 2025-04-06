@@ -36,10 +36,11 @@ public class CertificateServiceImpl implements CertificateService{
     private final LectureSystem lectureSystem;
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public ResponseSuccessDto<List<CertificateResponse>> getCertificates(Long userId) {
         // 사용자 ID로 완료된 강의 조회
-        List<CertificateResponse> certificates = userLectureRepository.getFinishedUserLecture(userId);
+        List<CertificateResponse> certificates = finishedUserLecture(userId);
+
         log.info("User {} certificates: {}", userId, certificates);
 
         // 결과 검증 및 로깅
@@ -47,15 +48,19 @@ public class CertificateServiceImpl implements CertificateService{
             log.warn("No certificates found for user {}", userId);
         }
 
-        ResponseSuccessDto<List<CertificateResponse>> res = responseUtil.successResponse(certificates, HereStatus.SUCCESS_CERTIFICATE);
-        return res;
+        return responseUtil.successResponse(certificates, HereStatus.SUCCESS_CERTIFICATE);
+    }
+
+    @Transactional(readOnly = true)
+    protected List<CertificateResponse> finishedUserLecture(Long userId) {
+        return userLectureRepository.getFinishedUserLecture(userId);
     }
 
     @Override
     @Transactional(readOnly = true)
     public ResponseSuccessDto<CertificateDetailResponse> getCertificatesDetail(Long userId, Long lectureId) {
         // 이수증 상세 정보 조회
-        CertificateDetailResponse certificateDetail = userLectureRepository.getCertificateDetail(userId, lectureId);
+        CertificateDetailResponse certificateDetail = getCertificateDetail(userId, lectureId);
 
         // 조회 결과 null 체크
         if (certificateDetail == null) {
@@ -67,8 +72,12 @@ public class CertificateServiceImpl implements CertificateService{
                     certificateDetail.getCertificateDate());
         }
 
-        ResponseSuccessDto<CertificateDetailResponse> res = responseUtil.successResponse(certificateDetail, HereStatus.SUCCESS_CERTIFICATE_DETAIL);
-        return res;
+        return responseUtil.successResponse(certificateDetail, HereStatus.SUCCESS_CERTIFICATE_DETAIL);
+    }
+
+    @Transactional(readOnly = true)
+    protected CertificateDetailResponse getCertificateDetail(Long userId, Long lectureId) {
+        return userLectureRepository.getCertificateDetail(userId, lectureId);
     }
 
     @Override
@@ -84,7 +93,8 @@ public class CertificateServiceImpl implements CertificateService{
 
     @Override
     public ResponseSuccessDto<Boolean> saveCertificate(BigInteger tokenId, Long lectureId, Long userId) {
-        Optional<UserLecture> userLecture = userLectureRepository.findByUserIdAndLectureId(userId, lectureId);
+        Optional<UserLecture> userLecture = findByUserIdAndLectureId(userId, lectureId);
+
         if (tokenId == null || userLecture.isEmpty()) {
             log.error("UserLecture with userId {} and lectureId {} doesn't exist", userId, lectureId);
             return responseUtil.successResponse(false, HereStatus.SUCCESS_CERTIFICATE_OWN);
@@ -93,6 +103,11 @@ public class CertificateServiceImpl implements CertificateService{
         userLecture.get().setCertificate(token);
         log.info("Certificate saved on userLectureId {} value {}", userLecture.get().getId(), token);
         return responseUtil.successResponse(true, HereStatus.SUCCESS_CERTIFICATE_OWN);
+    }
+
+    @Transactional(readOnly = true)
+    protected Optional<UserLecture> findByUserIdAndLectureId(Long userId, Long lectureId) {
+        return userLectureRepository.findByUserIdAndLectureId(userId, lectureId);
     }
 
 
