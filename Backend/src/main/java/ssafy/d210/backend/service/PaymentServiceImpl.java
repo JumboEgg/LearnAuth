@@ -55,12 +55,12 @@ public class PaymentServiceImpl implements PaymentService{
 
             // LectureSystem 컨트랙트에 토큰 사용 승인
             log.info("Approving token usage for lecture system");
-            TransactionReceipt approvalReceipt = catToken.approve(lectureSystem.getContractAddress(), BigInteger.valueOf(amount)).send();
+            TransactionReceipt approvalReceipt = catToken.approve(lectureSystem.getContractAddress(), (BigInteger.valueOf(amount)).multiply(BC_ETHER)).send();
             log.info("Token approval transaction hash: {}", approvalReceipt.getTransactionHash());
 
             // 토큰 입금 실행
             log.info("Executing deposit transaction");
-            return lectureSystem.depositToken(BigInteger.valueOf(userId), BigInteger.valueOf(amount)).sendAsync()
+            return lectureSystem.depositToken(BigInteger.valueOf(userId), (BigInteger.valueOf(amount)).multiply(BC_ETHER)).sendAsync()
                     .thenApply(receipt -> {
                         log.info("Deposit transaction completed. Hash: {}", receipt.getTransactionHash());
                         return receipt;
