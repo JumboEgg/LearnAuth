@@ -1,5 +1,7 @@
 package com.example.second_project.ui
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -62,6 +64,8 @@ class OwnedLectureDetailFragment : Fragment() {
         val lectureId = arguments?.getInt("lectureId") ?: return
         val userId = userId
         var subLectureId: Int? = null
+        var cid: String? = null
+
 
         viewModel.fetchLectureDetail(lectureId, userId)
         binding.loadingProgressBar.visibility = View.VISIBLE
@@ -83,6 +87,7 @@ class OwnedLectureDetailFragment : Fragment() {
                 binding.lectureDetailGoal.text = it.data.goal
 
                 val foundSubLecture = allSubLectures.find { sub -> sub.subLectureId == recentSubLectureId }
+                cid = it.data.cid
 
                 // "완강한 강의인지 아닌지 조건문 추가 필요"
                 if ( foundSubLecture != null ) {
@@ -226,7 +231,8 @@ class OwnedLectureDetailFragment : Fragment() {
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                findNavController().popBackStack(R.id.nav_search, true)
+                // SearchFragment로 돌아갈 때 상태를 보존하기 위해 popBackStack() 사용
+                findNavController().popBackStack()
             }
         })
 
@@ -238,17 +244,23 @@ class OwnedLectureDetailFragment : Fragment() {
             showReportDialog(userId, lectureId)
         }
 
-        //뒤로가기 처리
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                findNavController().popBackStack()
-            }
-        })
+        // 자료 받기 구현
+        binding.downloadBtn.setOnClickListener {
 
+            if (cid!=null) {
+                val downloadUrl = createIpfsDownloadUrl(cid!!)
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
+                startActivity(intent)
+            } else {
+                Toast.makeText(requireContext(), "등록된 자료가 없습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
 
     }
 
-
+    fun createIpfsDownloadUrl(cid: String, gateway: String = "https://gateway.pinata.cloud"): String {
+        return "$gateway/ipfs/$cid"
+    }
 
     private fun showReportDialog(userId:Int, lectureId: Int) {
         val builder = androidx.appcompat.app.AlertDialog.Builder(requireContext())

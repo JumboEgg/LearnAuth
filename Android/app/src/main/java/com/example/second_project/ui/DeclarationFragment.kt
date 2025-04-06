@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.second_project.adapter.ReportAdapter
 import com.example.second_project.data.DeclarationItem
@@ -57,6 +58,10 @@ class DeclarationFragment : Fragment() {
         viewModel.reportList.observe(viewLifecycleOwner) { list ->
             binding.tvReportCount.text = "신고 수 : ${list.size}건"
             reportAdapter.submitList(list)
+        }
+
+        binding.backBtn.setOnClickListener {
+            findNavController().popBackStack()
         }
     }
 

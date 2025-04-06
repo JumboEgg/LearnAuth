@@ -1,5 +1,7 @@
 package com.example.second_project.adapter
 
+import TransactionItem
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,8 +9,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.second_project.R
+import java.text.DecimalFormat
 
-class TransactionAdapter(private val transactionList: List<List<String>>) :
+private const val TAG = "TransactionAdapter_야옹"
+class TransactionAdapter(private val transactionList: List<TransactionItem>) :
     RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder>() {
 
     class TransactionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -28,7 +32,7 @@ class TransactionAdapter(private val transactionList: List<List<String>>) :
         val item = transactionList[position]
 
         // 카테고리 값에 따른 아이콘 설정
-        val category = item[0].toInt()
+        val category = item.category
         val iconRes = when (category) {
             1 -> R.drawable.dataicon
             2 -> R.drawable.lifeicon
@@ -41,9 +45,12 @@ class TransactionAdapter(private val transactionList: List<List<String>>) :
         holder.categoryIcon.setImageResource(iconRes)
 
         // 거래 내역 설정
-        holder.lectureTitle.text = item[1]  // 강의 제목
-        holder.lectureDate.text = item[2]   // 날짜
-        holder.lecturePrice.text = item[3]  // 가격
+        holder.lectureTitle.text = item.title  // 강의 제목
+        holder.lectureDate.text = item.date   // 날짜
+        val decimal = DecimalFormat("#,###")
+        val price = decimal.format(item.amount)
+        holder.lecturePrice.text = "${price} CAT"
+
     }
 
     override fun getItemCount(): Int {

@@ -66,4 +66,17 @@ class CategoryAdapter(
             )
         }
     }
+    
+    /**
+     * 선택된 카테고리 위치를 설정합니다.
+     * 이 메서드는 Fragment에서 상태를 복원할 때 호출됩니다.
+     */
+    fun setSelectedPosition(position: Int) {
+        if (position in 0 until categories.size && position != selectedCategory) {
+            val oldPosition = selectedCategory
+            selectedCategory = position
+            notifyItemChanged(oldPosition)
+            notifyItemChanged(position)
+        }
+    }
 }
