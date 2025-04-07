@@ -6,22 +6,21 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Animation
+import android.view.animation.TranslateAnimation
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.second_project.R
 import com.example.second_project.UserSession
-import com.example.second_project.databinding.FragmentChargeBinding
-import java.math.BigInteger
 import com.example.second_project.data.model.dto.request.DepositRequest
+import com.example.second_project.databinding.FragmentChargeBinding
 import com.example.second_project.network.ApiClient
 import com.example.second_project.network.PaymentApiService
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
-import java.text.DecimalFormat
-import java.text.NumberFormat
-import java.util.Locale
+import java.math.BigInteger
 
 class ChargeFragment : Fragment() {
     private var _binding: FragmentChargeBinding? = null
@@ -34,6 +33,7 @@ class ChargeFragment : Fragment() {
     private var currentBalance: BigInteger = BigInteger.ZERO
 
     private var isCharging = false // 중복 전송 방지용 flag
+    private var isOverlayVisible = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,41 +45,122 @@ class ChargeFragment : Fragment() {
     }
 
     // ChargeFragment에 handleWalletFile 함수 추가 및 onViewCreated 수정
+    // ---------------------------------------------
+    // onViewCreated
+    // ---------------------------------------------
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // 디버깅 로그 추가
+
         Log.d("ChargeFragment", "onViewCreated 시작")
         Log.d(
             "ChargeFragment",
-            "지갑 정보: walletFilePath=${UserSession.walletFilePath}, walletPassword=${UserSession.walletPassword != null}"
+            "지갑: ${UserSession.walletFilePath}, pw=${UserSession.walletPassword != null}"
         )
 
-        // 지갑 파일 처리 (새로 추가)
+        // 1) 지갑 파일 처리
         handleWalletFile()
 
-        // 초기 기본 금액 설정 (UI에는 5000 CAT으로 보임)
+        // 2) 기본 값 세팅
         selectedBaseAmount = getBaseAmountFromRadioButton()
         binding.chargeInput.setText(selectedBaseAmount.toString())
 
-        // 잔액 불러오기
+        // 3) 잔액 불러오기
         loadCurrentBalance()
 
-        // 라디오 버튼 선택 시 기본 금액 업데이트
+        // 라디오 버튼 변경 시
         binding.chargeOptions.setOnCheckedChangeListener { _, _ ->
             selectedBaseAmount = getBaseAmountFromRadioButton()
             binding.chargeInput.setText(selectedBaseAmount.toString())
             updateChargeOutput(selectedBaseAmount)
         }
 
-        // 결제하기 버튼 클릭 시
+        // 결제 버튼
         binding.purchaseBtn.setOnClickListener {
-            handlePurchase()
+            showLoadingOverlay()
+            startCatAnimation()
+            handlePurchase()  // 결제 로직
         }
 
-        // 닫기 버튼 클릭 시
+        // 닫기 버튼
         binding.purchaseCancel.setOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
+    }
+
+    // ---------------------------------------------
+    // (A) 오버레이 + 고양이 애니메이션
+    // ---------------------------------------------
+    private fun showLoadingOverlay() {
+        isOverlayVisible = true
+        binding.loadingOverlay.visibility = View.VISIBLE
+    }
+
+    private fun hideLoadingOverlay() {
+        isOverlayVisible = false
+        // 애니메이션 정지
+        binding.catImageView.clearAnimation()
+        // 오버레이 숨기기
+        binding.loadingOverlay.visibility = View.GONE
+    }
+
+    /**
+     * 고양이 ImageView를 “화면 왼쪽→오른쪽”으로만 계속 달리게 하는 메서드
+     * (한 번 달린 후 애니메이션 끝나면, 다시 왼쪽으로 복귀 후 반복)
+     */
+    private fun startCatAnimation() {
+        // 레이아웃 파악 후에 계산하기 위해 post 사용
+        binding.loadingOverlay.post {
+            // 현재 오버레이 폭
+            val parentWidth = binding.loadingOverlay.width
+            // 고양이 뷰 폭
+            val catWidth = binding.catImageView.width
+
+            if (parentWidth == 0 || catWidth == 0) {
+                Log.w("ChargeFragment", "화면/고양이 폭 측정 실패 → 기본 이동값 사용")
+                doSingleRun(600f) // 임시 하드코딩
+            } else {
+                val distanceX = (parentWidth - catWidth).toFloat()
+                doSingleRun(distanceX)
+            }
+        }
+    }
+
+    /**
+     * “왼쪽→오른쪽” 단 한 번 달린 뒤, 애니메이션이 끝나면
+     * 다시 왼쪽 위치로 순간 이동 & 재시작하여 계속 반복.
+     */
+    private fun doSingleRun(distanceX: Float) {
+        if (!isOverlayVisible) return  // 이미 오버레이가 사라졌다면 중단
+
+        // 고양이를 왼쪽 시작 위치로 초기화
+        binding.catImageView.translationX = 0f
+
+        // “왼쪽(0f) → 오른쪽(distanceX)” 한 번 이동
+        val anim = TranslateAnimation(
+            Animation.ABSOLUTE, 0f,
+            Animation.ABSOLUTE, distanceX,
+            Animation.ABSOLUTE, 0f,
+            Animation.ABSOLUTE, 0f
+        ).apply {
+            duration = 2000  // 이동 시간 (2초 예시)
+            fillAfter = true // 애니메이션 끝나면 그 위치에 유지
+            setAnimationListener(object : Animation.AnimationListener {
+                override fun onAnimationStart(animation: Animation) {}
+                override fun onAnimationRepeat(animation: Animation) {}
+                override fun onAnimationEnd(animation: Animation) {
+                    // 고양이가 오른쪽까지 도달한 뒤
+                    // 다시 왼쪽으로 순간이동 후, 새 애니메이션 반복
+                    binding.catImageView.post {
+                        if (isOverlayVisible) {
+                            // 다음 달리기 시작
+                            doSingleRun(distanceX)
+                        }
+                    }
+                }
+            })
+        }
+
+        binding.catImageView.startAnimation(anim)
     }
 
     // ChargeFragment에 handleWalletFile 함수 추가
@@ -89,7 +170,10 @@ class ChargeFragment : Fragment() {
 
             // 이더리움 주소 형식인지 확인 (0x로 시작하는지)
             if (UserSession.walletFilePath?.startsWith("0x") == true) {
-                Log.d("ChargeFragment", "walletFilePath가 이더리움 주소 형식입니다: ${UserSession.walletFilePath}")
+                Log.d(
+                    "ChargeFragment",
+                    "walletFilePath가 이더리움 주소 형식입니다: ${UserSession.walletFilePath}"
+                )
                 val ethAddress = UserSession.walletFilePath
 
                 // 지갑 파일 찾기
@@ -116,18 +200,27 @@ class ChargeFragment : Fragment() {
 
                             // 주소가 DB 저장 주소와 일치하는지 확인
                             if (walletAddress.equals(ethAddress, ignoreCase = true)) {
-                                Log.d("ChargeFragment", "✅ 일치하는 지갑 파일을 발견: ${walletFile.name}, 주소: $walletAddress")
+                                Log.d(
+                                    "ChargeFragment",
+                                    "✅ 일치하는 지갑 파일을 발견: ${walletFile.name}, 주소: $walletAddress"
+                                )
                                 UserSession.walletFilePath = walletFile.name
                                 matchFound = true
                                 validWalletFound = true
                                 break  // 일치하는 지갑을 찾았으므로 검색 종료
                             } else {
-                                Log.d("ChargeFragment", "주소가 일치하지 않는 지갑 파일: ${walletFile.name}, 주소: $walletAddress")
+                                Log.d(
+                                    "ChargeFragment",
+                                    "주소가 일치하지 않는 지갑 파일: ${walletFile.name}, 주소: $walletAddress"
+                                )
                                 validWalletFound = true
                             }
                         } catch (e: Exception) {
                             // 이 지갑 파일은 비밀번호가 맞지 않거나 손상되었을 수 있음
-                            Log.d("ChargeFragment", "지갑 파일 검증 실패: ${walletFile.name}, 오류: ${e.message}")
+                            Log.d(
+                                "ChargeFragment",
+                                "지갑 파일 검증 실패: ${walletFile.name}, 오류: ${e.message}"
+                            )
                         }
                     }
 
@@ -135,11 +228,17 @@ class ChargeFragment : Fragment() {
                     if (!matchFound) {
                         if (validWalletFound) {
                             // 검증 가능한 지갑은 있지만 주소가 일치하지 않음
-                            Log.w("ChargeFragment", "⚠️ DB 주소와 일치하는 지갑 파일이 없습니다. DB 주소를 계속 사용합니다: $ethAddress")
+                            Log.w(
+                                "ChargeFragment",
+                                "⚠️ DB 주소와 일치하는 지갑 파일이 없습니다. DB 주소를 계속 사용합니다: $ethAddress"
+                            )
                             UserSession.walletFilePath = ethAddress  // DB의 이더리움 주소를 그대로 유지
                         } else {
                             // 모든 지갑 파일이 검증 불가능
-                            Log.w("ChargeFragment", "⚠️ 검증 가능한 지갑 파일이 없습니다. DB 주소를 계속 사용합니다: $ethAddress")
+                            Log.w(
+                                "ChargeFragment",
+                                "⚠️ 검증 가능한 지갑 파일이 없습니다. DB 주소를 계속 사용합니다: $ethAddress"
+                            )
                             UserSession.walletFilePath = ethAddress  // DB의 이더리움 주소를 그대로 유지
                         }
                     }
@@ -284,6 +383,7 @@ class ChargeFragment : Fragment() {
                     }
                 } catch (e: Exception) {
                 }
+                hideLoadingOverlay() // 결제 끝 → 무조건 오버레이 숨김
 
                 if (response.isSuccessful) {
                     Log.d("ChargeFragment", "✅ 충전 API 호출 성공")
@@ -311,6 +411,7 @@ class ChargeFragment : Fragment() {
                 isCharging = false
                 binding.purchaseBtn.isEnabled = true
                 binding.purchaseBtn.text = "충전하기"
+                hideLoadingOverlay()
 
                 Log.e("ChargeFragment", "❌ 충전 API 통신 오류: ${t.message}")
                 t.printStackTrace()
@@ -396,6 +497,7 @@ class ChargeFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        binding.catImageView.clearAnimation()
         _binding = null
     }
 }

@@ -29,6 +29,7 @@ class ProfileFragment : Fragment() {
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
     private val viewModel: ProfileViewModel by viewModels()
+
     override fun onCreateView(
         inflater: android.view.LayoutInflater, container: android.view.ViewGroup?,
         savedInstanceState: Bundle?
@@ -39,22 +40,19 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         // 1. 사용자 이름 등 즉시 표시 (UI 먼저 보여줌)
         binding.textName.text = "${UserSession.nickname}님,"
         // moneyCount는 일단 "로딩 중..." 등의 문구
         binding.moneyCount.text = "Loading..."
-
+        val safeContext = context ?: return
         // 2. 메뉴 버튼 리스너 등은 즉시 설정
         setupMenuListeners()
-
         // 3. 백그라운드에서 지갑 파일 처리 + 잔액 조회
         viewLifecycleOwner.lifecycleScope.launch {
             // (a) 지갑 파일 처리 (handleWalletFile)도 오래 걸릴 수 있으니 Dispatchers.IO에서 처리
             withContext(Dispatchers.IO) {
                 handleWalletFile() // 원래 함수 로직을 그대로 호출 (파일 스캔 등)
             }
-
             // (b) 블록체인 잔액 로드 (이미 분리된 메서드라면 그대로 호출)
             loadBalanceAsync()
         }
@@ -88,21 +86,17 @@ class ProfileFragment : Fragment() {
     private fun handleWalletFile() {
         val path = UserSession.walletFilePath
         val address = UserSession.walletAddress
-
         Log.d("ProfileFragment", "지갑 정보 검증 시작: 파일 경로=$path, 주소=$address")
 
         // 주소가 있지만 파일 경로가 없는 경우 (DB에는 주소만 있는 경우)
         if (!address.isNullOrEmpty() && (path.isNullOrEmpty() || path == address)) {
             Log.d("ProfileFragment", "이더리움 주소가 있지만 파일 경로가 없습니다: $address")
-
             // 지갑 파일 찾기
             val walletFiles = requireContext().filesDir.listFiles { file ->
                 file.name.startsWith("UTC--") && file.name.endsWith(".json")
             }
-
             if (walletFiles != null && walletFiles.isNotEmpty()) {
                 Log.d("ProfileFragment", "총 ${walletFiles.size}개의 지갑 파일을 찾았습니다.")
-
                 // 주소와 일치하는 지갑 파일 찾기
                 for (walletFile in walletFiles) {
                     try {
@@ -110,7 +104,6 @@ class ProfileFragment : Fragment() {
                             UserSession.walletPassword,
                             walletFile
                         )
-
                         if (credentials.address.equals(address, ignoreCase = true)) {
                             Log.d("ProfileFragment", "✅ 일치하는 지갑 파일 발견: ${walletFile.name}")
                             UserSession.walletFilePath = walletFile.name
@@ -120,7 +113,6 @@ class ProfileFragment : Fragment() {
                         Log.d("ProfileFragment", "지갑 파일 검증 실패: ${walletFile.name}")
                     }
                 }
-
                 // 일치하는 지갑을 찾지 못하면 첫 번째 유효한 지갑 사용
                 Log.w("ProfileFragment", "⚠️ 일치하는 지갑 파일을 찾지 못했습니다. 첫 번째 유효한 지갑 시도")
                 for (walletFile in walletFiles) {
@@ -142,7 +134,6 @@ class ProfileFragment : Fragment() {
                         Log.d("ProfileFragment", "대체 지갑 검증 실패: ${walletFile.name}")
                     }
                 }
-
                 Log.e("ProfileFragment", "⚠️ 사용 가능한 지갑 파일을 찾지 못했습니다")
             } else {
                 Log.e("ProfileFragment", "⚠️ 지갑 파일이 없습니다")
@@ -151,7 +142,6 @@ class ProfileFragment : Fragment() {
         // 파일 경로가 있는 경우 (일반 파일 경로)
         else if (!path.isNullOrEmpty() && !path.startsWith("0x")) {
             Log.d("ProfileFragment", "지갑 파일 경로가 있습니다: $path")
-
             val walletFile = File(requireContext().filesDir, path)
             if (walletFile.exists()) {
                 try {
@@ -180,7 +170,6 @@ class ProfileFragment : Fragment() {
         val walletFiles = requireContext().filesDir.listFiles { file ->
             file.name.startsWith("UTC--") && file.name.endsWith(".json")
         }
-
         if (walletFiles != null && walletFiles.isNotEmpty()) {
             for (walletFile in walletFiles) {
                 try {
@@ -204,40 +193,54 @@ class ProfileFragment : Fragment() {
 
     // 잔액 로드
     private suspend fun loadBalanceAsync() = withContext(Dispatchers.IO) {
-        val manager = UserSession.getBlockchainManagerIfAvailable(requireContext())
+        // context가 더 이상 유효하지 않은지 먼저 확인
+        if (!isAdded) {
+            Log.d(
+                "ProfileFragment",
+                "Fragment is not attached to context, cancelling balance update"
+            )
+            return@withContext
+        }
+        val context = context ?: return@withContext // null 체크 추가
+        val manager = UserSession.getBlockchainManagerIfAvailable(context)
         if (manager != null) {
-            viewLifecycleOwner.lifecycleScope.launch {
-                try {
-                    // 지갑 주소 가져오기
-                    val address = withContext(Dispatchers.IO) { manager.getMyWalletAddress() }
-                    Log.d("ProfileFragment", "📍 내 지갑 주소: $address")
-
-                    // 주소 저장 (만약 아직 저장되지 않았다면)
-                    if (UserSession.walletAddress.isNullOrEmpty()) {
-                        UserSession.walletAddress = address
+            // viewLifecycleOwner는 View의 수명 주기에 바인딩되어 있으므로 Fragment가 분리되었을 때 안전하지 않습니다.
+            // 코루틴 자체의 수명 주기를 사용합니다.
+            try {
+                // 지갑 주소 가져오기
+                val address = withContext(Dispatchers.IO) { manager.getMyWalletAddress() }
+                Log.d("ProfileFragment", "📍 내 지갑 주소: $address")
+                // 주소 저장 (만약 아직 저장되지 않았다면)
+                if (UserSession.walletAddress.isNullOrEmpty()) {
+                    UserSession.walletAddress = address
+                }
+                // wei 단위의 토큰 잔액 가져오기
+                val balanceInWei = withContext(Dispatchers.IO) { manager.getMyCatTokenBalance() }
+                Log.d("ProfileFragment", "💰 CATToken 잔액(wei): $balanceInWei")
+                // UserSession에 마지막 잔액 저장 (나중에 참조 가능)
+                UserSession.lastKnownBalance = balanceInWei
+                // UI 업데이트는 메인 스레드에서 안전하게 수행하되, Fragment가 아직 유효한지 확인
+                withContext(Dispatchers.Main) {
+                    if (isAdded && _binding != null) {
+                        updateBalanceDisplay(balanceInWei)
                     }
-
-                    // wei 단위의 토큰 잔액 가져오기
-                    val balanceInWei =
-                        withContext(Dispatchers.IO) { manager.getMyCatTokenBalance() }
-                    Log.d("ProfileFragment", "💰 CATToken 잔액(wei): $balanceInWei")
-                    // UserSession에 마지막 잔액 저장 (나중에 참조 가능)
-                    UserSession.lastKnownBalance = balanceInWei
-                    // 잔액 포맷팅 및 표시
-                    updateBalanceDisplay(balanceInWei)
-                } catch (e: Exception) {
-                    Log.e("ProfileFragment", "잔액 조회 실패", e)
-                    e.printStackTrace()
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(requireContext(), "잔액 조회 실패: ${e.message}", Toast.LENGTH_SHORT)
-                            .show()
+                }
+            } catch (e: Exception) {
+                Log.e("ProfileFragment", "잔액 조회 실패", e)
+                e.printStackTrace()
+                withContext(Dispatchers.Main) {
+                    if (isAdded && context != null) {
+                        Toast.makeText(context, "잔액 조회 실패: ${e.message}", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
         } else {
             Log.w("ProfileFragment", "지갑 정보가 없습니다. 로그인 다시 해주세요")
+            // UI 업데이트는 메인 스레드에서 안전하게 수행하되, Fragment가 아직 유효한지 확인
             withContext(Dispatchers.Main) {
-                Toast.makeText(requireContext(), "지갑 정보가 없습니다. 로그인을 다시 해주세요", Toast.LENGTH_SHORT).show()
+                if (isAdded && context != null) {
+                    Toast.makeText(context, "지갑 정보가 없습니다. 로그인을 다시 해주세요", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -293,7 +296,6 @@ class ProfileFragment : Fragment() {
                     ).show()
                 }
             }
-
             override fun onFailure(call: Call<Void>, t: Throwable) {
                 Log.e("Logout", "Logout error", t)
                 Toast.makeText(requireContext(), "로그아웃 오류: ${t.message}", Toast.LENGTH_SHORT).show()
@@ -301,34 +303,13 @@ class ProfileFragment : Fragment() {
         })
     }
 
-    // 화면이 다시 보일 때마다 잔액 새로고침
     override fun onResume() {
         super.onResume()
-        viewLifecycleOwner.lifecycleScope.launch {
-            // 백그라운드에서 잔액 가져오고 UI 업데이트
-            loadBalanceAsync()
-        }
-    }
-
-
-    // 잔액 새로고침 메서드
-    private fun refreshBalance() {
-        val manager = UserSession.getBlockchainManagerIfAvailable(requireContext())
-        if (manager != null) {
+        // Fragment가 아직 활성 상태인 경우에만 코루틴 시작
+        if (isAdded && view != null) {
             viewLifecycleOwner.lifecycleScope.launch {
-                try {
-                    // 최신 잔액 가져오기
-                    val balanceInWei =
-                        withContext(Dispatchers.IO) { manager.getMyCatTokenBalance() }
-                    Log.d("ProfileFragment", "새로고침된 잔액(wei): $balanceInWei")
-                    // UserSession에 마지막 잔액 업데이트
-                    UserSession.lastKnownBalance = balanceInWei
-                    // 잔액 표시 업데이트
-                    updateBalanceDisplay(balanceInWei)
-                } catch (e: Exception) {
-                    Log.e("ProfileFragment", "잔액 새로고침 실패", e)
-                    // 오류가 발생해도 사용자에게는 토스트 메시지를 표시하지 않음 (onResume에서 자동 호출되므로)
-                }
+                // 백그라운드에서 잔액 가져오고 UI 업데이트
+                loadBalanceAsync()
             }
         }
     }
