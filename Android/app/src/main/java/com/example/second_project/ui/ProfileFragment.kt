@@ -1,7 +1,9 @@
 package com.example.second_project.ui
+
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -22,6 +24,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
+
 class ProfileFragment : Fragment() {
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
@@ -33,22 +36,30 @@ class ProfileFragment : Fragment() {
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
         return binding.root
     }
-    override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?) {
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // 사용자 이름 표시
+
+        // 1. 사용자 이름 등 즉시 표시 (UI 먼저 보여줌)
         binding.textName.text = "${UserSession.nickname}님,"
-        // 메뉴 버튼 클릭 리스너 설정
+        // moneyCount는 일단 "로딩 중..." 등의 문구
+        binding.moneyCount.text = "Loading..."
+
+        // 2. 메뉴 버튼 리스너 등은 즉시 설정
         setupMenuListeners()
-        // 지갑 정보 로그
-        Log.d(
-            "ProfileFragment",
-            "지갑 정보 확인: walletFilePath=${UserSession.walletFilePath}, walletAddress=${UserSession.walletAddress}, walletPassword=${UserSession.walletPassword?.length ?: 0}자"
-        )
-        // 지갑 파일 존재 여부 확인 및 처리
-        handleWalletFile()
-        // 잔액 조회 및 표시
-        loadBalance()
+
+        // 3. 백그라운드에서 지갑 파일 처리 + 잔액 조회
+        viewLifecycleOwner.lifecycleScope.launch {
+            // (a) 지갑 파일 처리 (handleWalletFile)도 오래 걸릴 수 있으니 Dispatchers.IO에서 처리
+            withContext(Dispatchers.IO) {
+                handleWalletFile() // 원래 함수 로직을 그대로 호출 (파일 스캔 등)
+            }
+
+            // (b) 블록체인 잔액 로드 (이미 분리된 메서드라면 그대로 호출)
+            loadBalanceAsync()
+        }
     }
+
     // 메뉴 버튼 클릭 리스너 설정
     private fun setupMenuListeners() {
         // profileMenu1 -> MyWalletFragment 이동
@@ -122,7 +133,10 @@ class ProfileFragment : Fragment() {
                         UserSession.walletFilePath = walletFile.name
                         // 주소도 업데이트
                         UserSession.walletAddress = credentials.address
-                        Log.d("ProfileFragment", "✅ 대체 지갑으로 업데이트: ${walletFile.name}, 주소=${credentials.address}")
+                        Log.d(
+                            "ProfileFragment",
+                            "✅ 대체 지갑으로 업데이트: ${walletFile.name}, 주소=${credentials.address}"
+                        )
                         return
                     } catch (e: Exception) {
                         Log.d("ProfileFragment", "대체 지갑 검증 실패: ${walletFile.name}")
@@ -176,7 +190,10 @@ class ProfileFragment : Fragment() {
                     )
                     UserSession.walletFilePath = walletFile.name
                     UserSession.walletAddress = credentials.address
-                    Log.d("ProfileFragment", "✅ 대체 지갑으로 업데이트: ${walletFile.name}, 주소=${credentials.address}")
+                    Log.d(
+                        "ProfileFragment",
+                        "✅ 대체 지갑으로 업데이트: ${walletFile.name}, 주소=${credentials.address}"
+                    )
                     return
                 } catch (e: Exception) {
                     Log.d("ProfileFragment", "대체 지갑 검증 실패: ${walletFile.name}")
@@ -186,7 +203,7 @@ class ProfileFragment : Fragment() {
     }
 
     // 잔액 로드
-    private fun loadBalance() {
+    private suspend fun loadBalanceAsync() = withContext(Dispatchers.IO) {
         val manager = UserSession.getBlockchainManagerIfAvailable(requireContext())
         if (manager != null) {
             viewLifecycleOwner.lifecycleScope.launch {
@@ -220,6 +237,7 @@ class ProfileFragment : Fragment() {
             Toast.makeText(requireContext(), "지갑 정보가 없습니다. 로그인을 다시 해주세요", Toast.LENGTH_SHORT).show()
         }
     }
+
     // 잔액 표시 업데이트
     private fun updateBalanceDisplay(balanceInWei: java.math.BigInteger) {
         // 10^18로 나누어 일반 단위로 변환
@@ -243,6 +261,7 @@ class ProfileFragment : Fragment() {
         // UI 업데이트
         binding.moneyCount.text = "$formattedBalance CAT"
     }
+
     // 로그아웃 처리
     private fun logout() {
         val refreshToken = UserSession.refreshToken
@@ -270,18 +289,24 @@ class ProfileFragment : Fragment() {
                     ).show()
                 }
             }
+
             override fun onFailure(call: Call<Void>, t: Throwable) {
                 Log.e("Logout", "Logout error", t)
                 Toast.makeText(requireContext(), "로그아웃 오류: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
+
     // 화면이 다시 보일 때마다 잔액 새로고침
     override fun onResume() {
         super.onResume()
-        Log.d("ProfileFragment", "onResume 호출됨 - 잔액 갱신 시도")
-        refreshBalance()
+        viewLifecycleOwner.lifecycleScope.launch {
+            // 백그라운드에서 잔액 가져오고 UI 업데이트
+            loadBalanceAsync()
+        }
     }
+
+
     // 잔액 새로고침 메서드
     private fun refreshBalance() {
         val manager = UserSession.getBlockchainManagerIfAvailable(requireContext())
@@ -303,6 +328,7 @@ class ProfileFragment : Fragment() {
             }
         }
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
