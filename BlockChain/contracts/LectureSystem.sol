@@ -25,8 +25,8 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
     
     // Structs
     struct Participant {
-        uint participantId;
-        uint settlementRatio; // Out of 100 (100%)
+        uint16 participantId;
+        uint8 settlementRatio; // Out of 100 (100%)
     }
     
     struct Lecture {
@@ -36,8 +36,8 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
     }
     
     // Mappings
-    mapping(uint => address) public users; // userId => userAddress
-    mapping(uint => Lecture) public lectures; // lectureId => Lecture
+    mapping(uint16 => address) public users; // userId => userAddress
+    mapping(uint16 => Lecture) public lectures; // lectureId => Lecture
     mapping(address => uint256[]) private userPurchases; // user address => lectureIds
     
     // Events
@@ -47,7 +47,7 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
     event TokenDeposited(uint256 indexed userId, uint256 amount, string activityType);
     event LectureCreated(uint256 lectureId, string title);
     event LecturePurchased(uint256 indexed userId, uint256 amount, string lectureTitle);
-    event LectureSettled(uint indexed userId, uint indexed lectureId, uint256 amount, string lectureTitle);
+    event LectureSettled(uint16 indexed userId, uint16 indexed lectureId, uint256 amount, string lectureTitle);
     event NFTIssued(uint256 userId, uint256 tokenId);
     
     /**
@@ -74,7 +74,7 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
      * @param userId User identifier
      * @param amount Amount of tokens to withdraw
      */
-    function withdrawToken(uint userId, uint256 amount) external {
+    function withdrawToken(uint16 userId, uint256 amount) external {
         require(amount > 0, "Amount must be greater than zero");
         
         address sender = _msgSender();
@@ -88,7 +88,7 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
      * @param userId User identifier
      * @param amount Amount of tokens to deposit
      */
-    function depositToken(uint userId, uint256 amount) external {
+    function depositToken(uint16 userId, uint256 amount) external {
         require(amount > 0, "Amount must be greater than zero");
         address sender = _msgSender();
         
@@ -115,7 +115,7 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
      * @param _userId DB 상의 userId
      * @param _userAddress user의 지갑 address
     */
-    function addUser(uint _userId, address _userAddress) external {
+    function addUser(uint16 _userId, address _userAddress) external {
         address sender = _msgSender();
         require(hasRole(ADMIN_ROLE, sender), "Only admin allowed");
         users[_userId] = _userAddress;
@@ -131,7 +131,7 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
      */
      // 저장할 강의 정보 넘기기
     function createLecture(
-        uint lectureId, 
+        uint16 lectureId, 
         string memory title,
         Participant[] memory participants
     ) external {
@@ -161,7 +161,7 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
         emit LectureCreated(lectureId, title);
     }
 
-    function getParticipants(uint lectureId) external view returns(Participant[] memory) {
+    function getParticipants(uint16 lectureId) external view returns(Participant[] memory) {
         return lectures[lectureId].participants;
     }
     
@@ -171,7 +171,7 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
      * @param lectureId Identifier of the lecture to purchase
      * @param amount Amount of tokens to pay
      */
-    function purchaseLecture(uint userId, uint lectureId, uint256 amount) external {
+    function purchaseLecture(uint16 userId, uint16 lectureId, uint256 amount) external {
         require(lectures[lectureId].exists, "Lecture does not exist");
         require(amount > 0, "Amount must be greater than zero");
         
@@ -211,7 +211,7 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
      * @param userId NFT를 수령한 사용자
      * @param cid IPFS CID for the NFT metadata
      */
-    function issueNFT(uint userId, string memory cid) external {
+    function issueNFT(uint16 userId, string memory cid) external {
         address sender = _msgSender();
         require(hasRole(ADMIN_ROLE, sender), "Only admin allowed");
         address recipient = users[userId];
