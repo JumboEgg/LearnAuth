@@ -93,14 +93,11 @@ public class CertificateServiceImpl implements CertificateService{
     }
 
     @Override
-    public BigInteger issueCertificate(Long userId, String cid) {
-        try {
-            CompletableFuture<TransactionReceipt> future = issueCertificateToContract(userId, cid);
-            TransactionReceipt receipt = future.get();
-            return extractTokenIdFromReceipt(receipt);
-        } catch (Exception e) {
-            return null;
-        }
+    // 수료증 발급 try catch -> 예외 throw
+    public BigInteger issueCertificate(Long userId, String cid) throws Exception {
+        CompletableFuture<TransactionReceipt> future = issueCertificateToContract(userId, cid);
+        TransactionReceipt receipt = future.get();
+        return extractTokenIdFromReceipt(receipt);
     }
 
     @Override
