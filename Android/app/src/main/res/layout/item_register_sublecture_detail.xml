@@ -70,7 +70,8 @@
                     android:paddingStart="14dp"
                     android:textColor="@color/text_gray"
                     android:maxLines="1"
-                    android:singleLine="true"/>
+                    android:singleLine="true"
+                    android:maxLength="64"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
@@ -95,7 +96,6 @@
                     android:layout_weight="3"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:background="@drawable/bg_radius_20"
                     android:textColorHint="@color/text_gray"
                     app:boxStrokeColor="@color/button_gray"
                     app:boxStrokeWidth="1dp">
@@ -109,7 +109,8 @@
                         android:textColor="@color/text_gray"
                         android:maxLines="1"
                         android:singleLine="true"
-                        android:fontFamily="@font/pretendard_medium" />
+                        android:fontFamily="@font/pretendard_medium"
+                        android:maxLength="64"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <androidx.appcompat.widget.AppCompatButton

@@ -99,6 +99,11 @@ class RegisterSublectureFragment: Fragment(), RegisterStepSavable {
 
         // 개별 강의 추가하기 버튼 클릭
         binding.btnAddSubLecture.setOnClickListener {
+            if (sublectureAdapter.itemCount >= 10) {
+                Toast.makeText(requireContext(), "개별 강의는 최대 10개까지 등록할 수 있습니다.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             sublectureAdapter.addItem()
             binding.recyclerSubLectures.scrollToPosition(sublectureAdapter.itemCount - 1)
         }

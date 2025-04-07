@@ -97,6 +97,8 @@ class RegisterSublectureAdapter (
                     item.videoId = ""
                     item.thumbnailUrl = ""
                     item.duration = 0
+                    item.inputUrl = ""
+                    binding.editURL.editText?.setText("")
                     notifyItemChanged(position)
                 } else {
                     // 📥 불러오기 진행
@@ -110,6 +112,12 @@ class RegisterSublectureAdapter (
                 isFocusable = !item.isLocked
                 isFocusableInTouchMode = !item.isLocked
                 isEnabled = !item.isLocked
+
+                setTextColor(
+                    if (item.isLocked) context.getColor(R.color.text_white_blue)  // 회색
+                    else context.getColor(R.color.text_gray)  // 기본 색상
+                )
+
             }
 
             // 버튼 텍스트 변경
