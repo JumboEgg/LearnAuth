@@ -10,6 +10,7 @@ import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
+import org.web3j.tx.response.PollingTransactionReceiptProcessor;
 import ssafy.d210.backend.contracts.CATToken;
 import ssafy.d210.backend.contracts.LectureForwarder;
 import ssafy.d210.backend.contracts.LectureSystem;
@@ -61,10 +62,16 @@ public class Web3jConfig {
 
     @Bean
     public TransactionManager web3jTransactionManager() {
+        PollingTransactionReceiptProcessor processor = new PollingTransactionReceiptProcessor(
+                web3j(),
+                TransactionManager.DEFAULT_POLLING_FREQUENCY,
+                TransactionManager.DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH
+        );
         return new RawTransactionManager(
                 web3j(),
                 credentials(),
-                CHAIN_ID
+                CHAIN_ID,
+                processor
         );
     }
 
