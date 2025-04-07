@@ -15,7 +15,7 @@ class HighGasProvider : ContractGasProvider {
 
     override fun getGasLimit(contractFunc: String?): BigInteger {
         // 테스트넷에서는 적절한 가스 한도 사용
-        return BigInteger.valueOf(3_000_000) // 3,000,000
+        return BigInteger.valueOf(9_000_000) // 9,000,000
     }
 
     override fun getGasLimit(): BigInteger {

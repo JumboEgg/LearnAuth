@@ -137,6 +137,38 @@ class RegisterQuizFragment: Fragment(), RegisterStepSavable {
     }
 
     override fun saveDataToViewModel(): Boolean {
+        val tempQuizzes = quizAdapter.getItems()
+
+        // 👇 유효성 검사
+        if (tempQuizzes.size < 3) {
+            Toast.makeText(requireContext(), "퀴즈는 최소 3개 이상 등록해야 합니다.", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
+        tempQuizzes.forEachIndexed { index, quiz ->
+            val question = quiz.question.trim()
+            val options = quiz.options.map { it.trim() }
+
+            if (question.isBlank()) {
+                Toast.makeText(requireContext(), "${index + 1}번째 퀴즈의 문제를 입력해주세요.", Toast.LENGTH_SHORT).show()
+                return false
+            }
+
+            if (options.any { it.isBlank() }) {
+                Toast.makeText(requireContext(), "${index + 1}번째 퀴즈의 보기 항목을 모두 입력해주세요.", Toast.LENGTH_SHORT).show()
+                return false
+            }
+
+            if (quiz.correctAnswerIndex !in 0..2) {
+                Toast.makeText(requireContext(), "${index + 1}번째 퀴즈의 정답을 선택해주세요.", Toast.LENGTH_SHORT).show()
+                return false
+            }
+
+            // trim 적용 후 저장
+            quiz.question = question
+            quiz.options = options.toMutableList()
+        }
+
         viewModel.tempQuizzes.clear()
         viewModel.tempQuizzes.addAll(quizAdapter.getItems())
         return true

@@ -56,6 +56,7 @@ class RegisterMainFragment: Fragment() {
     }
 
     fun moveToStep(index: Int) {
+        view?.clearFocus()
 
         val currentFragment = childFragmentManager.findFragmentById(binding.registerFragmentContainer.id)
         val shouldProceed = (currentFragment as? RegisterStepSavable)?.saveDataToViewModel() ?: true
