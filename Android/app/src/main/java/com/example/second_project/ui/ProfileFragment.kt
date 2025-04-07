@@ -44,6 +44,7 @@ class ProfileFragment : Fragment() {
         binding.textName.text = "${UserSession.nickname}님,"
         // moneyCount는 일단 "로딩 중..." 등의 문구
         binding.moneyCount.text = "Loading..."
+        val safeContext = context ?: return
 
         // 2. 메뉴 버튼 리스너 등은 즉시 설정
         setupMenuListeners()
@@ -204,18 +205,47 @@ class ProfileFragment : Fragment() {
 
     // 잔액 로드
     private suspend fun loadBalanceAsync() = withContext(Dispatchers.IO) {
-        val manager = UserSession.getBlockchainManagerIfAvailable(requireContext())
-        if (manager != null) {
-            viewLifecycleOwner.lifecycleScope.launch {
-                try {
-                    // 지갑 주소 가져오기
-                    val address = withContext(Dispatchers.IO) { manager.getMyWalletAddress() }
-                    Log.d("ProfileFragment", "📍 내 지갑 주소: $address")
+        // context가 더 이상 유효하지 않은지 먼저 확인
+        if (!isAdded) {
+            Log.d(
+                "ProfileFragment",
+                "Fragment is not attached to context, cancelling balance update"
+            )
+            return@withContext
+        }
 
-                    // 주소 저장 (만약 아직 저장되지 않았다면)
-                    if (UserSession.walletAddress.isNullOrEmpty()) {
-                        UserSession.walletAddress = address
+        val context = context ?: return@withContext // null 체크 추가
+
+        val manager = UserSession.getBlockchainManagerIfAvailable(context)
+        if (manager != null) {
+            // viewLifecycleOwner는 View의 수명 주기에 바인딩되어 있으므로 Fragment가 분리되었을 때 안전하지 않습니다.
+            // 코루틴 자체의 수명 주기를 사용합니다.
+            try {
+                // 지갑 주소 가져오기
+                val address = withContext(Dispatchers.IO) { manager.getMyWalletAddress() }
+                Log.d("ProfileFragment", "📍 내 지갑 주소: $address")
+
+                // 주소 저장 (만약 아직 저장되지 않았다면)
+                if (UserSession.walletAddress.isNullOrEmpty()) {
+                    UserSession.walletAddress = address
+                }
+
+                // wei 단위의 토큰 잔액 가져오기
+                val balanceInWei = withContext(Dispatchers.IO) { manager.getMyCatTokenBalance() }
+                Log.d("ProfileFragment", "💰 CATToken 잔액(wei): $balanceInWei")
+
+                // UserSession에 마지막 잔액 저장 (나중에 참조 가능)
+                UserSession.lastKnownBalance = balanceInWei
+
+                // UI 업데이트는 메인 스레드에서 안전하게 수행하되, Fragment가 아직 유효한지 확인
+                withContext(Dispatchers.Main) {
+                    if (isAdded && _binding != null) {
+                        updateBalanceDisplay(balanceInWei)
                     }
+                }
+            } catch (e: Exception) {
+                Log.e("ProfileFragment", "잔액 조회 실패", e)
+                e.printStackTrace()
 
                     // wei 단위의 토큰 잔액 가져오기
                     val balanceInWei =
@@ -236,8 +266,12 @@ class ProfileFragment : Fragment() {
             }
         } else {
             Log.w("ProfileFragment", "지갑 정보가 없습니다. 로그인 다시 해주세요")
+
+            // UI 업데이트는 메인 스레드에서 안전하게 수행하되, Fragment가 아직 유효한지 확인
             withContext(Dispatchers.Main) {
-                Toast.makeText(requireContext(), "지갑 정보가 없습니다. 로그인을 다시 해주세요", Toast.LENGTH_SHORT).show()
+                if (isAdded && context != null) {
+                    Toast.makeText(context, "지갑 정보가 없습니다. 로그인을 다시 해주세요", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -301,12 +335,15 @@ class ProfileFragment : Fragment() {
         })
     }
 
-    // 화면이 다시 보일 때마다 잔액 새로고침
     override fun onResume() {
         super.onResume()
-        viewLifecycleOwner.lifecycleScope.launch {
-            // 백그라운드에서 잔액 가져오고 UI 업데이트
-            loadBalanceAsync()
+
+        // Fragment가 아직 활성 상태인 경우에만 코루틴 시작
+        if (isAdded && view != null) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                // 백그라운드에서 잔액 가져오고 UI 업데이트
+                loadBalanceAsync()
+            }
         }
     }
 
