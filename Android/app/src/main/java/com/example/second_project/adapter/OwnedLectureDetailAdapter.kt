@@ -12,9 +12,15 @@ import com.example.second_project.utils.YoutubeUtil
 
 private const val TAG = "OwnedLectureDetailAdapter_야옹"
 class OwnedLectureDetailAdapter(
-    private val subLectureList: List<SubLecture>,
+    private var subLectureList: List<SubLecture>,
     private val onItemClick: (SubLecture) -> Unit
 ) : RecyclerView.Adapter<OwnedLectureDetailAdapter.LectureViewHolder>() {
+
+    // subLectureList 업데이트 메서드 추가
+    fun updateSubLectureList(newList: List<SubLecture>) {
+        subLectureList = newList
+        notifyDataSetChanged()
+    }
 
     inner class LectureViewHolder(private val binding: ItemOwnedSublectureBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -40,16 +46,25 @@ class OwnedLectureDetailAdapter(
                 Log.e(TAG, "유효한 유튜브 URL이 아님: ${subLecture.lectureUrl}")
             }
 
-            if(subLecture.endFlag == false && subLecture.continueWatching == 0) {
-                binding.eachWatchBtn.text = "수강하기"
-            } else if (subLecture.endFlag == false && subLecture.continueWatching != 0) {
-                binding.eachWatchBtn.text = "이어보기"
-            } else if (subLecture.endFlag == true) {
-                binding.eachWatchBtn.text = "다시보기"
-            }
+            // 강의 상태에 따라 버튼 텍스트 설정
+            updateButtonText(subLecture)
 
             binding.root.setOnClickListener {
                 onItemClick(subLecture)
+            }
+        }
+        
+        // 강의 상태에 따라 버튼 텍스트 업데이트
+        private fun updateButtonText(subLecture: SubLecture) {
+            if(subLecture.endFlag == true) {
+                // 완강한 경우
+                binding.eachWatchBtn.text = "다시보기"
+            } else if (subLecture.continueWatching > 0) {
+                // 일부 시청한 경우
+                binding.eachWatchBtn.text = "이어보기"
+            } else {
+                // 시청하지 않은 경우
+                binding.eachWatchBtn.text = "수강하기"
             }
         }
     }
