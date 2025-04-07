@@ -121,7 +121,7 @@ class SearchFragment : Fragment() {
         binding.lectureList.apply {
             layoutManager = GridLayoutManager(context, 2)
             adapter = searchLectureAdapter
-            addItemDecoration(GridSpaceItemDecoration(spanCount = 2, space = dpToPx(8)))
+            addItemDecoration(GridSpaceItemDecoration(spanCount = 2, space = dpToPx(2)))
             // ---------------------------
             // (A) 스크롤 리스너로 무한 스크롤 처리
             // ---------------------------
@@ -152,6 +152,19 @@ class SearchFragment : Fragment() {
         // 3) 검색어 입력 리스너 (Debounce)
         binding.searchInputText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
+                // 1) 16자 초과 시 잘라내기
+                s?.let {
+                    if (it.length > 16) {
+                        // 16자 이후 부분 삭제
+                        it.delete(16, it.length)
+                        // 안내 문구 표시
+                        binding.searchErrorText.visibility = View.VISIBLE
+                    } else {
+                        // 16자 이하이면 안내 문구 숨김
+                        binding.searchErrorText.visibility = View.GONE
+                    }
+                }
+
                 searchRunnable?.let { searchHandler.removeCallbacks(it) }
                 val keyword = s.toString().trim()
 
@@ -167,6 +180,7 @@ class SearchFragment : Fragment() {
                 }
                 searchHandler.postDelayed(searchRunnable!!, debounceDelay)
             }
+
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
