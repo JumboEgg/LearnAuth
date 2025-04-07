@@ -59,7 +59,7 @@ public class CertificateController {
     public ResponseEntity<ResponseSuccessDto<CertificateToken>> issueCertificate(
             @RequestBody CertificateRequest request,
             @PathVariable("lectureId") Long lectureId
-    ) {
+    ) throws Exception {
         BigInteger tokenId = certificateService.issueCertificate(request.getUserId(), request.getCid());
         return ResponseEntity.ok(certificateService.saveCertificate(tokenId, lectureId, request.getUserId()));
     }

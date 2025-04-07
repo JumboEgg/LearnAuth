@@ -12,6 +12,7 @@ import ssafy.d210.backend.entity.Quiz;
 import ssafy.d210.backend.entity.QuizOption;
 import ssafy.d210.backend.entity.UserLecture;
 import ssafy.d210.backend.enumeration.response.HereStatus;
+import ssafy.d210.backend.exception.service.EntityIsNullException;
 import ssafy.d210.backend.redis.DistributedLock;
 import ssafy.d210.backend.repository.QuizOptionRepository;
 import ssafy.d210.backend.repository.QuizRepository;
@@ -87,6 +88,9 @@ public class QuizServiceImpl implements QuizService{
     @Transactional(readOnly = true)
     protected UserLecture findUserLecture(Long lectureId, Long userId) {
         UserLecture userLecture = userLectureRepository.getUserLectureById(lectureId, userId);
+        if (userLecture == null) {
+            throw new EntityIsNullException("해당 강의 ID와 사용자 ID에 대한 UserLecture가 존재하지 않습니다.");
+        }
         userLecture.setCertificateDate(LocalDate.now());
         return userLecture;
     }

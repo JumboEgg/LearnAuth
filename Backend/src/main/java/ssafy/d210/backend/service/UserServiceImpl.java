@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     @DistributedLock(key = "#userSignupRequest.email")
-    public ResponseSuccessDto<SignupResponse> signup(SignupRequest userSignupRequest) {
+    public ResponseSuccessDto<SignupResponse> signup(SignupRequest userSignupRequest) throws Exception {
 
         // 이름 본인인증
         User newUser = new User();
@@ -64,11 +64,9 @@ public class UserServiceImpl implements UserService {
         newUser.setPassword(bCryptPasswordEncoder.encode(userSignupRequest.getPassword()));
         User user = userRepository.save(newUser);
 
-        try {
-            addUserToContract(user.getId(), userSignupRequest.getWallet());
-        } catch (Exception e) {
-            throw new BlockchainException("사용자 등록에 실패했습니다.");
-        }
+
+        addUserToContract(user.getId(), userSignupRequest.getWallet());
+
 
         SignupResponse userSignupResponse = SignupResponse.builder()
                 .nickname(newUser.getNickname())
@@ -102,10 +100,9 @@ public class UserServiceImpl implements UserService {
     }
 
     // Lecture System 컨트랙트에 사용자 지갑 등록
-    private TransactionReceipt addUserToContract(Long userId, String userAddress) {
+    private TransactionReceipt addUserToContract(Long userId, String userAddress) throws Exception {
         log.info("Adding user with userId {} and wallet address {} to blockchain", userId, userAddress);
 
-        try {
             BigInteger userIdBigInt = BigInteger.valueOf(userId);
 
             CompletableFuture<TransactionReceipt> future = lectureSystem
@@ -115,8 +112,5 @@ public class UserServiceImpl implements UserService {
             TransactionReceipt receipt = future.get();
             log.info("User with userId {} added successfully. Transaction Hash: {}", userId, receipt.getTransactionHash());
             return receipt;
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

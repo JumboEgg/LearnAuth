@@ -24,7 +24,7 @@ public interface CertificateService {
     *   Back에서 transaction 실행 후 결과 값(tokenId) 저장
     *   저장한 tokenId와 생성한 qrCode 반환
     */
-    public BigInteger issueCertificate(Long userId, String cid);
+    public BigInteger issueCertificate(Long userId, String cid) throws Exception;
 
     // 수료증 저장하기
     public ResponseSuccessDto<CertificateToken> saveCertificate(BigInteger tokenId, Long lectureId, Long userId);

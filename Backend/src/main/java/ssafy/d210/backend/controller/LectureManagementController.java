@@ -38,9 +38,8 @@ public class LectureManagementController {
     // request를 받아서 처리
     public ResponseEntity<ResponseSuccessDto<Boolean>> registerLecture(
             @RequestBody LectureRegisterRequest request
-    ) {
+    ) throws Exception {
         return ResponseEntity.ok(lectureManagementService.registerLecture(request));
     }
 
-    // "강의 등록 이메일 찾기" 는 "회원 가입 이메일 중복 확인"입니다.
 }
