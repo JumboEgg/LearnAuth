@@ -1,4 +1,4 @@
-package ssafy.d210.backend.redis;
+package ssafy.d210.backend.aop;
 
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;

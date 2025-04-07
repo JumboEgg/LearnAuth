@@ -15,7 +15,9 @@ import ssafy.d210.backend.contracts.LectureSystem;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.response.certificate.CertificateDetailResponse;
 import ssafy.d210.backend.dto.response.certificate.CertificateResponse;
+import ssafy.d210.backend.dto.response.certificate.CertificateToken;
 import ssafy.d210.backend.entity.Lecture;
+import ssafy.d210.backend.entity.PaymentRatio;
 import ssafy.d210.backend.entity.User;
 import ssafy.d210.backend.entity.UserLecture;
 import ssafy.d210.backend.enumeration.response.HereStatus;
@@ -105,7 +107,7 @@ public class CertificateServiceImpl implements CertificateService{
     }
 
     @Override
-    public ResponseSuccessDto<Boolean> saveCertificate(BigInteger tokenId, Long lectureId, Long userId) {
+    public ResponseSuccessDto<CertificateToken> saveCertificate(BigInteger tokenId, Long lectureId, Long userId) {
         UserLecture userLecture = findByUserIdAndLectureId(userId, lectureId)
                 .orElseThrow(() -> {
                     log.error("UserLecture with userId {} and lectureId {} doesn't exist", userId, lectureId);
@@ -116,41 +118,16 @@ public class CertificateServiceImpl implements CertificateService{
             log.error("UserLecture with userId {} and lectureId {} doesn't exist", userId, lectureId);
             return responseUtil.successResponse(false, HereStatus.SUCCESS_CERTIFICATE_OWN);
         }
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityIsNullException("User not found"));
-
-        Lecture lecture = lectureRepository.findById(lectureId)
-                .orElseThrow(() -> new EntityIsNullException("Lecture not found"));
-
-        Long lecturerId = paymentRatioRepository.findPaymentRatiosByLectureIdAndLecturerTrue(lectureId);
-        User lecturer = userRepository.findById(lecturerId)
-                .orElseThrow(() -> new EntityIsNullException("Lecturer not found"));
 
         int token = tokenId.intValue();
         userLecture.setCertificate(token);
-        try {
-            Map<String, Object> qrData = new HashMap<>();
-            qrData.put("name", user.getName());
-            qrData.put("category", lecture.getCategory().getCategoryName());
-            qrData.put("certificateCode", user.getWallet());
-            qrData.put("lectureTitle", lecture.getTitle());
-            qrData.put("lecturer", lecturer.getName());
-            qrData.put("lecturerCode", lecturer.getWallet());
-            qrData.put("certificateDate", userLecture.getCertificateDate());
 
-            ObjectMapper mapper = new ObjectMapper();
-            String jsonData = mapper.writeValueAsString(qrData);
-
-            userLecture.setQrCode(jsonData);
-
-            log.info("QR Code data saved for userLectureId {}", userLecture.getId());
-        } catch (Exception e) {
-            log.error("Error generating QR code data: {}", e.getMessage(), e);
-        }
-
+        CertificateToken certificateToken = CertificateToken.builder()
+                .token(tokenId)
+                .build();
 
         log.info("Certificate saved on userLectureId {} value {}", userLecture.getId(), token);
-        return responseUtil.successResponse(true, HereStatus.SUCCESS_CERTIFICATE_OWN);
+        return responseUtil.successResponse(certificateToken, HereStatus.SUCCESS_CERTIFICATE_OWN);
     }
 
     @Transactional(readOnly = true)

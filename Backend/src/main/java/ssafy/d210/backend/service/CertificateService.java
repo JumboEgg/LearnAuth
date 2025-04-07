@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.response.certificate.CertificateDetailResponse;
 import ssafy.d210.backend.dto.response.certificate.CertificateResponse;
+import ssafy.d210.backend.dto.response.certificate.CertificateToken;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -26,5 +27,5 @@ public interface CertificateService {
     public BigInteger issueCertificate(Long userId, String cid);
 
     // 수료증 저장하기
-    public ResponseSuccessDto<Boolean> saveCertificate(BigInteger tokenId, Long lectureId, Long userId);
+    public ResponseSuccessDto<CertificateToken> saveCertificate(BigInteger tokenId, Long lectureId, Long userId);
 }

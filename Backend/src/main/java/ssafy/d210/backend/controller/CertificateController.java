@@ -11,6 +11,7 @@ import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.request.certificate.CertificateRequest;
 import ssafy.d210.backend.dto.response.certificate.CertificateDetailResponse;
 import ssafy.d210.backend.dto.response.certificate.CertificateResponse;
+import ssafy.d210.backend.dto.response.certificate.CertificateToken;
 import ssafy.d210.backend.service.CertificateService;
 
 import java.math.BigInteger;
@@ -55,7 +56,7 @@ public class CertificateController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "수료증 발급 요청")
     })
-    public ResponseEntity<ResponseSuccessDto<Boolean>> issueCertificate(
+    public ResponseEntity<ResponseSuccessDto<CertificateToken>> issueCertificate(
             @RequestBody CertificateRequest request,
             @PathVariable("lectureId") Long lectureId
     ) {
