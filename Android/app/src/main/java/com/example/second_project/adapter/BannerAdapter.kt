@@ -1,5 +1,6 @@
 package com.example.second_project.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -10,6 +11,8 @@ import com.example.second_project.R
 import com.example.second_project.data.model.dto.request.Lecture
 import com.example.second_project.databinding.ItemBannerBinding
 import com.example.second_project.utils.YoutubeUtil
+
+private const val TAG = "BannerAdapter_야옹"
 
 class BannerAdapter(
     private val lectures: List<Lecture>,
@@ -69,32 +72,36 @@ class BannerAdapter(
             
             // 강의자 설정
             binding.bannerLecturer.text = lecture.lecturer ?: "강의자 정보 없음"
+            Log.d(TAG, "강의자명: ${lecture.lecturer}")
             
             // 썸네일 설정
             if (lecture.lectureId == -1) {
                 // 더미 아이템인 경우 기본 이미지 표시
                 val imageIndex = actualLectures.indexOf(lecture) % DEFAULT_BANNER_IMAGES.size
                 binding.bannerImage.setImageResource(DEFAULT_BANNER_IMAGES[imageIndex])
-            } else if (lecture.subLectures.isNullOrEmpty()) {
-                // 서브 강의가 없는 경우 기본 이미지 표시
-                binding.bannerImage.setImageResource(R.drawable.sample_plzdelete)
             } else {
-                // 첫 번째 서브 강의의 URL에서 비디오 ID 추출
-                val firstSubLecture = lecture.subLectures.first()
-                val videoId = firstSubLecture.lectureUrl?.let { YoutubeUtil.extractVideoId(it) }
+                // 첫 번째 subLecture의 URL을 사용하거나, lectureUrl을 사용
+                val videoId = if (!lecture.subLectures.isNullOrEmpty()) {
+                    lecture.subLectures[0].lectureUrl
+                } else {
+                    lecture.lectureUrl
+                }
                 
-                if (videoId != null) {
-                    // 유튜브 썸네일 URL 생성
-                    val thumbnailUrl = YoutubeUtil.getThumbnailUrl(videoId, YoutubeUtil.ThumbnailQuality.HIGH)
+                Log.d(TAG, "강의 ID: ${lecture.lectureId}")
+                Log.d(TAG, "첫 번째 subLecture URL: ${lecture.subLectures?.firstOrNull()?.lectureUrl}")
+                Log.d(TAG, "lectureUrl: ${lecture.lectureUrl}")
+                Log.d(TAG, "videoId: $videoId")
+                
+                videoId?.let { id ->
+                    val thumbnailUrl = YoutubeUtil.getThumbnailUrl(id, YoutubeUtil.ThumbnailQuality.HIGH)
+                    Log.d(TAG, "썸네일 URL: $thumbnailUrl")
                     
-                    // Glide를 사용하여 썸네일 로드
                     Glide.with(binding.root.context)
                         .load(thumbnailUrl)
                         .placeholder(R.drawable.white)
-                        .error(R.drawable.white)
                         .into(binding.bannerImage)
-                } else {
-                    // 비디오 ID를 추출할 수 없는 경우 기본 이미지 표시
+                } ?: run {
+                    Log.d(TAG, "videoId가 null이어서 기본 이미지 사용")
                     binding.bannerImage.setImageResource(R.drawable.white)
                 }
             }

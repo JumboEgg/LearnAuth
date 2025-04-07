@@ -18,7 +18,9 @@
             android:id="@+id/bannerImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="centerCrop"/>
+            android:scaleType="centerCrop"
+            android:scaleX="1.1"
+            android:scaleY="1.1"/>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/lectureTitleLayout"
