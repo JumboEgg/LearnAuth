@@ -161,6 +161,8 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
         try {
             Log.d(TAG, "강의 구매 시작 - 강의ID: $lectureId, 가격: $price, 제목: $lectureTitle")
 
+            val purchaseStartTime = System.currentTimeMillis()
+
             val chainManager = UserSession.getBlockchainManagerIfAvailable(requireContext())
             if (chainManager == null) {
                 Log.e(TAG, "블록체인 매니저가 null입니다.")
@@ -456,6 +458,10 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                                     response: Response<Void>
                                 ) {
                                     if (response.isSuccessful) {
+                                        val purchaseEndTime = System.currentTimeMillis()
+                                        val elapsedTime = purchaseEndTime - purchaseStartTime
+                                        Log.d(TAG, "강의 구매 성공! 소요 시간: $elapsedTime ms")
+
                                         Log.d(TAG, "🎉 강의 구매 성공")
                                         Toast.makeText(
                                             requireContext(),
