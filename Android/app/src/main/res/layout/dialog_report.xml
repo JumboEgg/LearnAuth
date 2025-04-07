@@ -117,7 +117,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="신고 접수는 유형당 한 번만 가능합니다."
+        android:text="중복 신고시 최신 신고만 반영됩니다."
         android:textAlignment="center"
         style="@style/medium16"
         android:textColor="@color/text_gray"
