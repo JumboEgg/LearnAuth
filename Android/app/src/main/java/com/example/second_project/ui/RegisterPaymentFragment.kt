@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.second_project.R
 import com.example.second_project.adapter.RegisterParticipantsAdapter
 import com.example.second_project.adapter.RegisterSearchParticipantsAdapter
@@ -38,6 +39,7 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
     private val searchHandler = Handler(Looper.getMainLooper())
     private var searchRunnable: Runnable? = null
     private val debounceDelay = 500L
+    private var isLoading = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -62,6 +64,7 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
             },
             onDeleteClick = { position -> adapter.removeItem(position) },
             onNameClick = { position ->
+                var currentKeyword = ""
                 val dialogBinding = DialogRegisterSearchParticipantsBinding.inflate(layoutInflater)
                 val dialog = AlertDialog.Builder(requireContext())
                     .setView(dialogBinding.root)
@@ -182,6 +185,7 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
                             }
                         }
                     }
+                    currentKeyword = keyword
                     if (keyword.isNotEmpty()) {
                         dialogBinding.recyclerUserList.visibility = View.VISIBLE
                         dialogBinding.layoutSelectedUser.visibility = View.GONE
@@ -189,6 +193,32 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
                     }
 
                 }
+
+                dialogBinding.recyclerUserList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                        super.onScrolled(recyclerView, dx, dy)
+
+                        val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                        val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+                        val totalItemCount = layoutManager.itemCount
+
+                        val isLastItem = lastVisibleItem + 1 >= totalItemCount
+
+                        if (isLastItem && !isLoading) {
+                            val total = viewModel.totalResults.value ?: return
+                            val current = viewModel.searchResults.value?.size ?: 0
+                            val nextPage = (viewModel.currentPage.value ?: 1) + 1
+
+                            if (current < total) {
+                                isLoading = true // 🔒 중복 방지 락
+                                viewModel.searchUsers(currentKeyword, nextPage) {
+                                    isLoading = false // 🔓 호출 후 다시 풀기
+                                }
+                            }
+                        }
+                    }
+                })
+
 
                 dialogBinding.btnCancel.setOnClickListener {
                     dialog.dismiss()
@@ -208,27 +238,39 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
 
 
         // 가격 설정
-//        binding.editTextPrice.editText?.setText(if (viewModel.price == 0) "" else viewModel.price.toString())
+        // binding.editTextPrice.editText?.setText(if (viewModel.price == 0) "" else viewModel.price.toString())
         binding.editTextPrice.editText?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
+
                 val priceText = s.toString().trim()
 
+                // 입력이 없으면 내부적으로 0 저장
                 if (priceText.isEmpty()) {
-                    // 공란을 유지하지만, 내부적으로는 0을 저장
                     viewModel.price = 0
-                } else {
-                    viewModel.price = try {
-                        priceText.toInt()
-                    } catch (e: NumberFormatException) {
-                        0 // 예외 발생 시 기본값 설정
-                    }
+                    return
                 }
+
+                val price = priceText.toIntOrNull()
+                if (price == null) {
+                    Toast.makeText(requireContext(), "유효한 숫자를 입력해주세요.", Toast.LENGTH_SHORT).show()
+                    return
+                }
+
+                // 백만원 초과 시 자동 수정
+                if (price > 1000000) {
+                    Toast.makeText(requireContext(), "가격은 최대 1,000,000원까지 입력 가능합니다.", Toast.LENGTH_SHORT).show()
+                    binding.editTextPrice.editText?.setText("1000000")
+                    binding.editTextPrice.editText?.setSelection(binding.editTextPrice.editText?.text?.length ?: 0)
+                    viewModel.price = 1000000
+                    return
+                }
+
+                viewModel.price = price
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
-
 
 
         // 가격 복원 (ViewModel에 저장된 값이 있을 경우)

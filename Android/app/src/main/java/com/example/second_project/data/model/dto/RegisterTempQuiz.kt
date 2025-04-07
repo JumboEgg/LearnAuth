@@ -3,5 +3,5 @@ package com.example.second_project.data.model.dto
 data class RegisterTempQuiz(
     var question: String = "",
     var options: MutableList<String> = mutableListOf("", "", ""),
-    var correctAnswerIndex: Int = -1 // 0, 1, 2 중 하나
+    var correctAnswerIndex: Int = 0 // 0, 1, 2 중 하나
 )
