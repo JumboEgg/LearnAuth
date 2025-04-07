@@ -87,6 +87,8 @@ class CertDetailFragment : Fragment() {
 
         // 롱 텍스트 스크롤 효과를 위해 텍스트뷰 선택상태 true 설정
         binding.msgOnCert.isSelected = true
+
+        binding.textLectureTitle.isSelected = true
     }
 
     private fun showConfirmDialog(userId: String, lectureId: String) {
