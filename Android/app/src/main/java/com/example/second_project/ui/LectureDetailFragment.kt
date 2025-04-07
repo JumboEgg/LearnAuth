@@ -183,8 +183,8 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                         Log.d(TAG, "사용자 주소: $userAddress")
 
                         // 표시용 가격 (사용자에게 보여줄 값) - 일반 단위
-                        // 표시용 가격 (사용자에게 보여줄 값) 및 거래에 사용할 가격 (wei 단위 그대로 사용)
                         val displayPrice = BigInteger.valueOf(price.toLong())
+                        // 표시용 가격 (사용자에게 보여줄 값) 및 거래에 사용할 가격 (wei 단위 그대로 사용)
                         val requiredAmount = displayPrice.multiply(BigInteger.TEN.pow(18))
                         Log.d(TAG, "표시 가격: $displayPrice")
                         Log.d(TAG, "트랜잭션 가격(wei): $requiredAmount")
@@ -194,6 +194,7 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                             catToken.balanceOf(userAddress).send()
                         }
                         Log.d(TAG, "토큰 잔액(wei): $balance")
+
                         // wei 단위 그대로 잔액 비교
                         if (balance < requiredAmount) {
                             val shortfall = requiredAmount.subtract(balance)
