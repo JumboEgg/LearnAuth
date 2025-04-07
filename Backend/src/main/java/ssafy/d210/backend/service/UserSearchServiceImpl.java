@@ -26,17 +26,17 @@ public class UserSearchServiceImpl implements UserSearchService{
     private final ResponseUtil responseUtil;
 
     // 검색 금지어 넣기
-    private static final List<String> BLOCKED_KEYWORDS = List.of("google", "naver", "com");
+//    private static final List<String> BLOCKED_KEYWORDS = List.of("google", "naver", "com");
     @Override
     @Transactional
     public ResponseSuccessDto<UserSearchResponse> searchUsers(String keyword, int page) {
         int pageSize = 12;
-
-        for (String blocked : BLOCKED_KEYWORDS) {
-            if (keyword.toLowerCase().contains(blocked)) {
-                throw new InvalidSearchKeywordException("검색할 수 없는 키워드입니다. : ");
-            }
-        }
+//
+//        for (String blocked : BLOCKED_KEYWORDS) {
+//            if (keyword.toLowerCase().contains(blocked)) {
+//                throw new InvalidSearchKeywordException("검색할 수 없는 키워드입니다. : ");
+//            }
+//        }
 
         PageRequest pageable = PageRequest.of(page - 1, pageSize);
 
