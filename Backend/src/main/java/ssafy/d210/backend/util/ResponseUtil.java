@@ -17,6 +17,7 @@ public class ResponseUtil<T> {
                 .<T>builder()
                 .timestamp(ZonedDateTime.now(TimeZone.getTimeZone("UTC").toZoneId()))
                 .code(HttpStatus.OK.value())
+                .status(String.valueOf(status))
                 .data(data)
                 .build();
         return res;
