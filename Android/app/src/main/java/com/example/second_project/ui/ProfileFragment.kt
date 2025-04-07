@@ -228,13 +228,17 @@ class ProfileFragment : Fragment() {
                 } catch (e: Exception) {
                     Log.e("ProfileFragment", "잔액 조회 실패", e)
                     e.printStackTrace()
-                    Toast.makeText(requireContext(), "잔액 조회 실패: ${e.message}", Toast.LENGTH_SHORT)
-                        .show()
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(requireContext(), "잔액 조회 실패: ${e.message}", Toast.LENGTH_SHORT)
+                            .show()
+                    }
                 }
             }
         } else {
             Log.w("ProfileFragment", "지갑 정보가 없습니다. 로그인 다시 해주세요")
-            Toast.makeText(requireContext(), "지갑 정보가 없습니다. 로그인을 다시 해주세요", Toast.LENGTH_SHORT).show()
+            withContext(Dispatchers.Main) {
+                Toast.makeText(requireContext(), "지갑 정보가 없습니다. 로그인을 다시 해주세요", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
