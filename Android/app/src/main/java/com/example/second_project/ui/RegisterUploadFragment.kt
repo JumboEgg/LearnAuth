@@ -30,6 +30,9 @@ class RegisterUploadFragment: Fragment(), RegisterStepSavable {
 
     private val viewModel: RegisterViewModel by activityViewModels()
 
+    // 파일 크기 제한: 50MB
+    private val MAX_FILE_SIZE = 50 * 1024 * 1024L
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -46,6 +49,10 @@ class RegisterUploadFragment: Fragment(), RegisterStepSavable {
             binding.textFile.text = it
         }
 
+        viewModel.selectedLectureFileUri?.let {
+            selectedFileUri = it
+        }
+
         // 파일 업로드 레이아웃 클릭 시 파일 선택기 열기
         binding.constraintUploadFile.setOnClickListener {
             openFilePicker()
@@ -58,6 +65,11 @@ class RegisterUploadFragment: Fragment(), RegisterStepSavable {
 
     // 프래그먼트 전환 시 ViewModel에 현재 입력값 저장 (임시 저장 용도)
     override fun saveDataToViewModel(): Boolean {
+        if (selectedFileUri == null) {
+            Toast.makeText(requireContext(), "파일을 업로드해주세요.", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
         viewModel.selectedLectureFileName = binding.textFile.text.toString()
         viewModel.selectedLectureFileUri = selectedFileUri
         return true
@@ -74,10 +86,17 @@ class RegisterUploadFragment: Fragment(), RegisterStepSavable {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == PICK_FILE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            selectedFileUri = data?.data
+            val uri = data?.data ?: return
+
+            val fileSize = FileUtils.getFileSizeFromUri(requireContext(), uri)
+            if (fileSize > MAX_FILE_SIZE) {
+                Toast.makeText(requireContext(), "50MB 이하의 파일만 업로드 가능합니다.", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            selectedFileUri = data.data
             selectedFileUri?.let {
 
-                // 만약 파일명 표시하려면 TextView 하나 추가해서 보여줄 수도 있음
                 val fileName = FileUtils.getFileNameFromUri(requireContext(), it)
                 binding.textFile.text = "선택된 파일: $fileName"
 
@@ -85,6 +104,7 @@ class RegisterUploadFragment: Fragment(), RegisterStepSavable {
             }
         }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

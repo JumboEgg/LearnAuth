@@ -14,6 +14,7 @@ import com.example.second_project.R
 import com.example.second_project.adapter.RegisterSublectureAdapter
 import com.example.second_project.databinding.FragmentRegisterSublectureBinding
 import com.example.second_project.interfaces.RegisterStepSavable
+import com.example.second_project.utils.KeyboardUtils
 import com.example.second_project.utils.YoutubeUtil
 import com.example.second_project.viewmodel.RegisterViewModel
 
@@ -68,6 +69,11 @@ class RegisterSublectureFragment: Fragment(), RegisterStepSavable {
                                 isLocked = true
                             )
                             sublectureAdapter.updateItem(position, item)
+                            val viewHolder = binding.recyclerSubLectures.findViewHolderForAdapterPosition(position)
+                            if (viewHolder?.itemView != null) {
+                                val editUrl = viewHolder.itemView.findViewById<View>(R.id.editURL)
+                                KeyboardUtils.clearFocusAndHideKeyboard(editUrl)
+                            }
 
                         },
                         onError = { message ->
@@ -93,6 +99,11 @@ class RegisterSublectureFragment: Fragment(), RegisterStepSavable {
 
         // 개별 강의 추가하기 버튼 클릭
         binding.btnAddSubLecture.setOnClickListener {
+            if (sublectureAdapter.itemCount >= 10) {
+                Toast.makeText(requireContext(), "개별 강의는 최대 10개까지 등록할 수 있습니다.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             sublectureAdapter.addItem()
             binding.recyclerSubLectures.scrollToPosition(sublectureAdapter.itemCount - 1)
         }

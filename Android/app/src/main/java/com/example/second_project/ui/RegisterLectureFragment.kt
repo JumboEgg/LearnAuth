@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.example.second_project.databinding.FragmentRegisterLectureBinding
 import com.example.second_project.interfaces.RegisterStepSavable
+import com.example.second_project.utils.KeyboardUtils
 import com.example.second_project.viewmodel.RegisterViewModel
 import com.example.second_project.utils.setEnterLimit
 
@@ -44,6 +45,7 @@ class RegisterLectureFragment: Fragment(), RegisterStepSavable {
                 val selected = categoryNames[position]
                 viewModel.categoryName = selected
                 Log.d("CategorySelect", "선택된 카테고리: $selected")
+                KeyboardUtils.hideKeyboard(binding.autoCompleteCategory, requireContext())
             }
         }
 

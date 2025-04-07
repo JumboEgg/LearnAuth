@@ -122,6 +122,7 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
                 viewModel.searchResults.observe(viewLifecycleOwner, observer)
 
                 dialog.setOnDismissListener {
+                    binding.root.clearFocus()
                     viewModel.searchResults.removeObserver(observer)
                     viewModel.clearSearchResults()
                 }
@@ -153,9 +154,14 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
 
 
                 dialogBinding.btnRegisterParticipants.setOnClickListener {
-                    selectedEmail?.let {
-                        adapter.updateParticipantName(position, it)
-                        dialog.dismiss()
+                    selectedEmail?.let { email ->
+                        if (viewModel.isEmailAlreadyRegistered(email)) {
+                            Toast.makeText(requireContext(), "이미 등록된 참여자입니다.", Toast.LENGTH_SHORT).show()
+                        } else {
+                            adapter.updateParticipantName(position, email)
+                            viewModel.ratios.add(Ratio(email, 0, false)) // 여기서 동기화해도 되고
+                            dialog.dismiss()
+                        }
                     } ?: run {
                         Toast.makeText(requireContext(), "사용자를 선택해주세요.", Toast.LENGTH_SHORT).show()
                     }
@@ -165,26 +171,6 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
                     val keyword = dialogBinding.searchInputText.text.toString().trim()
                     Log.d("searchUsers", "검색어: $keyword")
 
-                    val bannedPatterns = listOf("@", "gmail", "naver", ".com", ".net")
-
-                    when {
-                        keyword.length < 2 -> {
-                            Toast.makeText(requireContext(), "검색어는 최소 2자 이상 입력해주세요.", Toast.LENGTH_SHORT).show()
-                            return@setOnClickListener
-                        }
-
-                        else -> {
-                            val matched = bannedPatterns.find { keyword.contains(it, ignoreCase = true) }
-                            if (matched != null) {
-                                Toast.makeText(
-                                    requireContext(),
-                                    "입력한 검색어에 허용되지 않는 키워드 \"$matched\"가 포함되어 있습니다.",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                return@setOnClickListener
-                            }
-                        }
-                    }
                     currentKeyword = keyword
                     if (keyword.isNotEmpty()) {
                         dialogBinding.recyclerUserList.visibility = View.VISIBLE
@@ -233,8 +219,18 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
 
         // 추가 버튼
         binding.btnAddParticipants.setOnClickListener {
+
+            binding.root.clearFocus()
+
+           //  🔒 참여자 최대 20명 제한도 여기에 함께 적용하면 좋아요
+            if (adapter.itemCount >= 10) {
+                Toast.makeText(requireContext(), "참여자는 최대 10명까지 등록할 수 있습니다.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             adapter.addItem()
         }
+
 
 
         // 가격 설정

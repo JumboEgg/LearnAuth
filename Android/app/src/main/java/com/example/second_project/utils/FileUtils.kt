@@ -26,4 +26,13 @@ object FileUtils {
         }
         return result ?: "알 수 없는 파일"
     }
+
+    fun getFileSizeFromUri(context: Context, uri: Uri): Long {
+        val cursor = context.contentResolver.query(uri, null, null, null, null)
+        return cursor?.use {
+            val sizeIndex = it.getColumnIndex(OpenableColumns.SIZE)
+            it.moveToFirst()
+            it.getLong(sizeIndex)
+        } ?: 0L
+    }
 }

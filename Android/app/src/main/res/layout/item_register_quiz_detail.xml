@@ -50,6 +50,7 @@
                 android:layout_marginTop="15dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
+                app:endIconMode="clear_text"
                 android:id="@+id/editTextTitle"
                 style="@style/body1"
                 android:layout_width="match_parent"
@@ -69,7 +70,8 @@
                     android:paddingStart="14dp"
                     android:textColor="@color/text_gray"
                     android:maxLines="1"
-                    android:singleLine="true"/>
+                    android:singleLine="true"
+                    android:maxLength="100"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
@@ -87,6 +89,7 @@
 
 
                 <com.google.android.material.textfield.TextInputLayout
+                    app:endIconMode="clear_text"
                     android:id="@+id/editAnswer1"
                     style="@style/body1"
                     android:layout_width="0dp"
@@ -107,7 +110,8 @@
                         android:paddingStart="14dp"
                         android:textColor="@color/text_gray"
                         android:maxLines="1"
-                        android:singleLine="true"/>
+                        android:singleLine="true"
+                        android:maxLength="100"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -135,6 +139,7 @@
 
 
                 <com.google.android.material.textfield.TextInputLayout
+                    app:endIconMode="clear_text"
                     android:id="@+id/editAnswer2"
                     style="@style/body1"
                     android:layout_width="0dp"
@@ -155,7 +160,8 @@
                         android:paddingStart="14dp"
                         android:textColor="@color/text_gray"
                         android:maxLines="1"
-                        android:singleLine="true"/>
+                        android:singleLine="true"
+                        android:maxLength="100"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -184,6 +190,7 @@
 
 
                 <com.google.android.material.textfield.TextInputLayout
+                    app:endIconMode="clear_text"
                     android:id="@+id/editAnswer3"
                     style="@style/body1"
                     android:layout_width="0dp"
@@ -204,7 +211,8 @@
                         android:paddingStart="14dp"
                         android:textColor="@color/text_gray"
                         android:maxLines="1"
-                        android:singleLine="true"/>
+                        android:singleLine="true"
+                        android:maxLength="100"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout

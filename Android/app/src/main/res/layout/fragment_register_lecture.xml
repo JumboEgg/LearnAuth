@@ -9,6 +9,8 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         android:fillViewport="true">
 
         <LinearLayout
@@ -36,6 +38,7 @@
                 android:layout_marginTop="15dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
+                app:endIconMode="clear_text"
                 android:id="@+id/editTextTitle"
                 style="@style/body1"
                 android:layout_width="match_parent"
@@ -95,7 +98,8 @@
                     android:background="@android:color/transparent"
                     android:textColor="@color/text_gray"
                     android:textSize="16sp"
-                    android:padding="14dp"/>
+                    android:padding="14dp"
+                    android:focusableInTouchMode="true"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -109,6 +113,7 @@
                 android:layout_marginTop="15dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
+                app:endIconMode="clear_text"
                 android:id="@+id/editTextGoal"
                 style="@style/body1"
                 android:layout_width="match_parent"
@@ -149,6 +154,7 @@
                 android:layout_marginTop="15dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
+                app:endIconMode="clear_text"
                 android:id="@+id/editTextContent"
                 style="@style/body1"
                 android:layout_width="match_parent"

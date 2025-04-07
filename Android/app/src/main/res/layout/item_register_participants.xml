@@ -63,7 +63,8 @@
                     android:textColor="@color/text_gray"
                     android:maxLines="1"
                     android:inputType="number"
-                    android:singleLine="true"/>
+                    android:singleLine="true"
+                    android:maxLength="3"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
