@@ -71,6 +71,8 @@ public class LectureSystem extends Contract {
 
     public static final String FUNC_GETOWNEROFNFT = "getOwnerOfNFT";
 
+    public static final String FUNC_GETPARTICIPANTS = "getParticipants";
+
     public static final String FUNC_GETROLEADMIN = "getRoleAdmin";
 
     public static final String FUNC_GETTOKENURI = "getTokenURI";
@@ -197,9 +199,9 @@ public class LectureSystem extends Contract {
 
     public static List<ApprovalEventResponse> getApprovalEvents(
             TransactionReceipt transactionReceipt) {
-        List<EventValuesWithLog> valueList = staticExtractEventParametersWithLog(APPROVAL_EVENT, transactionReceipt);
+        List<Contract.EventValuesWithLog> valueList = staticExtractEventParametersWithLog(APPROVAL_EVENT, transactionReceipt);
         ArrayList<ApprovalEventResponse> responses = new ArrayList<ApprovalEventResponse>(valueList.size());
-        for (EventValuesWithLog eventValues : valueList) {
+        for (Contract.EventValuesWithLog eventValues : valueList) {
             ApprovalEventResponse typedResponse = new ApprovalEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.owner = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -211,7 +213,7 @@ public class LectureSystem extends Contract {
     }
 
     public static ApprovalEventResponse getApprovalEventFromLog(Log log) {
-        EventValuesWithLog eventValues = staticExtractEventParametersWithLog(APPROVAL_EVENT, log);
+        Contract.EventValuesWithLog eventValues = staticExtractEventParametersWithLog(APPROVAL_EVENT, log);
         ApprovalEventResponse typedResponse = new ApprovalEventResponse();
         typedResponse.log = log;
         typedResponse.owner = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -233,9 +235,9 @@ public class LectureSystem extends Contract {
 
     public static List<ApprovalForAllEventResponse> getApprovalForAllEvents(
             TransactionReceipt transactionReceipt) {
-        List<EventValuesWithLog> valueList = staticExtractEventParametersWithLog(APPROVALFORALL_EVENT, transactionReceipt);
+        List<Contract.EventValuesWithLog> valueList = staticExtractEventParametersWithLog(APPROVALFORALL_EVENT, transactionReceipt);
         ArrayList<ApprovalForAllEventResponse> responses = new ArrayList<ApprovalForAllEventResponse>(valueList.size());
-        for (EventValuesWithLog eventValues : valueList) {
+        for (Contract.EventValuesWithLog eventValues : valueList) {
             ApprovalForAllEventResponse typedResponse = new ApprovalForAllEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.owner = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -247,7 +249,7 @@ public class LectureSystem extends Contract {
     }
 
     public static ApprovalForAllEventResponse getApprovalForAllEventFromLog(Log log) {
-        EventValuesWithLog eventValues = staticExtractEventParametersWithLog(APPROVALFORALL_EVENT, log);
+        Contract.EventValuesWithLog eventValues = staticExtractEventParametersWithLog(APPROVALFORALL_EVENT, log);
         ApprovalForAllEventResponse typedResponse = new ApprovalForAllEventResponse();
         typedResponse.log = log;
         typedResponse.owner = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -269,9 +271,9 @@ public class LectureSystem extends Contract {
 
     public static List<BatchMetadataUpdateEventResponse> getBatchMetadataUpdateEvents(
             TransactionReceipt transactionReceipt) {
-        List<EventValuesWithLog> valueList = staticExtractEventParametersWithLog(BATCHMETADATAUPDATE_EVENT, transactionReceipt);
+        List<Contract.EventValuesWithLog> valueList = staticExtractEventParametersWithLog(BATCHMETADATAUPDATE_EVENT, transactionReceipt);
         ArrayList<BatchMetadataUpdateEventResponse> responses = new ArrayList<BatchMetadataUpdateEventResponse>(valueList.size());
-        for (EventValuesWithLog eventValues : valueList) {
+        for (Contract.EventValuesWithLog eventValues : valueList) {
             BatchMetadataUpdateEventResponse typedResponse = new BatchMetadataUpdateEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse._fromTokenId = (BigInteger) eventValues.getNonIndexedValues().get(0).getValue();
@@ -282,7 +284,7 @@ public class LectureSystem extends Contract {
     }
 
     public static BatchMetadataUpdateEventResponse getBatchMetadataUpdateEventFromLog(Log log) {
-        EventValuesWithLog eventValues = staticExtractEventParametersWithLog(BATCHMETADATAUPDATE_EVENT, log);
+        Contract.EventValuesWithLog eventValues = staticExtractEventParametersWithLog(BATCHMETADATAUPDATE_EVENT, log);
         BatchMetadataUpdateEventResponse typedResponse = new BatchMetadataUpdateEventResponse();
         typedResponse.log = log;
         typedResponse._fromTokenId = (BigInteger) eventValues.getNonIndexedValues().get(0).getValue();
@@ -304,9 +306,9 @@ public class LectureSystem extends Contract {
 
     public static List<LectureCreatedEventResponse> getLectureCreatedEvents(
             TransactionReceipt transactionReceipt) {
-        List<EventValuesWithLog> valueList = staticExtractEventParametersWithLog(LECTURECREATED_EVENT, transactionReceipt);
+        List<Contract.EventValuesWithLog> valueList = staticExtractEventParametersWithLog(LECTURECREATED_EVENT, transactionReceipt);
         ArrayList<LectureCreatedEventResponse> responses = new ArrayList<LectureCreatedEventResponse>(valueList.size());
-        for (EventValuesWithLog eventValues : valueList) {
+        for (Contract.EventValuesWithLog eventValues : valueList) {
             LectureCreatedEventResponse typedResponse = new LectureCreatedEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.lectureId = (BigInteger) eventValues.getNonIndexedValues().get(0).getValue();
@@ -317,7 +319,7 @@ public class LectureSystem extends Contract {
     }
 
     public static LectureCreatedEventResponse getLectureCreatedEventFromLog(Log log) {
-        EventValuesWithLog eventValues = staticExtractEventParametersWithLog(LECTURECREATED_EVENT, log);
+        Contract.EventValuesWithLog eventValues = staticExtractEventParametersWithLog(LECTURECREATED_EVENT, log);
         LectureCreatedEventResponse typedResponse = new LectureCreatedEventResponse();
         typedResponse.log = log;
         typedResponse.lectureId = (BigInteger) eventValues.getNonIndexedValues().get(0).getValue();
@@ -338,9 +340,9 @@ public class LectureSystem extends Contract {
 
     public static List<LecturePurchasedEventResponse> getLecturePurchasedEvents(
             TransactionReceipt transactionReceipt) {
-        List<EventValuesWithLog> valueList = staticExtractEventParametersWithLog(LECTUREPURCHASED_EVENT, transactionReceipt);
+        List<Contract.EventValuesWithLog> valueList = staticExtractEventParametersWithLog(LECTUREPURCHASED_EVENT, transactionReceipt);
         ArrayList<LecturePurchasedEventResponse> responses = new ArrayList<LecturePurchasedEventResponse>(valueList.size());
-        for (EventValuesWithLog eventValues : valueList) {
+        for (Contract.EventValuesWithLog eventValues : valueList) {
             LecturePurchasedEventResponse typedResponse = new LecturePurchasedEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.userId = (BigInteger) eventValues.getIndexedValues().get(0).getValue();
@@ -352,7 +354,7 @@ public class LectureSystem extends Contract {
     }
 
     public static LecturePurchasedEventResponse getLecturePurchasedEventFromLog(Log log) {
-        EventValuesWithLog eventValues = staticExtractEventParametersWithLog(LECTUREPURCHASED_EVENT, log);
+        Contract.EventValuesWithLog eventValues = staticExtractEventParametersWithLog(LECTUREPURCHASED_EVENT, log);
         LecturePurchasedEventResponse typedResponse = new LecturePurchasedEventResponse();
         typedResponse.log = log;
         typedResponse.userId = (BigInteger) eventValues.getIndexedValues().get(0).getValue();
@@ -374,9 +376,9 @@ public class LectureSystem extends Contract {
 
     public static List<LectureSettledEventResponse> getLectureSettledEvents(
             TransactionReceipt transactionReceipt) {
-        List<EventValuesWithLog> valueList = staticExtractEventParametersWithLog(LECTURESETTLED_EVENT, transactionReceipt);
+        List<Contract.EventValuesWithLog> valueList = staticExtractEventParametersWithLog(LECTURESETTLED_EVENT, transactionReceipt);
         ArrayList<LectureSettledEventResponse> responses = new ArrayList<LectureSettledEventResponse>(valueList.size());
-        for (EventValuesWithLog eventValues : valueList) {
+        for (Contract.EventValuesWithLog eventValues : valueList) {
             LectureSettledEventResponse typedResponse = new LectureSettledEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.userId = (BigInteger) eventValues.getIndexedValues().get(0).getValue();
@@ -389,7 +391,7 @@ public class LectureSystem extends Contract {
     }
 
     public static LectureSettledEventResponse getLectureSettledEventFromLog(Log log) {
-        EventValuesWithLog eventValues = staticExtractEventParametersWithLog(LECTURESETTLED_EVENT, log);
+        Contract.EventValuesWithLog eventValues = staticExtractEventParametersWithLog(LECTURESETTLED_EVENT, log);
         LectureSettledEventResponse typedResponse = new LectureSettledEventResponse();
         typedResponse.log = log;
         typedResponse.userId = (BigInteger) eventValues.getIndexedValues().get(0).getValue();
@@ -412,9 +414,9 @@ public class LectureSystem extends Contract {
 
     public static List<MetadataUpdateEventResponse> getMetadataUpdateEvents(
             TransactionReceipt transactionReceipt) {
-        List<EventValuesWithLog> valueList = staticExtractEventParametersWithLog(METADATAUPDATE_EVENT, transactionReceipt);
+        List<Contract.EventValuesWithLog> valueList = staticExtractEventParametersWithLog(METADATAUPDATE_EVENT, transactionReceipt);
         ArrayList<MetadataUpdateEventResponse> responses = new ArrayList<MetadataUpdateEventResponse>(valueList.size());
-        for (EventValuesWithLog eventValues : valueList) {
+        for (Contract.EventValuesWithLog eventValues : valueList) {
             MetadataUpdateEventResponse typedResponse = new MetadataUpdateEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse._tokenId = (BigInteger) eventValues.getNonIndexedValues().get(0).getValue();
@@ -424,7 +426,7 @@ public class LectureSystem extends Contract {
     }
 
     public static MetadataUpdateEventResponse getMetadataUpdateEventFromLog(Log log) {
-        EventValuesWithLog eventValues = staticExtractEventParametersWithLog(METADATAUPDATE_EVENT, log);
+        Contract.EventValuesWithLog eventValues = staticExtractEventParametersWithLog(METADATAUPDATE_EVENT, log);
         MetadataUpdateEventResponse typedResponse = new MetadataUpdateEventResponse();
         typedResponse.log = log;
         typedResponse._tokenId = (BigInteger) eventValues.getNonIndexedValues().get(0).getValue();
@@ -444,9 +446,9 @@ public class LectureSystem extends Contract {
 
     public static List<NFTIssuedEventResponse> getNFTIssuedEvents(
             TransactionReceipt transactionReceipt) {
-        List<EventValuesWithLog> valueList = staticExtractEventParametersWithLog(NFTISSUED_EVENT, transactionReceipt);
+        List<Contract.EventValuesWithLog> valueList = staticExtractEventParametersWithLog(NFTISSUED_EVENT, transactionReceipt);
         ArrayList<NFTIssuedEventResponse> responses = new ArrayList<NFTIssuedEventResponse>(valueList.size());
-        for (EventValuesWithLog eventValues : valueList) {
+        for (Contract.EventValuesWithLog eventValues : valueList) {
             NFTIssuedEventResponse typedResponse = new NFTIssuedEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.userId = (BigInteger) eventValues.getNonIndexedValues().get(0).getValue();
@@ -457,7 +459,7 @@ public class LectureSystem extends Contract {
     }
 
     public static NFTIssuedEventResponse getNFTIssuedEventFromLog(Log log) {
-        EventValuesWithLog eventValues = staticExtractEventParametersWithLog(NFTISSUED_EVENT, log);
+        Contract.EventValuesWithLog eventValues = staticExtractEventParametersWithLog(NFTISSUED_EVENT, log);
         NFTIssuedEventResponse typedResponse = new NFTIssuedEventResponse();
         typedResponse.log = log;
         typedResponse.userId = (BigInteger) eventValues.getNonIndexedValues().get(0).getValue();
@@ -478,9 +480,9 @@ public class LectureSystem extends Contract {
 
     public static List<RoleAdminChangedEventResponse> getRoleAdminChangedEvents(
             TransactionReceipt transactionReceipt) {
-        List<EventValuesWithLog> valueList = staticExtractEventParametersWithLog(ROLEADMINCHANGED_EVENT, transactionReceipt);
+        List<Contract.EventValuesWithLog> valueList = staticExtractEventParametersWithLog(ROLEADMINCHANGED_EVENT, transactionReceipt);
         ArrayList<RoleAdminChangedEventResponse> responses = new ArrayList<RoleAdminChangedEventResponse>(valueList.size());
-        for (EventValuesWithLog eventValues : valueList) {
+        for (Contract.EventValuesWithLog eventValues : valueList) {
             RoleAdminChangedEventResponse typedResponse = new RoleAdminChangedEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.role = (byte[]) eventValues.getIndexedValues().get(0).getValue();
@@ -492,7 +494,7 @@ public class LectureSystem extends Contract {
     }
 
     public static RoleAdminChangedEventResponse getRoleAdminChangedEventFromLog(Log log) {
-        EventValuesWithLog eventValues = staticExtractEventParametersWithLog(ROLEADMINCHANGED_EVENT, log);
+        Contract.EventValuesWithLog eventValues = staticExtractEventParametersWithLog(ROLEADMINCHANGED_EVENT, log);
         RoleAdminChangedEventResponse typedResponse = new RoleAdminChangedEventResponse();
         typedResponse.log = log;
         typedResponse.role = (byte[]) eventValues.getIndexedValues().get(0).getValue();
@@ -514,9 +516,9 @@ public class LectureSystem extends Contract {
 
     public static List<RoleGrantedEventResponse> getRoleGrantedEvents(
             TransactionReceipt transactionReceipt) {
-        List<EventValuesWithLog> valueList = staticExtractEventParametersWithLog(ROLEGRANTED_EVENT, transactionReceipt);
+        List<Contract.EventValuesWithLog> valueList = staticExtractEventParametersWithLog(ROLEGRANTED_EVENT, transactionReceipt);
         ArrayList<RoleGrantedEventResponse> responses = new ArrayList<RoleGrantedEventResponse>(valueList.size());
-        for (EventValuesWithLog eventValues : valueList) {
+        for (Contract.EventValuesWithLog eventValues : valueList) {
             RoleGrantedEventResponse typedResponse = new RoleGrantedEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.role = (byte[]) eventValues.getIndexedValues().get(0).getValue();
@@ -528,7 +530,7 @@ public class LectureSystem extends Contract {
     }
 
     public static RoleGrantedEventResponse getRoleGrantedEventFromLog(Log log) {
-        EventValuesWithLog eventValues = staticExtractEventParametersWithLog(ROLEGRANTED_EVENT, log);
+        Contract.EventValuesWithLog eventValues = staticExtractEventParametersWithLog(ROLEGRANTED_EVENT, log);
         RoleGrantedEventResponse typedResponse = new RoleGrantedEventResponse();
         typedResponse.log = log;
         typedResponse.role = (byte[]) eventValues.getIndexedValues().get(0).getValue();
@@ -550,9 +552,9 @@ public class LectureSystem extends Contract {
 
     public static List<RoleRevokedEventResponse> getRoleRevokedEvents(
             TransactionReceipt transactionReceipt) {
-        List<EventValuesWithLog> valueList = staticExtractEventParametersWithLog(ROLEREVOKED_EVENT, transactionReceipt);
+        List<Contract.EventValuesWithLog> valueList = staticExtractEventParametersWithLog(ROLEREVOKED_EVENT, transactionReceipt);
         ArrayList<RoleRevokedEventResponse> responses = new ArrayList<RoleRevokedEventResponse>(valueList.size());
-        for (EventValuesWithLog eventValues : valueList) {
+        for (Contract.EventValuesWithLog eventValues : valueList) {
             RoleRevokedEventResponse typedResponse = new RoleRevokedEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.role = (byte[]) eventValues.getIndexedValues().get(0).getValue();
@@ -564,7 +566,7 @@ public class LectureSystem extends Contract {
     }
 
     public static RoleRevokedEventResponse getRoleRevokedEventFromLog(Log log) {
-        EventValuesWithLog eventValues = staticExtractEventParametersWithLog(ROLEREVOKED_EVENT, log);
+        Contract.EventValuesWithLog eventValues = staticExtractEventParametersWithLog(ROLEREVOKED_EVENT, log);
         RoleRevokedEventResponse typedResponse = new RoleRevokedEventResponse();
         typedResponse.log = log;
         typedResponse.role = (byte[]) eventValues.getIndexedValues().get(0).getValue();
@@ -586,9 +588,9 @@ public class LectureSystem extends Contract {
 
     public static List<TokenDepositedEventResponse> getTokenDepositedEvents(
             TransactionReceipt transactionReceipt) {
-        List<EventValuesWithLog> valueList = staticExtractEventParametersWithLog(TOKENDEPOSITED_EVENT, transactionReceipt);
+        List<Contract.EventValuesWithLog> valueList = staticExtractEventParametersWithLog(TOKENDEPOSITED_EVENT, transactionReceipt);
         ArrayList<TokenDepositedEventResponse> responses = new ArrayList<TokenDepositedEventResponse>(valueList.size());
-        for (EventValuesWithLog eventValues : valueList) {
+        for (Contract.EventValuesWithLog eventValues : valueList) {
             TokenDepositedEventResponse typedResponse = new TokenDepositedEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.userId = (BigInteger) eventValues.getIndexedValues().get(0).getValue();
@@ -600,7 +602,7 @@ public class LectureSystem extends Contract {
     }
 
     public static TokenDepositedEventResponse getTokenDepositedEventFromLog(Log log) {
-        EventValuesWithLog eventValues = staticExtractEventParametersWithLog(TOKENDEPOSITED_EVENT, log);
+        Contract.EventValuesWithLog eventValues = staticExtractEventParametersWithLog(TOKENDEPOSITED_EVENT, log);
         TokenDepositedEventResponse typedResponse = new TokenDepositedEventResponse();
         typedResponse.log = log;
         typedResponse.userId = (BigInteger) eventValues.getIndexedValues().get(0).getValue();
@@ -622,9 +624,9 @@ public class LectureSystem extends Contract {
 
     public static List<TokenWithdrawnEventResponse> getTokenWithdrawnEvents(
             TransactionReceipt transactionReceipt) {
-        List<EventValuesWithLog> valueList = staticExtractEventParametersWithLog(TOKENWITHDRAWN_EVENT, transactionReceipt);
+        List<Contract.EventValuesWithLog> valueList = staticExtractEventParametersWithLog(TOKENWITHDRAWN_EVENT, transactionReceipt);
         ArrayList<TokenWithdrawnEventResponse> responses = new ArrayList<TokenWithdrawnEventResponse>(valueList.size());
-        for (EventValuesWithLog eventValues : valueList) {
+        for (Contract.EventValuesWithLog eventValues : valueList) {
             TokenWithdrawnEventResponse typedResponse = new TokenWithdrawnEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.userId = (BigInteger) eventValues.getIndexedValues().get(0).getValue();
@@ -636,7 +638,7 @@ public class LectureSystem extends Contract {
     }
 
     public static TokenWithdrawnEventResponse getTokenWithdrawnEventFromLog(Log log) {
-        EventValuesWithLog eventValues = staticExtractEventParametersWithLog(TOKENWITHDRAWN_EVENT, log);
+        Contract.EventValuesWithLog eventValues = staticExtractEventParametersWithLog(TOKENWITHDRAWN_EVENT, log);
         TokenWithdrawnEventResponse typedResponse = new TokenWithdrawnEventResponse();
         typedResponse.log = log;
         typedResponse.userId = (BigInteger) eventValues.getIndexedValues().get(0).getValue();
@@ -658,9 +660,9 @@ public class LectureSystem extends Contract {
 
     public static List<TransferEventResponse> getTransferEvents(
             TransactionReceipt transactionReceipt) {
-        List<EventValuesWithLog> valueList = staticExtractEventParametersWithLog(TRANSFER_EVENT, transactionReceipt);
+        List<Contract.EventValuesWithLog> valueList = staticExtractEventParametersWithLog(TRANSFER_EVENT, transactionReceipt);
         ArrayList<TransferEventResponse> responses = new ArrayList<TransferEventResponse>(valueList.size());
-        for (EventValuesWithLog eventValues : valueList) {
+        for (Contract.EventValuesWithLog eventValues : valueList) {
             TransferEventResponse typedResponse = new TransferEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.from = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -672,7 +674,7 @@ public class LectureSystem extends Contract {
     }
 
     public static TransferEventResponse getTransferEventFromLog(Log log) {
-        EventValuesWithLog eventValues = staticExtractEventParametersWithLog(TRANSFER_EVENT, log);
+        Contract.EventValuesWithLog eventValues = staticExtractEventParametersWithLog(TRANSFER_EVENT, log);
         TransferEventResponse typedResponse = new TransferEventResponse();
         typedResponse.log = log;
         typedResponse.from = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -709,8 +711,8 @@ public class LectureSystem extends Contract {
     public RemoteFunctionCall<TransactionReceipt> addUser(BigInteger _userId, String _userAddress) {
         final Function function = new Function(
                 FUNC_ADDUSER, 
-                Arrays.<Type>asList(new Uint16(_userId),
-                new Address(160, _userAddress)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint16(_userId), 
+                new org.web3j.abi.datatypes.Address(160, _userAddress)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
@@ -725,15 +727,15 @@ public class LectureSystem extends Contract {
     public RemoteFunctionCall<TransactionReceipt> approve(String to, BigInteger tokenId) {
         final Function function = new Function(
                 FUNC_APPROVE, 
-                Arrays.<Type>asList(new Address(160, to),
-                new Uint256(tokenId)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, to), 
+                new org.web3j.abi.datatypes.generated.Uint256(tokenId)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
 
     public RemoteFunctionCall<BigInteger> balanceOf(String owner) {
         final Function function = new Function(FUNC_BALANCEOF, 
-                Arrays.<Type>asList(new Address(160, owner)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, owner)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
@@ -747,7 +749,7 @@ public class LectureSystem extends Contract {
 
     public RemoteFunctionCall<BigInteger> checkBalance(String _address) {
         final Function function = new Function(FUNC_CHECKBALANCE, 
-                Arrays.<Type>asList(new Address(160, _address)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _address)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
@@ -756,9 +758,9 @@ public class LectureSystem extends Contract {
             List<Participant> participants) {
         final Function function = new Function(
                 FUNC_CREATELECTURE, 
-                Arrays.<Type>asList(new Uint16(lectureId),
-                new Utf8String(title),
-                new DynamicArray<Participant>(Participant.class, participants)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint16(lectureId), 
+                new org.web3j.abi.datatypes.Utf8String(title), 
+                new org.web3j.abi.datatypes.DynamicArray<Participant>(Participant.class, participants)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
@@ -767,43 +769,58 @@ public class LectureSystem extends Contract {
             BigInteger amount) {
         final Function function = new Function(
                 FUNC_DEPOSITTOKEN, 
-                Arrays.<Type>asList(new Uint16(userId),
-                new Uint256(amount)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint16(userId), 
+                new org.web3j.abi.datatypes.generated.Uint256(amount)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
 
     public RemoteFunctionCall<String> getApproved(BigInteger tokenId) {
         final Function function = new Function(FUNC_GETAPPROVED, 
-                Arrays.<Type>asList(new Uint256(tokenId)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(tokenId)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
     public RemoteFunctionCall<String> getOwnerOfNFT(BigInteger tokenId) {
         final Function function = new Function(FUNC_GETOWNEROFNFT, 
-                Arrays.<Type>asList(new Uint256(tokenId)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(tokenId)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
+    public RemoteFunctionCall<List> getParticipants(BigInteger lectureId) {
+        final Function function = new Function(FUNC_GETPARTICIPANTS, 
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint16(lectureId)), 
+                Arrays.<TypeReference<?>>asList(new TypeReference<DynamicArray<Participant>>() {}));
+        return new RemoteFunctionCall<List>(function,
+                new Callable<List>() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public List call() throws Exception {
+                        List<Type> result = (List<Type>) executeCallSingleValueReturn(function, List.class);
+                        return convertToNative(result);
+                    }
+                });
+    }
+
     public RemoteFunctionCall<byte[]> getRoleAdmin(byte[] role) {
         final Function function = new Function(FUNC_GETROLEADMIN, 
-                Arrays.<Type>asList(new Bytes32(role)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(role)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {}));
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 
     public RemoteFunctionCall<String> getTokenURI(BigInteger tokenId) {
         final Function function = new Function(FUNC_GETTOKENURI, 
-                Arrays.<Type>asList(new Uint256(tokenId)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(tokenId)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
     public RemoteFunctionCall<List> getUserPurchases(String userAddress) {
         final Function function = new Function(FUNC_GETUSERPURCHASES, 
-                Arrays.<Type>asList(new Address(160, userAddress)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, userAddress)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<DynamicArray<Uint256>>() {}));
         return new RemoteFunctionCall<List>(function,
                 new Callable<List>() {
@@ -819,31 +836,31 @@ public class LectureSystem extends Contract {
     public RemoteFunctionCall<TransactionReceipt> grantRole(byte[] role, String account) {
         final Function function = new Function(
                 FUNC_GRANTROLE, 
-                Arrays.<Type>asList(new Bytes32(role),
-                new Address(160, account)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(role), 
+                new org.web3j.abi.datatypes.Address(160, account)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
 
     public RemoteFunctionCall<Boolean> hasRole(byte[] role, String account) {
         final Function function = new Function(FUNC_HASROLE, 
-                Arrays.<Type>asList(new Bytes32(role),
-                new Address(160, account)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(role), 
+                new org.web3j.abi.datatypes.Address(160, account)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
     public RemoteFunctionCall<Boolean> isApprovedForAll(String owner, String operator) {
         final Function function = new Function(FUNC_ISAPPROVEDFORALL, 
-                Arrays.<Type>asList(new Address(160, owner),
-                new Address(160, operator)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, owner), 
+                new org.web3j.abi.datatypes.Address(160, operator)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
     public RemoteFunctionCall<Boolean> isTrustedForwarder(String forwarder) {
         final Function function = new Function(FUNC_ISTRUSTEDFORWARDER, 
-                Arrays.<Type>asList(new Address(160, forwarder)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, forwarder)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
@@ -851,15 +868,15 @@ public class LectureSystem extends Contract {
     public RemoteFunctionCall<TransactionReceipt> issueNFT(BigInteger userId, String cid) {
         final Function function = new Function(
                 FUNC_ISSUENFT, 
-                Arrays.<Type>asList(new Uint16(userId),
-                new Utf8String(cid)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint16(userId), 
+                new org.web3j.abi.datatypes.Utf8String(cid)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
 
     public RemoteFunctionCall<Tuple2<String, Boolean>> lectures(BigInteger param0) {
         final Function function = new Function(FUNC_LECTURES, 
-                Arrays.<Type>asList(new Uint16(param0)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint16(param0)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}, new TypeReference<Bool>() {}));
         return new RemoteFunctionCall<Tuple2<String, Boolean>>(function,
                 new Callable<Tuple2<String, Boolean>>() {
@@ -882,7 +899,7 @@ public class LectureSystem extends Contract {
 
     public RemoteFunctionCall<String> ownerOf(BigInteger tokenId) {
         final Function function = new Function(FUNC_OWNEROF, 
-                Arrays.<Type>asList(new Uint256(tokenId)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(tokenId)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
@@ -891,9 +908,9 @@ public class LectureSystem extends Contract {
             BigInteger lectureId, BigInteger amount) {
         final Function function = new Function(
                 FUNC_PURCHASELECTURE, 
-                Arrays.<Type>asList(new Uint16(userId),
-                new Uint16(lectureId),
-                new Uint256(amount)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint16(userId), 
+                new org.web3j.abi.datatypes.generated.Uint16(lectureId), 
+                new org.web3j.abi.datatypes.generated.Uint256(amount)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
@@ -902,8 +919,8 @@ public class LectureSystem extends Contract {
             String callerConfirmation) {
         final Function function = new Function(
                 FUNC_RENOUNCEROLE, 
-                Arrays.<Type>asList(new Bytes32(role),
-                new Address(160, callerConfirmation)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(role), 
+                new org.web3j.abi.datatypes.Address(160, callerConfirmation)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
@@ -911,8 +928,8 @@ public class LectureSystem extends Contract {
     public RemoteFunctionCall<TransactionReceipt> revokeRole(byte[] role, String account) {
         final Function function = new Function(
                 FUNC_REVOKEROLE, 
-                Arrays.<Type>asList(new Bytes32(role),
-                new Address(160, account)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(role), 
+                new org.web3j.abi.datatypes.Address(160, account)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
@@ -921,9 +938,9 @@ public class LectureSystem extends Contract {
             BigInteger tokenId) {
         final Function function = new Function(
                 FUNC_safeTransferFrom, 
-                Arrays.<Type>asList(new Address(160, from),
-                new Address(160, to),
-                new Uint256(tokenId)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, from), 
+                new org.web3j.abi.datatypes.Address(160, to), 
+                new org.web3j.abi.datatypes.generated.Uint256(tokenId)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
@@ -932,9 +949,9 @@ public class LectureSystem extends Contract {
             BigInteger tokenId, byte[] data) {
         final Function function = new Function(
                 FUNC_safeTransferFrom, 
-                Arrays.<Type>asList(new Address(160, from),
-                new Address(160, to),
-                new Uint256(tokenId),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, from), 
+                new org.web3j.abi.datatypes.Address(160, to), 
+                new org.web3j.abi.datatypes.generated.Uint256(tokenId), 
                 new org.web3j.abi.datatypes.DynamicBytes(data)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
@@ -944,8 +961,8 @@ public class LectureSystem extends Contract {
             Boolean approved) {
         final Function function = new Function(
                 FUNC_SETAPPROVALFORALL, 
-                Arrays.<Type>asList(new Address(160, operator),
-                new Bool(approved)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, operator), 
+                new org.web3j.abi.datatypes.Bool(approved)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
@@ -966,7 +983,7 @@ public class LectureSystem extends Contract {
 
     public RemoteFunctionCall<String> tokenURI(BigInteger tokenId) {
         final Function function = new Function(FUNC_TOKENURI, 
-                Arrays.<Type>asList(new Uint256(tokenId)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(tokenId)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
@@ -975,9 +992,9 @@ public class LectureSystem extends Contract {
             BigInteger tokenId) {
         final Function function = new Function(
                 FUNC_TRANSFERFROM, 
-                Arrays.<Type>asList(new Address(160, from),
-                new Address(160, to),
-                new Uint256(tokenId)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, from), 
+                new org.web3j.abi.datatypes.Address(160, to), 
+                new org.web3j.abi.datatypes.generated.Uint256(tokenId)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
@@ -991,7 +1008,7 @@ public class LectureSystem extends Contract {
 
     public RemoteFunctionCall<String> users(BigInteger param0) {
         final Function function = new Function(FUNC_USERS, 
-                Arrays.<Type>asList(new Uint16(param0)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint16(param0)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
@@ -1000,32 +1017,32 @@ public class LectureSystem extends Contract {
             BigInteger amount) {
         final Function function = new Function(
                 FUNC_WITHDRAWTOKEN, 
-                Arrays.<Type>asList(new Uint16(userId),
-                new Uint256(amount)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint16(userId), 
+                new org.web3j.abi.datatypes.generated.Uint256(amount)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
 
     @Deprecated
-    public static com.example.second_project.blockchain.LectureSystem load(String contractAddress, Web3j web3j, Credentials credentials,
-                                                                                   BigInteger gasPrice, BigInteger gasLimit) {
-        return new com.example.second_project.blockchain.LectureSystem(contractAddress, web3j, credentials, gasPrice, gasLimit);
+    public static LectureSystem load(String contractAddress, Web3j web3j, Credentials credentials,
+            BigInteger gasPrice, BigInteger gasLimit) {
+        return new LectureSystem(contractAddress, web3j, credentials, gasPrice, gasLimit);
     }
 
     @Deprecated
-    public static com.example.second_project.blockchain.LectureSystem load(String contractAddress, Web3j web3j,
-                                                                                   TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
-        return new com.example.second_project.blockchain.LectureSystem(contractAddress, web3j, transactionManager, gasPrice, gasLimit);
+    public static LectureSystem load(String contractAddress, Web3j web3j,
+            TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
+        return new LectureSystem(contractAddress, web3j, transactionManager, gasPrice, gasLimit);
     }
 
-    public static com.example.second_project.blockchain.LectureSystem load(String contractAddress, Web3j web3j, Credentials credentials,
-                                                                                   ContractGasProvider contractGasProvider) {
-        return new com.example.second_project.blockchain.LectureSystem(contractAddress, web3j, credentials, contractGasProvider);
+    public static LectureSystem load(String contractAddress, Web3j web3j, Credentials credentials,
+            ContractGasProvider contractGasProvider) {
+        return new LectureSystem(contractAddress, web3j, credentials, contractGasProvider);
     }
 
-    public static com.example.second_project.blockchain.LectureSystem load(String contractAddress, Web3j web3j,
-                                                                                   TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
-        return new com.example.second_project.blockchain.LectureSystem(contractAddress, web3j, transactionManager, contractGasProvider);
+    public static LectureSystem load(String contractAddress, Web3j web3j,
+            TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
+        return new LectureSystem(contractAddress, web3j, transactionManager, contractGasProvider);
     }
 
     public static class Participant extends StaticStruct {
@@ -1034,8 +1051,8 @@ public class LectureSystem extends Contract {
         public BigInteger settlementRatio;
 
         public Participant(BigInteger participantId, BigInteger settlementRatio) {
-            super(new Uint16(participantId),
-                    new Uint8(settlementRatio));
+            super(new org.web3j.abi.datatypes.generated.Uint16(participantId), 
+                    new org.web3j.abi.datatypes.generated.Uint8(settlementRatio));
             this.participantId = participantId;
             this.settlementRatio = settlementRatio;
         }

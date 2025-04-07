@@ -1,5 +1,6 @@
 package com.example.second_project.network
 
+import com.example.second_project.data.model.dto.request.PurchaseRequest
 import com.example.second_project.data.model.dto.request.SaveTimeRequest
 import com.example.second_project.data.model.dto.response.LectureDetailResponse
 import com.example.second_project.data.model.dto.response.LectureResponse
@@ -9,7 +10,6 @@ import com.example.second_project.data.model.dto.response.MostRecentLecturesResp
 import com.example.second_project.data.model.dto.response.OwnedLectureResponse
 import com.example.second_project.data.model.dto.response.ParticipatedLectureResponse
 import com.example.second_project.data.model.dto.response.RandomLecturesResponse
-import com.example.second_project.data.model.dto.request.LecturePurchaseRequest
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -56,14 +56,14 @@ interface LectureApiService {
     // 내가 참여한 강의
     @GET("/api/lecture/participated")
     fun getParticipatedLectures(
-        @Query("userId") userId:Int
-    ) :Call<ParticipatedLectureResponse>
+        @Query("userId") userId: Int
+    ): Call<ParticipatedLectureResponse>
 
     // 내가 보유한 강의
     @GET("/api/lecture/owned")
     fun getOwnedLectures(
-        @Query("userId") userId:Int
-    ) : Call<OwnedLectureResponse>
+        @Query("userId") userId: Int
+    ): Call<OwnedLectureResponse>
 
     // 개별 강의 재생 시간 업데이트
     @POST("api/userlecture/{userLectureId}/time")
@@ -82,7 +82,6 @@ interface LectureApiService {
 
     // 강의 구매
     @POST("/api/lecture/purchase")
-    fun purchaseLecture(
-        @Body request: LecturePurchaseRequest
-    ): Call<Void>
+    fun purchaseLecture(@Body request: PurchaseRequest): Call<Void>
+
 }

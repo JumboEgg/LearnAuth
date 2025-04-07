@@ -45,7 +45,7 @@ class ParticipatedLectureFragment : Fragment() {
         binding.participatedRecyclerView.adapter = adapter
 
 
-        val userId = UserSession.userId + 3
+        val userId = UserSession.userId
         Log.d("TAG", "onViewCreated userId: $userId")
         viewModel.loadParticipatedLectures(userId)
         // 뷰모델에서 참여 강의 리스트를 관찰하여 어댑터에 업데이트
