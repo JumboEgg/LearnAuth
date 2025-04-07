@@ -26,6 +26,8 @@ class RegisterSublectureAdapter (
         fun bind(position: Int) {
 
             val item = tempSubLectures[position]
+
+            binding.linearConfirmYoutube.visibility = if (item.isLocked) View.VISIBLE else View.GONE
             // 제목 업데이트 (ex. 개별 강의 1)
             binding.textSubLectureIndex.text = "개별 강의 ${position + 1}"
 

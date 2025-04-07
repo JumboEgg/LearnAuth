@@ -14,6 +14,7 @@ import com.example.second_project.R
 import com.example.second_project.adapter.RegisterSublectureAdapter
 import com.example.second_project.databinding.FragmentRegisterSublectureBinding
 import com.example.second_project.interfaces.RegisterStepSavable
+import com.example.second_project.utils.KeyboardUtils
 import com.example.second_project.utils.YoutubeUtil
 import com.example.second_project.viewmodel.RegisterViewModel
 
@@ -68,6 +69,11 @@ class RegisterSublectureFragment: Fragment(), RegisterStepSavable {
                                 isLocked = true
                             )
                             sublectureAdapter.updateItem(position, item)
+                            val viewHolder = binding.recyclerSubLectures.findViewHolderForAdapterPosition(position)
+                            if (viewHolder?.itemView != null) {
+                                val editUrl = viewHolder.itemView.findViewById<View>(R.id.editURL)
+                                KeyboardUtils.clearFocusAndHideKeyboard(editUrl)
+                            }
 
                         },
                         onError = { message ->
