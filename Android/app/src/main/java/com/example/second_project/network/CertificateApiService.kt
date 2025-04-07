@@ -2,6 +2,7 @@ package com.example.second_project.network
 
 import com.example.second_project.data.model.dto.response.CertificateDetailResponse
 import com.example.second_project.data.model.dto.response.CertificateResponse
+import com.example.second_project.data.model.dto.response.CertificateIssueResponse
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.PATCH
@@ -15,13 +16,18 @@ interface CertificateApiService {
 
     @GET("/api/certificate/detail")
     fun getCertificateDetail(
-        @Query("userId") userId: String,
-        @Query("lectureId") lectureId: String
+        @Query("userId") userId: Int,
+        @Query("lectureId") lectureId: Int
     ): Call<CertificateDetailResponse>
 
     @PATCH("api/certificate/lecture/{lectureId}/certification")
     fun issueCertificate(
-        @Path("lectureId") lectureId: String,
-        @Body requestBody: Map<String, Any>
-    ): Call<Unit>
+        @Path("lectureId") lectureId: Int,
+        @Body requestBody: CertificateIssueRequest
+    ): Call<CertificateIssueResponse>
 }
+
+data class CertificateIssueRequest(
+    val userId: Int,
+    val cid: String
+)

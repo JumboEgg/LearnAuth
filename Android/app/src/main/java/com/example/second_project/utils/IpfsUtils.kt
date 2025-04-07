@@ -57,7 +57,7 @@ object IpfsUtils {
      * @param jsonData 업로드할 JSON 데이터
      * @return Response<PinataResponse>
      */
-    suspend fun uploadJsonToIpfs(apiKey: String, jsonData: Map<String, Any>): Response<PinataResponse> {
+    suspend fun uploadJsonToIpfs(apiKey: String, jsonData: Map<String, String>): Response<PinataResponse> {
         try {
             // Pinata API 호출
             return PinataApiClient.pinataService.pinJSONToIPFS(apiKey, jsonData)

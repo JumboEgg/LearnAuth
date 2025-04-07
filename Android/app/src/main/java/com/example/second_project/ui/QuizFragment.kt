@@ -272,7 +272,11 @@ class QuizFragment : Fragment() {
         dialogBinding.dialogImage.setImageResource(resultIcon)
         dialogBinding.dialogMessage.text = resultMessage
         // 퀴즈 통과 시 certificate = true로 설정
-        ApiClient.quizService.completeQuiz(lectureId, userId).enqueue(object : Callback<QuizResponse> {
+        ApiClient.quizService.completeQuiz(
+            lectureId = lectureId.toInt(),
+            userId = userId.toInt(),
+            requestBody = QuizCompleteRequest(completeQuiz = true)
+        ).enqueue(object : Callback<QuizResponse> {
             override fun onResponse(call: Call<QuizResponse>, response: Response<QuizResponse>) {
                 if (response.isSuccessful) {
                     Log.d(TAG, "퀴즈 완료 처리 성공")
