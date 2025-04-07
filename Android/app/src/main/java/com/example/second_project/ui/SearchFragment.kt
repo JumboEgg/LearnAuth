@@ -183,20 +183,42 @@ class SearchFragment : Fragment() {
 
         // 5) 검색 결과 관찰
         viewModel.searchResults.observe(viewLifecycleOwner) { results ->
-            // 검색어가 있을 때만 갱신
-            if (binding.searchInputText.text.toString().trim().isNotEmpty()) {
-                searchLectureAdapter.submitList(results)
+            val keyword = binding.searchInputText.text.toString().trim()
+
+            // 1) 검색어가 존재하고 (즉, 사용자가 검색 중),
+            // 2) 결과가 비었을 때 → '등록된 강의 없음' 안내 표시
+            if (keyword.isNotEmpty()) {
+                if (results.isEmpty()) {
+                    // (a) 안내 문구만 표시
+                    binding.emptyTextView.visibility = View.VISIBLE
+                    binding.lectureList.visibility = View.GONE
+                } else {
+                    // (b) 결과가 있으면 RecyclerView 보여주고, 안내 문구 숨김
+                    binding.emptyTextView.visibility = View.GONE
+                    binding.lectureList.visibility = View.VISIBLE
+                    searchLectureAdapter.submitList(results)
+                }
                 Log.d(TAG, "Search results updated: $results")
             }
         }
 
+
         // 6) 일반 강의 목록 관찰
         viewModel.lectures.observe(viewLifecycleOwner) { lectureList ->
-            if (binding.searchInputText.text.toString().trim().isEmpty()) {
-                searchLectureAdapter.submitList(lectureList)
-                Log.d(TAG, "Category lectures: $lectureList")
+            val keyword = binding.searchInputText.text.toString().trim()
+            if (keyword.isEmpty()) {
+                if (lectureList.isEmpty()) {
+                    binding.emptyTextView.visibility = View.VISIBLE
+                    binding.lectureList.visibility = View.GONE
+                } else {
+                    binding.emptyTextView.visibility = View.GONE
+                    binding.lectureList.visibility = View.VISIBLE
+                    searchLectureAdapter.submitList(lectureList)
+                }
+                Log.d(TAG, "Category lectures updated: $lectureList")
             }
         }
+
 
         // 7) 초기 진입 시 기본 강의 로드
         if (savedInstanceState == null) {
