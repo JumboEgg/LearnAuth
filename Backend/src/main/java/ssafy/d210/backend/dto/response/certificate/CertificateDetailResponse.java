@@ -2,6 +2,7 @@ package ssafy.d210.backend.dto.response.certificate;
 
 import lombok.*;
 
+import java.math.BigInteger;
 import java.sql.Date;
 
 //
