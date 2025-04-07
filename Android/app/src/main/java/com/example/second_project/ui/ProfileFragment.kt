@@ -247,10 +247,20 @@ class ProfileFragment : Fragment() {
                 Log.e("ProfileFragment", "잔액 조회 실패", e)
                 e.printStackTrace()
 
-                // UI 업데이트는 메인 스레드에서 안전하게 수행하되, Fragment가 아직 유효한지 확인
-                withContext(Dispatchers.Main) {
-                    if (isAdded && context != null) {
-                        Toast.makeText(context, "잔액 조회 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                    // wei 단위의 토큰 잔액 가져오기
+                    val balanceInWei =
+                        withContext(Dispatchers.IO) { manager.getMyCatTokenBalance() }
+                    Log.d("ProfileFragment", "💰 CATToken 잔액(wei): $balanceInWei")
+                    // UserSession에 마지막 잔액 저장 (나중에 참조 가능)
+                    UserSession.lastKnownBalance = balanceInWei
+                    // 잔액 포맷팅 및 표시
+                    updateBalanceDisplay(balanceInWei)
+                } catch (e: Exception) {
+                    Log.e("ProfileFragment", "잔액 조회 실패", e)
+                    e.printStackTrace()
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(requireContext(), "잔액 조회 실패: ${e.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                 }
             }
