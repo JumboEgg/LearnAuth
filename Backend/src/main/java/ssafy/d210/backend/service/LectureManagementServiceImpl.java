@@ -50,152 +50,158 @@ public class LectureManagementServiceImpl implements LectureManagementService {
     @Override
     @DistributedLock(key = "#registerLecture")
     @Transactional(rollbackFor = {Exception.class, BlockchainException.class})
-    public ResponseSuccessDto<Boolean> registerLecture(LectureRegisterRequest request) throws Exception {
-
+    public ResponseSuccessDto<Boolean> registerLecture(LectureRegisterRequest request) {
         // 예외 처리
         // 한나 : 더 찾으면 알려주세요
         // 예외처리 분리
-        isValidationForLecture(request);
 
-        Set<String> emailset = new HashSet<>();
-        final int[] lecturerCount = {0};
-        request.getRatios().forEach(ratio -> {
-            if (!emailset.add(ratio.getEmail())) {
-                throw new DuplicatedValueException("수익 분배 대상자 이메일이 중복 됐습니다. : " + ratio.getEmail());
-            }
-            if (ratio.isLecturer()) {
-                lecturerCount[0]++;
-            }
-        });
+        try {
+            isValidationForLecture(request);
 
-        // 강의 등록자 무조건 1명
-        if (lecturerCount[0] != 1) {
-            throw new InvalidRatioDataException("등록자는 반드시 한 명이어야 하고, ratio에서 lecturer=true로 설정 되어야 한다.");
-        }
-
-
-        // 1. 카테고리 조회
-        CategoryName categoryEnum = mapCategoryName(request.getCategoryName());
-
-        Category category = findCategory(categoryEnum);
-
-        // 2. Lecture entity 생성
-        Lecture lecture = new Lecture();
-        lecture.setTitle(request.getTitle());
-        lecture.setGoal(request.getGoal());
-        lecture.setDescription(request.getDescription());
-        lecture.setPrice(request.getPrice());
-        lecture.setCID(request.getCID());
-//            lecture.setWalletKey(aes256Util.encrypt(request.getWalletKey()));
-        lecture.setCategory(category);
-        Lecture savedLecture = lectureRepository.save(lecture);
-
-        // 3. SubLecture 저장
-        List<SubLecture> subLectures = request.getSubLectures().stream()
-                .peek(subReq -> {
-                    if (subReq.getSubLectureLength() <= 0) {
-                        throw new InvalidLectureDataException("개별 강의 길이는 1초 이상이어야 한다.");
-                    }
-                })
-                .map(subReq -> SubLecture.from(subReq, savedLecture))
-                .collect(Collectors.toList());
-        subLectureRepository.saveAll(subLectures);
-
-
-        // 4. Quiz, QuizOption 저장 + 옵션은 3개만 허용 + 정답은 무조건 하나 + 퀴즈 옵션 내용 비어있으면 안된다.
-        List<Quiz> savedQuizzes = request.getQuizzes().stream()
-                .peek(this::isValidationForQuiz)
-                .map(quizReq -> {
-                    Quiz quiz = new Quiz();
-                    quiz.setQuestion(quizReq.getQuestion());
-                    quiz.setLecture(savedLecture);
-                    return quiz;
-                })
-                .collect(Collectors.collectingAndThen(
-                        Collectors.toList(),
-                        quizRepository::saveAll
-                ));
-        List<QuizOption> allQuizOptions = IntStream.range(0, savedQuizzes.size())
-                .mapToObj(i -> {
-                    Quiz savedQuiz = savedQuizzes.get(i);
-                    QuizRequest quizReq = request.getQuizzes().get(i);
-
-                    return quizReq.getQuizOptions().stream()
-                            .peek(optionReq -> {
-                                if (optionReq.getQuizOption() == null || optionReq.getQuizOption().isBlank()) {
-                                    throw new InvalidQuizDataException("퀴즈 옵션 내용은 비어 있을 수 없다.");
-                                }
-                            })
-                            .map(optionReq -> QuizOption.from(optionReq, savedQuiz));
-                })
-                .flatMap(stream -> stream)
-                .collect(Collectors.toList());
-
-        quizOptionRepository.saveAll(allQuizOptions);
-
-
-        // 5. PaymentRatio + UserLecture + UserLectureTime 등록 : user email로 조회
-        List<PaymentRatio> paymentRatios = new ArrayList<>(request.getRatios().size());
-        List<UserLectureTime> userLectureTimes = new ArrayList<>();
-
-        List<UserLecture> userLectures = request.getRatios().stream()
-                .map(ratioReq -> {
-                    User user = findUserEmail(ratioReq.getEmail());
-
-                    // PaymentRatio 저장
-                    PaymentRatio paymentRatio = new PaymentRatio();
-                    paymentRatio.setLecture(savedLecture);
-                    paymentRatio.setUser(user);
-                    paymentRatio.setRatio(ratioReq.getRatio());
-                    paymentRatio.setLecturer(ratioReq.isLecturer() ? 1 : 0);
-                    paymentRatios.add(paymentRatio);
-
-                    // UserLecture 등록
-                    UserLecture userLecture = new UserLecture();
-                    userLecture.setUser(user);
-                    userLecture.setLecture(savedLecture);
-
-                    return userLecture;
-
-                })
-                .collect(Collectors.toList());
-
-        List<UserLecture> savedUserLectures = userLectureRepository.saveAll(userLectures);
-        savedUserLectures.forEach(savedUserLecture -> {
-            subLectures.forEach(sub -> {
-                UserLectureTime ult = new UserLectureTime();
-                ult.setUserLecture(savedUserLecture);
-                ult.setSubLecture(sub);
-                userLectureTimes.add(ult);
+            Set<String> emailset = new HashSet<>();
+            final int[] lecturerCount = {0};
+            request.getRatios().forEach(ratio -> {
+                if (!emailset.add(ratio.getEmail())) {
+                    throw new DuplicatedValueException("수익 분배 대상자 이메일이 중복 됐습니다. : " + ratio.getEmail());
+                }
+                if (ratio.isLecturer()) {
+                    lecturerCount[0]++;
+                }
             });
-        });
-        paymentRatioRepository.saveAll(paymentRatios);
-        userLectureTimeRepository.saveAll(userLectureTimes);
 
-        // 블록체인에 강의를 등록하는 기능. 필요에 의해 앞쪽에 삽입될 수도 있습니다.
-        List<LectureSystem.Participant> participants = paymentRatios.stream().map(
-                paymentRatio -> new LectureSystem.Participant(
-                        BigInteger.valueOf(paymentRatio.getUser().getId()),
-                        BigInteger.valueOf(paymentRatio.getRatio())
-                )
-        ).toList();
+            // 강의 등록자 무조건 1명
+            if (lecturerCount[0] != 1) {
+                throw new InvalidRatioDataException("등록자는 반드시 한 명이어야 하고, ratio에서 lecturer=true로 설정 되어야 한다.");
+            }
 
 
-        RemoteFunctionCall<TransactionReceipt> tx = lectureSystem.createLecture(
-                BigInteger.valueOf(savedLecture.getId()),
-                request.getTitle(),
-                participants
-        );
-        TransactionReceipt receipt = tx.send();
-        if (receipt.isStatusOK()) {
-            log.info("Lecture created on blockchain with ID: {}", savedLecture.getId());
-        } else {
-            log.error("Blockchain transaction failed. Status: {}", receipt.getStatus());
-            // 적절한 오류 처리
-            throw new BlockchainException("블록체인 이슈로 강의등록 실패, 트랜잭션 롤백");
+            // 1. 카테고리 조회
+            CategoryName categoryEnum = mapCategoryName(request.getCategoryName());
+
+            Category category = findCategory(categoryEnum);
+
+            // 2. Lecture entity 생성
+            Lecture lecture = new Lecture();
+            lecture.setTitle(request.getTitle());
+            lecture.setGoal(request.getGoal());
+            lecture.setDescription(request.getDescription());
+            lecture.setPrice(request.getPrice());
+            lecture.setCID(request.getCID());
+//            lecture.setWalletKey(aes256Util.encrypt(request.getWalletKey()));
+            lecture.setCategory(category);
+            Lecture savedLecture = lectureRepository.save(lecture);
+
+            // 3. SubLecture 저장
+            List<SubLecture> subLectures = request.getSubLectures().stream()
+                    .peek(subReq -> {
+                        if (subReq.getSubLectureLength() <= 0) {
+                            throw new InvalidLectureDataException("개별 강의 길이는 1초 이상이어야 한다.");
+                        }
+                    })
+                    .map(subReq -> SubLecture.from(subReq, savedLecture))
+                    .collect(Collectors.toList());
+            subLectureRepository.saveAll(subLectures);
+
+
+            // 4. Quiz, QuizOption 저장 + 옵션은 3개만 허용 + 정답은 무조건 하나 + 퀴즈 옵션 내용 비어있으면 안된다.
+            List<Quiz> savedQuizzes = request.getQuizzes().stream()
+                    .peek(this::isValidationForQuiz)
+                    .map(quizReq -> {
+                        Quiz quiz = new Quiz();
+                        quiz.setQuestion(quizReq.getQuestion());
+                        quiz.setLecture(savedLecture);
+                        return quiz;
+                    })
+                    .collect(Collectors.collectingAndThen(
+                            Collectors.toList(),
+                            quizRepository::saveAll
+                    ));
+            List<QuizOption> allQuizOptions = IntStream.range(0, savedQuizzes.size())
+                    .mapToObj(i -> {
+                        Quiz savedQuiz = savedQuizzes.get(i);
+                        QuizRequest quizReq = request.getQuizzes().get(i);
+
+                        return quizReq.getQuizOptions().stream()
+                                .peek(optionReq -> {
+                                    if (optionReq.getQuizOption() == null || optionReq.getQuizOption().isBlank()) {
+                                        throw new InvalidQuizDataException("퀴즈 옵션 내용은 비어 있을 수 없다.");
+                                    }
+                                })
+                                .map(optionReq -> QuizOption.from(optionReq, savedQuiz));
+                    })
+                    .flatMap(stream -> stream)
+                    .collect(Collectors.toList());
+
+            quizOptionRepository.saveAll(allQuizOptions);
+
+
+            // 5. PaymentRatio + UserLecture + UserLectureTime 등록 : user email로 조회
+            List<PaymentRatio> paymentRatios = new ArrayList<>(request.getRatios().size());
+            List<UserLectureTime> userLectureTimes = new ArrayList<>();
+
+            List<UserLecture> userLectures = request.getRatios().stream()
+                    .map(ratioReq -> {
+                        User user = findUserEmail(ratioReq.getEmail());
+
+                        // PaymentRatio 저장
+                        PaymentRatio paymentRatio = new PaymentRatio();
+                        paymentRatio.setLecture(savedLecture);
+                        paymentRatio.setUser(user);
+                        paymentRatio.setRatio(ratioReq.getRatio());
+                        paymentRatio.setLecturer(ratioReq.isLecturer() ? 1 : 0);
+                        paymentRatios.add(paymentRatio);
+
+                        // UserLecture 등록
+                        UserLecture userLecture = new UserLecture();
+                        userLecture.setUser(user);
+                        userLecture.setLecture(savedLecture);
+
+                        return userLecture;
+
+                    })
+                    .collect(Collectors.toList());
+
+            List<UserLecture> savedUserLectures = userLectureRepository.saveAll(userLectures);
+            savedUserLectures.forEach(savedUserLecture -> {
+                subLectures.forEach(sub -> {
+                    UserLectureTime ult = new UserLectureTime();
+                    ult.setUserLecture(savedUserLecture);
+                    ult.setSubLecture(sub);
+                    userLectureTimes.add(ult);
+                });
+            });
+            paymentRatioRepository.saveAll(paymentRatios);
+            userLectureTimeRepository.saveAll(userLectureTimes);
+
+            // 블록체인에 강의를 등록하는 기능. 필요에 의해 앞쪽에 삽입될 수도 있습니다.
+            List<LectureSystem.Participant> participants = paymentRatios.stream().map(
+                    paymentRatio -> new LectureSystem.Participant(
+                            BigInteger.valueOf(paymentRatio.getUser().getId()),
+                            BigInteger.valueOf(paymentRatio.getRatio())
+                    )
+            ).toList();
+
+
+            RemoteFunctionCall<TransactionReceipt> tx = lectureSystem.createLecture(
+                    BigInteger.valueOf(savedLecture.getId()),
+                    request.getTitle(),
+                    participants
+            );
+            TransactionReceipt receipt = tx.send();
+            if (receipt.isStatusOK()) {
+                log.info("Lecture created on blockchain with ID: {}", savedLecture.getId());
+            } else {
+                log.error("Blockchain transaction failed. Status: {}", receipt.getStatus());
+                // 적절한 오류 처리
+                throw new BlockchainException("블록체인 이슈로 강의등록 실패, 트랜잭션 롤백");
+            }
+
+            return responseUtil.successResponse(true, HereStatus.SUCCESS_LECTURE_REGISTERED);
+
+        } catch (Exception e) {
+            return responseUtil.successResponse(false, HereStatus.SUCCESS_LECTURE_REGISTERED);
         }
 
-        return responseUtil.successResponse(true, HereStatus.SUCCESS_LECTURE_REGISTERED);
     }
 
     private void isValidationForQuiz(QuizRequest quizReq) {

@@ -7,5 +7,5 @@ import ssafy.d210.backend.dto.response.lecture.LectureResponse;
 
 public interface LectureManagementService {
 
-    ResponseSuccessDto<Boolean> registerLecture(LectureRegisterRequest request) throws Exception;
+    ResponseSuccessDto<Boolean> registerLecture(LectureRegisterRequest request);
 }
