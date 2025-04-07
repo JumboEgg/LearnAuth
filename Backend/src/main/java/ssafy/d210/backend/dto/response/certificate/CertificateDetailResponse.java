@@ -15,5 +15,4 @@ public class CertificateDetailResponse {
     private String teacherWallet;
     private Date certificateDate;
     private Integer certificate;
-    private String qrCode;
 }
