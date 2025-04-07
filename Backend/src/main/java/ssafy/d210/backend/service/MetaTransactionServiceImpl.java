@@ -10,6 +10,7 @@ import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.TransactionManager;
 import org.springframework.stereotype.Service;
 import org.web3j.tx.gas.ContractGasProvider;
+import org.web3j.tx.response.PollingTransactionReceiptProcessor;
 import org.web3j.utils.Numeric;
 import ssafy.d210.backend.contracts.LectureForwarder;
 import ssafy.d210.backend.dto.request.transaction.ForwardRequest;
@@ -39,7 +40,12 @@ public class MetaTransactionServiceImpl implements MetaTransactionService{
     public boolean executeMetaTransaction(SignedRequest signedRequest) {
         try {
             Credentials credentials = Credentials.create(BC_PRIVATE_KEY);
-            TransactionManager txManager = new RawTransactionManager(web3j, credentials, CHAIN_ID);
+            PollingTransactionReceiptProcessor processor = new PollingTransactionReceiptProcessor(
+                    web3j,
+                    TransactionManager.DEFAULT_POLLING_FREQUENCY,
+                    TransactionManager.DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH
+            );
+            TransactionManager txManager = new RawTransactionManager(web3j, credentials, CHAIN_ID, processor);
             log.info("🚀 트랜잭션 보내는 relayer address: {}", credentials.getAddress());
 
             LectureForwarder forwarder = LectureForwarder.load(
