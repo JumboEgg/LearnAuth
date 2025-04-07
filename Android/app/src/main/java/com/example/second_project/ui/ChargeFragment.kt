@@ -18,6 +18,7 @@ import com.example.second_project.network.PaymentApiService
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.File
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.Locale
@@ -43,15 +44,18 @@ class ChargeFragment : Fragment() {
         return binding.root
     }
 
+    // ChargeFragment에 handleWalletFile 함수 추가 및 onViewCreated 수정
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         // 디버깅 로그 추가
         Log.d("ChargeFragment", "onViewCreated 시작")
         Log.d(
             "ChargeFragment",
             "지갑 정보: walletFilePath=${UserSession.walletFilePath}, walletPassword=${UserSession.walletPassword != null}"
         )
+
+        // 지갑 파일 처리 (새로 추가)
+        handleWalletFile()
 
         // 초기 기본 금액 설정 (UI에는 5000 CAT으로 보임)
         selectedBaseAmount = getBaseAmountFromRadioButton()
@@ -75,6 +79,113 @@ class ChargeFragment : Fragment() {
         // 닫기 버튼 클릭 시
         binding.purchaseCancel.setOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
+    }
+
+    // ChargeFragment에 handleWalletFile 함수 추가
+    private fun handleWalletFile() {
+        if (!UserSession.walletFilePath.isNullOrEmpty()) {
+            Log.d("ChargeFragment", "현재 지갑 경로: ${UserSession.walletFilePath}")
+
+            // 이더리움 주소 형식인지 확인 (0x로 시작하는지)
+            if (UserSession.walletFilePath?.startsWith("0x") == true) {
+                Log.d("ChargeFragment", "walletFilePath가 이더리움 주소 형식입니다: ${UserSession.walletFilePath}")
+                val ethAddress = UserSession.walletFilePath
+
+                // 지갑 파일 찾기
+                val walletFiles = requireContext().filesDir.listFiles { file ->
+                    file.name.startsWith("UTC--") && file.name.endsWith(".json")
+                }
+
+                if (walletFiles != null && walletFiles.isNotEmpty()) {
+                    Log.d("ChargeFragment", "총 ${walletFiles.size}개의 지갑 파일을 찾았습니다.")
+
+                    // 주소 검증을 위한 임시 변수들
+                    var matchFound = false
+                    var validWalletFound = false
+
+                    // 발견된 모든 지갑 파일에 대해 검증
+                    for (walletFile in walletFiles) {
+                        try {
+                            // 비밀번호로 지갑 검증 시도
+                            val credentials = org.web3j.crypto.WalletUtils.loadCredentials(
+                                UserSession.walletPassword,
+                                walletFile
+                            )
+                            val walletAddress = credentials.address
+
+                            // 주소가 DB 저장 주소와 일치하는지 확인
+                            if (walletAddress.equals(ethAddress, ignoreCase = true)) {
+                                Log.d("ChargeFragment", "✅ 일치하는 지갑 파일을 발견: ${walletFile.name}, 주소: $walletAddress")
+                                UserSession.walletFilePath = walletFile.name
+                                matchFound = true
+                                validWalletFound = true
+                                break  // 일치하는 지갑을 찾았으므로 검색 종료
+                            } else {
+                                Log.d("ChargeFragment", "주소가 일치하지 않는 지갑 파일: ${walletFile.name}, 주소: $walletAddress")
+                                validWalletFound = true
+                            }
+                        } catch (e: Exception) {
+                            // 이 지갑 파일은 비밀번호가 맞지 않거나 손상되었을 수 있음
+                            Log.d("ChargeFragment", "지갑 파일 검증 실패: ${walletFile.name}, 오류: ${e.message}")
+                        }
+                    }
+
+                    // 검증 결과에 따른 처리
+                    if (!matchFound) {
+                        if (validWalletFound) {
+                            // 검증 가능한 지갑은 있지만 주소가 일치하지 않음
+                            Log.w("ChargeFragment", "⚠️ DB 주소와 일치하는 지갑 파일이 없습니다. DB 주소를 계속 사용합니다: $ethAddress")
+                            UserSession.walletFilePath = ethAddress  // DB의 이더리움 주소를 그대로 유지
+                        } else {
+                            // 모든 지갑 파일이 검증 불가능
+                            Log.w("ChargeFragment", "⚠️ 검증 가능한 지갑 파일이 없습니다. DB 주소를 계속 사용합니다: $ethAddress")
+                            UserSession.walletFilePath = ethAddress  // DB의 이더리움 주소를 그대로 유지
+                        }
+                    }
+                } else {
+                    // 지갑 파일이 없는 경우
+                    Log.d("ChargeFragment", "지갑 파일을 찾을 수 없습니다. DB 주소를 계속 사용합니다: $ethAddress")
+                    // 이더리움 주소를 그대로 유지
+                    UserSession.walletFilePath = ethAddress
+                }
+            } else {
+                // 일반 파일 경로인 경우 (UTC--)
+                val walletFile = File(requireContext().filesDir, UserSession.walletFilePath)
+
+                if (!walletFile.exists()) {
+                    Log.w("ChargeFragment", "⚠️ 지갑 파일을 찾을 수 없습니다: ${UserSession.walletFilePath}")
+
+                    // 지갑 파일이 없는 경우 다른 지갑 파일 찾기 시도
+                    val walletFiles = requireContext().filesDir.listFiles { file ->
+                        file.name.startsWith("UTC--") && file.name.endsWith(".json")
+                    }
+
+                    if (walletFiles != null && walletFiles.isNotEmpty()) {
+                        // 첫 번째 지갑 파일 사용
+                        val walletFileName = walletFiles[0].name
+                        Log.d("ChargeFragment", "✅ 대체 지갑 파일을 찾았습니다: $walletFileName")
+                        UserSession.walletFilePath = walletFileName
+                    } else {
+                        Log.e("ChargeFragment", "⚠️ 사용 가능한 지갑 파일이 없습니다!")
+                    }
+                } else {
+                    Log.d("ChargeFragment", "✅ 지갑 파일이 존재합니다: ${walletFile.absolutePath}")
+                    // 지갑 파일 유효성 검증 (선택사항)
+                    try {
+                        val credentials = org.web3j.crypto.WalletUtils.loadCredentials(
+                            UserSession.walletPassword,
+                            walletFile
+                        )
+                        Log.d("ChargeFragment", "✅ 지갑 검증 성공, 주소: ${credentials.address}")
+                    } catch (e: Exception) {
+                        Log.w("ChargeFragment", "⚠️ 지갑 파일 검증 실패: ${e.message}")
+                        // 비밀번호가 틀려도 경로는 유지
+                    }
+                }
+            }
+        } else {
+            Log.e("ChargeFragment", "⚠️ 지갑 경로가 비어있습니다!")
         }
     }
 

@@ -1,4 +1,5 @@
 package com.example.second_project.ui
+
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -45,7 +46,10 @@ class ProfileFragment : Fragment() {
         setupMenuListeners()
 
         // 지갑 정보 로그
-        Log.d("ProfileFragment", "지갑 정보 확인: walletFilePath=${UserSession.walletFilePath}, walletPassword=${UserSession.walletPassword}")
+        Log.d(
+            "ProfileFragment",
+            "지갑 정보 확인: walletFilePath=${UserSession.walletFilePath}, walletPassword=${UserSession.walletPassword}"
+        )
 
         // 지갑 파일 존재 여부 확인 및 처리
         handleWalletFile()
@@ -83,27 +87,128 @@ class ProfileFragment : Fragment() {
     }
 
     // 지갑 파일 처리
+// ProfileFragment의 handleWalletFile 함수 수정
     private fun handleWalletFile() {
         if (!UserSession.walletFilePath.isNullOrEmpty()) {
-            val walletFile = File(requireContext().filesDir, UserSession.walletFilePath)
-            Log.d("ProfileFragment", "지갑 파일 존재 여부: ${walletFile.exists()}, 경로: ${walletFile.absolutePath}")
+            Log.d("ProfileFragment", "현재 지갑 경로: ${UserSession.walletFilePath}")
 
-            // 지갑 파일이 없으면서 이더리움 주소 형식이라면
-            if (!walletFile.exists() && UserSession.walletFilePath?.startsWith("0x") == true) {
+            // 이더리움 주소 형식인지 확인 (0x로 시작하는지)
+            if (UserSession.walletFilePath?.startsWith("0x") == true) {
+                Log.d(
+                    "ProfileFragment",
+                    "walletFilePath가 이더리움 주소 형식입니다: ${UserSession.walletFilePath}"
+                )
+                val ethAddress = UserSession.walletFilePath
+
                 // 지갑 파일 찾기
                 val walletFiles = requireContext().filesDir.listFiles { file ->
                     file.name.startsWith("UTC--") && file.name.endsWith(".json")
                 }
 
                 if (walletFiles != null && walletFiles.isNotEmpty()) {
-                    // 찾은 지갑 파일 사용
-                    val walletFileName = walletFiles[0].name
-                    UserSession.walletFilePath = walletFileName
-                    Log.d("ProfileFragment", "✅ 지갑 파일을 찾아 설정했습니다: $walletFileName")
+                    Log.d("ProfileFragment", "총 ${walletFiles.size}개의 지갑 파일을 찾았습니다.")
+
+                    // 주소 검증을 위한 임시 변수들
+                    var matchFound = false
+                    var validWalletFound = false
+
+                    // 발견된 모든 지갑 파일에 대해 검증
+                    for (walletFile in walletFiles) {
+                        try {
+                            // 비밀번호로 지갑 검증 시도
+                            val credentials = org.web3j.crypto.WalletUtils.loadCredentials(
+                                UserSession.walletPassword,
+                                walletFile
+                            )
+                            val walletAddress = credentials.address
+
+                            // 주소가 DB 저장 주소와 일치하는지 확인
+                            if (walletAddress.equals(ethAddress, ignoreCase = true)) {
+                                Log.d(
+                                    "ProfileFragment",
+                                    "✅ 일치하는 지갑 파일을 발견: ${walletFile.name}, 주소: $walletAddress"
+                                )
+                                UserSession.walletFilePath = walletFile.name
+                                matchFound = true
+                                validWalletFound = true
+                                break  // 일치하는 지갑을 찾았으므로 검색 종료
+                            } else {
+                                Log.d(
+                                    "ProfileFragment",
+                                    "주소가 일치하지 않는 지갑 파일: ${walletFile.name}, 주소: $walletAddress"
+                                )
+                                validWalletFound = true
+                            }
+                        } catch (e: Exception) {
+                            // 이 지갑 파일은 비밀번호가 맞지 않거나 손상되었을 수 있음
+                            Log.d(
+                                "ProfileFragment",
+                                "지갑 파일 검증 실패: ${walletFile.name}, 오류: ${e.message}"
+                            )
+                        }
+                    }
+
+                    // 검증 결과에 따른 처리
+                    if (!matchFound) {
+                        if (validWalletFound) {
+                            // 검증 가능한 지갑은 있지만 주소가 일치하지 않음
+                            Log.w(
+                                "ProfileFragment",
+                                "⚠️ DB 주소와 일치하는 지갑 파일이 없습니다. DB 주소를 계속 사용합니다: $ethAddress"
+                            )
+                            UserSession.walletFilePath = ethAddress  // DB의 이더리움 주소를 그대로 유지
+                        } else {
+                            // 모든 지갑 파일이 검증 불가능
+                            Log.w(
+                                "ProfileFragment",
+                                "⚠️ 검증 가능한 지갑 파일이 없습니다. DB 주소를 계속 사용합니다: $ethAddress"
+                            )
+                            UserSession.walletFilePath = ethAddress  // DB의 이더리움 주소를 그대로 유지
+                        }
+                    }
                 } else {
-                    Log.e("ProfileFragment", "⚠️ 지갑 파일을 찾을 수 없습니다!")
+                    // 지갑 파일이 없는 경우
+                    Log.d("ProfileFragment", "지갑 파일을 찾을 수 없습니다. DB 주소를 계속 사용합니다: $ethAddress")
+                    // 이더리움 주소를 그대로 유지
+                    UserSession.walletFilePath = ethAddress
+                }
+            } else {
+                // 일반 파일 경로인 경우 (UTC--)
+                val walletFile = File(requireContext().filesDir, UserSession.walletFilePath)
+
+                if (!walletFile.exists()) {
+                    Log.w("ProfileFragment", "⚠️ 지갑 파일을 찾을 수 없습니다: ${UserSession.walletFilePath}")
+
+                    // 지갑 파일이 없는 경우 다른 지갑 파일 찾기 시도
+                    val walletFiles = requireContext().filesDir.listFiles { file ->
+                        file.name.startsWith("UTC--") && file.name.endsWith(".json")
+                    }
+
+                    if (walletFiles != null && walletFiles.isNotEmpty()) {
+                        // 첫 번째 지갑 파일 사용
+                        val walletFileName = walletFiles[0].name
+                        Log.d("ProfileFragment", "✅ 대체 지갑 파일을 찾았습니다: $walletFileName")
+                        UserSession.walletFilePath = walletFileName
+                    } else {
+                        Log.e("ProfileFragment", "⚠️ 사용 가능한 지갑 파일이 없습니다!")
+                    }
+                } else {
+                    Log.d("ProfileFragment", "✅ 지갑 파일이 존재합니다: ${walletFile.absolutePath}")
+                    // 지갑 파일 유효성 검증 (선택사항)
+                    try {
+                        val credentials = org.web3j.crypto.WalletUtils.loadCredentials(
+                            UserSession.walletPassword,
+                            walletFile
+                        )
+                        Log.d("ProfileFragment", "✅ 지갑 검증 성공, 주소: ${credentials.address}")
+                    } catch (e: Exception) {
+                        Log.w("ProfileFragment", "⚠️ 지갑 파일 검증 실패: ${e.message}")
+                        // 비밀번호가 틀려도 경로는 유지
+                    }
                 }
             }
+        } else {
+            Log.e("ProfileFragment", "⚠️ 지갑 경로가 비어있습니다!")
         }
     }
 
@@ -118,7 +223,8 @@ class ProfileFragment : Fragment() {
                     Log.d("ProfileFragment", "📍 내 지갑 주소: $address")
 
                     // wei 단위의 토큰 잔액 가져오기
-                    val balanceInWei = withContext(Dispatchers.IO) { manager.getMyCatTokenBalance() }
+                    val balanceInWei =
+                        withContext(Dispatchers.IO) { manager.getMyCatTokenBalance() }
                     Log.d("ProfileFragment", "💰 CATToken 잔액(wei): $balanceInWei")
 
                     // UserSession에 마지막 잔액 저장 (나중에 참조 가능)
@@ -130,7 +236,8 @@ class ProfileFragment : Fragment() {
                 } catch (e: Exception) {
                     Log.e("ProfileFragment", "잔액 조회 실패", e)
                     e.printStackTrace()
-                    Toast.makeText(requireContext(), "잔액 조회 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "잔액 조회 실패: ${e.message}", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
         } else {
@@ -218,7 +325,8 @@ class ProfileFragment : Fragment() {
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
                     // 최신 잔액 가져오기
-                    val balanceInWei = withContext(Dispatchers.IO) { manager.getMyCatTokenBalance() }
+                    val balanceInWei =
+                        withContext(Dispatchers.IO) { manager.getMyCatTokenBalance() }
                     Log.d("ProfileFragment", "새로고침된 잔액(wei): $balanceInWei")
 
                     // UserSession에 마지막 잔액 업데이트
