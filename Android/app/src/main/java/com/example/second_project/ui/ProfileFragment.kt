@@ -15,6 +15,8 @@ import com.example.second_project.UserSession
 import com.example.second_project.databinding.FragmentProfileBinding
 import com.example.second_project.network.ApiClient
 import com.example.second_project.network.AuthApiService
+import com.example.second_project.network.CertificateApiService
+import com.example.second_project.data.model.dto.response.CertificateResponse
 import com.example.second_project.viewmodel.ProfileViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -47,7 +49,13 @@ class ProfileFragment : Fragment() {
         val safeContext = context ?: return
         // 2. 메뉴 버튼 리스너 등은 즉시 설정
         setupMenuListeners()
-        // 3. 백그라운드에서 지갑 파일 처리 + 잔액 조회
+        
+        // 3. 수료증 데이터 로드 및 프로필 이미지 설정 (우선 실행)
+        viewLifecycleOwner.lifecycleScope.launch {
+            loadCertificatesAndSetProfileImage()
+        }
+        
+        // 4. 백그라운드에서 지갑 파일 처리 + 잔액 조회 (병렬 실행)
         viewLifecycleOwner.lifecycleScope.launch {
             // (a) 지갑 파일 처리 (handleWalletFile)도 오래 걸릴 수 있으니 Dispatchers.IO에서 처리
             withContext(Dispatchers.IO) {
@@ -301,6 +309,38 @@ class ProfileFragment : Fragment() {
                 Toast.makeText(requireContext(), "로그아웃 오류: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
+    }
+
+    // 수료증 데이터 로드 및 프로필 이미지 설정
+    private suspend fun loadCertificatesAndSetProfileImage() = withContext(Dispatchers.IO) {
+        try {
+            Log.d("ProfileFragment", "수료증 데이터 로드 시작")
+            val certificateApiService = ApiClient.retrofit.create(CertificateApiService::class.java)
+            val response = certificateApiService.getCertificates(UserSession.userId).execute()
+            
+            if (response.isSuccessful && response.body() != null) {
+                val certificateResponse = response.body()!!
+                // certificate 값이 0보다 큰 항목의 수 계산 (수료증이 발급된 항목)
+                val certificateCount = certificateResponse.data.count { it.certificate > 0 }
+                
+                Log.d("ProfileFragment", "수료증 개수: $certificateCount")
+                
+                // 수료증 개수에 따라 프로필 이미지 설정
+                withContext(Dispatchers.Main) {
+                    val profileImageResId = when {
+                        certificateCount < 3 -> R.drawable.profile1
+                        certificateCount < 6 -> R.drawable.profile2
+                        else -> R.drawable.profile3
+                    }
+                    binding.profileImg.setImageResource(profileImageResId)
+                    Log.d("ProfileFragment", "프로필 이미지 설정: $profileImageResId (수료증 ${certificateCount}개)")
+                }
+            } else {
+                Log.e("ProfileFragment", "수료증 데이터 로드 실패: ${response.code()}")
+            }
+        } catch (e: Exception) {
+            Log.e("ProfileFragment", "수료증 데이터 로드 중 오류 발생", e)
+        }
     }
 
     override fun onResume() {
