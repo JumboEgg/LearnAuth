@@ -36,7 +36,8 @@ public interface UserLectureRepository extends JpaRepository<UserLecture, Long> 
             on l.lecture_id = ul.lecture_lecture_id
             join category c
             on l.category_category_id = c.category_id
-            where ul.user_user_id = :userId;
+            where ul.user_user_id = :userId
+            and ul.certificate_date is not null;
          """, nativeQuery = true)
     List<CertificateResponse> getFinishedUserLecture(@Param("userId") Long userId);
 
