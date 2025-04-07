@@ -122,6 +122,7 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
                 viewModel.searchResults.observe(viewLifecycleOwner, observer)
 
                 dialog.setOnDismissListener {
+                    binding.root.clearFocus()
                     viewModel.searchResults.removeObserver(observer)
                     viewModel.clearSearchResults()
                 }
@@ -218,6 +219,15 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
 
         // 추가 버튼
         binding.btnAddParticipants.setOnClickListener {
+
+            binding.root.clearFocus()
+
+            // 🔒 참여자 최대 10명 제한도 여기에 함께 적용하면 좋아요
+            if (adapter.itemCount >= 5) {
+                Toast.makeText(requireContext(), "참여자는 최대 5명까지 등록할 수 있습니다.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             adapter.addItem()
         }
 
