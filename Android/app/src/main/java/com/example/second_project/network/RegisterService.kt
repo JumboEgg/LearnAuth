@@ -2,12 +2,14 @@ package com.example.second_project.network
 
 import com.example.second_project.data.model.dto.request.RegisterLectureRequest
 import com.example.second_project.data.model.dto.response.CategoryResponse
+import com.example.second_project.data.model.dto.response.EmailSearchData
 import com.example.second_project.data.model.dto.response.common.ApiResponse
 import retrofit2.Response
 import retrofit2.http.Body
 
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 interface RegisterService {
     @GET("api/category")
@@ -17,5 +19,11 @@ interface RegisterService {
     suspend fun registerLecture(
         @Body request: RegisterLectureRequest
     ): Response<ApiResponse<Boolean>>
+
+    @GET("api/user/search")
+    suspend fun searchUserEmail(
+        @Query ("keyword") keyword: String,
+        @Query ("page") page: Int
+    ) : Response<ApiResponse<EmailSearchData>>
 
 }

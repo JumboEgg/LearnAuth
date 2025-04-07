@@ -19,6 +19,7 @@ import com.example.second_project.utils.IpfsUtils
 import com.example.second_project.utils.YoutubeUtil
 import kotlinx.coroutines.launch
 import com.example.second_project.data.model.dto.request.QuizOption
+import com.example.second_project.data.model.dto.response.RegisterEmailResponse
 
 class RegisterViewModel : ViewModel(){
 
@@ -26,6 +27,17 @@ class RegisterViewModel : ViewModel(){
     private val _categoryList = MutableLiveData<List<CategoryResponse>>()
     val categoryList: LiveData<List<CategoryResponse>> = _categoryList
     val tempSubLectures = mutableListOf<RegisterTempSubLecture>()
+
+    // 사용자 검색 결과 상태
+    private val _searchResults = MutableLiveData<List<RegisterEmailResponse>>()
+    val searchResults: LiveData<List<RegisterEmailResponse>> = _searchResults
+
+    private val _totalResults = MutableLiveData<Int>()
+    val totalResults: LiveData<Int> = _totalResults
+
+    private val _currentPage = MutableLiveData<Int>()
+    val currentPage: LiveData<Int> = _currentPage
+
 
     // IPFS 업로드 상태
     private val _ipfsUploadState = MutableLiveData<IpfsUploadState>()
@@ -52,8 +64,10 @@ class RegisterViewModel : ViewModel(){
 
 
     var title: String = ""
+        set(value) { field = value.trim() }
     var categoryName: String = ""
     var goal: String = ""
+        set(value) { field = value.trim() }
     var description: String = ""
     var price: Int = 0
 
@@ -94,21 +108,6 @@ class RegisterViewModel : ViewModel(){
             cid = ipfsHash
         )
     }
-
-//    fun isValid(): Boolean {
-//        return title.isNotBlank()
-//                && categoryName.isNotBlank()
-//                && goal.isNotBlank()
-//                && description.isNotBlank()
-//                && price >= 0
-//                && ratios.isNotEmpty()
-//                && ratios.any { it.lecturer }
-//                && subLectures.isNotEmpty()
-//                && quizzes.size >= 3
-//                && quizzes.all { quiz ->
-//            quiz.quizOptions.size == 3 && quiz.quizOptions.count { it.isCorrect } == 1
-//        }
-//    }
 
     fun isValid(): Boolean {
         if (title.isBlank()) {
@@ -294,6 +293,42 @@ class RegisterViewModel : ViewModel(){
             }
         }
     }
+
+    fun searchUsers(keyword: String, page: Int = 1, onComplete: (() -> Unit)? = null) {
+        viewModelScope.launch {
+            runCatching {
+                registerService.searchUserEmail(keyword, page)
+            }.onSuccess { response ->
+                if (response.isSuccessful) {
+                    val data = response.body()?.data
+                    val newResults = data?.searchResults ?: emptyList()
+                    val currentList = _searchResults.value.orEmpty()
+
+                    _searchResults.value = if (page == 1) {
+                        newResults
+                    } else {
+                        currentList + newResults
+                    }
+
+                    _totalResults.value = data?.totalResults ?: 0
+                    _currentPage.value = data?.currentPage ?: 1
+
+                    Log.d("searchUsers", "검색 성공: ${response.code()} ${response.body()}")
+                } else {
+                    Log.d("searchUsers", "검색 실패: ${response.code()}")
+                }
+            }.onFailure { throwable ->
+                Log.d("searchUsers", "예외 발생: ${throwable.message}")
+            }.also {
+                onComplete?.invoke()
+            }
+        }
+    }
+
+    fun clearSearchResults() {
+        _searchResults.value = emptyList()
+    }
+
 }
 
 /**

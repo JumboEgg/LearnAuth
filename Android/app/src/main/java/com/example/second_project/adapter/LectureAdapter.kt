@@ -10,6 +10,7 @@ import com.example.second_project.R
 import com.example.second_project.data.model.dto.request.Lecture
 import com.example.second_project.databinding.ItemLectureBinding
 import com.example.second_project.utils.YoutubeUtil
+import java.text.DecimalFormat
 
 private const val TAG = "LectureAdapter_야옹"
 
@@ -52,11 +53,14 @@ class LectureAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: Lecture) {
+            val decimal = DecimalFormat("#,###")
+
             // 강의 제목을 표시 (추가적인 정보도 필요하면 여기서 바인딩)
             binding.lectureTitle.text = item.title
             binding.lectureTitle.isSelected = true
             binding.lectureTeacherName.text = item.lecturer   // 강의자 정보 바인딩
-            binding.lecturePrice.text = "${item.price}원"
+            val price = decimal.format(item.price)
+            binding.lecturePrice.text = "${price}원"
             
             // 첫 번째 subLecture의 URL을 사용하거나, lectureUrl을 사용
             val videoId = if (!item.subLectures.isNullOrEmpty()) {

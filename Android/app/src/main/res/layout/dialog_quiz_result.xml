@@ -17,8 +17,8 @@ android:id="@+id/dialogTitle"
 android:layout_width="wrap_content"
 android:layout_height="wrap_content"
 android:text="눈 뜨고 차이는 법"
-android:textSize="16sp"
-android:textStyle="bold"
+    style="@style/heading3"
+    android:textSize="16sp"
 android:textColor="@android:color/black"
     />
 
@@ -39,7 +39,7 @@ android:contentDescription="결과 아이콘"
 android:layout_height="wrap_content"
 android:layout_marginTop="16dp"
 android:text="3문제 중 1문제 통과\n다시 시도하세요!"
-android:textSize="14sp"
+style="@style/semibold14"
 android:gravity="center"
 android:textColor="@android:color/black"
     />
@@ -52,5 +52,6 @@ android:layout_height="wrap_content"
 android:layout_marginTop="24dp"
     android:layout_marginHorizontal="20dp"
 android:text="종료하기"
+    style="@style/semibold16"
     />
     </LinearLayout>

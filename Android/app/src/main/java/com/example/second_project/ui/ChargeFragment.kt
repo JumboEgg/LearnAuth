@@ -18,6 +18,9 @@ import com.example.second_project.network.PaymentApiService
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.text.DecimalFormat
+import java.text.NumberFormat
+import java.util.Locale
 
 class ChargeFragment : Fragment() {
     private var _binding: FragmentChargeBinding? = null
