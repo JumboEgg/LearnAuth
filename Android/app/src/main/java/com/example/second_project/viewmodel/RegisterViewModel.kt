@@ -329,6 +329,11 @@ class RegisterViewModel : ViewModel(){
         _searchResults.value = emptyList()
     }
 
+    fun isEmailAlreadyRegistered(email: String): Boolean {
+        return ratios.any { it.email == email }
+    }
+
+
 }
 
 /**

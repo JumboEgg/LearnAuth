@@ -32,7 +32,8 @@
             android:id="@+id/searchInputText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="12dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="40dp"
             android:layout_marginVertical="10dp"
             android:background="@color/white"
             android:hint="이메일을 입력해주세요."
@@ -41,7 +42,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/searchBtn"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:maxLength="32"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/searchBtn"
