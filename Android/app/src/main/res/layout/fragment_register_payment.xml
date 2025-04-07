@@ -61,7 +61,8 @@
                         android:paddingStart="14dp"
                         android:textColor="@color/text_gray"
                         android:maxLines="1"
-                        android:inputType="number" />
+                        android:inputType="number"
+                        android:maxLength="8"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
 
