@@ -1,13 +1,11 @@
 package com.example.second_project.blockchain;
 
-import java.math.BigInteger;
-import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Address;
-import org.web3j.abi.datatypes.generated.Uint256;
-import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.DynamicStruct;
-import java.util.Arrays;
-import java.util.List;
+import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Uint256;
+
+import java.math.BigInteger;
 
 public class ForwardRequest extends DynamicStruct {
     private String from;
@@ -21,13 +19,13 @@ public class ForwardRequest extends DynamicStruct {
     public ForwardRequest(String from, String to, BigInteger value, BigInteger gas,
                           BigInteger nonce, BigInteger deadline, String data) {
         super(
-            new Address(160, from),
-            new Address(160, to),
-            new Uint256(value),
-            new Uint256(gas),
-            new Uint256(nonce),
-            new Uint256(deadline),
-            new Utf8String(data)
+                new Address(160, from),
+                new Address(160, to),
+                new Uint256(value),
+                new Uint256(gas),
+                new Uint256(nonce),
+                new Uint256(deadline),
+                new Utf8String(data)
         );
         this.from = from;
         this.to = to;

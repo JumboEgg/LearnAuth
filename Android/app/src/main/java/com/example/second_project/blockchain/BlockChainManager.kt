@@ -37,9 +37,9 @@ class BlockChainManager(
 
     init {
         val addresses = mapOf(
-            "LectureForwarder" to "0x4CC8Dcb97755FB7CE165C4ffbd80A5a70B9f6637",
-            "CATToken" to "0x936023c54f6509148C01A8e2C9d5b153A62c8A14",
-            "LectureSystem" to "0x421C88D8A14ad9e389A3F807E563E8D4249c531E"
+            "LectureForwarder" to "0x8424d5F766121B16c0d2F5d0cf8aC4594aC62Fe8",
+            "CATToken" to "0x02078287108e640e6Cc2da073870763970E08e95",
+            "LectureSystem" to "0xeE2dD174b049953495A246A5197E3e1D9929000D"
         )
 
         // ✅ txManager로 EIP-155 트랜잭션 실행

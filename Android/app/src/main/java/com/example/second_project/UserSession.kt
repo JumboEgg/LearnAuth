@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.example.second_project.blockchain.BlockChainManager
 import java.io.File
+import java.math.BigInteger
 
 object UserSession {
     private const val PREFS_NAME = "user_session_prefs"
@@ -16,6 +17,9 @@ object UserSession {
     private const val KEY_WALLET_PASSWORD = "wallet_password"
 
     private lateinit var preferences: SharedPreferences
+
+    // 마지막으로 알려진 잔액 (메모리에만 저장, 영구 저장은 불필요)
+    var lastKnownBalance: BigInteger? = null
 
     // 앱 시작 시 Application.onCreate()에서 호출하여 초기화합니다.
     fun init(context: Context) {
@@ -68,17 +72,50 @@ object UserSession {
     fun getBlockchainManagerIfAvailable(context: Context): BlockChainManager? {
         val path = walletFilePath
         val password = walletPassword
+
         if (!path.isNullOrEmpty() && !password.isNullOrEmpty()) {
+            // 주어진 경로에 파일이 있는지 확인
             val walletFile = File(context.filesDir, path)
-            return if (walletFile.exists()) {
-                BlockChainManager(password, walletFile)
+
+            if (walletFile.exists()) {
+                try {
+                    val manager = BlockChainManager(password, walletFile)
+                    // 초기화 성공 시 간단한 로그
+                    android.util.Log.d("UserSession", "BlockChainManager 초기화 성공")
+                    return manager
+                } catch (e: Exception) {
+                    android.util.Log.e("UserSession", "BlockChainManager 초기화 실패: ${e.message}")
+                    e.printStackTrace()
+                    return null
+                }
             } else {
-                null // ⚠️ 파일이 없으면 null
+                android.util.Log.e("UserSession", "지갑 파일이 존재하지 않음: $path")
+
+                // 이더리움 주소 형식인지 확인 (0x로 시작하는지)
+                if (path.startsWith("0x")) {
+                    android.util.Log.d("UserSession", "walletFilePath가 이더리움 주소 형식. 실제 파일 찾기 시도")
+
+                    // 디렉토리에서 지갑 파일 찾기
+                    val walletFiles = context.filesDir.listFiles { file ->
+                        file.name.startsWith("UTC--") && file.name.endsWith(".json")
+                    }
+
+                    if (walletFiles != null && walletFiles.isNotEmpty()) {
+                        // 찾은 파일 중 첫 번째 파일 사용
+                        val walletFileName = walletFiles[0].name
+                        android.util.Log.d("UserSession", "지갑 파일 찾음: $walletFileName")
+
+                        // walletFilePath 업데이트
+                        walletFilePath = walletFileName
+
+                        // 업데이트된 경로로 다시 시도
+                        return getBlockchainManagerIfAvailable(context)
+                    }
+                }
             }
         }
         return null
     }
-
 
 
     // 로그아웃 등 세션 종료 시 모든 데이터를 초기화합니다.
