@@ -185,7 +185,23 @@
         android:id="@+id/myLectureFragment"
         android:name="com.example.second_project.ui.MyLectureFragment"
         android:label="fragment_my_lecture"
-        tools:layout="@layout/fragment_my_lecture" />
+        tools:layout="@layout/fragment_my_lecture" >
+
+        <!-- 여기에서 lecturePlayFragment 로 가는 액션을 새로 정의 -->
+        <action
+            android:id="@+id/action_myLectureFragment_to_lecturePlayFragment"
+            app:destination="@id/lecturePlayFragment">
+            <argument
+                android:name="lectureId"
+                app:argType="integer"/>
+            <argument
+                android:name="userId"
+                app:argType="integer"/>
+            <argument
+                android:name="subLectureId"
+                app:argType="integer"/>
+        </action>
+    </fragment>
 
     <!-- 소유 강의 탭 -->
     <fragment

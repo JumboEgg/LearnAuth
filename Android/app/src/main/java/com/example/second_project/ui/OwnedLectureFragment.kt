@@ -81,15 +81,21 @@ class OwnedLectureFragment : Fragment() {
     // LecturePlayFragment로 이동하는 함수
     private fun navigateToLecturePlay(lectureId: Int, userId: Int, subLectureId: Int) {
         Log.d("OwnedLectureFragment", "클릭된 강의: lectureId=$lectureId, userId=$userId, subLectureId=$subLectureId")
-        
-        // LecturePlayFragment로 이동
-        val action = OwnedLectureFragmentDirections.actionOwnedLectureFragmentToLecturePlayFragment(
-            lectureId = lectureId,
-            userId = userId,
-            subLectureId = subLectureId
-        )
-        findNavController().navigate(action)
+
+        // (1) parentNavController 가져오기
+        val parentNavController =
+            androidx.navigation.Navigation.findNavController(requireParentFragment().requireView())
+
+        // (2) MyLectureFragmentDirections 이용해서 action_myLectureFragment_to_lecturePlayFragment 호출
+        val action =
+            MyLectureFragmentDirections.actionMyLectureFragmentToLecturePlayFragment(
+                lectureId = lectureId,
+                userId = userId,
+                subLectureId = subLectureId
+            )
+        parentNavController.navigate(action)
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
