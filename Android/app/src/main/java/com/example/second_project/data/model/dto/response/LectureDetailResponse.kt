@@ -8,8 +8,8 @@ data class LectureDetailResponse(
 )
 
 data class LectureData(
-    val lectureId: Int,
-    val userLectureId: Int,
+    val lectureId: Int, // 강의 ID
+    val userLectureId: Int, // 구매한 사람의 ID
     val title: String,
     val categoryName: String,
     val goal: String,

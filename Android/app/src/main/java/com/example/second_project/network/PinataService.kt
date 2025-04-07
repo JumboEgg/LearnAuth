@@ -20,7 +20,7 @@ interface PinataService {
     @POST("pinning/pinJSONToIPFS")
     suspend fun pinJSONToIPFS(
         @Header("Authorization") apiKey: String,
-        @Body jsonData: Map<String, Any>
+        @Body jsonData: Map<String, String>
     ): Response<PinataResponse>
 }
 

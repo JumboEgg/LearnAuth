@@ -35,17 +35,21 @@ class CategoryAdapter(
     override fun onBindViewHolder(holder: CategoryViewHolder, position: Int) {
         holder.button.text = categories[position]
 
+        // 선택 상태에 따라 스타일 변경
         updateButton(holder.button, position == selectedCategory)
 
         holder.button.setOnClickListener {
             val adapterPosition = holder.adapterPosition
             if (adapterPosition != RecyclerView.NO_POSITION) {
+                // == (1) 항상 콜백 호출: 같은 카테고리여도 재검색/재로드 가능
+                onCategorySelected(adapterPosition)
+
+                // == (2) '선택 색' 업데이트는 바뀐 경우에만
                 if (selectedCategory != adapterPosition) {
                     val oldCategory = selectedCategory
                     selectedCategory = adapterPosition
                     notifyItemChanged(oldCategory)
                     notifyItemChanged(adapterPosition)
-                    onCategorySelected(adapterPosition)
                 }
             }
         }
@@ -66,11 +70,7 @@ class CategoryAdapter(
             )
         }
     }
-    
-    /**
-     * 선택된 카테고리 위치를 설정합니다.
-     * 이 메서드는 Fragment에서 상태를 복원할 때 호출됩니다.
-     */
+
     fun setSelectedPosition(position: Int) {
         if (position in 0 until categories.size && position != selectedCategory) {
             val oldPosition = selectedCategory

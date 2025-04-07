@@ -14,7 +14,7 @@ class CertDetailViewModel : ViewModel() {
     private val _certificateDetail = MutableLiveData<CertificateDetailResponse?>()
     val certificateDetail: LiveData<CertificateDetailResponse?> = _certificateDetail
 
-    fun fetchCertificateDetail(userId: String, lectureId: String) {
+    fun fetchCertificateDetail(userId: Int, lectureId: Int) {
         val certificateApiService = ApiClient.retrofit.create(CertificateApiService::class.java)
         certificateApiService.getCertificateDetail(userId, lectureId)
             .enqueue(object : Callback<CertificateDetailResponse> {

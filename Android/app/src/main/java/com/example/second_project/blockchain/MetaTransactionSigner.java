@@ -2,23 +2,22 @@ package com.example.second_project.blockchain;
 
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.ECKeyPair;
+import org.web3j.crypto.Hash;
 import org.web3j.crypto.Sign;
-import org.web3j.crypto.StructuredData;
-import org.web3j.crypto.StructuredData.EIP712Domain;
-import org.web3j.crypto.StructuredData.Entry;
-import org.web3j.crypto.StructuredDataEncoder;
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.methods.response.EthChainId;
 import org.web3j.utils.Numeric;
+import org.web3j.protocol.Web3j;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class MetaTransactionSigner {
+
+    private static final String EIP712_DOMAIN_TYPE = "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)";
+    private static final String FORWARD_REQUEST_TYPE = "ForwardRequest(address from,address to,uint256 value,uint256 gas,uint256 nonce,uint48 deadline,bytes data)";
 
     public static CompletableFuture<SignedRequest> signMetaTxRequest(
             Credentials signer,
@@ -26,100 +25,145 @@ public class MetaTransactionSigner {
             Web3j web3j,
             MetaTxRequest input) throws Exception {
 
+        // 체인에서 nonce 조회
+        BigInteger nonce = forwarder.nonces(input.getFrom()).send();
+        return signMetaTxRequestWithNonce(signer, forwarder, web3j, input, nonce);
+    }
+
+    public static CompletableFuture<SignedRequest> signMetaTxRequestWithNonce(
+            Credentials signer,
+            LectureForwarder forwarder,
+            Web3j web3j,
+            MetaTxRequest input,
+            BigInteger explicitNonce) throws Exception {
+
         CompletableFuture<SignedRequest> future = new CompletableFuture<>();
 
-        // Get domain name from forwarder contract
-        String domainName = forwarder.name().send();
+        try {
+            // 1. 도메인 관련 데이터 가져오기
+            String domainName = forwarder.name().send();
+            BigInteger chainId = web3j.ethChainId().send().getChainId();
+            String verifyingContract = forwarder.getContractAddress();
 
-        // Get chain ID
-        EthChainId chainIdResponse = web3j.ethChainId().send();
-        BigInteger chainId = chainIdResponse.getChainId();
+            // 2. 요청 객체 생성
+            ForwardRequest request = new ForwardRequest(
+                    input.getFrom(),
+                    input.getTo(),
+                    BigInteger.ZERO,
+                    input.getGas(),
+                    explicitNonce,
+                    input.getDeadline(),
+                    input.getData()
+            );
 
-        // Get nonce from forwarder contract
-        BigInteger onChainNonce = forwarder.nonces(input.getFrom()).send();
+            // 3. 도메인 구분자 계산
+            byte[] domainSeparator = calculateDomainSeparator(domainName, "1", chainId, verifyingContract);
 
-        // Create forward request object
-        ForwardRequest request = new ForwardRequest(
-            input.getFrom(),
-            input.getTo(),
-            BigInteger.ZERO,
-            input.getGas(),
-            onChainNonce,
-            input.getDeadline(),
-            input.getData()
-        );
+            // 4. 타입 해시 계산
+            byte[] typeHash = Hash.sha3(FORWARD_REQUEST_TYPE.getBytes());
 
-        // Create typed data structure
-        List<Entry> forwardRequestEntries = new ArrayList<>();
-        forwardRequestEntries.add(new Entry("from", "address"));
-        forwardRequestEntries.add(new Entry("to", "address"));
-        forwardRequestEntries.add(new Entry("value", "uint256"));
-        forwardRequestEntries.add(new Entry("gas", "uint256"));
-        forwardRequestEntries.add(new Entry("nonce", "uint256"));
-        forwardRequestEntries.add(new Entry("deadline", "uint48"));
-        forwardRequestEntries.add(new Entry("data", "bytes"));
+            // 5. 구조체 해시 계산
+            byte[] structHash = calculateStructHash(typeHash, request);
 
-        List<Entry> eip712DomainEntries = new ArrayList<>();
-        eip712DomainEntries.add(new Entry("name", "string"));
-        eip712DomainEntries.add(new Entry("version", "string"));
-        eip712DomainEntries.add(new Entry("chainId", "uint256"));
-        eip712DomainEntries.add(new Entry("verifyingContract", "address"));
-        eip712DomainEntries.add(new Entry("salt", "string"));
+            // 6. 최종 해시 계산 (EIP-712 방식)
+            byte[] digest = calculateDigest(domainSeparator, structHash);
 
-        HashMap<String, List<Entry>> types = new HashMap<>();
-        types.put("ForwardRequest", forwardRequestEntries);
-        types.put("EIP712Domain", eip712DomainEntries);
+            // 7. 개인키로 서명
+            ECKeyPair keyPair = signer.getEcKeyPair();
+            Sign.SignatureData signatureData = Sign.signMessage(digest, keyPair, false);
 
-        // Create domain
-        EIP712Domain domain = new EIP712Domain(
-            domainName,
-            "1",
-            chainId.toString(),
-            forwarder.getContractAddress(),
-            ""
-        );
+            // 8. 서명 결합
+            String signature = joinSignature(signatureData);
 
-        // Create message with string values for numbers
-        Map<String, Object> message = new HashMap<>();
-        message.put("from", request.getFrom().toLowerCase());
-        message.put("to", request.getTo().toLowerCase());
-        message.put("value", request.getValueAmount().toString());
-        message.put("gas", request.getGas().toString());
-        message.put("nonce", request.getNonce().toString());
-        message.put("deadline", request.getDeadline().toString());
-        message.put("data", request.getData());
+            // 9. 결과 반환
+            future.complete(new SignedRequest(request, signature));
 
-        // Create structured data
-        StructuredData.EIP712Message eip712Message = new StructuredData.EIP712Message(
-            types,
-            "ForwardRequest",
-            message,
-            domain
-        );
+        } catch (Exception e) {
+            future.completeExceptionally(e);
+        }
 
-        // Sign the message
-        StructuredDataEncoder encoder = new StructuredDataEncoder(eip712Message);
-        byte[] hashStructuredData = encoder.hashStructuredData();
-
-        ECKeyPair keyPair = signer.getEcKeyPair();
-        Sign.SignatureData signatureData = Sign.signMessage(hashStructuredData, keyPair, false);
-
-        // Convert signature to hex
-        String signature = joinSignature(signatureData);
-
-        future.complete(new SignedRequest(request, signature));
         return future;
     }
 
+    private static byte[] calculateDomainSeparator(String name, String version, BigInteger chainId, String verifyingContract) {
+        byte[] typeHash = Hash.sha3(EIP712_DOMAIN_TYPE.getBytes());
+
+        byte[] nameHash = Hash.sha3(name.getBytes());
+        byte[] versionHash = Hash.sha3(version.getBytes());
+
+        return Hash.sha3(concatenateDataForDomain(
+                typeHash,
+                nameHash,
+                versionHash,
+                Numeric.toBytesPadded(chainId, 32),
+                Numeric.hexStringToByteArray(padAddress(verifyingContract))
+        ));
+    }
+
+    private static byte[] calculateStructHash(byte[] typeHash, ForwardRequest request) {
+        byte[] fromAddress = Numeric.hexStringToByteArray(padAddress(request.getFrom()));
+        byte[] toAddress = Numeric.hexStringToByteArray(padAddress(request.getTo()));
+        byte[] value = Numeric.toBytesPadded(request.getValueAmount(), 32);
+        byte[] gas = Numeric.toBytesPadded(request.getGas(), 32);
+        byte[] nonce = Numeric.toBytesPadded(request.getNonce(), 32);
+        byte[] deadline = Numeric.toBytesPadded(request.getDeadline(), 32);
+        byte[] dataHash = Hash.sha3(Numeric.hexStringToByteArray(request.getData()));
+
+        return Hash.sha3(concatenateDataForStruct(
+                typeHash,
+                fromAddress,
+                toAddress,
+                value,
+                gas,
+                nonce,
+                deadline,
+                dataHash
+        ));
+    }
+
+    private static byte[] calculateDigest(byte[] domainSeparator, byte[] structHash) {
+        ByteBuffer buffer = ByteBuffer.allocate(66); // 2 + 32 + 32
+        buffer.put(new byte[] {0x19, 0x01});
+        buffer.put(domainSeparator);
+        buffer.put(structHash);
+        return Hash.sha3(buffer.array());
+    }
+
+    private static byte[] concatenateDataForDomain(byte[]... arrays) {
+        int totalLength = 0;
+        for (byte[] array : arrays) {
+            totalLength += array.length;
+        }
+
+        ByteBuffer buffer = ByteBuffer.allocate(totalLength);
+        for (byte[] array : arrays) {
+            buffer.put(array);
+        }
+
+        return buffer.array();
+    }
+
+    private static byte[] concatenateDataForStruct(byte[]... arrays) {
+        return concatenateDataForDomain(arrays);
+    }
+
+    private static String padAddress(String address) {
+        String cleanAddress = Numeric.cleanHexPrefix(address.toLowerCase());
+        while (cleanAddress.length() < 64) {
+            cleanAddress = "0" + cleanAddress;
+        }
+        return "0x" + cleanAddress;
+    }
+
     private static String joinSignature(Sign.SignatureData signatureData) {
-        byte[] v = signatureData.getV();
         byte[] r = signatureData.getR();
         byte[] s = signatureData.getS();
+        byte v = signatureData.getV()[0];
 
-        byte[] result = new byte[65]; // v(1) + r(32) + s(32) = 65 bytes
+        byte[] result = new byte[65];
         System.arraycopy(r, 0, result, 0, 32);
         System.arraycopy(s, 0, result, 32, 32);
-        result[64] = v[0];
+        result[64] = v;
 
         return Numeric.toHexString(result);
     }

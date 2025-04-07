@@ -2,12 +2,24 @@ package com.example.second_project.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import com.example.second_project.data.model.dto.request.Lecture
 import com.example.second_project.data.model.dto.response.LectureDetailResponse
 import com.example.second_project.data.repository.LectureDetailRepository
 import com.example.second_project.data.repository.LectureRepository
 import com.example.second_project.data.repository.SearchRepository
+
+// 만약 별도 파일이 아니라 여기 아래에 observeOnce를 두고 싶다면 이렇게 둘 수도 있습니다.
+//fun <T> LiveData<T>.observeOnce(onChangeHandler: (T) -> Unit) {
+//    val observer = object : Observer<T> {
+//        override fun onChanged(value: T) {
+//            removeObserver(this)
+//            onChangeHandler(value)
+//        }
+//    }
+//    observeForever(observer)
+//}
 
 class SearchViewModel : ViewModel() {
 
@@ -44,10 +56,11 @@ class SearchViewModel : ViewModel() {
         if (isLectureLoading || isLectureLastPage) return
         isLectureLoading = true
 
-        repository.fetchLectures(categoryId, currentLecturePage).observeForever { lectureList ->
+        // 기존 observeForever(...) → observeOnce(...)
+        repository.fetchLectures(categoryId, currentLecturePage).observeOnce { lectureList ->
             if (lectureList.isNotEmpty()) {
                 loadedLectures.addAll(lectureList)
-                _lectures.value = loadedLectures.toList() // LiveData 갱신
+                _lectures.value = loadedLectures.toList()
                 currentLecturePage++
             } else {
                 // 더 이상 가져올 데이터가 없는 경우
@@ -98,7 +111,8 @@ class SearchViewModel : ViewModel() {
         if (isSearchLoading || isSearchLastPage) return
         isSearchLoading = true
 
-        searchRepository.searchLectures(keyword, currentSearchPage).observeForever { searchData ->
+        // 기존 observeForever(...) → observeOnce(...)
+        searchRepository.searchLectures(keyword, currentSearchPage).observeOnce { searchData ->
             val results = searchData?.searchResults ?: emptyList()
             if (results.isNotEmpty()) {
                 // "전체"가 아니라면 필터링
@@ -122,7 +136,8 @@ class SearchViewModel : ViewModel() {
     // -----------------------------
     fun loadLectureDetail(lectureId: Int, userId: Int): LiveData<LectureDetailResponse?> {
         val lectureDetailLiveData = MutableLiveData<LectureDetailResponse?>()
-        lectureDetailRepository.fetchLectureDetail(lectureId, userId).observeForever { response ->
+        // 여기도 observeForever(...) → observeOnce(...)
+        lectureDetailRepository.fetchLectureDetail(lectureId, userId).observeOnce { response ->
             lectureDetailLiveData.value = response
         }
         return lectureDetailLiveData
@@ -131,11 +146,6 @@ class SearchViewModel : ViewModel() {
     // -----------------------------
     // (4) 이전 코드와의 호환성
     // -----------------------------
-    /**
-     * 기존 코드(매개변수에 page)를 직접 지정하던 메서드들.
-     * 이제 내부적으로는 사용하지 않고,
-     * 페이지가 필요 없으면 1로 고정해버릴 수도 있습니다.
-     */
     fun loadLectures(categoryId: Int, page: Int) {
         resetLectures()
         // 초기 1페이지부터 다시 불러오기
@@ -157,6 +167,19 @@ class SearchViewModel : ViewModel() {
     // -----------------------------
     override fun onCleared() {
         super.onCleared()
-        // observeForever() 사용 시, 필요하면 removeObserver 로직 추가
+        // observeOnce()에서 한번 호출 후 바로 removeObserver 해주므로
+        // 추가로 removeObserver할 필요는 크게 없음
     }
 }
+
+
+fun <T> LiveData<T>.observeOnce(onChangeHandler: (T) -> Unit) {
+    val observer = object : Observer<T> {
+        override fun onChanged(value: T) {
+            removeObserver(this)
+            onChangeHandler(value)
+        }
+    }
+    observeForever(observer)
+}
+

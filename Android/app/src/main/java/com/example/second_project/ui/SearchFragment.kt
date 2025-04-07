@@ -9,7 +9,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -63,24 +62,31 @@ class SearchFragment : Fragment() {
             currentCategoryPosition = it.getInt(KEY_CURRENT_CATEGORY_POSITION, 0)
         }
 
+        // ------------------------------------------------
         // 1) 카테고리 RecyclerView
+        // ------------------------------------------------
         val spacing = dpToPx(8)
         categoryAdapter = CategoryAdapter(categoryList) { position ->
-            // 선택된 카테고리를 저장
-            currentCategory = categoryList[position]
-            currentCategoryPosition = position
-
+            // 선택된 카테고리 저장
+            val newCategory = categoryList[position]
             val keyword = binding.searchInputText.text.toString().trim()
+
+            // 만약 검색어가 있으면 -> 검색 모드
             if (keyword.isNotEmpty()) {
-                // 검색 모드
-                // => ViewModel의 searchLectures() 다시 호출(카테고리가 바뀌었으므로 reset됨)
-                viewModel.searchLectures(keyword, currentCategory)
+                // 카테고리 바뀌면 SearchViewModel 내부에서 resetSearchResults() 처리
+                viewModel.searchLectures(keyword, newCategory)
             } else {
-                // 일반 강의 모드
-                // => ViewModel의 loadLectures() 다시 호출 (카테고리가 바뀌었으므로 reset)
-                viewModel.resetLectures()  // 혹은 내부에서 자동 reset
-                viewModel.loadLectures(position) // 0=전체, 1=수학, ...
+                // 검색어가 없으면 -> 일반 강의 모드
+                // 만약 새로 선택된 카테고리가 기존과 다르면 강의 목록을 다시 로딩
+                if (newCategory != currentCategory) {
+                    viewModel.resetLectures()
+                    viewModel.loadLectures(position)
+                }
             }
+            // 현재 카테고리, 위치 갱신
+            currentCategory = newCategory
+            currentCategoryPosition = position
+            categoryAdapter.setSelectedPosition(position)
         }
         binding.categoryRecyclerView.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
@@ -92,12 +98,13 @@ class SearchFragment : Fragment() {
         binding.categoryRecyclerView.post {
             if (currentCategoryPosition > 0) {
                 binding.categoryRecyclerView.scrollToPosition(currentCategoryPosition)
-                // 카테고리 선택 상태 복원
                 categoryAdapter.setSelectedPosition(currentCategoryPosition)
             }
         }
 
+        // ------------------------------------------------
         // 2) 강의 결과 RecyclerView (2열 Grid)
+        // ------------------------------------------------
         searchLectureAdapter = SearchLectureAdapter { lectureId, userId ->
             // 강의 클릭 시 상세 정보 불러오기 -> 이동
             val lectureDetailLiveData = viewModel.loadLectureDetail(lectureId, userId)
@@ -121,10 +128,11 @@ class SearchFragment : Fragment() {
         binding.lectureList.apply {
             layoutManager = GridLayoutManager(context, 2)
             adapter = searchLectureAdapter
-            addItemDecoration(GridSpaceItemDecoration(spanCount = 2, space = dpToPx(8)))
-            // ---------------------------
-            // (A) 스크롤 리스너로 무한 스크롤 처리
-            // ---------------------------
+            // DiffUtil 애니메이션으로 인한 깜빡임 방지
+            itemAnimator = null
+            addItemDecoration(GridSpaceItemDecoration(spanCount = 2, space = dpToPx(2)))
+
+            // 무한 스크롤 처리
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     super.onScrolled(recyclerView, dx, dy)
@@ -141,7 +149,7 @@ class SearchFragment : Fragment() {
                                 viewModel.searchLectures(keyword, currentCategory)
                             } else {
                                 // 일반 강의 모드
-                                viewModel.loadLectures(categoryList.indexOf(currentCategory))
+                                viewModel.loadLectures(currentCategoryPosition)
                             }
                         }
                     }
@@ -149,67 +157,121 @@ class SearchFragment : Fragment() {
             })
         }
 
+        // ------------------------------------------------
         // 3) 검색어 입력 리스너 (Debounce)
+        // ------------------------------------------------
         binding.searchInputText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
+                // 1) 16자 초과 시 잘라내기
+                s?.let {
+                    if (it.length > 16) {
+                        it.delete(16, it.length)
+                        binding.searchErrorText.visibility = View.VISIBLE
+                    } else {
+                        binding.searchErrorText.visibility = View.GONE
+                    }
+                }
+
+                // 검색어가 바뀌면 일정 시간(debounce) 후에 실제 검색
                 searchRunnable?.let { searchHandler.removeCallbacks(it) }
                 val keyword = s.toString().trim()
 
                 searchRunnable = Runnable {
                     if (keyword.isNotEmpty()) {
-                        // 검색 모드
                         viewModel.searchLectures(keyword, currentCategory)
                     } else {
-                        // 검색어가 없으면 일반 강의 목록 로드
-                        viewModel.resetLectures()
-                        viewModel.loadLectures(currentCategoryPosition)
+                        // 검색어가 없어지면 일반 강의 목록 표시
+                        // 만약 이미 로드된 강의가 있다면 굳이 reset/load 안 해도 됨
+                        if (viewModel.lectures.value.isNullOrEmpty()) {
+                            viewModel.resetLectures()
+                            viewModel.loadLectures(currentCategoryPosition)
+                        } else {
+                            // 빈 검색어 상태면 그냥 기존 목록 유지
+                            searchLectureAdapter.submitList(viewModel.lectures.value)
+                        }
                     }
                 }
                 searchHandler.postDelayed(searchRunnable!!, debounceDelay)
             }
+
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
+        // ------------------------------------------------
         // 4) Clear 버튼
+        // ------------------------------------------------
         binding.clearBtn.setOnClickListener {
             binding.searchInputText.text?.clear()
-            // 검색 관련 LiveData도 초기화
             viewModel.resetSearchResults()
-            // 카테고리는 그대로 두고, 일반 강의 목록 로드
-            viewModel.resetLectures()
-            viewModel.loadLectures(currentCategoryPosition)
+
+            // 카테고리는 유지하되, 기존 강의 목록이 비었다면 새로 로드
+            if (viewModel.lectures.value.isNullOrEmpty()) {
+                viewModel.resetLectures()
+                viewModel.loadLectures(currentCategoryPosition)
+            } else {
+                // ViewModel에 이미 데이터가 있으면 그대로 submit
+                searchLectureAdapter.submitList(viewModel.lectures.value)
+            }
         }
 
+        // ------------------------------------------------
         // 5) 검색 결과 관찰
+        // ------------------------------------------------
         viewModel.searchResults.observe(viewLifecycleOwner) { results ->
-            // 검색어가 있을 때만 갱신
-            if (binding.searchInputText.text.toString().trim().isNotEmpty()) {
-                searchLectureAdapter.submitList(results)
+            val keyword = binding.searchInputText.text.toString().trim()
+            // 검색 중인 상태(키워드가 있을 때)만 반영
+            if (keyword.isNotEmpty()) {
+                if (results.isEmpty()) {
+                    binding.emptyTextView.visibility = View.VISIBLE
+                    binding.lectureList.visibility = View.GONE
+                } else {
+                    binding.emptyTextView.visibility = View.GONE
+                    binding.lectureList.visibility = View.VISIBLE
+                    searchLectureAdapter.submitList(results)
+                }
                 Log.d(TAG, "Search results updated: $results")
             }
         }
 
+        // ------------------------------------------------
         // 6) 일반 강의 목록 관찰
+        // ------------------------------------------------
         viewModel.lectures.observe(viewLifecycleOwner) { lectureList ->
-            if (binding.searchInputText.text.toString().trim().isEmpty()) {
-                searchLectureAdapter.submitList(lectureList)
-                Log.d(TAG, "Category lectures: $lectureList")
+            val keyword = binding.searchInputText.text.toString().trim()
+            // 검색어가 없을 때만 강의 목록 갱신
+            if (keyword.isEmpty()) {
+                if (lectureList.isEmpty()) {
+                    binding.emptyTextView.visibility = View.VISIBLE
+                    binding.lectureList.visibility = View.GONE
+                } else {
+                    binding.emptyTextView.visibility = View.GONE
+                    binding.lectureList.visibility = View.VISIBLE
+                    searchLectureAdapter.submitList(lectureList)
+                }
+                Log.d(TAG, "Category lectures updated: $lectureList")
             }
         }
 
+        // ------------------------------------------------
         // 7) 초기 진입 시 기본 강의 로드
-        if (savedInstanceState == null) {
-            // 처음 생성된 경우에만 초기화
+        // ------------------------------------------------
+        if (savedInstanceState == null && viewModel.lectures.value.isNullOrEmpty()) {
+            // 처음 진입 & ViewModel이 비어있는 경우에만 초기 로드
             viewModel.resetLectures()
-            viewModel.loadLectures(currentCategoryPosition) // 저장된 카테고리 위치 또는 "전체"
+            viewModel.loadLectures(currentCategoryPosition)
         } else {
-            // 상태 복원 시 해당 카테고리의 강의 로드
+            // 이미 ViewModel에 강의 목록이 있거나 상태가 복원된 경우
             val keyword = binding.searchInputText.text.toString().trim()
             if (keyword.isNotEmpty()) {
                 viewModel.searchLectures(keyword, currentCategory)
             } else {
-                viewModel.loadLectures(currentCategoryPosition)
+                // 만약 ViewModel의 lectures가 비어있지 않다면, 그대로 submitList 해도 무방
+                if (!viewModel.lectures.value.isNullOrEmpty()) {
+                    searchLectureAdapter.submitList(viewModel.lectures.value)
+                } else {
+                    viewModel.loadLectures(currentCategoryPosition)
+                }
             }
         }
     }

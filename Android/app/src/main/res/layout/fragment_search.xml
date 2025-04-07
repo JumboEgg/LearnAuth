@@ -54,40 +54,35 @@
             android:singleLine="true"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/searchBtn"
+            app:layout_constraintEnd_toStartOf="@+id/clearBtn"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/searchBtn"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:backgroundTint="@color/primary_color"
-            android:insetLeft="0dp"
-            android:insetTop="0dp"
-            android:insetRight="0dp"
-            android:insetBottom="0dp"
-            app:cornerRadius="16dp"
-            app:icon="@drawable/search"
-            app:iconGravity="textStart"
-            app:iconPadding="0dp"
-            app:iconSize="24dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/clearBtn"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
             android:contentDescription="검색 지우기"
             android:src="@drawable/cancel"
             app:layout_constraintBottom_toBottomOf="@id/searchInputText"
-            app:layout_constraintEnd_toStartOf="@id/searchBtn"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/searchInputText"
             app:tint="@color/button_gray" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/searchErrorText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="4dp"
+        android:text="16자 이상 쓰실 수 없습니다."
+        android:textColor="@android:color/holo_red_dark"
+        android:textSize="14sp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/searchContainer" />
 
     <!-- 카테고리 RecyclerView (NestedScrollView 포함) -->
     <androidx.core.widget.NestedScrollView
@@ -96,7 +91,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:scrollbars="none"
-        app:layout_constraintTop_toBottomOf="@id/searchContainer">
+        app:layout_constraintTop_toBottomOf="@id/searchErrorText">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/categoryRecyclerView"
@@ -116,4 +111,20 @@
         android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/categoryLayout" />
+
+    <TextView
+        android:id="@+id/emptyTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="등록된 강의가 없습니다."
+        android:textColor="@color/primary_color"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/categoryLayout" />
 </androidx.constraintlayout.widget.ConstraintLayout>

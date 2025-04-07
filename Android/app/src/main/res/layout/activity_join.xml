@@ -152,7 +152,8 @@
                     android:hint="이메일"
                     android:paddingHorizontal="20dp"
                     android:paddingVertical="12dp"
-                    android:singleLine="true" />
+                    android:singleLine="true"
+                    android:inputType="textEmailAddress"/>
             </LinearLayout>
 
             <LinearLayout

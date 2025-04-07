@@ -19,6 +19,7 @@ import com.example.second_project.databinding.DialogCertConfirmBinding
 import com.example.second_project.databinding.FragmentCertDetailBinding
 import com.example.second_project.network.ApiClient
 import com.example.second_project.network.CertificateApiService
+import com.example.second_project.network.CertificateIssueRequest
 import com.example.second_project.utils.ApiKeyProvider
 import com.example.second_project.utils.IpfsUtils
 import com.example.second_project.viewmodel.CertDetailViewModel
@@ -51,8 +52,8 @@ class CertDetailFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Safe Args를 통해 전달받은 userId와 lectureId 사용
-        val userId = args.userId.toString()
-        val lectureId = args.lectureId.toString()
+        val userId = args.userId
+        val lectureId = args.lectureId
 
         // API 호출: CertDetailViewModel에서 수료증 상세 데이터를 받아옴
         viewModel.fetchCertificateDetail(userId, lectureId)
@@ -87,9 +88,11 @@ class CertDetailFragment : Fragment() {
 
         // 롱 텍스트 스크롤 효과를 위해 텍스트뷰 선택상태 true 설정
         binding.msgOnCert.isSelected = true
+
+        binding.textLectureTitle.isSelected = true
     }
 
-    private fun showConfirmDialog(userId: String, lectureId: String) {
+    private fun showConfirmDialog(userId: Int, lectureId: Int) {
         val dialogBinding = DialogCertConfirmBinding.inflate(layoutInflater)
         val dialog = AlertDialog.Builder(requireContext())
             .setView(dialogBinding.root)
@@ -112,7 +115,7 @@ class CertDetailFragment : Fragment() {
     }
 
     // NFT 수료증 발급받는 로직
-    private fun issueCertificate(userId: String, lectureId: String) {
+    private fun issueCertificate(userId: Int, lectureId: Int) {
         lifecycleScope.launch {
             try {
                 // 프로그레스바 표시
@@ -122,45 +125,72 @@ class CertDetailFragment : Fragment() {
                 val certificateDate = viewModel.certificateDetail.value?.data?.certificateDate 
                     ?: SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
                 
+                // 수료자 정보 가져오기
+                val userName = UserSession.name ?: ""
+                val userWalletAddress = UserSession.walletFilePath ?: ""
+                
+                // 강의 정보 가져오기
+                val lectureTitle = binding.textLectureTitle.text.toString()
+                val teacherName = binding.textNameLecturer.text.toString()
+                val teacherWallet = viewModel.certificateDetail.value?.data?.teacherWallet ?: ""
+                
+                // 카테고리 정보 가져오기 (예시로 "데이터"로 설정, 실제로는 API에서 가져와야 함)
+                val category = "데이터" // 실제 카테고리 정보로 대체 필요
+                
                 // JSON 데이터 생성
                 val jsonData = mapOf(
-                    "userId" to userId,
-                    "lectureId" to lectureId,
-                    "studentName" to binding.textNameStudent.text.toString(),
-                    "lectureTitle" to binding.textLectureTitle.text.toString(),
-                    "teacherName" to binding.textNameLecturer.text.toString(),
-                    "issueDate" to certificateDate
+                    "userName" to userName,
+                    "userWalletAddress" to userWalletAddress,
+                    "category" to category,
+                    "lectureTitle" to lectureTitle,
+                    "teacherName" to teacherName,
+                    "teacherWallet" to teacherWallet,
+                    "certificateDate" to certificateDate
                 )
+
+                // Map<String, Any>를 Map<String, String>으로 변환
+                val stringJsonData = jsonData.mapValues { it.value.toString() }
 
                 // Pinata API 키 가져오기
                 val apiKey = ApiKeyProvider.getPinataApiKey()
                 
                 // IPFS에 JSON 데이터 업로드
-                val response = IpfsUtils.uploadJsonToIpfs(apiKey, jsonData)
+                val response = IpfsUtils.uploadJsonToIpfs(apiKey, stringJsonData)
                 
                 if (response.isSuccessful && response.body() != null) {
                     val cid = response.body()!!.IpfsHash
+                    Log.d(TAG, "IPFS 업로드 성공: CID = $cid")
                     
                     // 백엔드 API로 CID 전송하여 수료증 발급 요청
-                    val certResponse = ApiClient.certificateApiService.issueCertificate(
-                        lectureId = lectureId,
-                        requestBody = mapOf(
-                            "userId" to userId,
-                            "cid" to cid
-                        )
-                    ).execute()
+                    val certResponse = withContext(Dispatchers.IO) {
+                        ApiClient.certificateApiService.issueCertificate(
+                            lectureId = lectureId,
+                            requestBody = CertificateIssueRequest(
+                                userId = userId,
+                                cid = cid
+                            )
+                        ).execute()
+                    }
                     
-                    if (certResponse.isSuccessful) {
+                    if (certResponse.isSuccessful && certResponse.body() != null) {
+                        val token = certResponse.body()!!.data.token
+                        Log.d(TAG, "수료증 발급 성공: Token = $token")
                         Toast.makeText(requireContext(), "NFT 수료증이 발급되었습니다.", Toast.LENGTH_SHORT).show()
                         // 수료증 발급 후 화면 갱신 또는 다른 처리 필요
                     } else {
-                        Toast.makeText(requireContext(), "NFT 수료증 발급에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                        val errorBody = certResponse.errorBody()?.string()
+                        Log.e(TAG, "수료증 발급 실패: ${certResponse.code()} - ${certResponse.message()}")
+                        Log.e(TAG, "오류 응답 본문: $errorBody")
+                        Toast.makeText(requireContext(), "NFT 수료증 발급에 실패했습니다. (코드: ${certResponse.code()})", Toast.LENGTH_SHORT).show()
                     }
                 } else {
-                    Log.d(TAG, "issueCertificate: IPFS 업로드 실패")
+                    Log.e(TAG, "IPFS 업로드 실패: ${response.code()} - ${response.message()}")
+                    Toast.makeText(requireContext(), "IPFS 업로드에 실패했습니다.", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
-                Log.d(TAG, "issueCertificate: 오류 발생: ${e.message}")
+                Log.e(TAG, "수료증 발급 중 오류 발생: ${e.message}")
+                Log.e(TAG, "오류 스택 트레이스: ${e.stackTraceToString()}")
+                Toast.makeText(requireContext(), "오류가 발생했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
             } finally {
                 // 프로그레스바 숨기기
                 binding.loadingProgressBar.visibility = View.GONE

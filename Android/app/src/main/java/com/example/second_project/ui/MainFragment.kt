@@ -4,21 +4,19 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.viewpager2.widget.ViewPager2
 import com.example.second_project.R
 import com.example.second_project.UserSession
 import com.example.second_project.adapter.BannerAdapter
 import com.example.second_project.adapter.LectureAdapter
 import com.example.second_project.databinding.FragmentMainBinding
 import com.example.second_project.viewmodel.MainViewModel
-import java.io.File
 
 class MainFragment : Fragment() {
 
@@ -28,6 +26,17 @@ class MainFragment : Fragment() {
     private lateinit var bannerAdapter: BannerAdapter
     private lateinit var recommendedAdapter: LectureAdapter
     private lateinit var recentAdapter: LectureAdapter
+    private val bannerHandler = Handler(Looper.getMainLooper())
+    private val bannerRunnable = object : Runnable {
+        var currentItem = 0
+        override fun run() {
+            if (currentItem >= 3) {
+                currentItem = 0
+            }
+            binding.bannerArea.currentItem = currentItem++
+            bannerHandler.postDelayed(this, 3000)
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,12 +59,10 @@ class MainFragment : Fragment() {
         binding.recommendTitle.text = "${nickname}님을 위한 추천 강의"
 
         Log.d("MainFragment", "✅ UserSession.userId = ${UserSession.userId}")
-
-
         Log.d("MainFragment", "✅ UserSession.nickname = $nickname")
         Log.d("MainFragment", "✅ UserSession.walletFilePath = $walletPath")
-
         Log.d("MainFragment", "✅ UserSession.walletPassword = $walletPassword")
+        
         // dp -> px 변환
         val spacing = dpToPx(4)
 
@@ -133,34 +140,68 @@ class MainFragment : Fragment() {
             }
         }
 
-        // 배너 설정
-        val bannerList = listOf(
-            R.drawable.sample_plzdelete,
-            R.drawable.sample_plzdelete2,
-            R.drawable.sample_plzdelete3
-        )
-        bannerAdapter = BannerAdapter(bannerList)
-        val viewPager = view.findViewById<ViewPager2>(R.id.bannerArea)
-        viewPager.adapter = bannerAdapter
-
-        // 자동 슬라이드 기능
-        val handler = Handler(Looper.getMainLooper())
-        val runnable = object : Runnable {
-            var currentItem = 0
-            override fun run() {
-                if (currentItem >= bannerList.size) {
-                    currentItem = 0
+        // 배너 설정 - 가장 많이 수료한 강의 데이터 사용
+        setupBanner()
+        
+        // 자동 슬라이드 시작
+        startBannerAutoSlide()
+    }
+    
+    private fun setupBanner() {
+        // 가장 많이 수료한 강의 데이터 관찰
+        viewModel.mostCompletedLectures.observe(viewLifecycleOwner) { lectureList ->
+            if (lectureList.isNullOrEmpty()) {
+                // 데이터가 없으면 빈 리스트 전달
+                bannerAdapter = BannerAdapter(emptyList())
+            } else {
+                // 최대 3개의 강의만 사용
+                val bannerLectures = lectureList.take(3)
+                bannerAdapter = BannerAdapter(bannerLectures) { lecture ->
+                    // 배너 클릭 시 해당 강의 상세 페이지로 이동
+                    val lectureDetailLiveData = viewModel.loadLectureDetail(lecture.lectureId, UserSession.userId)
+                    lectureDetailLiveData.observe(viewLifecycleOwner) { lectureDetail ->
+                        lectureDetail?.let {
+                            val action = if (it.data.owned == false) {
+                                MainFragmentDirections.actionNavMainToLectureDetailFragment(
+                                    lectureId = it.data.lectureId,
+                                    userId = UserSession.userId
+                                )
+                            } else {
+                                MainFragmentDirections.actionNavMainToOwnedLectureDetailFragment(
+                                    lectureId = it.data.lectureId,
+                                    userId = UserSession.userId
+                                )
+                            }
+                            findNavController().navigate(action)
+                        }
+                    }
                 }
-                viewPager.currentItem = currentItem++
-                handler.postDelayed(this, 3000)
             }
+            binding.bannerArea.adapter = bannerAdapter
         }
-        handler.postDelayed(runnable, 3000)
+    }
+    
+    private fun startBannerAutoSlide() {
+        bannerHandler.postDelayed(bannerRunnable, 3000)
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        // 화면이 일시 중지될 때 자동 슬라이드 중지
+        bannerHandler.removeCallbacks(bannerRunnable)
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        // 화면이 다시 표시될 때 자동 슬라이드 재시작
+        startBannerAutoSlide()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        // 화면이 파괴될 때 자동 슬라이드 중지
+        bannerHandler.removeCallbacks(bannerRunnable)
     }
 
     private fun dpToPx(dp: Int): Int {

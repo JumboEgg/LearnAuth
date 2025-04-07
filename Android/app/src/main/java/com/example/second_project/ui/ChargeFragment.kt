@@ -2,8 +2,7 @@ package com.example.second_project.ui
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,6 +18,7 @@ import com.example.second_project.network.PaymentApiService
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.File
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.Locale
@@ -27,11 +27,13 @@ class ChargeFragment : Fragment() {
     private var _binding: FragmentChargeBinding? = null
     private val binding get() = _binding!!
 
-    private var selectedAmount: Int = 5000
+    // 기본 금액(단위: CAT, 예: 5000)은 Int로 보관 (UI에 그대로 보여짐)
+    private var selectedBaseAmount: Int = 5000
+
+    // currentBalance는 이미 wei 단위로 관리 (10^18 단위)
     private var currentBalance: BigInteger = BigInteger.ZERO
-    private var isCharging = false // ✅ 중복 전송 방지용 flag
-    private val decimalFormat = DecimalFormat("#,###")
-    private var isTextWatcherActive = false
+
+    private var isCharging = false // 중복 전송 방지용 flag
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,165 +44,327 @@ class ChargeFragment : Fragment() {
         return binding.root
     }
 
+    // ChargeFragment에 handleWalletFile 함수 추가 및 onViewCreated 수정
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // 디버깅 로그 추가
+        Log.d("ChargeFragment", "onViewCreated 시작")
+        Log.d(
+            "ChargeFragment",
+            "지갑 정보: walletFilePath=${UserSession.walletFilePath}, walletPassword=${UserSession.walletPassword != null}"
+        )
 
-        selectedAmount = getAmountFromRadioButton()
-        val num = decimalFormat.format(selectedAmount)
-        binding.chargeInput.setText(num)
+        // 지갑 파일 처리 (새로 추가)
+        handleWalletFile()
+
+        // 초기 기본 금액 설정 (UI에는 5000 CAT으로 보임)
+        selectedBaseAmount = getBaseAmountFromRadioButton()
+        binding.chargeInput.setText(selectedBaseAmount.toString())
 
         // 잔액 불러오기
-        val manager = UserSession.getBlockchainManagerIfAvailable(requireContext())
-        if (manager != null) {
-            Thread {
-                try {
-                    val balance = manager.getMyCatTokenBalance()
-                    currentBalance = balance
-                    requireActivity().runOnUiThread {
-                        updateChargeOutput(selectedAmount)
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    requireActivity().runOnUiThread {
-                        Toast.makeText(requireContext(), "잔액 조회 실패", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }.start()
-        }
+        loadCurrentBalance()
 
-        // 라디오 버튼 → 입력창 자동 입력
+        // 라디오 버튼 선택 시 기본 금액 업데이트
         binding.chargeOptions.setOnCheckedChangeListener { _, _ ->
-            selectedAmount = getAmountFromRadioButton()
-            val finalSelectedAmount = decimalFormat.format(selectedAmount)
-            binding.chargeInput.setText(finalSelectedAmount)
-            updateChargeOutput(selectedAmount)
+            selectedBaseAmount = getBaseAmountFromRadioButton()
+            binding.chargeInput.setText(selectedBaseAmount.toString())
+            updateChargeOutput(selectedBaseAmount)
         }
 
-        // 직접 입력 시 콤마 자동 적용 및 충전단위 업데이트
-        binding.chargeInput.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            
-            override fun afterTextChanged(s: Editable?) {
-                if (isTextWatcherActive) return
-                
-                isTextWatcherActive = true
-                
-                // 콤마 제거 후 숫자만 추출
-                val cleanString = s.toString().replace(",", "")
-                
-                // 숫자로 변환
-                val amount = cleanString.toIntOrNull() ?: 0
-                
-                // 콤마 적용된 문자열 생성
-                val formattedAmount = if (amount > 0) decimalFormat.format(amount) else ""
-                
-                // 현재 커서 위치 저장
-                val cursorPosition = binding.chargeInput.selectionStart
-                
-                // 텍스트 설정
-                binding.chargeInput.setText(formattedAmount)
-                
-                // 커서 위치 조정 (콤마 추가로 인한 위치 변화 보정)
-                val newCursorPosition = if (cursorPosition > 0) {
-                    val oldLength = s?.length ?: 0
-                    val newLength = formattedAmount.length
-                    val diff = newLength - oldLength
-                    cursorPosition + diff
-                } else {
-                    formattedAmount.length
-                }
-                
-                // 커서 위치 설정
-                binding.chargeInput.setSelection(newCursorPosition.coerceIn(0, formattedAmount.length))
-                
-                // 충전단위 업데이트
-                updateChargeOutput(amount)
-                
-                isTextWatcherActive = false
-            }
-        })
-
-        // 결제하기 버튼
+        // 결제하기 버튼 클릭 시
         binding.purchaseBtn.setOnClickListener {
-
-            if (isCharging) {
-                Toast.makeText(requireContext(), "충전 진행 중입니다!", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // 콤마 제거 후 숫자로 변환
-            val cleanString = binding.chargeInput.text.toString().replace(",", "")
-            val amount = cleanString.toIntOrNull()
-            
-            if (amount == null || amount <= 0) {
-                Toast.makeText(requireContext(), "올바른 금액을 입력하세요!", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val limit = BigInteger.valueOf(1_000_000)
-            val total = currentBalance + amount.toBigInteger()
-            // ★ 1) 100만 초과 여부 체크
-            if (total > limit) {
-                // 다이얼로그를 띄운 뒤 결제 요청 중단
-                AlertDialog.Builder(requireContext())
-                    .setTitle("충전 불가")
-                    .setMessage("보유 가능 CAT은 최대 1,000,000까지입니다.\n현재 충전으로 초과됩니다.")
-                    .setPositiveButton("확인", null)
-                    .show()
-                return@setOnClickListener
-            }
-
-            isCharging = true
-            binding.purchaseBtn.isEnabled = false
-            binding.purchaseBtn.text = "충전 중..."
-
-            // ★ 2) 여기서부터 실제 충전 로직
-            val request = DepositRequest(
-                userId = UserSession.userId,
-                quantity = amount
-            )
-
-            val service = ApiClient.retrofit.create(PaymentApiService::class.java)
-            service.deposit(request).enqueue(object : Callback<Void> {
-                override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                    isCharging = false
-                    binding.purchaseBtn.isEnabled = true
-                    binding.purchaseBtn.text = "충전하기"
-
-                    if (response.isSuccessful) {
-                        currentBalance += amount.toBigInteger()
-                        updateChargeOutput(amount)
-                        Toast.makeText(requireContext(), "충전 완료!", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(
-                            requireContext(),
-                            "충전 실패: ${response.code()}",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-
-                override fun onFailure(call: Call<Void>, t: Throwable) {
-                    isCharging = false
-                    binding.purchaseBtn.isEnabled = true
-                    binding.purchaseBtn.text = "충전하기"
-
-                    Toast.makeText(requireContext(), "통신 오류: ${t.message}", Toast.LENGTH_SHORT)
-                        .show()
-                }
-            })
+            handlePurchase()
         }
 
-
-        // 닫기 버튼
+        // 닫기 버튼 클릭 시
         binding.purchaseCancel.setOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
     }
 
-    private fun getAmountFromRadioButton(): Int {
+    // ChargeFragment에 handleWalletFile 함수 추가
+    private fun handleWalletFile() {
+        if (!UserSession.walletFilePath.isNullOrEmpty()) {
+            Log.d("ChargeFragment", "현재 지갑 경로: ${UserSession.walletFilePath}")
+
+            // 이더리움 주소 형식인지 확인 (0x로 시작하는지)
+            if (UserSession.walletFilePath?.startsWith("0x") == true) {
+                Log.d("ChargeFragment", "walletFilePath가 이더리움 주소 형식입니다: ${UserSession.walletFilePath}")
+                val ethAddress = UserSession.walletFilePath
+
+                // 지갑 파일 찾기
+                val walletFiles = requireContext().filesDir.listFiles { file ->
+                    file.name.startsWith("UTC--") && file.name.endsWith(".json")
+                }
+
+                if (walletFiles != null && walletFiles.isNotEmpty()) {
+                    Log.d("ChargeFragment", "총 ${walletFiles.size}개의 지갑 파일을 찾았습니다.")
+
+                    // 주소 검증을 위한 임시 변수들
+                    var matchFound = false
+                    var validWalletFound = false
+
+                    // 발견된 모든 지갑 파일에 대해 검증
+                    for (walletFile in walletFiles) {
+                        try {
+                            // 비밀번호로 지갑 검증 시도
+                            val credentials = org.web3j.crypto.WalletUtils.loadCredentials(
+                                UserSession.walletPassword,
+                                walletFile
+                            )
+                            val walletAddress = credentials.address
+
+                            // 주소가 DB 저장 주소와 일치하는지 확인
+                            if (walletAddress.equals(ethAddress, ignoreCase = true)) {
+                                Log.d("ChargeFragment", "✅ 일치하는 지갑 파일을 발견: ${walletFile.name}, 주소: $walletAddress")
+                                UserSession.walletFilePath = walletFile.name
+                                matchFound = true
+                                validWalletFound = true
+                                break  // 일치하는 지갑을 찾았으므로 검색 종료
+                            } else {
+                                Log.d("ChargeFragment", "주소가 일치하지 않는 지갑 파일: ${walletFile.name}, 주소: $walletAddress")
+                                validWalletFound = true
+                            }
+                        } catch (e: Exception) {
+                            // 이 지갑 파일은 비밀번호가 맞지 않거나 손상되었을 수 있음
+                            Log.d("ChargeFragment", "지갑 파일 검증 실패: ${walletFile.name}, 오류: ${e.message}")
+                        }
+                    }
+
+                    // 검증 결과에 따른 처리
+                    if (!matchFound) {
+                        if (validWalletFound) {
+                            // 검증 가능한 지갑은 있지만 주소가 일치하지 않음
+                            Log.w("ChargeFragment", "⚠️ DB 주소와 일치하는 지갑 파일이 없습니다. DB 주소를 계속 사용합니다: $ethAddress")
+                            UserSession.walletFilePath = ethAddress  // DB의 이더리움 주소를 그대로 유지
+                        } else {
+                            // 모든 지갑 파일이 검증 불가능
+                            Log.w("ChargeFragment", "⚠️ 검증 가능한 지갑 파일이 없습니다. DB 주소를 계속 사용합니다: $ethAddress")
+                            UserSession.walletFilePath = ethAddress  // DB의 이더리움 주소를 그대로 유지
+                        }
+                    }
+                } else {
+                    // 지갑 파일이 없는 경우
+                    Log.d("ChargeFragment", "지갑 파일을 찾을 수 없습니다. DB 주소를 계속 사용합니다: $ethAddress")
+                    // 이더리움 주소를 그대로 유지
+                    UserSession.walletFilePath = ethAddress
+                }
+            } else {
+                // 일반 파일 경로인 경우 (UTC--)
+                val walletFile = File(requireContext().filesDir, UserSession.walletFilePath)
+
+                if (!walletFile.exists()) {
+                    Log.w("ChargeFragment", "⚠️ 지갑 파일을 찾을 수 없습니다: ${UserSession.walletFilePath}")
+
+                    // 지갑 파일이 없는 경우 다른 지갑 파일 찾기 시도
+                    val walletFiles = requireContext().filesDir.listFiles { file ->
+                        file.name.startsWith("UTC--") && file.name.endsWith(".json")
+                    }
+
+                    if (walletFiles != null && walletFiles.isNotEmpty()) {
+                        // 첫 번째 지갑 파일 사용
+                        val walletFileName = walletFiles[0].name
+                        Log.d("ChargeFragment", "✅ 대체 지갑 파일을 찾았습니다: $walletFileName")
+                        UserSession.walletFilePath = walletFileName
+                    } else {
+                        Log.e("ChargeFragment", "⚠️ 사용 가능한 지갑 파일이 없습니다!")
+                    }
+                } else {
+                    Log.d("ChargeFragment", "✅ 지갑 파일이 존재합니다: ${walletFile.absolutePath}")
+                    // 지갑 파일 유효성 검증 (선택사항)
+                    try {
+                        val credentials = org.web3j.crypto.WalletUtils.loadCredentials(
+                            UserSession.walletPassword,
+                            walletFile
+                        )
+                        Log.d("ChargeFragment", "✅ 지갑 검증 성공, 주소: ${credentials.address}")
+                    } catch (e: Exception) {
+                        Log.w("ChargeFragment", "⚠️ 지갑 파일 검증 실패: ${e.message}")
+                        // 비밀번호가 틀려도 경로는 유지
+                    }
+                }
+            }
+        } else {
+            Log.e("ChargeFragment", "⚠️ 지갑 경로가 비어있습니다!")
+        }
+    }
+
+    // 현재 잔액 로드
+    private fun loadCurrentBalance() {
+        val manager = UserSession.getBlockchainManagerIfAvailable(requireContext())
+        if (manager != null) {
+            Thread {
+                try {
+                    // 지갑 주소 확인 (디버깅용)
+                    val address = manager.getMyWalletAddress()
+                    Log.d("ChargeFragment", "충전 대상 지갑 주소: $address")
+
+                    // wei 단위의 잔액 가져오기
+                    val balance = manager.getMyCatTokenBalance()
+                    Log.d("ChargeFragment", "현재 잔액(wei): $balance")
+
+                    currentBalance = balance
+                    requireActivity().runOnUiThread {
+                        updateChargeOutput(selectedBaseAmount)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Log.e("ChargeFragment", "잔액 조회 실패: ${e.message}")
+                    requireActivity().runOnUiThread {
+                        Toast.makeText(requireContext(), "잔액 조회 실패", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }.start()
+        } else {
+            Log.e("ChargeFragment", "BlockchainManager 초기화 실패 - 지갑 정보를 확인하세요")
+            Toast.makeText(requireContext(), "지갑 정보 초기화 실패", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // 구매 버튼 처리
+    private fun handlePurchase() {
+        if (isCharging) {
+            Toast.makeText(requireContext(), "충전 진행 중입니다!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val inputBase = binding.chargeInput.text.toString().toIntOrNull()
+        if (inputBase == null || inputBase <= 0) {
+            Toast.makeText(requireContext(), "올바른 금액을 입력하세요!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 1 CAT = 10^18 wei
+        val tokenUnit = BigInteger.TEN.pow(18)
+
+        // 한도를 wei 단위로 변경: 1,000,000 CAT -> 1,000,000 * 10^18
+        val limit = BigInteger.valueOf(1_000_000).multiply(tokenUnit)
+
+        // 충전할 금액 (wei 단위)
+        val depositAmountWei = BigInteger.valueOf(inputBase.toLong()).multiply(tokenUnit)
+        Log.d("ChargeFragment", "충전 요청 금액(CAT): $inputBase")
+        Log.d("ChargeFragment", "충전 요청 금액(wei): $depositAmountWei")
+
+        // 총액 검증
+        val total = currentBalance.add(depositAmountWei)
+        if (total > limit) {
+            AlertDialog.Builder(requireContext())
+                .setTitle("충전 불가")
+                .setMessage("보유 가능 CAT은 최대 1,000,000까지입니다.\n현재 충전으로 초과됩니다.")
+                .setPositiveButton("확인", null)
+                .show()
+            return
+        }
+
+        // 충전 시작
+        isCharging = true
+        binding.purchaseBtn.isEnabled = false
+        binding.purchaseBtn.text = "충전 중..."
+
+        // DepositRequest에 quantity는 wei 단위로 전송
+        val request = DepositRequest(
+            userId = UserSession.userId,
+            quantity = depositAmountWei
+        )
+
+        // API 호출
+        val service = ApiClient.retrofit.create(PaymentApiService::class.java)
+        service.deposit(request).enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                isCharging = false
+                binding.purchaseBtn.isEnabled = true
+                binding.purchaseBtn.text = "충전하기"
+
+                // 응답 로깅
+                Log.d("ChargeFragment", "충전 API 응답 코드: ${response.code()}")
+                try {
+                    val errorBody = response.errorBody()?.string()
+                    if (!errorBody.isNullOrEmpty()) {
+                        Log.d("ChargeFragment", "응답 상세: $errorBody")
+                    }
+                } catch (e: Exception) {
+                }
+
+                if (response.isSuccessful) {
+                    Log.d("ChargeFragment", "✅ 충전 API 호출 성공")
+
+                    // 충전 성공 시 현재 잔액 업데이트
+                    currentBalance = currentBalance.add(depositAmountWei)
+                    updateChargeOutput(inputBase)
+
+                    // 성공 메시지
+                    Toast.makeText(requireContext(), "충전 완료!", Toast.LENGTH_SHORT).show()
+
+                    // 블록체인에서 실제 잔액 확인 (비동기)
+                    verifyBalanceAfterCharge(depositAmountWei, inputBase)
+                } else {
+                    Log.e("ChargeFragment", "❌ 충전 API 호출 실패: ${response.code()}")
+                    Toast.makeText(
+                        requireContext(),
+                        "충전 실패: ${response.code()}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                isCharging = false
+                binding.purchaseBtn.isEnabled = true
+                binding.purchaseBtn.text = "충전하기"
+
+                Log.e("ChargeFragment", "❌ 충전 API 통신 오류: ${t.message}")
+                t.printStackTrace()
+
+                Toast.makeText(requireContext(), "통신 오류: ${t.message}", Toast.LENGTH_SHORT)
+                    .show()
+            }
+        })
+    }
+
+    // 충전 후 잔액 확인 및 UserSession에 저장
+    private fun verifyBalanceAfterCharge(depositAmountWei: BigInteger, inputBase: Int) {
+        val manager = UserSession.getBlockchainManagerIfAvailable(requireContext())
+        if (manager != null) {
+            Thread {
+                try {
+                    // 블록체인에 반영될 시간을 주기 위해 잠시 대기
+                    Thread.sleep(1500)
+
+                    // 실제 블록체인 잔액 확인
+                    val actualBalance = manager.getMyCatTokenBalance()
+                    Log.d("ChargeFragment", "충전 후 실제 잔액(wei): $actualBalance")
+                    Log.d("ChargeFragment", "기대 잔액(wei): ${currentBalance}")
+                    Log.d("ChargeFragment", "잔액 일치 여부: ${actualBalance == currentBalance}")
+
+                    // UserSession에 마지막 잔액 저장 - 이것이 핵심!
+                    UserSession.lastKnownBalance = actualBalance
+
+                    // UI 스레드에서 작업
+                    requireActivity().runOnUiThread {
+                        // 충전 완료 메시지 강화
+                        Toast.makeText(
+                            requireContext(),
+                            "충전이 완료되었습니다. 잔액이 업데이트 되었습니다.",
+                            Toast.LENGTH_LONG
+                        ).show()
+
+                        // 3초 후 자동으로 이전 화면으로 돌아가기 (선택사항)
+                        binding.root.postDelayed({
+                            if (isAdded && !isRemoving) { // Fragment가 아직 유효한 경우에만
+                                requireActivity().onBackPressedDispatcher.onBackPressed()
+                            }
+                        }, 3000)
+                    }
+                } catch (e: Exception) {
+                    Log.e("ChargeFragment", "충전 후 잔액 확인 실패: ${e.message}")
+                    e.printStackTrace()
+                }
+            }.start()
+        }
+    }
+
+    // UI에 표시할 기본 금액 (CAT 단위)을 반환하는 함수
+    private fun getBaseAmountFromRadioButton(): Int {
         return when (binding.chargeOptions.checkedRadioButtonId) {
             R.id.chargeOption1 -> 5000
             R.id.chargeOption2 -> 10000
@@ -210,19 +374,24 @@ class ChargeFragment : Fragment() {
         }
     }
 
-    private fun updateChargeOutput(amount: Int) {
-        val finalAmount = decimalFormat.format(amount)
-        binding.chargeOutput.text = "$finalAmount  CAT"
-        val total = currentBalance + BigInteger.valueOf(amount.toLong())
-        val finalTotal = decimalFormat.format(total)
-        if (total.toInt() > 1000000) {
-            binding.chargeResult.text = "1,000,000 CAT을 초과하여 충전할 수 없습니다."
-            binding.purchaseBtn.isEnabled = false
+    // 실제 DepositRequest에 사용할 금액(wei 단위)을 반환하는 함수
+    private fun getAmountFromRadioButton(): BigInteger {
+        val baseAmount = getBaseAmountFromRadioButton()
+        return BigInteger.valueOf(baseAmount.toLong()).multiply(BigInteger.TEN.pow(18))
+    }
 
-        } else {
-            binding.chargeResult.text = "충전 후 ${finalTotal} CAT 보유 예상"
-            binding.purchaseBtn.isEnabled = true
-        }
+    // 충전 정보 표시 업데이트
+    private fun updateChargeOutput(amount: Int) {
+        // 사용자가 입력한 기본 금액(예: 5000 CAT)은 그대로 표시
+        binding.chargeOutput.text = "$amount CAT"
+
+        val tokenUnit = BigInteger.TEN.pow(18)
+
+        // currentBalance는 이미 wei 단위이므로, 충전 금액도 wei로 변환하여 합산
+        val totalWei = currentBalance.add(BigInteger.valueOf(amount.toLong()).multiply(tokenUnit))
+        val displayTotal = totalWei.divide(tokenUnit)
+
+        binding.chargeResult.text = "충전 후 ${displayTotal} CAT 보유 예상"
     }
 
     override fun onDestroyView() {
