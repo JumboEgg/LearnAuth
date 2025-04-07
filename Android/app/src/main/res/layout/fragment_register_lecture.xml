@@ -97,7 +97,8 @@
                     android:background="@android:color/transparent"
                     android:textColor="@color/text_gray"
                     android:textSize="16sp"
-                    android:padding="14dp"/>
+                    android:padding="14dp"
+                    android:focusableInTouchMode="true"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
