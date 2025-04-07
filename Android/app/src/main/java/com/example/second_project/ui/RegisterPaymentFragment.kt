@@ -165,26 +165,26 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
                     val keyword = dialogBinding.searchInputText.text.toString().trim()
                     Log.d("searchUsers", "검색어: $keyword")
 
-                    val bannedPatterns = listOf("@", "gmail", "naver", ".com", ".net")
-
-                    when {
-                        keyword.length < 2 -> {
-                            Toast.makeText(requireContext(), "검색어는 최소 2자 이상 입력해주세요.", Toast.LENGTH_SHORT).show()
-                            return@setOnClickListener
-                        }
-
-                        else -> {
-                            val matched = bannedPatterns.find { keyword.contains(it, ignoreCase = true) }
-                            if (matched != null) {
-                                Toast.makeText(
-                                    requireContext(),
-                                    "입력한 검색어에 허용되지 않는 키워드 \"$matched\"가 포함되어 있습니다.",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                return@setOnClickListener
-                            }
-                        }
-                    }
+//                    val bannedPatterns = listOf("@", "gmail", "naver", ".com", ".net")
+//
+//                    when {
+//                        keyword.length < 2 -> {
+//                            Toast.makeText(requireContext(), "검색어는 최소 2자 이상 입력해주세요.", Toast.LENGTH_SHORT).show()
+//                            return@setOnClickListener
+//                        }
+//
+//                        else -> {
+//                            val matched = bannedPatterns.find { keyword.contains(it, ignoreCase = true) }
+//                            if (matched != null) {
+//                                Toast.makeText(
+//                                    requireContext(),
+//                                    "입력한 검색어에 허용되지 않는 키워드 \"$matched\"가 포함되어 있습니다.",
+//                                    Toast.LENGTH_SHORT
+//                                ).show()
+//                                return@setOnClickListener
+//                            }
+//                        }
+//                    }
                     currentKeyword = keyword
                     if (keyword.isNotEmpty()) {
                         dialogBinding.recyclerUserList.visibility = View.VISIBLE
