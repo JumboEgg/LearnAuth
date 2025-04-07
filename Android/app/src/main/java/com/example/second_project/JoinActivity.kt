@@ -37,9 +37,6 @@ class JoinActivity : AppCompatActivity() {
         binding = ActivityJoinBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 뒤로가기 무효화
-        disableBackButton()
-
         // 비밀번호 보이기 토글
         binding.joinPwShow.setOnClickListener { changePasswordVisibility() }
         binding.joinPwShow2.setOnClickListener { changePassword2Visibility() }
@@ -63,6 +60,9 @@ class JoinActivity : AppCompatActivity() {
                 Toast.makeText(this, "비밀번호가 일치하지 않습니다.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+
+            // 뒤로가기 버튼 비활성화
+            disableBackButton()
 
             // 터치 게임 화면 보여주기 (기존 가입 입력 UI 숨김)
             showTouchGameUI()
