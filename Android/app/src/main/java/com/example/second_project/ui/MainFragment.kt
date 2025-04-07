@@ -4,24 +4,19 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.viewpager2.widget.ViewPager2
-import com.bumptech.glide.Glide
 import com.example.second_project.R
 import com.example.second_project.UserSession
 import com.example.second_project.adapter.BannerAdapter
 import com.example.second_project.adapter.LectureAdapter
 import com.example.second_project.databinding.FragmentMainBinding
-import com.example.second_project.databinding.ItemBannerBinding
-import com.example.second_project.utils.YoutubeUtil
 import com.example.second_project.viewmodel.MainViewModel
-import java.io.File
 
 class MainFragment : Fragment() {
 
