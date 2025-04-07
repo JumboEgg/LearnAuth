@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.second_project.NavGraphDirections
 import com.example.second_project.UserSession
 import com.example.second_project.adapter.OwnedLectureAdapter
+import com.example.second_project.data.repository.LectureDetailRepository
 import com.example.second_project.databinding.FragmentOwnedLectureBinding
 import com.example.second_project.viewmodel.OwnedLectureViewModel
 
@@ -22,6 +24,7 @@ class OwnedLectureFragment : Fragment() {
 
     private val viewModel: OwnedLectureViewModel by viewModels()
     private lateinit var adapter: OwnedLectureAdapter
+    private val lectureDetailRepository = LectureDetailRepository()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,10 +37,31 @@ class OwnedLectureFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Adapter 초기화: 클릭 시 강의 제목을 Safe Args를 통해 전역 Static Fragment로 이동 (예시)
+        // Adapter 초기화: 클릭 시 LecturePlayFragment로 이동
         adapter = OwnedLectureAdapter { lectureItem ->
-            val action = NavGraphDirections.actionGlobalStaticFragment(lectureItem.title)
-            findNavController().navigate(action)
+            val userId = UserSession.userId
+            val lectureId = lectureItem.lectureId
+            
+            // recentId가 null이면 강의 상세 정보를 가져와서 첫 번째 subLecture의 ID를 사용
+            if (lectureItem.recentId == null) {
+                // 강의 상세 정보를 가져와서 첫 번째 subLecture의 ID를 사용
+                lectureDetailRepository.fetchLectureDetail(lectureId, userId).observe(viewLifecycleOwner) { lectureDetail ->
+                    lectureDetail?.let {
+                        val subLectures = it.data.subLectures
+                        if (subLectures.isNotEmpty()) {
+                            val firstSubLectureId = subLectures[0].subLectureId
+                            navigateToLecturePlay(lectureId, userId, firstSubLectureId)
+                        } else {
+                            Toast.makeText(requireContext(), "강의 내용이 없습니다.", Toast.LENGTH_SHORT).show()
+                        }
+                    } ?: run {
+                        Toast.makeText(requireContext(), "강의 정보를 가져오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } else {
+                // recentId가 있으면 해당 ID를 사용
+                navigateToLecturePlay(lectureId, userId, lectureItem.recentId)
+            }
         }
         binding.ownedRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.ownedRecyclerView.adapter = adapter
@@ -52,6 +76,19 @@ class OwnedLectureFragment : Fragment() {
             Log.d("OwnedLectureFragment", "Owned lectures: $lectureList")
             adapter.submitList(lectureList)
         }
+    }
+    
+    // LecturePlayFragment로 이동하는 함수
+    private fun navigateToLecturePlay(lectureId: Int, userId: Int, subLectureId: Int) {
+        Log.d("OwnedLectureFragment", "클릭된 강의: lectureId=$lectureId, userId=$userId, subLectureId=$subLectureId")
+        
+        // LecturePlayFragment로 이동
+        val action = OwnedLectureFragmentDirections.actionOwnedLectureFragmentToLecturePlayFragment(
+            lectureId = lectureId,
+            userId = userId,
+            subLectureId = subLectureId
+        )
+        findNavController().navigate(action)
     }
 
     override fun onDestroyView() {

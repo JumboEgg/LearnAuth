@@ -204,6 +204,7 @@
                 app:cardCornerRadius="20dp"
                 app:cardElevation="1dp"
                 android:clickable="false"
+                android:layout_marginBottom="20dp"
                 >
 
                 <com.google.android.material.button.MaterialButton
@@ -219,8 +220,7 @@
                     android:paddingVertical="12dp"
                     android:layout_gravity="center"
                     android:clickable="false"
-                    android:visibility="visible"
-                    android:layout_marginBottom="20dp"/>
+                    android:visibility="visible"/>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/quizBtnVisible"

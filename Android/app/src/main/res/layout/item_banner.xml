@@ -35,7 +35,7 @@
             >
 
             <TextView
-                android:id="@+id/lectureTitle"
+                android:id="@+id/bannerTitle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="강의 제목"
@@ -51,11 +51,12 @@
                 android:layout_width="18dp"
                 android:layout_height="18dp"
                 android:src="@drawable/person2"
-                app:layout_constraintTop_toBottomOf="@id/lectureTitle"
-                app:layout_constraintStart_toStartOf="@id/lectureTitle"
+                app:layout_constraintTop_toBottomOf="@id/bannerTitle"
+                app:layout_constraintStart_toStartOf="@id/bannerTitle"
                 app:tint="@color/text_white_gray"/>
 
             <TextView
+                android:id="@+id/bannerLecturer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="데이터"
