@@ -9,5 +9,5 @@ import java.math.BigInteger;
 @Builder
 public class CertificateToken {
 
-    private BigInteger token;
+    private int token;
 }

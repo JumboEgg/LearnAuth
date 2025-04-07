@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.validator.constraints.Length;
 
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.util.List;
 

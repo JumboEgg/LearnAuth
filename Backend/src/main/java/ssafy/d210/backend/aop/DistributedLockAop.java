@@ -9,6 +9,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
+import ssafy.d210.backend.redis.AopForTransaction;
 import ssafy.d210.backend.redis.CustomSpringELParser;
 import ssafy.d210.backend.redis.DistributedLock;
 

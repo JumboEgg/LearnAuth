@@ -46,9 +46,6 @@ public class CertificateServiceImpl implements CertificateService{
     private final UserLectureRepository userLectureRepository;
     private final ResponseUtil responseUtil;
     private final LectureSystem lectureSystem;
-    private final UserRepository userRepository;
-    private final LectureRepository lectureRepository;
-    private final PaymentRatioRepository paymentRatioRepository;
 
     @Override
     @Transactional
@@ -118,15 +115,14 @@ public class CertificateServiceImpl implements CertificateService{
             log.error("UserLecture with userId {} and lectureId {} doesn't exist", userId, lectureId);
             return responseUtil.successResponse(false, HereStatus.SUCCESS_CERTIFICATE_OWN);
         }
-
         int token = tokenId.intValue();
         userLecture.setCertificate(token);
 
         CertificateToken certificateToken = CertificateToken.builder()
-                .token(tokenId)
+                .token(token)
                 .build();
 
-        log.info("Certificate saved on userLectureId {} value {}", userLecture.getId(), token);
+        log.info("Certificate saved on userLectureId {} value {}", userLecture.getId(), tokenId);
         return responseUtil.successResponse(certificateToken, HereStatus.SUCCESS_CERTIFICATE_OWN);
     }
 
