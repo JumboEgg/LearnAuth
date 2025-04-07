@@ -368,8 +368,8 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                         val purchaseFunction = org.web3j.abi.datatypes.Function(
                             "purchaseLecture",
                             listOf(
-                                org.web3j.abi.datatypes.generated.Uint256(userIdBigInt),
-                                org.web3j.abi.datatypes.generated.Uint256(lectureIdBigInt),
+                                org.web3j.abi.datatypes.generated.Uint16(userIdBigInt),
+                                org.web3j.abi.datatypes.generated.Uint16(lectureIdBigInt),
                                 org.web3j.abi.datatypes.generated.Uint256(requiredAmount)
                             ),
                             emptyList()
