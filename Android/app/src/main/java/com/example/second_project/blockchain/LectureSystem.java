@@ -811,6 +811,7 @@ public class LectureSystem extends Contract {
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 
+    //여기에 수료증 token을 때리면 ... IPFS 어쩌구 쫙쫙 나올 겁니다 ! ㅎㅎ
     public RemoteFunctionCall<String> getTokenURI(BigInteger tokenId) {
         final Function function = new Function(FUNC_GETTOKENURI, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(tokenId)), 
