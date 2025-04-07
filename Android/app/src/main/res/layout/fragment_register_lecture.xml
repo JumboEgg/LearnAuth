@@ -38,6 +38,7 @@
                 android:layout_marginTop="15dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
+                app:endIconMode="clear_text"
                 android:id="@+id/editTextTitle"
                 style="@style/body1"
                 android:layout_width="match_parent"
@@ -112,6 +113,7 @@
                 android:layout_marginTop="15dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
+                app:endIconMode="clear_text"
                 android:id="@+id/editTextGoal"
                 style="@style/body1"
                 android:layout_width="match_parent"
@@ -152,6 +154,7 @@
                 android:layout_marginTop="15dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
+                app:endIconMode="clear_text"
                 android:id="@+id/editTextContent"
                 style="@style/body1"
                 android:layout_width="match_parent"

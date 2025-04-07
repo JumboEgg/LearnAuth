@@ -41,6 +41,7 @@
                 android:orientation="horizontal">
 
                 <com.google.android.material.textfield.TextInputLayout
+                    app:endIconMode="clear_text"
                     android:id="@+id/editTextPrice"
                     style="@style/body1"
                     android:layout_width="0dp"
@@ -60,7 +61,7 @@
                         android:paddingStart="14dp"
                         android:textColor="@color/text_gray"
                         android:maxLines="1"
-                        android:inputType="number"/>
+                        android:inputType="number" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
