@@ -1,6 +1,7 @@
 package com.example.second_project.ui
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -48,6 +49,7 @@ import androidx.core.content.FileProvider
 import org.json.JSONObject
 import java.net.URLDecoder
 import java.util.regex.Pattern
+import androidx.core.content.res.ResourcesCompat
 
 private const val TAG = "CertDetailFragment_야옹"
 private const val IPFS_GATEWAY_URL = "https://j12d210.p.ssafy.io/ipfs"
@@ -482,44 +484,116 @@ class CertDetailFragment : Fragment() {
                 drawable.draw(canvas)
             }
             
-            // 텍스트 스타일 설정
-            val paint = Paint().apply {
-                color = Color.BLACK
-                textSize = 16f
-                typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
+            // 페이지 중앙 좌표
+            val centerX = pageInfo.pageWidth / 2f
+            val centerY = pageInfo.pageHeight / 2f
+            
+            // 강의 제목 스타일 설정 (파란색, 큰 글씨)
+            val titlePaint = Paint().apply {
+                color = ContextCompat.getColor(requireContext(), R.color.primary_color)
+                textSize = 60f  // 24f에서 60f로 증가 (2.5배)
+                typeface = ResourcesCompat.getFont(requireContext(), R.font.pretendard_black)
                 textAlign = Paint.Align.CENTER
             }
             
-            // 중앙 정렬을 위한 x 좌표 (페이지 중앙)
-            val centerX = pageInfo.pageWidth / 2f
+            // 이름 스타일 설정 (검정색, 중간 크기)
+            val namePaint = Paint().apply {
+                color = Color.BLACK
+                textSize = 40f  // 18f에서 45f로 증가 (2.5배)
+                typeface = ResourcesCompat.getFont(requireContext(), R.font.pretendard_bold)
+                textAlign = Paint.Align.CENTER
+            }
             
-            // 동적 데이터 그리기
-            val startY = 300f  // 시작 Y 좌표 (조정 필요)
-            val lineHeight = 40f
+            // 라벨 스타일 설정 (파란색/검정색, 작은 글씨)
+            val labelPaint = Paint().apply {
+                color = ContextCompat.getColor(requireContext(), R.color.primary_color)
+                textSize = 30f  // 14f에서 35f로 증가 (2.5배)
+                typeface = ResourcesCompat.getFont(requireContext(), R.font.pretendard_bold)
+                textAlign = Paint.Align.CENTER
+            }
             
-            // 강의명
-            canvas.drawText(binding.textLectureTitle.text.toString(), centerX, startY, paint)
+            // 강의자 라벨 스타일 (검정색)
+            val teacherLabelPaint = Paint().apply {
+                color = Color.BLACK
+                textSize = 30f  // 14f에서 35f로 증가 (2.5배)
+                typeface = ResourcesCompat.getFont(requireContext(), R.font.pretendard_bold)
+                textAlign = Paint.Align.CENTER
+            }
+            
+            // 강의 제목 (중앙에서 살짝 왼쪽으로)
+            val lectureTitle = binding.textLectureTitle.text.toString()
+            
+            // 한글 기준 14글자 제한
+            val limitedTitle = if (lectureTitle.count { "[가-힣]".toRegex().matches(it.toString()) } > 14) {
+                // 한글 글자 수 계산
+                var koreanCount = 0
+                var result = ""
+                
+                for (char in lectureTitle) {
+                    if ("[가-힣]".toRegex().matches(char.toString())) {
+                        koreanCount++
+                        if (koreanCount <= 14) {
+                            result += char
+                        } else {
+                            break
+                        }
+                    } else {
+                        result += char
+                    }
+                }
+                
+                result + "..."
+            } else {
+                lectureTitle
+            }
+            
+            // 긴 제목은 줄바꿈 처리
+            val maxWidth = pageInfo.pageWidth * 0.8f // 페이지 너비의 80%까지만 사용
+            val titleLines = splitTextIntoLines(limitedTitle, titlePaint, maxWidth)
+            
+            // 제목 그리기 (여러 줄일 경우 중앙 정렬, 살짝 왼쪽으로)
+            val titleStartY = centerY - (titleLines.size * titlePaint.textSize) / 2
+            val titleX = centerX - 20f // 중앙에서 20픽셀 왼쪽으로
+            titleLines.forEachIndexed { index, line ->
+                canvas.drawText(line, titleX, titleStartY + index * titlePaint.textSize, titlePaint)
+            }
+            
+            // 수료자 정보 (하단 좌측)
+            val studentName = binding.textNameStudent.text.toString()
+            val studentX = pageInfo.pageWidth * 0.30f // 25%에서 35%로 변경 (중앙에 더 가깝게)
+            val studentY = pageInfo.pageHeight * 0.75f // 페이지 높이의 75% 지점
             
             // 수료자 이름
-            canvas.drawText(binding.textNameStudent.text.toString(), centerX, startY + lineHeight, paint)
+            canvas.drawText(studentName, studentX, studentY, namePaint)
             
-            // 강사명
-            canvas.drawText(binding.textNameLecturer.text.toString(), centerX, startY + lineHeight * 2, paint)
+            // "수료자" 라벨
+            canvas.drawText("수료자", studentX, studentY + namePaint.textSize + 10, labelPaint)
             
-            // QR 코드 (중앙 정렬)
+            // 강의자 정보 (하단 우측)
+            val teacherName = binding.textNameLecturer.text.toString()
+            val teacherX = pageInfo.pageWidth * 0.70f // 75%에서 65%로 변경 (중앙에 더 가깝게)
+            val teacherY = pageInfo.pageHeight * 0.75f // 페이지 높이의 75% 지점
+            
+            // 강의자 이름
+            canvas.drawText(teacherName, teacherX, teacherY, namePaint)
+            
+            // "강의자" 라벨
+            canvas.drawText("강의자", teacherX, teacherY + namePaint.textSize + 10, teacherLabelPaint)
+            
+            // QR 코드 (중앙 하단)
             val qrBitmap = (binding.imgQR.drawable as? BitmapDrawable)?.bitmap
             qrBitmap?.let {
                 val qrX = (pageInfo.pageWidth - it.width) / 2f
-                val qrY = startY + lineHeight * 4  // QR 코드 위치 조정
-                canvas.drawBitmap(it, qrX, qrY, paint)
+                val qrY = pageInfo.pageHeight * 0.85f // 페이지 높이의 85% 지점
+                canvas.drawBitmap(it, qrX, qrY, null)
             }
             
             // 페이지 완성
             document.finishPage(page)
             
-            // PDF 파일 저장
+            // PDF 파일 저장 - 다운로드 폴더에 저장
             val fileName = "수료증_${binding.textLectureTitle.text}_${System.currentTimeMillis()}.pdf"
-            val filePath = File(requireContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), fileName)
+            val filePath = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName)
             
             FileOutputStream(filePath).use { outputStream ->
                 document.writeTo(outputStream)
@@ -528,30 +602,102 @@ class CertDetailFragment : Fragment() {
             // PDF 문서 닫기
             document.close()
             
-            // 저장 완료 메시지 및 파일 열기
-            Toast.makeText(requireContext(), "수료증이 저장되었습니다.", Toast.LENGTH_SHORT).show()
+            // 저장 완료 메시지 표시
+            Toast.makeText(requireContext(), "수료증이 다운로드 폴더에 저장되었습니다.", Toast.LENGTH_LONG).show()
             
-            // PDF 파일 열기
-            val uri = FileProvider.getUriForFile(
-                requireContext(),
-                "${requireContext().packageName}.provider",
-                filePath
-            )
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                setDataAndType(uri, "application/pdf")
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-            
-            try {
-                startActivity(intent)
-            } catch (e: Exception) {
-                Toast.makeText(requireContext(), "PDF 뷰어 앱을 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
-            }
+            // 파일 경로 로그 출력
+            Log.d(TAG, "PDF 파일 저장 경로: ${filePath.absolutePath}")
             
         } catch (e: Exception) {
             Log.e(TAG, "PDF 생성 중 오류 발생: ${e.message}")
             Toast.makeText(requireContext(), "PDF 생성 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    // 긴 텍스트를 여러 줄로 나누는 함수
+    private fun splitTextIntoLines(text: String, paint: Paint, maxWidth: Float): List<String> {
+        // 한글과 영어를 구분하여 처리
+        val koreanPattern = "[가-힣]".toRegex()
+        val englishPattern = "[a-zA-Z]".toRegex()
+        
+        // 한글과 영어의 비율 계산
+        val koreanCount = text.count { koreanPattern.matches(it.toString()) }
+        val englishCount = text.count { englishPattern.matches(it.toString()) }
+        
+        // 한글과 영어의 비율에 따라 최대 글자 수 결정
+        val maxCharsPerLine = if (koreanCount > englishCount) {
+            // 한글이 더 많은 경우
+            7
+        } else {
+            // 영어가 더 많거나 비슷한 경우
+            11
+        }
+        
+        // 문자 단위로 분리
+        val lines = mutableListOf<String>()
+        var currentLine = ""
+        var currentCharCount = 0
+        
+        // 공백으로 단어 분리
+        val words = text.split(" ")
+        
+        for (word in words) {
+            // 단어가 너무 길면 문자 단위로 분리
+            if (word.length > maxCharsPerLine) {
+                // 현재 줄에 내용이 있으면 먼저 추가
+                if (currentLine.isNotEmpty()) {
+                    lines.add(currentLine)
+                    currentLine = ""
+                    currentCharCount = 0
+                }
+                
+                // 단어를 문자 단위로 분리
+                var tempLine = ""
+                var tempCharCount = 0
+                
+                for (char in word) {
+                    val isKorean = koreanPattern.matches(char.toString())
+                    // 한글 글자 수 계산 방식 수정 (한글은 1글자로 계산)
+                    val charWidth = 1
+                    
+                    if (tempCharCount + charWidth <= maxCharsPerLine) {
+                        tempLine += char
+                        tempCharCount += charWidth
+                    } else {
+                        lines.add(tempLine)
+                        tempLine = char.toString()
+                        tempCharCount = charWidth
+                    }
+                }
+                
+                if (tempLine.isNotEmpty()) {
+                    currentLine = tempLine
+                    currentCharCount = tempCharCount
+                }
+            } else {
+                // 단어가 짧은 경우
+                val wordCharCount = word.length
+                
+                if (currentLine.isEmpty()) {
+                    currentLine = word
+                    currentCharCount = wordCharCount
+                } else if (currentCharCount + wordCharCount + 1 <= maxCharsPerLine) {
+                    // 공백 포함 글자 수 계산
+                    currentLine += " $word"
+                    currentCharCount += wordCharCount + 1
+                } else {
+                    lines.add(currentLine)
+                    currentLine = word
+                    currentCharCount = wordCharCount
+                }
+            }
+        }
+        
+        if (currentLine.isNotEmpty()) {
+            lines.add(currentLine)
+        }
+        
+        return lines
     }
 
     override fun onDestroyView() {
