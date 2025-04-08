@@ -204,7 +204,6 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                             withContext(Dispatchers.Main) {
                                 // 부족액을 원래 wei 단위 그대로 표시
                                 showNotEnoughDialog(shortfall)
-                                showChargeDialog()
                             }
                             return@launch
                         }
