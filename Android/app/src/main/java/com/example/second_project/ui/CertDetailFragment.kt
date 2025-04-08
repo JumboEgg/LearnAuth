@@ -176,7 +176,8 @@ class CertDetailFragment : Fragment() {
                     
                     // 해당 강의의 수료증이 발급되었는지 확인
                     val certificate = certificates.find { it.lectureId == lectureId }
-                    isCertificateIssued = certificate?.certificate != null
+                    // certificate 값이 null이거나 0인 경우 발급되지 않은 것으로 처리
+                    isCertificateIssued = certificate?.certificate != null && certificate.certificate != 0
                     
                     // 로그 출력
                     Log.d(TAG, "수료증 발급 여부 확인: userId=$userId, lectureId=$lectureId")
