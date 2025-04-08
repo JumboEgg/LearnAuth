@@ -103,6 +103,7 @@
                 android:id="@+id/reportContent"
                 android:layout_width="match_parent"
                 android:layout_height="120dp"
+                android:maxLength="255"
                 android:hint="신고 내용을 적어 주세요."
                 style="@style/medium16"
                 android:paddingVertical="12dp"
