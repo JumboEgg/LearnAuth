@@ -31,6 +31,9 @@ public interface LectureService {
     // 강의 검색(검색어)
     public ResponseSuccessDto<LectureSearchResponse> searchLectures(String keyword, int page);
 
+    // 강의 가격 확인
+    public Integer getLecturePrice(Long lectureId);
+
     // 강의 구매
     public ResponseSuccessDto<Object> purchaseLecture(Long userId, Long lectureId);
 

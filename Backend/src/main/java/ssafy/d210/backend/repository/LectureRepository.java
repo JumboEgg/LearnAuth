@@ -268,7 +268,13 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
     """)
     int countLecturesByKeyword(@Param("keyword") String keyword);
 
-    // 강의 구매
+    // 강의 가격
+    @Query("""
+        select l.price
+        from Lecture l
+        where l.id = :lectureId
+    """)
+    Integer getLecturePriceById(@Param("lectureId")Long lectureId);
 
 
     // 사용자가 보유한 강의

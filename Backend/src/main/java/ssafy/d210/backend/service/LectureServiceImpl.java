@@ -6,7 +6,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.web3j.abi.datatypes.Int;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.response.lecture.*;
 import ssafy.d210.backend.entity.*;
@@ -15,8 +14,7 @@ import ssafy.d210.backend.repository.*;
 import ssafy.d210.backend.util.ResponseUtil;
 
 import org.springframework.data.domain.Pageable;
-import java.util.ArrayList;
-import java.util.Collections;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -214,6 +212,11 @@ public class LectureServiceImpl implements LectureService{
         response.setCurrentPage(page);
         response.setSearchResults(pagedList);
         return responseUtil.successResponse(response, HereStatus.SUCCESS_LECTURE_SEARCH);
+    }
+
+    @Override
+    public Integer getLecturePrice(Long lectureId) {
+        return lectureRepository.getLecturePriceById(lectureId);
     }
 
     @Transactional(readOnly = true)
