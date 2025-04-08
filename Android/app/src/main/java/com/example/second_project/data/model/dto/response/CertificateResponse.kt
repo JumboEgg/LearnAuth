@@ -11,5 +11,7 @@ data class CertificateData(
     val lectureId: Int,
     val title: String,
     val categoryName: String,
-    val certificate: Int
+    val certificate: Int,
+    val certificateDate: String
 )
+
