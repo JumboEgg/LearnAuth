@@ -22,7 +22,14 @@
             android:layout_weight="1"
             android:text="신고 제목"
             style="@style/semibold16"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:scrollHorizontally="true"
+            android:layout_marginEnd="10dp"/>
 
         <TextView
             android:id="@+id/tvReportType"
