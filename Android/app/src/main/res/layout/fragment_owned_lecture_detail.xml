@@ -274,16 +274,14 @@
             </androidx.cardview.widget.CardView>
 
 
-
-            
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/myLectureDetailList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/quizBtn"
                 android:layout_marginHorizontal="24dp"
-                android:layout_marginBottom="100dp"
-                />
+                android:layout_marginBottom="97dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/quizBtn" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
