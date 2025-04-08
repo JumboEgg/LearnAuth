@@ -6,7 +6,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,15 +16,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.entity.User;
 import ssafy.d210.backend.enumeration.response.HereStatus;
+import ssafy.d210.backend.exception.service.RefreshTokenNotAvailable;
 import ssafy.d210.backend.repository.UserRepository;
-import ssafy.d210.backend.security.entity.Token;
-import ssafy.d210.backend.security.repository.TokenRepository;
 import ssafy.d210.backend.util.ResponseUtil;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.ZonedDateTime;
-import java.util.Optional;
 import java.util.TimeZone;
 
 @Slf4j
@@ -60,23 +57,20 @@ public class JwtRefreshFilter extends OncePerRequestFilter {
 
         if (refresh == null) {
             log.error("Refresh token이 없습니다.");
-            sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Refresh token이 없습니다.");
-            return;
+            throw new RefreshTokenNotAvailable("Refresh token이 없습니다.");
         }
 
         try {
             // 토큰 검증
             if (jwtUtil.isExpired(refresh)) {
                 log.error("Refresh token이 만료되었습니다.");
-                sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Refresh token이 만료되었습니다.");
-                return;
+                throw new RefreshTokenNotAvailable("Refresh token이 만료되었습니다.");
             }
 
             String category = jwtUtil.getCategory(refresh);
             if (!category.equals("refresh")) {
                 log.error("유효하지 않은 토큰 타입입니다.");
-                sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 토큰 타입입니다.");
-                return;
+                throw new RefreshTokenNotAvailable("유효하지 않은 토큰 타입입니다.");
             }
             // 토큰 검증 부분 수정
             String redisKey = "refresh:" + refresh;
@@ -84,8 +78,7 @@ public class JwtRefreshFilter extends OncePerRequestFilter {
 
             if (!hasKey) {
                 log.error("토큰이 DB에 저장되어 있지 않습니다.");
-                sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "토큰이 DB에 저장되어 있지 않습니다.");
-                return;
+                throw new RefreshTokenNotAvailable("토큰이 DB에 저장되어 있지 않습니다.");
             }
 
             // 사용자 정보 추출
@@ -96,8 +89,7 @@ public class JwtRefreshFilter extends OncePerRequestFilter {
             User user = userRepository.findUserByEmail(email);
             if (user == null) {
                 log.error("사용자가 존재하지 않습니다.");
-                sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "사용자가 존재하지 않습니다.");
-                return;
+                throw new RefreshTokenNotAvailable("사용자가 존재하지 않습니다.");
             }
 
             // 새 액세스 토큰 생성
@@ -124,17 +116,10 @@ public class JwtRefreshFilter extends OncePerRequestFilter {
 
         } catch (ExpiredJwtException e) {
             log.error("Refresh token이 만료되었습니다.");
-            sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Refresh token이 만료되었습니다.");
+            throw new RefreshTokenNotAvailable("Refresh token이 만료되었습니다.");
         } catch (Exception e) {
             log.error("Refresh token 에러", e);
-            sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error");
+            throw new RefreshTokenNotAvailable("Refresh token 에러");
         }
-    }
-
-    private void sendErrorResponse(HttpServletResponse response, int statusCode, String message) throws IOException {
-        response.setStatus(statusCode);
-        String jsonResponse = String.format("{\"error\":\"토큰 갱신 실패\", \"message\":\"%s\"}", message);
-        response.getWriter().write(jsonResponse);
-        response.getWriter().flush();
     }
 }

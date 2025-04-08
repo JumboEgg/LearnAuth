@@ -173,7 +173,6 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
                                               AuthenticationException failed)
             throws IOException, ServletException {
         log.info("로그인 실패: {}", failed.getMessage());
-
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

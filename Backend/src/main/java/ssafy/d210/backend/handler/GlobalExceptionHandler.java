@@ -3,6 +3,7 @@ package ssafy.d210.backend.handler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -24,17 +25,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DecryptedException.class)
     public ResponseEntity<ResponseErrorDto<ErrorContentDto>> handleDecryptedException(DecryptedException ex, WebRequest request) {
-        return buildError(ex, request, HttpStatus.BAD_REQUEST);
+        return buildError(ex, request, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(DuplicatedValueException.class)
     public ResponseEntity<ResponseErrorDto<ErrorContentDto>> handleDuplicatedValue(DuplicatedValueException ex, WebRequest request) {
-        return buildError(ex, request, HttpStatus.BAD_REQUEST);
+        return buildError(ex, request, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(EncryptedException.class)
     public ResponseEntity<ResponseErrorDto<ErrorContentDto>> handleEncryptedException(EncryptedException ex, WebRequest request) {
-        return buildError(ex, request, HttpStatus.BAD_REQUEST);
+        return buildError(ex, request, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(EntityIsNullException.class)
@@ -44,7 +45,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidLectureDataException.class)
     public ResponseEntity<ResponseErrorDto<ErrorContentDto>> handleInvalidLecture(InvalidLectureDataException ex, WebRequest request) {
-        return buildError(ex, request, HttpStatus.BAD_REQUEST);
+        return buildError(ex, request, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(InvalidQuizDataException.class)
@@ -76,6 +77,26 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseErrorDto<ErrorContentDto>> handleUserLectureNotFound(UserLectureNotFoundException ex, WebRequest request) {
         return buildError(ex, request, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ResponseErrorDto<ErrorContentDto>> handleBadCredentialsException(BadCredentialsException ex, WebRequest request) {
+        return buildError(ex, request, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(TokenNotInDB.class)
+    public ResponseEntity<ResponseErrorDto<ErrorContentDto>> handleTokenNotInDB(TokenNotInDB ex, WebRequest request) {
+        return buildError(ex, request, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(RefreshTokenNotAvailable.class)
+    public ResponseEntity<ResponseErrorDto<ErrorContentDto>> handleRefreshTokenNotAvailable(RefreshTokenNotAvailable ex, WebRequest request) {
+        return buildError(ex, request, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+
+
+
+
 
     private ResponseEntity<ResponseErrorDto<ErrorContentDto>> buildError(Exception ex, WebRequest request, HttpStatus status) {
         ResponseErrorDto<ErrorContentDto> errorResponse = responseUtil.buildErrorResponse(
