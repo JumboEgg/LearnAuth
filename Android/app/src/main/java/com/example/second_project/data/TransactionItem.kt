@@ -1,6 +1,9 @@
+package com.example.second_project.data
+
+import java.math.BigInteger
+
 data class TransactionItem(
-    val category: Int,
     val title: String,
     val date: String,
-    val amount: Int
+    val amount: BigInteger
 )
