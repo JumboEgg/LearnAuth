@@ -23,7 +23,7 @@ data class LectureData(
     val owned: Boolean,
     val certificate: Boolean,
     val subLectures: List<SubLecture>,
-    val cid: String
+    val cid: String?
 )
 
 data class SubLecture(
