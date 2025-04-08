@@ -13,5 +13,6 @@ data class CertificateDetailData(
     val teacherWallet: String,
     val certificateDate: String,
     val certificate: Int,
-    val qrCode: String
+    val qrCode: String,
+    val tokenId: String? = null
 )

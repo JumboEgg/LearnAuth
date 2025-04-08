@@ -9,6 +9,7 @@ import retrofit2.http.PATCH
 import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.http.Body
+import retrofit2.http.POST
 
 interface CertificateApiService {
     @GET("/api/certificate")
@@ -29,5 +30,5 @@ interface CertificateApiService {
 
 data class CertificateIssueRequest(
     val userId: Int,
-    val cid: String
+    val cid: String? = null
 )

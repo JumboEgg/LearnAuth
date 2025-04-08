@@ -60,7 +60,7 @@ class LectureAdapter(
             binding.lectureTitle.isSelected = true
             binding.lectureTeacherName.text = item.lecturer   // 강의자 정보 바인딩
             val price = decimal.format(item.price)
-            binding.lecturePrice.text = "${price}원"
+            binding.lecturePrice.text = "${price}CAT"
             
             // 첫 번째 subLecture의 URL을 사용하거나, lectureUrl을 사용
             val videoId = if (!item.subLectures.isNullOrEmpty()) {
