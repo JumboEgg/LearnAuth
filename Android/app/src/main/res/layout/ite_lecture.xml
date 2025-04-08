@@ -60,7 +60,7 @@
             android:id="@+id/progressBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="학습률 30%"
+            android:text="  "
             style="@style/semibold14"
             android:textColor="@color/text_white_blue"
             android:layout_marginTop="8dp"

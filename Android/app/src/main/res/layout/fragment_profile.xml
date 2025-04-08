@@ -41,7 +41,14 @@
                 android:text="밥테일님,"
                 style="@style/heading1"
                 android:textSize="28sp"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white"
+                android:maxWidth="230dp"
+                android:maxLines="1"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:scrollHorizontally="true"/>
 
             <TextView
                 android:id="@+id/textMent"

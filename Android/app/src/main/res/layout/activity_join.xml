@@ -5,7 +5,7 @@
     android:id="@+id/joinMainLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/loginbg">
+    android:background="@color/background_color">
 
     <ScrollView
         android:id="@+id/scrollView"
@@ -25,13 +25,12 @@
 
             <TextView
                 android:id="@+id/joinTitle"
-                style="@style/heading3"
+                style="@style/heading2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="40dp"
                 android:layout_marginTop="52dp"
                 android:text="회원가입"
-                android:textSize="24sp"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <LinearLayout
@@ -49,10 +48,10 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        style="@style/caption"
+                        style="@style/semibold16"
+                        android:textColor="@color/text_gray"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="@font/pretendard_semibold"
                         android:text="실명을 입력하세요" />
 
                     <ImageView
@@ -73,18 +72,19 @@
 
                     <EditText
                         android:id="@+id/joinName"
-                        style="@style/medium14"
+                        style="@style/body1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="5dp"
                         android:background="@drawable/seletor_radio_button"
                         android:hint="실명"
                         android:inputType="text"
                         android:paddingHorizontal="20dp"
-                        android:paddingVertical="12dp"
+                        android:paddingVertical="15dp"
                         android:singleLine="true"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:maxLength="32"/>
 
 
                     <TextView
@@ -124,10 +124,10 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        style="@style/caption"
+                        style="@style/semibold16"
+                        android:textColor="@color/text_gray"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="@font/pretendard_semibold"
                         android:text="이메일을 입력하세요" />
 
                     <ImageView
@@ -144,16 +144,17 @@
 
                 <EditText
                     android:id="@+id/joinEmail"
-                    style="@style/medium14"
+                    style="@style/body1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="5dp"
                     android:background="@drawable/seletor_radio_button"
                     android:hint="이메일"
                     android:paddingHorizontal="20dp"
-                    android:paddingVertical="12dp"
+                    android:paddingVertical="15dp"
                     android:singleLine="true"
-                    android:inputType="textEmailAddress"/>
+                    android:inputType="textEmailAddress"
+                    android:maxLength="32"/>
             </LinearLayout>
 
             <LinearLayout
@@ -171,10 +172,10 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        style="@style/caption"
+                        style="@style/semibold16"
+                        android:textColor="@color/text_gray"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="@font/pretendard_semibold"
                         android:text="비밀번호를 입력하세요" />
 
                     <ImageView
@@ -194,18 +195,19 @@
 
                     <EditText
                         android:id="@+id/joinPw"
-                        style="@style/medium14"
+                        style="@style/body1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="5dp"
                         android:background="@drawable/seletor_radio_button"
                         android:hint="비밀번호"
                         android:inputType="textPassword"
                         android:paddingHorizontal="20dp"
-                        android:paddingVertical="12dp"
+                        android:paddingVertical="15dp"
                         android:singleLine="true"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:maxLength="32"/>
 
                     <ImageButton
                         android:id="@+id/joinPwShow"
@@ -226,7 +228,7 @@
                     android:layout_height="wrap_content"
                     android:text="※ 비밀번호는 8자 이상입니다."
                     android:textColor="@color/text_gray"
-                    android:textSize="8sp"
+                    style="@style/body2"
                     android:layout_marginTop="4dp"
                     android:layout_marginLeft="8dp"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -238,7 +240,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="40dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="16dp"
                 android:orientation="vertical"
                 app:layout_constraintTop_toBottomOf="@id/joinPwContainer">
 
@@ -248,10 +250,10 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        style="@style/caption"
+                        style="@style/semibold16"
+                        android:textColor="@color/text_gray"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="@font/pretendard_semibold"
                         android:text="비밀번호를 다시 입력하세요" />
 
                     <ImageView
@@ -273,18 +275,19 @@
 
                     <EditText
                         android:id="@+id/joinPw2"
-                        style="@style/medium14"
+                        style="@style/body1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="5dp"
                         android:background="@drawable/seletor_radio_button"
                         android:hint="비밀번호 재확인"
                         android:inputType="textPassword"
                         android:paddingHorizontal="20dp"
-                        android:paddingVertical="12dp"
+                        android:paddingVertical="15dp"
                         android:singleLine="true"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:maxLength="32"/>
 
                     <ImageButton
                         android:id="@+id/joinPwShow2"
@@ -313,17 +316,17 @@
                 android:orientation="vertical"
                 app:layout_constraintTop_toBottomOf="@id/joinPw2Container">
 
+                <TextView
+                    style="@style/semibold16"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/text_gray"
+                    android:text="닉네임을 입력하세요" />
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
-
-                    <TextView
-                        style="@style/caption"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/pretendard_semibold"
-                        android:text="닉네임을 입력하세요" />
 
                     <ImageView
                         android:id="@+id/complete5"
@@ -339,30 +342,31 @@
 
                 <EditText
                     android:id="@+id/joinNickname"
-                    style="@style/medium14"
+                    style="@style/body1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="5dp"
                     android:background="@drawable/seletor_radio_button"
                     android:hint="닉네임"
                     android:paddingHorizontal="20dp"
-                    android:paddingVertical="12dp"
-                    android:singleLine="true" />
+                    android:paddingVertical="15dp"
+                    android:singleLine="true"
+                    android:maxLength="32"/>
             </LinearLayout>
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/joinBtn"
-                style="@style/heading3"
+                style="@style/heading4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="40dp"
-                android:layout_marginTop="32dp"
-                android:background="@drawable/bg_radius_12"
+                android:layout_marginTop="52dp"
+                android:background="@drawable/bg_radius_20"
                 android:backgroundTint="@color/primary_color"
                 android:text="회원가입하기"
                 android:textColor="@color/white"
-                android:textSize="20sp"
-                app:layout_constraintTop_toBottomOf="@id/joinNicknameContainer" />
+                app:layout_constraintTop_toBottomOf="@id/joinNicknameContainer"
+                android:padding="15dp"/>
         </LinearLayout>
     </ScrollView>
 
