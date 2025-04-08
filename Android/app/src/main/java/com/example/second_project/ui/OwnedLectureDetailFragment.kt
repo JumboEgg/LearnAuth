@@ -11,8 +11,10 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.Visibility
@@ -316,6 +318,10 @@ class OwnedLectureDetailFragment : Fragment() {
                 Toast.makeText(requireContext(), "신고 내용을 입력해 주세요.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+            if (content.length > 255) {
+                Toast.makeText(requireContext(), "신고 내용은 255자 이하로 작성해 주세요.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
             val report = ReportItem(
                 userId = userId,
@@ -332,6 +338,13 @@ class OwnedLectureDetailFragment : Fragment() {
                     if (response.isSuccessful) {
                         Toast.makeText(requireContext(), "신고가 접수되었습니다.", Toast.LENGTH_SHORT).show()
                         dialog.dismiss()
+                        findNavController().navigate(
+                            R.id.ownedLectureDetailFragment,
+                            bundleOf("lectureId" to lectureId),
+                            NavOptions.Builder()
+                                .setPopUpTo(R.id.nav_main, false)  // 메인 페이지는 스택에 유지
+                                .build()
+                        )
                     } else {
                         Log.e(TAG, "신고 접수 실패 - 응답 코드: ${response.code()}")  // 응답 코드 출력
                         Log.e(TAG, "신고 접수 실패 - 응답 메시지: ${response.message()}") // 기본 메시지

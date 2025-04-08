@@ -3,5 +3,14 @@
     <style name="Base.Theme.Second_project" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <!-- 텍스트 입력 커서 색상 설정 -->
+        <item name="colorControlActivated">@color/primary_color</item>
+        <item name="colorAccent">@color/primary_color</item>
+        <item name="android:textColorHighlight">@color/primary_color</item>
+        <item name="android:textSelectHandle">@color/primary_color</item>
+        <item name="android:textSelectHandleLeft">@color/primary_color</item>
+        <item name="android:textSelectHandleRight">@color/primary_color</item>
+        <item name="android:textCursorDrawable">@null</item>
+        <item name="android:textColorPrimary">@color/white</item>
     </style>
 </resources>
