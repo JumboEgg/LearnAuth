@@ -87,6 +87,10 @@ public class ReportServiceImpl implements ReportService{
     @DistributedLock(key = "#createReport")
     public ResponseSuccessDto<Void> createReport(ReportRequest request, Long userId) {
 
+        Optional<UserLecture> userLecture = userLectureRepository.findByUserIdAndLectureId(userId, request.getLectureId());
+        userLecture.get().setReport(1);
+        userLectureRepository.save(userLecture.get());
+
         List<Report> reports = paymentRatioRepository.findPaymentRatiosByLectureId(request.getLectureId()).stream()
                 .map(paymentRatio -> {
                     Report report = new Report();

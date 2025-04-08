@@ -34,6 +34,8 @@ public class QUserLecture extends EntityPathBase<UserLecture> {
 
     public final NumberPath<Long> recentLectureId = createNumber("recentLectureId", Long.class);
 
+    public final NumberPath<Integer> report = createNumber("report", Integer.class);
+
     public final QUser user;
 
     public final ListPath<UserLectureTime, QUserLectureTime> userLectureTimeList = this.<UserLectureTime, QUserLectureTime>createList("userLectureTimeList", UserLectureTime.class, QUserLectureTime.class, PathInits.DIRECT2);
