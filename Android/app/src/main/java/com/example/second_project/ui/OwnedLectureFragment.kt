@@ -63,6 +63,16 @@ class OwnedLectureFragment : Fragment() {
         viewModel.ownedLectures.observe(viewLifecycleOwner) { lectureList ->
             Log.d("OwnedLectureFragment", "Owned lectures: $lectureList")
             adapter.submitList(lectureList)
+            
+            // 데이터가 없을 때 메시지 표시
+            if (lectureList.isEmpty()) {
+                binding.emptyMessage.text = "보유한 강의가 없습니다."
+                binding.emptyMessage.visibility = View.VISIBLE
+                binding.ownedRecyclerView.visibility = View.GONE
+            } else {
+                binding.emptyMessage.visibility = View.GONE
+                binding.ownedRecyclerView.visibility = View.VISIBLE
+            }
         }
     }
     

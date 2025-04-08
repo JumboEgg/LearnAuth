@@ -58,6 +58,16 @@ class ParticipatedLectureFragment : Fragment() {
         // 뷰모델에서 참여 강의 리스트를 관찰하여 어댑터에 업데이트
         viewModel.participatedLectures.observe(viewLifecycleOwner) { lectureList ->
             adapter.submitList(lectureList)
+            
+            // 데이터가 없을 때 메시지 표시
+            if (lectureList.isEmpty()) {
+                binding.emptyMessage.text = "참여한 강의가 없습니다."
+                binding.emptyMessage.visibility = View.VISIBLE
+                binding.participatedRecyclerView.visibility = View.GONE
+            } else {
+                binding.emptyMessage.visibility = View.GONE
+                binding.participatedRecyclerView.visibility = View.VISIBLE
+            }
         }
 
         // 새 강의 등록 버튼 클릭 시 RegisterMainFragment로 이동
