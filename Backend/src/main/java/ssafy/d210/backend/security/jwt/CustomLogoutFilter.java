@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import ssafy.d210.backend.exception.service.TokenNotInDB;
 import ssafy.d210.backend.security.repository.TokenRepository;
 
 import java.io.IOException;
@@ -42,23 +43,20 @@ public class CustomLogoutFilter extends GenericFilter {
 
         if (refresh == null) {
             log.error("Refresh 토큰이 없습니다.");
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+            throw new TokenNotInDB("Refresh 토큰이 없습니다.");
         }
 
         try {
             jwtUtil.isExpired(refresh);
         } catch (ExpiredJwtException e) {
             log.error("Refresh 토큰이 만료되었습니다.");
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+            throw new TokenNotInDB("Refresh 토큰이 만료되었습니다.");
         }
 
         String category = jwtUtil.getCategory(refresh);
         if (!category.equals("refresh")) {
             log.error("Refresh 토큰이 없습니다.");
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+            throw new TokenNotInDB("Refresh 토큰이 없습니다.");
         }
 
         // 토큰 검증 부분 수정
@@ -67,8 +65,7 @@ public class CustomLogoutFilter extends GenericFilter {
 
         if (!hasKey) {
             log.error("Refresh 토큰이 DB에 없습니다.");
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+            throw new TokenNotInDB("Refresh 토큰이 DB에 없습니다.");
         }
         // Redis에서 직접 삭제
         redisTemplate.delete(redisKey);
