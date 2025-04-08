@@ -12,4 +12,17 @@
         android:id="@+id/ownedRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+
+    <TextView
+        android:id="@+id/emptyMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="보유한 강의가 없습니다."
+        android:textColor="@color/text_white_gray"
+        android:textSize="16sp"
+        android:fontFamily="@font/pretendard_medium"
+        android:visibility="gone"
+        tools:visibility="visible"/>
+
 </FrameLayout>
