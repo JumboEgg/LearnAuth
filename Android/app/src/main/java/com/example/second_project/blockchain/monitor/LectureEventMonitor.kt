@@ -2,6 +2,10 @@ package com.example.second_project.blockchain.monitor;
 
 import io.reactivex.rxjava3.core.Flowable
 import android.util.Log
+import com.example.second_project.blockchain.LecturePurchaseEvent
+import com.example.second_project.blockchain.TransactionEvent
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.web3j.abi.EventEncoder
 import org.web3j.abi.datatypes.Event
 import org.web3j.abi.datatypes.Utf8String
@@ -14,19 +18,16 @@ import org.web3j.tx.Contract
 import org.web3j.tx.gas.ContractGasProvider
 import java.math.BigInteger
 import org.web3j.abi.TypeReference
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 private const val TAG = "LectureSystem_야옹"
 
-data class TransactionEvent(
-    val userId: BigInteger, //거래자 ID
-    val amount: BigInteger, // 거래 금액 (토큰단위)
-    val activityType: String //거래 유형 (입/출금)
-)
-
-data class LecturePurchaseEvent(
-    val userId: BigInteger, // 강의구매자
-    val amount: BigInteger, // 강의구매비용
-    val lectureTitle: String // 구매한 강의 제목
+data class ParsedEvent(
+    val title: String,
+    val amount: BigInteger,
+    val date: String
 )
 
 class LectureSystem(
@@ -65,7 +66,7 @@ class LectureSystem(
     }
 
     // 스마트 컨트랙트에서 발생하는 이벤트 목록 정의
-    private val events = mapOf(
+    val events = mapOf(
         "TokenDeposited" to Event(
             "TokenDeposited",
             listOf(
@@ -126,6 +127,8 @@ class LectureSystem(
             )
         ).map { log ->
             val eventValues = Contract.staticExtractEventParameters(event, log)
+            Log.d(TAG, "tokenWithdrawnEventFlowable: ${eventValues.indexedValues}")
+            Log.d(TAG, "tokenWithdrawnEventFlowable: ${eventValues.nonIndexedValues}")
             val transactionEvent = TransactionEvent(
                 userId = eventValues.indexedValues[0].value as BigInteger,
                 amount = eventValues.nonIndexedValues[0].value as BigInteger,
@@ -155,6 +158,51 @@ class LectureSystem(
             )
             Log.d(TAG, "LecturePurchased: ${lecturePurchaseEvent.amount}, UserId: ${lecturePurchaseEvent.userId}, Title: ${lecturePurchaseEvent.lectureTitle}")
             lecturePurchaseEvent
+        }
+    }
+
+    suspend fun getEventLogs(
+        eventName: String,
+        userId: BigInteger,
+        web3j: Web3j,
+        contractAddress: String,
+        fromBlock: DefaultBlockParameter,
+        toBlock: DefaultBlockParameter
+    ): List<ParsedEvent> = withContext(Dispatchers.IO) {
+        val event = events[eventName] ?: return@withContext emptyList()
+        val filter = org.web3j.protocol.core.methods.request.EthFilter(fromBlock, toBlock, contractAddress).apply {
+            addSingleTopic(EventEncoder.encode(event))
+            // userId 필터 (32자리 16진수 문자열로 패딩)
+            addOptionalTopics("0x" + userId.toString(16).padStart(64, '0'))
+        }
+        val logs = web3j.ethGetLogs(filter).send().logs
+            .mapNotNull { it as? org.web3j.protocol.core.methods.response.Log }
+        logs.mapNotNull { log ->
+            try {
+                val eventValues = staticExtractEventParameters(event, log)
+                // 첫번째 non-indexed 값: 거래 금액
+                val rawAmount = eventValues.nonIndexedValues[0].value as BigInteger
+                val amount = rawAmount.divide(BigInteger.TEN.pow(18))
+                // 이벤트 종류에 따라 title 결정
+                val title: String = when (eventName) {
+                    "TokenDeposited" -> "토큰 충전"
+                    "TokenWithdrawn" -> "토큰 출금"
+                    "LecturePurchased" -> eventValues.nonIndexedValues[1].value as String
+                    else -> ""
+                }
+                // 로그가 포함된 블록의 타임스탬프를 가져와 날짜 형식으로 변환
+                val block = web3j.ethGetBlockByHash(log.blockHash, false).send()
+                val timestamp = block.block.timestamp.toLong() * 1000
+                val date = SimpleDateFormat("yyyy / MM / dd", Locale.getDefault()).format(Date(timestamp))
+                ParsedEvent(
+                    title = title,
+                    amount = amount,
+                    date = date
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "과거 로그 파싱 실패: ${e.message}")
+                null
+            }
         }
     }
 }

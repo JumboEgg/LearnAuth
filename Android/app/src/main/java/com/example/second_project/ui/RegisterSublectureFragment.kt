@@ -130,8 +130,8 @@ class RegisterSublectureFragment: Fragment(), RegisterStepSavable {
                 Toast.makeText(requireContext(), "${index + 1}번째 강의 제목은 32자 이하여야 합니다.", Toast.LENGTH_SHORT).show()
                 return false
             }
-            if (lecture.inputUrl.length > 100) {
-                Toast.makeText(requireContext(), "${index + 1}번째 강의 링크는 100자 이하여야 합니다.", Toast.LENGTH_SHORT).show()
+            if (lecture.inputUrl.length > 50) {
+                Toast.makeText(requireContext(), "${index + 1}번째 강의 링크는 50자 이하여야 합니다.", Toast.LENGTH_SHORT).show()
                 return false
             }
 

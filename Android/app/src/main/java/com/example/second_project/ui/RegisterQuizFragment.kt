@@ -1,6 +1,7 @@
 package com.example.second_project.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +16,8 @@ import com.example.second_project.data.model.dto.RegisterTempQuiz
 import com.example.second_project.databinding.FragmentRegisterQuizBinding
 import com.example.second_project.interfaces.RegisterStepSavable
 import com.example.second_project.utils.ApiKeyProvider
+import com.example.second_project.utils.KeyboardUtils
+import com.example.second_project.utils.LoadingOverlayHelper
 import com.example.second_project.viewmodel.IpfsUploadState
 import com.example.second_project.viewmodel.RegisterViewModel
 import kotlinx.coroutines.launch
@@ -25,7 +28,6 @@ class RegisterQuizFragment: Fragment(), RegisterStepSavable {
     private val binding get() = _binding!!
     private lateinit var quizAdapter: RegisterQuizAdapter
     private val viewModel: RegisterViewModel by activityViewModels()
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,6 +55,12 @@ class RegisterQuizFragment: Fragment(), RegisterStepSavable {
 
 
         binding.btnDone.setOnClickListener {
+
+            requireActivity().currentFocus?.let {
+                KeyboardUtils.clearFocusAndHideKeyboard(it)
+            }
+
+            if (!saveDataToViewModel()) return@setOnClickListener
             viewModel.tempQuizzes.clear()
             viewModel.tempQuizzes.addAll(quizAdapter.getItems())
 
@@ -82,16 +90,24 @@ class RegisterQuizFragment: Fragment(), RegisterStepSavable {
                 is IpfsUploadState.Loading -> {
                     binding.btnDone.isEnabled = false
                     binding.btnDone.text = "업로드 중..."
+//                    (activity as? RegisterMainFragment)?.showGlobalLoading()
+                    (parentFragment as? RegisterMainFragment)?.also {
+                        Log.d("RegisterQuizFragment", "✅ showGlobalLoading 호출됨")
+                        it.showGlobalLoading()
+                    }
+
                 }
                 is IpfsUploadState.Success -> {
                     binding.btnDone.isEnabled = true
                     binding.btnDone.text = "강의 등록 완료하기"
                     // IPFS 업로드 성공 후 강의 등록 진행
                     registerLecture()
+                    (parentFragment as? RegisterMainFragment)?.hideGlobalLoading()
                 }
                 is IpfsUploadState.Error -> {
                     binding.btnDone.isEnabled = true
                     binding.btnDone.text = "강의 등록 완료하기"
+                    (activity as? RegisterMainFragment)?.hideGlobalLoading()
                     Toast.makeText(requireContext(), "파일 업로드 실패: ${state.message}", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -126,9 +142,11 @@ class RegisterQuizFragment: Fragment(), RegisterStepSavable {
     private fun registerLecture() {
         viewModel.registerLecture(
             onSuccess = {
-                Toast.makeText(requireContext(), "강의가 성공적으로 등록되었습니다!", Toast.LENGTH_SHORT).show()
-                viewModel.reset()
-                requireActivity().supportFragmentManager.popBackStack()
+                if (isAdded) {
+                    Toast.makeText(requireContext(), "강의가 성공적으로 등록되었습니다!", Toast.LENGTH_SHORT).show()
+                    viewModel.reset()
+                    requireActivity().supportFragmentManager.popBackStack()
+                }
             },
             onError = { message ->
                 Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()

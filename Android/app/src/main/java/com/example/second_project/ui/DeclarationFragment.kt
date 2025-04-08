@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.second_project.UserSession
 import com.example.second_project.adapter.ReportAdapter
 import com.example.second_project.data.DeclarationItem
 import com.example.second_project.data.model.dto.response.ReportDetailResponse
@@ -52,7 +53,7 @@ class DeclarationFragment : Fragment() {
         }
 
         // 예시: 로그인한 사용자의 userId를 사용 (UserSession를 사용하거나 직접 1로 지정)
-        val userID = 1 // 혹은 UserSession.userId
+        val userID = UserSession.userId // 혹은 UserSession.userId
         viewModel.fetchReports(userID)
 
         viewModel.reportList.observe(viewLifecycleOwner) { list ->

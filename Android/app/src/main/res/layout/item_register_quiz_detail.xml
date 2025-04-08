@@ -73,6 +73,14 @@
                     android:singleLine="true"
                     android:maxLength="100"/>
             </com.google.android.material.textfield.TextInputLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="100자 이하의 문제만 가능합니다"
+                style="@style/body2"
+                android:textColor="@color/text_gray"
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="5dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -81,6 +89,14 @@
                 style="@style/heading3"
                 android:textColor="@color/text_gray"
                 android:layout_marginTop="15dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="100자 이하의 선택지만 가능합니다"
+                style="@style/body2"
+                android:textColor="@color/text_gray"
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="5dp"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -233,6 +249,7 @@
 
             </LinearLayout>
 
+
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnDeleteSubLecture"
                 android:layout_width="wrap_content"
@@ -247,6 +264,7 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="20dp"
                 android:visibility="gone"/>
+
         </LinearLayout>
         <View
             android:layout_width="match_parent"

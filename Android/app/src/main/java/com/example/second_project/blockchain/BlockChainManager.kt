@@ -2,20 +2,49 @@ package com.example.second_project.blockchain
 
 import android.util.Log
 import com.example.second_project.blockchain.monitor.LectureSystem
+import com.example.second_project.data.TransactionItem
+import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.core.FlowableEmitter
+import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.web3j.abi.EventEncoder
+import org.web3j.abi.datatypes.Event
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.WalletUtils
 import org.web3j.protocol.Web3j
+import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.DefaultBlockParameterName
+import org.web3j.protocol.core.methods.request.EthFilter
+import org.web3j.protocol.core.methods.response.Log as Web3Log
 import org.web3j.protocol.http.HttpService
+import org.web3j.tx.Contract
 import org.web3j.tx.RawTransactionManager
 import org.web3j.tx.TransactionManager
+import org.web3j.tx.gas.ContractGasProvider
 import java.io.File
 import java.math.BigInteger
 
 private const val TAG = "BlockChainManager_야옹"
 
+// ==========================
+// 이벤트 DTO 예시 (원하는 대로 커스텀 가능)
+// ==========================
+data class TransactionEvent(
+    val userId: BigInteger,
+    val amount: BigInteger,
+    val activityType: String // 예: "Deposit", "Withdraw"
+)
+
+data class LecturePurchaseEvent(
+    val userId: BigInteger,
+    val amount: BigInteger,
+    val lectureTitle: String
+)
+
+/**
+ * 지갑, 컨트랙트 로드, 이벤트를 수동(replay)으로 관리
+ */
 class BlockChainManager(
     private val walletPassword: String,
     private val walletFile: File
@@ -24,25 +53,24 @@ class BlockChainManager(
     val web3j: Web3j = Web3j.build(HttpService("https://rpc-amoy.polygon.technology/"))
     val credentials: Credentials = WalletUtils.loadCredentials(walletPassword, walletFile)
 
-    // ✅ EIP-155 적용된 트랜잭션 매니저 사용
-    private val chainId = 80002L // Polygon Amoy 테스트넷
+    // Amoy 테스트넷 체인ID
+    private val chainId = 80002L
     private val txManager: TransactionManager = RawTransactionManager(web3j, credentials, chainId)
-    
-    // 고가스 제공자 사용
-    private val gasProvider = HighGasProvider()
+    private val gasProvider: ContractGasProvider = HighGasProvider()
 
+    // 컨트랙트 인스턴스들
     val lectureSystem: LectureSystem
     val catToken: CATToken
     val forwarder: LectureForwarder
 
     init {
+        // 실제 배포 주소 (예시는 가짜)
         val addresses = mapOf(
             "LectureForwarder" to "0x8424d5F766121B16c0d2F5d0cf8aC4594aC62Fe8",
-            "CATToken" to "0x02078287108e640e6Cc2da073870763970E08e95",
-            "LectureSystem" to "0xeE2dD174b049953495A246A5197E3e1D9929000D"
+            "CATToken"         to "0x02078287108e640e6Cc2da073870763970E08e95",
+            "LectureSystem"    to "0xeE2dD174b049953495A246A5197E3e1D9929000D"
         )
 
-        // ✅ txManager로 EIP-155 트랜잭션 실행
         lectureSystem = LectureSystem.load(
             addresses["LectureSystem"]!!,
             web3j,
@@ -63,9 +91,172 @@ class BlockChainManager(
         )
     }
 
+    /**
+     * (A) "TokenDeposited" 과거+미래 로그 Flowable (수동 방식)
+     *  - fromBlock ~ toBlock 의 과거 로그는 ethGetLogs()로
+     *  - 앞으로 새로 발생하는 로그는 ethLogFlowable()로
+     */
+    fun subscribePastAndFutureTokenDepositedManual(
+        fromBlock: DefaultBlockParameter,
+        toBlock: DefaultBlockParameter
+    ): Flowable<TransactionEvent> {
+        val event = lectureSystem.events["TokenDeposited"] ?: return Flowable.empty()
+
+        // 1) EthFilter 설정
+        val filter = EthFilter(fromBlock, toBlock, lectureSystem.contractAddress)
+            .addSingleTopic(EventEncoder.encode(event))
+        // 만약 userId별로 필터링하고 싶으면 addOptionalTopics("0x123abc...") 등을 추가
+
+        // 2) Flowable 수동 생성
+        return Flowable.create({ emitter: FlowableEmitter<TransactionEvent> ->
+            try {
+                // ------------------------------------------------
+                // (a) 과거 로그: ethGetLogs() 로 한번에 조회
+                // ------------------------------------------------
+                val logsResponse = web3j.ethGetLogs(filter).send()
+                val pastLogs = logsResponse.logs.mapNotNull { it as? Web3Log }
+
+                // 과거 로그 파싱 후 emitter로 전달
+                for (log in pastLogs) {
+                    val ev = Contract.staticExtractEventParameters(event, log)
+                    val userId = ev.indexedValues[0].value as BigInteger
+                    val amount = ev.nonIndexedValues[0].value as BigInteger
+                    val activityType = ev.nonIndexedValues[1].value as String
+
+                    emitter.onNext(TransactionEvent(userId, amount, activityType))
+                }
+
+                // ------------------------------------------------
+                // (b) 미래(실시간) 로그: ethLogFlowable()로 구독
+                // ------------------------------------------------
+                val futureFlowable = web3j.ethLogFlowable(filter)
+
+                // 실시간 구독
+                futureFlowable.subscribe(
+                    { newLog ->
+                        val ev = Contract.staticExtractEventParameters(event, newLog)
+                        val userId = ev.indexedValues[0].value as BigInteger
+                        val amount = ev.nonIndexedValues[0].value as BigInteger
+                        val activityType = ev.nonIndexedValues[1].value as String
+
+                        emitter.onNext(TransactionEvent(userId, amount, activityType))
+                    },
+                    { error ->
+                        emitter.onError(error)
+                    }
+                )
+
+            } catch (e: Exception) {
+                emitter.onError(e)
+            }
+        }, io.reactivex.rxjava3.core.BackpressureStrategy.BUFFER)
+        // 필요하다면 .subscribeOn(Schedulers.io()) / .observeOn(AndroidSchedulers.mainThread()) 등
+    }
+
+
+    /**
+     * (B) "TokenWithdrawn" 과거+미래 로그 Flowable (수동 방식)
+     */
+    fun subscribePastAndFutureTokenWithdrawnManual(
+        fromBlock: DefaultBlockParameter,
+        toBlock: DefaultBlockParameter
+    ): Flowable<TransactionEvent> {
+        val event = lectureSystem.events["TokenWithdrawn"] ?: return Flowable.empty()
+
+        val filter = EthFilter(fromBlock, toBlock, lectureSystem.contractAddress)
+            .addSingleTopic(EventEncoder.encode(event))
+
+        return Flowable.create({ emitter: FlowableEmitter<TransactionEvent> ->
+            try {
+                // 1) 과거 로그
+                val logsResponse = web3j.ethGetLogs(filter).send()
+                val pastLogs = logsResponse.logs.mapNotNull { it as? Web3Log }
+                for (log in pastLogs) {
+                    val ev = Contract.staticExtractEventParameters(event, log)
+                    val userId = ev.indexedValues[0].value as BigInteger
+                    val amount = ev.nonIndexedValues[0].value as BigInteger
+                    val activityType = ev.nonIndexedValues[1].value as String
+
+                    emitter.onNext(TransactionEvent(userId, amount, activityType))
+                }
+
+                // 2) 실시간 로그
+                val futureFlowable = web3j.ethLogFlowable(filter)
+                futureFlowable.subscribe(
+                    { newLog ->
+                        val ev = Contract.staticExtractEventParameters(event, newLog)
+                        val userId = ev.indexedValues[0].value as BigInteger
+                        val amount = ev.nonIndexedValues[0].value as BigInteger
+                        val activityType = ev.nonIndexedValues[1].value as String
+
+                        emitter.onNext(TransactionEvent(userId, amount, activityType))
+                    },
+                    { error -> emitter.onError(error) }
+                )
+
+            } catch (e: Exception) {
+                emitter.onError(e)
+            }
+        }, io.reactivex.rxjava3.core.BackpressureStrategy.BUFFER)
+    }
+
+
+    /**
+     * (C) "LecturePurchased" 과거+미래 로그 Flowable (수동 방식)
+     */
+    fun subscribePastAndFutureLecturePurchasedManual(
+        fromBlock: DefaultBlockParameter,
+        toBlock: DefaultBlockParameter
+    ): Flowable<LecturePurchaseEvent> {
+        val event = lectureSystem.events["LecturePurchased"] ?: return Flowable.empty()
+
+        val filter = EthFilter(fromBlock, toBlock, lectureSystem.contractAddress)
+            .addSingleTopic(EventEncoder.encode(event))
+
+        return Flowable.create({ emitter: FlowableEmitter<LecturePurchaseEvent> ->
+            try {
+                // 1) 과거 로그
+                val logsResponse = web3j.ethGetLogs(filter).send()
+                val pastLogs = logsResponse.logs.mapNotNull { it as? Web3Log }
+                for (log in pastLogs) {
+                    val ev = Contract.staticExtractEventParameters(event, log)
+                    val userId = ev.indexedValues[0].value as BigInteger
+                    val amount = ev.nonIndexedValues[0].value as BigInteger
+                    val title = ev.nonIndexedValues[1].value as String
+
+                    emitter.onNext(LecturePurchaseEvent(userId, amount, title))
+                }
+
+                // 2) 미래(실시간)
+                val futureFlowable = web3j.ethLogFlowable(filter)
+                futureFlowable.subscribe(
+                    { newLog ->
+                        val ev = Contract.staticExtractEventParameters(event, newLog)
+                        val userId = ev.indexedValues[0].value as BigInteger
+                        val amount = ev.nonIndexedValues[0].value as BigInteger
+                        val title = ev.nonIndexedValues[1].value as String
+
+                        emitter.onNext(LecturePurchaseEvent(userId, amount, title))
+                    },
+                    { error -> emitter.onError(error) }
+                )
+
+            } catch (e: Exception) {
+                emitter.onError(e)
+            }
+        }, io.reactivex.rxjava3.core.BackpressureStrategy.BUFFER)
+    }
+
+
+    // ==================================
+    // 아래는 기존 코드 (필요에 따라 유지)
+    // ==================================
+
     suspend fun getTransactionHistory(userId: BigInteger) {
         withContext(Dispatchers.IO) {
-            // 이벤트 구독
+            // 이 함수는 earliest~latest 전체 구독이라
+            // 퍼블릭 노드에서 filter not found가 빈번히 발생 가능
+            // => 필요 없다면 제거 권장
             lectureSystem.tokenDepositedEventFlowable(
                 DefaultBlockParameterName.EARLIEST,
                 DefaultBlockParameterName.LATEST
@@ -77,30 +268,7 @@ class BlockChainManager(
                 },
                 { error -> Log.e(TAG, "Error fetching deposits", error) }
             )
-
-            lectureSystem.tokenWithdrawnEventFlowable(
-                DefaultBlockParameterName.EARLIEST,
-                DefaultBlockParameterName.LATEST
-            ).subscribe(
-                { event ->
-                    if (event.userId == userId) {
-                        Log.d(TAG, "💸 Withdraw: ${event.amount}, ${event.activityType}")
-                    }
-                },
-                { error -> Log.e(TAG, "Error fetching withdrawals", error) }
-            )
-
-            lectureSystem.lecturePurchasedEventFlowable(
-                DefaultBlockParameterName.EARLIEST,
-                DefaultBlockParameterName.LATEST
-            ).subscribe(
-                { event ->
-                    if (event.userId == userId) {
-                        Log.d(TAG, "🎓 Purchase: ${event.amount}, ${event.lectureTitle}")
-                    }
-                },
-                { error -> Log.e(TAG, "Error fetching purchases", error) }
-            )
+            // 이하 생략...
         }
     }
 
