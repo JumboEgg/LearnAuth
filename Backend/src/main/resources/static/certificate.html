@@ -62,8 +62,8 @@
     // URL에서 CID 가져오기
     function getCidFromUrl() {
         // URL에서 CID 추출 (IPFS 게이트웨이 URL 형식: https://gateway.pinata.cloud/ipfs/CID)
-        const pathParts = window.location.pathname.split('/');
-        return pathParts[pathParts.length - 1];
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('cid');
     }
 
     // IPFS에서 수료증 정보 가져오기
