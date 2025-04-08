@@ -7,18 +7,22 @@ import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.request.report.ReportRequest;
 import ssafy.d210.backend.dto.response.report.ReportDetailResponse;
 import ssafy.d210.backend.dto.response.report.ReportResponse;
+import ssafy.d210.backend.entity.PaymentRatio;
 import ssafy.d210.backend.entity.Report;
 import ssafy.d210.backend.entity.UserLecture;
 import ssafy.d210.backend.enumeration.response.HereStatus;
 import ssafy.d210.backend.exception.service.EntityIsNullException;
 import ssafy.d210.backend.exception.service.LectureNotFoundException;
 import ssafy.d210.backend.redis.DistributedLock;
+import ssafy.d210.backend.repository.PaymentRatioRepository;
 import ssafy.d210.backend.repository.ReportRepository;
 import ssafy.d210.backend.repository.UserLectureRepository;
 import ssafy.d210.backend.repository.UserRepository;
 import ssafy.d210.backend.util.ResponseUtil;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +33,7 @@ public class ReportServiceImpl implements ReportService{
     // report data db 조회, 저장 위한 repository
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
+    private final PaymentRatioRepository paymentRatioRepository;
     // 현재 로그인한 사용자의 UserLecture를 조회하기 위한 Repository : 구현 필요
     // JWT -> 현재 사용자 ID : 그 사용자 ID로 UserLecture 조회 "UserLectureRepository"
     // Long currentUserId = jwtUtil.getCurrentUserId(); -> 이런 식으로 id 추출
@@ -40,18 +45,35 @@ public class ReportServiceImpl implements ReportService{
     public ResponseSuccessDto<List<ReportResponse>> getReports(Long userId) {
         // ReportRequest, 200ok
         // userId를 이용해 UserLecture와 연관된 Report들 조회 (ReportRepository에 커스텀 메서드 추가)
-        List<Report> reports = findReports(userId);
-
-        System.out.println("조회된 신고 개수 = " + reports.size());
-        // 클라이언트에 반환할 DTO 리스트 만드는 변수
-        List<ReportResponse> responseList = reports.stream()
-                .map(report -> new ReportResponse(
-                        report.getId(),
-                        report.getUserLecture().getLecture().getTitle(),
-                        report.getReportType()))
+        List<PaymentRatio> paymentRatios = findPaymentRatio(userId);
+        List<UserLecture> userLectures = userLectureRepository.findAllByUserId(userId);
+        List<ReportResponse> responseList = paymentRatios.stream()
+                .filter(paymentRatio -> userLectures.stream()
+                        .anyMatch(userLecture ->
+                                Objects.equals(paymentRatio.getLecture().getId(), userLecture.getLecture().getId()) &&
+                                        userLecture.getReport() != null &&
+                                        userLecture.getReport().getId() != null))
+                .flatMap(paymentRatio -> userLectures.stream()
+                        .filter(userLecture ->
+                                Objects.equals(paymentRatio.getLecture().getId(), userLecture.getLecture().getId()) &&
+                                        userLecture.getReport() != null &&
+                                        userLecture.getReport().getId() != null)
+                        .map(userLecture -> {
+                            Optional<Report> report = reportRepository.findById(userLecture.getReport().getId());
+                            return report.map(r -> new ReportResponse(
+                                    r.getId(),
+                                    userLecture.getLecture().getTitle(),
+                                    r.getReportType()
+                            )).orElse(null);
+                        })
+                        .filter(Objects::nonNull))
                 .collect(Collectors.toList());
 
         return responseUtil.successResponse(responseList, HereStatus.SUCCESS_REPORT_LIST);
+    }
+
+    private List<PaymentRatio> findPaymentRatio(Long userId) {
+        return paymentRatioRepository.findPaymentRatiosByUserId(userId);
     }
 
     @Transactional(readOnly = true)
