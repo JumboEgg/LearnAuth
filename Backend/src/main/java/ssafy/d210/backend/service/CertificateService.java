@@ -27,5 +27,5 @@ public interface CertificateService {
     public BigInteger issueCertificate(Long userId, String cid) throws Exception;
 
     // 수료증 저장하기
-    public ResponseSuccessDto<CertificateToken> saveCertificate(BigInteger tokenId, Long lectureId, Long userId);
+    public ResponseSuccessDto<CertificateToken> saveCertificate(BigInteger tokenId, Long lectureId, Long userId, String cid);
 }

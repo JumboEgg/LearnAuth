@@ -61,6 +61,6 @@ public class CertificateController {
             @PathVariable("lectureId") Long lectureId
     ) throws Exception {
         BigInteger tokenId = certificateService.issueCertificate(request.getUserId(), request.getCid());
-        return ResponseEntity.ok(certificateService.saveCertificate(tokenId, lectureId, request.getUserId()));
+        return ResponseEntity.ok(certificateService.saveCertificate(tokenId, lectureId, request.getUserId(), request.getCid()));
     }
 }
