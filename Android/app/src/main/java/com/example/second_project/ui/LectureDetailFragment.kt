@@ -6,6 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.animation.Animation
+import android.view.animation.TranslateAnimation
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -16,6 +18,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -49,6 +52,7 @@ private const val TAG = "LectureDetailFragment_야옹"
 class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
     private var _binding: FragmentLectureDetailBinding? = null
     private val binding get() = _binding!!
+    private var isOverlayVisible = false
     private val viewModel: LectureDetailViewModel by viewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -172,6 +176,8 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
             Log.d(TAG, "블록체인 매니저 준비 완료.")
 
             showPaymentConfirmDialog(BigInteger.valueOf(price.toLong())) {
+                // 로딩 시작
+                showLoadingOverlay()
                 lifecycleScope.launch {
                     try {
                         Log.d(TAG, "구매 트랜잭션 준비 시작")
@@ -461,17 +467,21 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                                         val purchaseEndTime = System.currentTimeMillis()
                                         val elapsedTime = purchaseEndTime - purchaseStartTime
                                         Log.d(TAG, "강의 구매 성공! 소요 시간: $elapsedTime ms")
-
+                                        // 로딩 끄기
+                                        hideLoadingOverlay()
+                                        findNavController().navigate(
+                                            R.id.ownedLectureDetailFragment,
+                                            bundleOf("lectureId" to lectureId),
+                                            NavOptions.Builder()
+                                                .setPopUpTo(R.id.lectureDetailFragment, true)
+                                                .build()
+                                        )
                                         Log.d(TAG, "🎉 강의 구매 성공")
                                         Toast.makeText(
                                             requireContext(),
                                             "강의 구매 완료!",
                                             Toast.LENGTH_SHORT
                                         ).show()
-                                        findNavController().navigate(
-                                            R.id.action_lectureDetailFragment_self,
-                                            bundleOf("lectureId" to lectureId)
-                                        )
                                     } else {
                                         Log.e(TAG, "서버 오류: ${response.code()}")
                                         Log.e(TAG, "서버 응답 바디: ${response.errorBody()?.string()}")
@@ -565,5 +575,81 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
         super.onDestroyView()
         _binding = null
         Log.d(TAG, "onDestroyView 호출됨.")
+    }
+
+    // ---------------------------------------------
+    // (A) 오버레이 + 고양이 애니메이션
+    // ---------------------------------------------
+    private fun showLoadingOverlay() {
+        isOverlayVisible = true
+        binding.loadingOverlay.visibility = View.VISIBLE
+    }
+
+    private fun hideLoadingOverlay() {
+        isOverlayVisible = false
+        // 애니메이션 정지
+        binding.catImageView.clearAnimation()
+        // 오버레이 숨기기
+        binding.loadingOverlay.visibility = View.GONE
+    }
+
+    /**
+     * 고양이 ImageView를 “화면 왼쪽→오른쪽”으로만 계속 달리게 하는 메서드
+     * (한 번 달린 후 애니메이션 끝나면, 다시 왼쪽으로 복귀 후 반복)
+     */
+    private fun startCatAnimation() {
+        // 레이아웃 파악 후에 계산하기 위해 post 사용
+        binding.loadingOverlay.post {
+            // 현재 오버레이 폭
+            val parentWidth = binding.loadingOverlay.width
+            // 고양이 뷰 폭
+            val catWidth = binding.catImageView.width
+
+            if (parentWidth == 0 || catWidth == 0) {
+                Log.w("ChargeFragment", "화면/고양이 폭 측정 실패 → 기본 이동값 사용")
+                doSingleRun(600f) // 임시 하드코딩
+            } else {
+                val distanceX = (parentWidth - catWidth).toFloat()
+                doSingleRun(distanceX)
+            }
+        }
+    }
+
+    /**
+     * “왼쪽→오른쪽” 단 한 번 달린 뒤, 애니메이션이 끝나면
+     * 다시 왼쪽 위치로 순간 이동 & 재시작하여 계속 반복.
+     */
+    private fun doSingleRun(distanceX: Float) {
+        if (!isOverlayVisible) return  // 이미 오버레이가 사라졌다면 중단
+
+        // 고양이를 왼쪽 시작 위치로 초기화
+        binding.catImageView.translationX = 0f
+
+        // “왼쪽(0f) → 오른쪽(distanceX)” 한 번 이동
+        val anim = TranslateAnimation(
+            Animation.ABSOLUTE, 0f,
+            Animation.ABSOLUTE, distanceX,
+            Animation.ABSOLUTE, 0f,
+            Animation.ABSOLUTE, 0f
+        ).apply {
+            duration = 2000  // 이동 시간 (2초 예시)
+            fillAfter = true // 애니메이션 끝나면 그 위치에 유지
+            setAnimationListener(object : Animation.AnimationListener {
+                override fun onAnimationStart(animation: Animation) {}
+                override fun onAnimationRepeat(animation: Animation) {}
+                override fun onAnimationEnd(animation: Animation) {
+                    // 고양이가 오른쪽까지 도달한 뒤
+                    // 다시 왼쪽으로 순간이동 후, 새 애니메이션 반복
+                    binding.catImageView.post {
+                        if (isOverlayVisible) {
+                            // 다음 달리기 시작
+                            doSingleRun(distanceX)
+                        }
+                    }
+                }
+            })
+        }
+
+        binding.catImageView.startAnimation(anim)
     }
 }
