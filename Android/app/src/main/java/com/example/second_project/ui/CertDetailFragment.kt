@@ -51,6 +51,7 @@ import java.net.URLDecoder
 import java.util.regex.Pattern
 import androidx.core.content.res.ResourcesCompat
 import android.graphics.Bitmap
+import com.example.second_project.network.ErrorResponse
 
 private const val TAG = "CertDetailFragment_야옹"
 private const val IPFS_GATEWAY_URL = "https://j12d210.p.ssafy.io/ipfs"
@@ -101,19 +102,15 @@ class CertDetailFragment : Fragment() {
                 // QR 코드 이미지 로딩: detail.qrCode가 이미지 URL인 경우 Glide 사용
                 if (detail.certificate != null && detail.certificate != 0 ) {
                     isCertificateIssued = true
-                    // currentCid = detail.certificate.toString() // 이 부분 제거
-
-                    // QR 코드 이미지가 이미 생성되어 있지 않은 경우에만 Glide로 로딩
-                    if (binding.imgQR.drawable == null) {
-                        // QR 코드 이미지 로딩
-                        Glide.with(this)
-                            .load(detail.qrCode)
-                            .into(binding.imgQR)
-                    }
-
-                    // QR 코드 클릭 이벤트 설정
-                    binding.imgQR.setOnClickListener {
-                        showQrCodeDialog(detail.qrCode)
+                    
+                    // QR 코드 URL이 있는 경우 (CID 값)
+                    if (detail.qrCode.isNotEmpty()) {
+                        // CID를 사용하여 QR 코드 생성
+                        generateQrCodeFromCid(detail.qrCode)
+                    } else {
+                        // QR 코드 URL이 없는 경우 직접 생성
+                        val cid = detail.certificate.toString()
+                        generateQrCodeFromCid(cid)
                     }
 
                     // 임시 수료증 텍스트 변경
@@ -262,8 +259,15 @@ class CertDetailFragment : Fragment() {
                     Toast.makeText(requireContext(), "QR 코드를 생성할 수 없습니다.", Toast.LENGTH_SHORT).show()
                 }
             } else {
-                Log.e(TAG, "showQrCodeDialog: URL에서 CID를 추출할 수 없음: $qrCodeUrl")
-                Toast.makeText(requireContext(), "QR 코드 URL이 올바르지 않습니다.", Toast.LENGTH_SHORT).show()
+                // qrCodeUrl이 직접 CID인 경우
+                val qrCodeBitmap = QrCodeUtils.generateQrCode(IpfsUtils.createQrCodeUrl(qrCodeUrl))
+                qrCodeBitmap?.let { 
+                    dialogBinding.imgQrCodeDialog.setImageBitmap(it)
+                    Log.d(TAG, "QR 코드 다이얼로그에 이미지 설정 성공 (직접 CID)")
+                } ?: run {
+                    Log.e(TAG, "showQrCodeDialog: QR코드 생성 실패")
+                    Toast.makeText(requireContext(), "QR 코드를 생성할 수 없습니다.", Toast.LENGTH_SHORT).show()
+                }
             }
         } catch (e: Exception) {
             Log.e(TAG, "showQrCodeDialog: QR코드 생성 중 오류 발생 ${e.message}", e)
@@ -369,23 +373,77 @@ class CertDetailFragment : Fragment() {
                 if (cid != null) {
                     Log.d(TAG, "IPFS 업로드 성공: CID = $cid")
                     
+                    // 요청 본문 생성
+                    val requestBody = CertificateIssueRequest(
+                        userId = userId,
+                        cid = cid
+                    )
+                    
+                    // 요청 본문 로깅
+                    Log.d(TAG, "수료증 발급 요청: lectureId=$lectureId, userId=$userId, cid=$cid")
+                    Log.d(TAG, "요청 본문: ${requestBody.toString()}")
+                    
                     // 백엔드 API로 수료증 발급 요청 (CID 포함)
                     val certResponse = withContext(Dispatchers.IO) {
-                        ApiClient.certificateApiService.issueCertificate(
-                            lectureId = lectureId,
-                            requestBody = CertificateIssueRequest(
-                                userId = userId,
-                                cid = cid
-                            )
-                        ).execute()
+                        try {
+                            val response = ApiClient.certificateApiService.issueCertificate(
+                                lectureId = lectureId,
+                                requestBody = requestBody
+                            ).execute()
+                            
+                            // 응답 로깅
+                            Log.d(TAG, "응답 코드: ${response.code()}")
+                            Log.d(TAG, "응답 메시지: ${response.message()}")
+                            Log.d(TAG, "응답 헤더: ${response.headers()}")
+                            
+                            if (response.isSuccessful) {
+                                Log.d(TAG, "응답 본문: ${response.body()}")
+                                response.body()?.let { issueResponse ->
+                                    if (issueResponse.code == 200) {
+                                        // 성공적으로 인증서가 발급됨
+                                        requireActivity().runOnUiThread {
+                                            Toast.makeText(requireContext(), "인증서가 성공적으로 발급되었습니다.", Toast.LENGTH_SHORT).show()
+                                            // 인증서 상세 정보 다시 로드
+                                            loadCertificateDetail()
+                                        }
+                                    } else {
+                                        requireActivity().runOnUiThread {
+                                            Toast.makeText(requireContext(), "인증서 발급에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                }
+                            } else {
+                                val errorBody = response.errorBody()?.string()
+                                Log.e(TAG, "오류 응답 본문: $errorBody")
+                                
+                                // 오류 응답 파싱 시도
+                                try {
+                                    val errorResponse = ApiClient.gson.fromJson<ErrorResponse>(errorBody, ErrorResponse::class.java)
+                                    Log.e(TAG, "파싱된 오류 응답: $errorResponse")
+                                    
+                                    // 오류 메시지가 있는 경우 표시
+                                    errorResponse.message?.let { message ->
+                                        Log.e(TAG, "서버 오류 메시지: $message")
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "오류 응답 파싱 실패: ${e.message}")
+                                }
+                            }
+                            
+                            response
+                        } catch (e: Exception) {
+                            Log.e(TAG, "API 호출 중 예외 발생: ${e.message}")
+                            Log.e(TAG, "예외 스택 트레이스: ${e.stackTraceToString()}")
+                            throw e
+                        }
                     }
                     
                     if (certResponse.isSuccessful && certResponse.body() != null) {
                         currentCid = cid
                         Log.d(TAG, "수료증 발급 성공: CID = $cid")
                         
-                        // CID로 QR 코드 생성
-                        generateQrCodeFromCid(cid)
+                        // 수료증 상세 정보 다시 불러오기
+                        viewModel.fetchCertificateDetail(userId, lectureId)
                         
                         // UI 업데이트
                         isCertificateIssued = true
@@ -396,7 +454,18 @@ class CertDetailFragment : Fragment() {
                         val errorBody = certResponse.errorBody()?.string()
                         Log.e(TAG, "수료증 발급 실패: ${certResponse.code()} - ${certResponse.message()}")
                         Log.e(TAG, "오류 응답 본문: $errorBody")
-                        Toast.makeText(requireContext(), "NFT 수료증 발급에 실패했습니다. (코드: ${certResponse.code()})", Toast.LENGTH_SHORT).show()
+                        
+                        // 오류 메시지 표시
+                        val errorMessage = when (certResponse.code()) {
+                            400 -> "잘못된 요청입니다. 입력값을 확인해주세요."
+                            401 -> "인증에 실패했습니다. 다시 로그인해주세요."
+                            403 -> "권한이 없습니다."
+                            404 -> "요청한 리소스를 찾을 수 없습니다."
+                            500 -> "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+                            else -> "수료증 발급에 실패했습니다. (코드: ${certResponse.code()})"
+                        }
+                        
+                        Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
                     }
                 } else {
                     Log.e(TAG, "IPFS 업로드 실패")
@@ -708,6 +777,13 @@ class CertDetailFragment : Fragment() {
         }
         
         return lines
+    }
+
+    private fun loadCertificateDetail() {
+        val userId = args.userId
+        val lectureId = args.lectureId
+        viewModel.fetchCertificateDetail(userId, lectureId)
+        checkCertificateIssued(userId, lectureId)
     }
 
     override fun onDestroyView() {

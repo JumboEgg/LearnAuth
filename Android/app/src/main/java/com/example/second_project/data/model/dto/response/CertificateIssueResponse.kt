@@ -8,5 +8,5 @@ data class CertificateIssueResponse(
 )
 
 data class CertificateIssueData(
-    val token: String
+    val token: Int
 ) 
