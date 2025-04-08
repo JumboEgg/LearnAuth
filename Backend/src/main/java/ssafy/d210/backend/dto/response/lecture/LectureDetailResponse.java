@@ -11,6 +11,7 @@ import java.util.List;
 public class LectureDetailResponse {
     private long lectureId;
     private Long userLectureId;
+    private Long reportId;
     private String title;
     private String categoryName;
     private String goal;
