@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수료증 확인</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .certificate-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .certificate-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .certificate-info {
+            margin-bottom: 20px;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+        .info-value {
+            margin-left: 10px;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        .error {
+            color: red;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="certificate-container">
+    <div class="certificate-header">
+        <h1>수료증 확인</h1>
+    </div>
+    <div id="certificate-content">
+        <div class="loading">수료증 정보를 불러오는 중...</div>
+    </div>
+</div>
+
+<script>
+    // IPFS 게이트웨이 URL
+    const IPFS_GATEWAY_URL = "https://gateway.pinata.cloud/ipfs";
+
+    // URL에서 CID 가져오기
+    function getCidFromUrl() {
+        // URL에서 CID 추출 (IPFS 게이트웨이 URL 형식: https://gateway.pinata.cloud/ipfs/CID)
+        const pathParts = window.location.pathname.split('/');
+        return pathParts[pathParts.length - 1];
+    }
+
+    // IPFS에서 수료증 정보 가져오기
+    async function fetchCertificateInfo(cid) {
+        try {
+            const response = await fetch(`${IPFS_GATEWAY_URL}/${cid}`);
+
+            if (!response.ok) {
+                throw new Error('수료증 정보를 가져오는데 실패했습니다.');
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error:', error);
+            throw error;
+        }
+    }
+
+    // 수료증 정보 표시
+    function displayCertificateInfo(data) {
+        const certificateContent = document.getElementById('certificate-content');
+
+        let html = `
+                <div class="certificate-info">
+                    <div class="info-label">수료자:</div>
+                    <div class="info-value">${data.userName || '정보 없음'}</div>
+                </div>
+                <div class="certificate-info">
+                    <div class="info-label">강의명:</div>
+                    <div class="info-value">${data.lectureTitle || '정보 없음'}</div>
+                </div>
+                <div class="certificate-info">
+                    <div class="info-label">강사명:</div>
+                    <div class="info-value">${data.teacherName || '정보 없음'}</div>
+                </div>
+                <div class="certificate-info">
+                    <div class="info-label">카테고리:</div>
+                    <div class="info-value">${data.category || '정보 없음'}</div>
+                </div>
+                <div class="certificate-info">
+                    <div class="info-label">수료 일자:</div>
+                    <div class="info-value">${data.certificateDate || '정보 없음'}</div>
+                </div>
+            `;
+
+        certificateContent.innerHTML = html;
+    }
+
+    // 페이지 로드 시 실행
+    window.onload = async function() {
+        const cid = getCidFromUrl();
+
+        if (!cid) {
+            document.getElementById('certificate-content').innerHTML =
+                `<div class="error">CID가 제공되지 않았습니다.</div>`;
+            return;
+        }
+
+        try {
+            const certificateData = await fetchCertificateInfo(cid);
+            displayCertificateInfo(certificateData);
+        } catch (error) {
+            document.getElementById('certificate-content').innerHTML =
+                `<div class="error">오류가 발생했습니다: ${error.message}</div>`;
+        }
+    };
+</script>
+</body>
+</html>
