@@ -36,6 +36,7 @@ public class LectureServiceImpl implements LectureService{
     private final UserLectureRepository userLectureRepository;
     private final UserLectureTimeRepository userLectureTimeRepository;
     private final ResponseUtil responseUtil;
+    private final ReportRepository reportRepository;
 
     @Override
     @Transactional
@@ -139,6 +140,9 @@ public class LectureServiceImpl implements LectureService{
             lectureDetail.setRecentLectureId(userLecture.getRecentLectureId());
             lectureDetail.setOwned(true);
             lectureDetail.setCertificate(userLecture.getCertificateDate() != null);
+
+            reportRepository.findByUserLectureId(userLecture.getId())
+                    .ifPresent(report -> lectureDetail.setReportId(report.getId()));
         }
 
         if (subLectureIdList.isEmpty()) {
@@ -335,7 +339,6 @@ public class LectureServiceImpl implements LectureService{
                 .lectureId(lectureDetail.getLectureId())
                 .categoryName(lectureDetail.getCategoryName())
                 .CID(lectureDetail.getCID())
-                .reportId(lectureDetail.getReportId())
                 .build();
     }
 
