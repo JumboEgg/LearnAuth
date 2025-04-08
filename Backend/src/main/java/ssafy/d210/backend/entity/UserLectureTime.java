@@ -25,7 +25,7 @@ public class UserLectureTime {
     private UserLecture userLecture;
 
     @ColumnDefault("0")
-    private Integer continueWatching;
+    private Integer continueWatching = 0;
 
     private int endFlag = 0;
 

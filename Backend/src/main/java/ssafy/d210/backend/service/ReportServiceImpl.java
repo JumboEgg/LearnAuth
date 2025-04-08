@@ -15,6 +15,7 @@ import ssafy.d210.backend.exception.service.LectureNotFoundException;
 import ssafy.d210.backend.redis.DistributedLock;
 import ssafy.d210.backend.repository.ReportRepository;
 import ssafy.d210.backend.repository.UserLectureRepository;
+import ssafy.d210.backend.repository.UserRepository;
 import ssafy.d210.backend.util.ResponseUtil;
 
 import java.util.List;
@@ -27,7 +28,7 @@ public class ReportServiceImpl implements ReportService{
 
     // report data db 조회, 저장 위한 repository
     private final ReportRepository reportRepository;
-
+    private final UserRepository userRepository;
     // 현재 로그인한 사용자의 UserLecture를 조회하기 위한 Repository : 구현 필요
     // JWT -> 현재 사용자 ID : 그 사용자 ID로 UserLecture 조회 "UserLectureRepository"
     // Long currentUserId = jwtUtil.getCurrentUserId(); -> 이런 식으로 id 추출
@@ -55,6 +56,10 @@ public class ReportServiceImpl implements ReportService{
 
     @Transactional(readOnly = true)
     protected List<Report> findReports(Long userId) {
+        boolean userExists = userRepository.existsById(userId);
+        if (!userExists) {
+            throw new EntityIsNullException("유효한 userId가 아닙니다.");
+        }
         return reportRepository.findByUserLectureUserId(userId);
     }
 

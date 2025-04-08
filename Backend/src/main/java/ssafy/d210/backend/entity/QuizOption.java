@@ -12,6 +12,7 @@ import ssafy.d210.backend.dto.request.quiz.QuizOptionRequest;
 @Setter
 @NoArgsConstructor
 public class QuizOption {
+
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "quiz_option_id")
