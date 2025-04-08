@@ -11,9 +11,11 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.transition.Visibility
 import com.bumptech.glide.Glide
 import com.example.second_project.R
 import com.example.second_project.UserSession.userId
@@ -85,6 +87,13 @@ class OwnedLectureDetailFragment : Fragment() {
                 binding.lectureDetailCategory.text = it.data.categoryName
                 binding.lectureDetailTeacher.text = it.data.lecturer ?: "강의자 미정"
                 binding.lectureDetailGoal.text = it.data.goal
+
+                val reportId = it.data.reportId
+                binding.declarationBtn.visibility = if (reportId == null || reportId == 0) {
+                    View.VISIBLE
+                } else {
+                    View.INVISIBLE
+                }
 
                 val foundSubLecture = allSubLectures.find { sub -> sub.subLectureId == recentSubLectureId }
                 cid = it.data.cid
