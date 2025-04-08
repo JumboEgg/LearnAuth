@@ -178,7 +178,7 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                         val credentials = chainManager.credentials
                         val web3j = chainManager.web3j
                         val forwarder = chainManager.forwarder
-                        val lectureSystem = chainManager.lectureSystem
+                        val lectureSystem = chainManager.lectureEventMonitor
                         val catToken = chainManager.catToken
 
                         val userAddress = credentials.address

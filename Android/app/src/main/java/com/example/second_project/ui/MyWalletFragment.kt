@@ -12,6 +12,7 @@ import com.example.second_project.R
 import com.example.second_project.UserSession
 import com.example.second_project.adapter.TransactionAdapter
 import com.example.second_project.blockchain.BlockChainManager
+import com.example.second_project.data.TransactionCache
 import com.example.second_project.data.TransactionItem
 import com.example.second_project.databinding.FragmentMywalletBinding
 import kotlinx.coroutines.CoroutineScope
@@ -25,24 +26,22 @@ import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import java.util.concurrent.CopyOnWriteArrayList
 
 class MyWalletFragment : Fragment() {
     private var _binding: FragmentMywalletBinding? = null
     private val binding get() = _binding!!
     private lateinit var transactionAdapter: TransactionAdapter
-    private val TAG = "MyWalletFragment_야옹"
-
-    // 블록체인 매니저
+    private val TAG = "MyWalletFragment"
     private var blockChainManager: BlockChainManager? = null
-
-    // 트랜잭션 목록을 스레드 안전하게 관리
-    private val transactions = CopyOnWriteArrayList<TransactionItem>()
-    private var isDataLoaded = false
-
-    // 사용자 ID
     private val userId: BigInteger
         get() = BigInteger.valueOf(UserSession.userId.toLong())
+    private var isDataLoaded = false
+
+    // 최적화: 마지막 데이터 새로고침 시각을 저장
+    private var lastRefreshTime = 0L
+
+    // 최적화: 데이터 새로고침 간격 (밀리초) - 2분으로 설정
+    private val REFRESH_INTERVAL = 2 * 60 * 1000L
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -55,26 +54,26 @@ class MyWalletFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d(TAG, "userId: $userId (decimal), 0x${userId.toString(16)} (hex)")
 
-        // UserId 로깅 추가
-        Log.d(TAG, "내 userId: $userId (decimal), 0x${userId.toString(16)} (hex)")
+        setupUI()
 
-        // RecyclerView 초기화
+        // 최적화: 캐시된 데이터 즉시 표시 후 필요한 경우에만 새로고침
+        displayCachedDataAndRefreshIfNeeded()
+    }
+
+    private fun setupUI() {
+        // RecyclerView와 Adapter 설정
         transactionAdapter = TransactionAdapter(emptyList())
         binding.transactionList.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = transactionAdapter
         }
 
-        // UserSession에서 블록체인 매니저 가져오기
         blockChainManager = UserSession.getBlockchainManagerIfAvailable(requireContext())
-
-        // 사용자 이름 표시
         binding.userName.text = UserSession.name ?: "사용자"
 
-        // 블록체인 데이터 로드
-        loadBlockchainData()
-
+        // 버튼 리스너 설정
         binding.chargeBtn.setOnClickListener {
             val transaction = requireActivity().supportFragmentManager.beginTransaction()
             transaction.replace(R.id.nav_host_fragment, ChargeFragment())
@@ -87,12 +86,48 @@ class MyWalletFragment : Fragment() {
         }
     }
 
-    private fun loadBlockchainData() {
-        // 화면에 로딩 표시
-        showLoading(true)
+    // 최적화: 캐시된 데이터 표시 후 필요한 경우에만 새로고침
+    private fun displayCachedDataAndRefreshIfNeeded() {
+        val currentTime = System.currentTimeMillis()
+        val needsRefresh = lastRefreshTime == 0L || currentTime - lastRefreshTime > REFRESH_INTERVAL
+
+        // 1. 캐시된 잔액 즉시 표시
+        UserSession.lastKnownBalance?.let {
+            updateBalanceUI(it)
+        }
+
+        // 2. 캐시된 거래 내역 즉시 표시 (향상된 TransactionCache 사용)
+        if (!TransactionCache.isEmpty()) {
+            transactionAdapter =
+                TransactionAdapter(TransactionCache.getRecentTransactions(TransactionCache.size()))
+            binding.transactionList.adapter = transactionAdapter
+            binding.transactionList.visibility = View.VISIBLE
+            binding.loadingSpinner.visibility = View.GONE
+            binding.blockTouchOverlay.visibility = View.GONE
+            binding.chargeBtn.isEnabled = true
+            isDataLoaded = true
+        } else {
+            showLoading(true)
+        }
+
+        // 3. 새로고침이 필요하거나 캐시가 비어있으면 백그라운드에서 데이터 로드
+        if (needsRefresh || !TransactionCache.isFresh() || TransactionCache.isEmpty()) {
+            loadBlockchainData(needsRefresh)
+            lastRefreshTime = currentTime
+        } else {
+            Log.d(TAG, "캐시된 데이터 사용 중 (마지막 새로고침: ${Date(lastRefreshTime)})")
+        }
+    }
+
+    private fun loadBlockchainData(forceRefresh: Boolean = false) {
+        if (!forceRefresh && !TransactionCache.isEmpty()) {
+            Log.d(TAG, "이미 캐시된 데이터가 있어 로드를 건너뜁니다")
+            showLoading(false)
+            return
+        }
 
         if (blockChainManager == null) {
-            Log.e(TAG, "BlockChainManager가 초기화되지 않았습니다")
+            Log.e(TAG, "BlockChainManager 초기화 실패")
             showDefaultData()
             showLoading(false)
             return
@@ -100,29 +135,23 @@ class MyWalletFragment : Fragment() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                // 1. 캐시된 잔액 사용 (빠른 응답)
-                val cachedBalance = UserSession.lastKnownBalance
-                if (cachedBalance != null) {
-                    withContext(Dispatchers.Main) { updateBalanceUI(cachedBalance) }
-                }
-
-                // 2. 최신 잔액 조회 및 UI 업데이트
+                // 1. 최신 잔액 조회 후 갱신 (캐시된 데이터가 이미 표시되고 있음)
                 val actualBalance = blockChainManager!!.getMyCatTokenBalance()
                 UserSession.lastKnownBalance = actualBalance
                 withContext(Dispatchers.Main) { updateBalanceUI(actualBalance) }
 
-                // 3. 역사적 거래 내역 로드 (기존 이벤트 조회)
+                // 2. 이전 거래 내역 로드
                 loadHistoricalEvents()
 
-                // 4. 실시간 이벤트 구독 (구독 도중에는 기본 데이터 호출을 건너뛰도록 플래그를 업데이트)
-                setupTransactionEvents()
+                // 3. 실시간 이벤트 구독 (이미 이전에 설정되었을 수 있으므로 필요한 경우에만)
+                if (forceRefresh) {
+                    setupTransactionEvents()
+                }
 
-                // 5. 일정 시간 후에도 거래 내역이 없으면 기본 데이터 표시
-                // (예를 들어, 5초 대기)
-                kotlinx.coroutines.delay(5000)
+                // 4. 일정 시간 동안 데이터가 없으면 기본 데이터 표시
+                kotlinx.coroutines.delay(3000) // 최적화: 5초에서 3초로 단축
                 withContext(Dispatchers.Main) {
-                    // 만약 이미 실시간 이벤트나 역사적 이벤트로 인해 데이터가 채워졌다면 기본 데이터 호출하지 않음
-                    if (transactions.isEmpty() && !isDataLoaded) {
+                    if (TransactionCache.isEmpty() && !isDataLoaded) {
                         showDefaultTransactions()
                     }
                     showLoading(false)
@@ -130,112 +159,285 @@ class MyWalletFragment : Fragment() {
             } catch (e: Exception) {
                 Log.e(TAG, "블록체인 데이터 로드 오류: ${e.message}")
                 withContext(Dispatchers.Main) {
-                    showDefaultData()
+                    if (TransactionCache.isEmpty()) {
+                        showDefaultData()
+                    }
                     showLoading(false)
                 }
             }
         }
     }
 
-
+    // loadHistoricalEvents 메서드 수정
     private suspend fun loadHistoricalEvents() {
         val bcm = blockChainManager ?: return
-        val web3j = bcm.web3j
-        val contract = bcm.lectureSystem
-        val address = contract.contractAddress
 
-        val startBlock = DefaultBlockParameter.valueOf(
-            BigInteger.valueOf( // 배포 블록이나 과거 특정 블록 번호
-                12345678L
-            )
-        )
-        val endBlock = DefaultBlockParameterName.LATEST
-        val events = listOf(
-            contract.getEventLogs("TokenDeposited", userId, web3j, address, startBlock, endBlock)
-                .map {
-                    TransactionItem("토큰 충전", it.date, it.amount)
-                },
-            contract.getEventLogs("TokenWithdrawn", userId, web3j, address, startBlock, endBlock)
-                .map {
-                    TransactionItem("토큰 출금", it.date, it.amount)
-                },
-            contract.getEventLogs("LecturePurchased", userId, web3j, address, startBlock, endBlock)
-                .map {
-                    TransactionItem(it.title, it.date, it.amount)
+        // 기존 캐시 데이터가 있다면 즉시 업데이트
+        if (!TransactionCache.isEmpty()) {
+            withContext(Dispatchers.Main) {
+                if (_binding != null) {
+                    transactionAdapter =
+                        TransactionAdapter(TransactionCache.getRecentTransactions(TransactionCache.size()))
+                    binding.transactionList.adapter = transactionAdapter
                 }
-        ).flatten()
-
-        withContext(Dispatchers.Main) {
-            if (events.isNotEmpty()) {
-                Log.d(TAG, "📜 과거 트랜잭션 ${events.size}개 로드됨")
-                transactions.addAll(events.sortedByDescending { it.date })
-                transactionAdapter = TransactionAdapter(transactions.take(10))
-                binding.transactionList.adapter = transactionAdapter
-                isDataLoaded = true
             }
+        }
+
+        // 최적화: 로그 조회를 위한 시작 블록 줄이기 (너무 오래된 로그는 조회하지 않음)
+        val startBlock = DefaultBlockParameter.valueOf(BigInteger.valueOf(12345678L))
+        val endBlock = DefaultBlockParameterName.LATEST
+
+        try {
+            // 세 이벤트 카테고리를 가져와서 ParsedEvent로 변환 후 합칩니다.
+            val depositedEvents = bcm.lectureEventMonitor.getEventLogs(
+                "TokenDeposited",
+                userId,
+                bcm.web3j,
+                bcm.lectureEventMonitor.contractAddress,
+                startBlock,
+                endBlock
+            )
+                .map { evt ->
+                    Log.d(TAG, "충전 이벤트: ${evt.title}, 타임스탬프: ${evt.timestamp}")
+                    TransactionItem("토큰 충전", evt.date, evt.amount, evt.timestamp)
+                }
+
+            val withdrawnEvents = bcm.lectureEventMonitor.getEventLogs(
+                "TokenWithdrawn",
+                userId,
+                bcm.web3j,
+                bcm.lectureEventMonitor.contractAddress,
+                startBlock,
+                endBlock
+            )
+                .map { evt ->
+                    Log.d(TAG, "출금 이벤트: ${evt.title}, 타임스탬프: ${evt.timestamp}")
+                    TransactionItem("토큰 출금", evt.date, evt.amount, evt.timestamp)
+                }
+
+            val purchasedEvents = bcm.lectureEventMonitor.getEventLogs(
+                "LecturePurchased",
+                userId,
+                bcm.web3j,
+                bcm.lectureEventMonitor.contractAddress,
+                startBlock,
+                endBlock
+            )
+                .map { evt ->
+                    Log.d(TAG, "구매 이벤트: ${evt.title}, 타임스탬프: ${evt.timestamp}")
+                    TransactionItem(evt.title, evt.date, evt.amount, evt.timestamp)
+                }
+
+            // 새로 추가: 정산 이벤트 조회
+            val settlementEvents = bcm.lectureEventMonitor.getSettlementEventLogs(
+                userId,
+                bcm.web3j,
+                bcm.lectureEventMonitor.contractAddress,
+                startBlock,
+                endBlock
+            )
+                .map { evt ->
+                    Log.d(TAG, "정산 이벤트: ${evt.title}, 타임스탬프: ${evt.timestamp}")
+                    TransactionItem(evt.title, evt.date, evt.amount, evt.timestamp)
+                }
+
+            // 전체 이벤트를 하나로 합친 후 타임스탬프 기준 내림차순 정렬합니다.
+            val events = (depositedEvents + withdrawnEvents + purchasedEvents + settlementEvents)
+                .sortedByDescending { it.timestamp }
+
+            // 정렬 확인용 로깅
+            if (events.isNotEmpty()) {
+                Log.d(TAG, "정렬된 이벤트 첫 5개:")
+                events.take(5).forEachIndexed { index, evt ->
+                    Log.d(TAG, "[$index] ${evt.title}: ${evt.timestamp}, ${evt.date}")
+                }
+            }
+
+            if (events.isNotEmpty()) {
+                // 향상된 TransactionCache 사용
+                TransactionCache.updateTransactions(events)
+
+                withContext(Dispatchers.Main) {
+                    if (_binding != null) {
+                        val transactions =
+                            TransactionCache.getRecentTransactions(TransactionCache.size())
+                        transactionAdapter = TransactionAdapter(transactions)
+                        binding.transactionList.adapter = transactionAdapter
+
+                        // 리스트가 변경되었음을 명시적으로 알림
+                        transactionAdapter.notifyDataSetChanged()
+
+                        // 첫 아이템으로 스크롤 (최신 거래를 보여주기 위해)
+                        if (transactions.isNotEmpty()) {
+                            binding.transactionList.scrollToPosition(0)
+                        }
+
+                        isDataLoaded = true
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "이벤트 로그 조회 실패: ${e.message}")
+            e.printStackTrace()
         }
     }
 
-
+    // setupTransactionEvents 메서드 수정
     private suspend fun setupTransactionEvents() {
         val bcm = blockChainManager ?: return
 
-        // 1. 충전 이벤트
+        // 이벤트 구독 취소를 위한 Disposable 객체들을 저장
+        val disposables = mutableListOf<io.reactivex.rxjava3.disposables.Disposable>()
+
+        // 충전 이벤트 구독
         try {
-            bcm.lectureSystem.tokenDepositedEventFlowable(
+            val depositDisposable = bcm.lectureEventMonitor.tokenDepositedEventFlowable(
                 DefaultBlockParameterName.EARLIEST,
                 DefaultBlockParameterName.LATEST
-            ).subscribe({ event ->
-                if (event.userId == userId) {
-                    Log.d(TAG, "✅ 충전 이벤트 매치됨! 금액: ${event.amount}")
-                    val date = getToday()
-                    val convertedAmount = event.amount.divide(BigInteger.TEN.pow(18))
-                    val transactionItem = TransactionItem("토큰 충전", date, convertedAmount)
-                    addTransaction(transactionItem)
-                }
-            }, { error -> Log.e(TAG, "충전 이벤트 오류: ${error.message}") })
+            )
+                .subscribe({ event ->
+                    if (event.userId == userId) {
+                        Log.d(TAG, "충전 이벤트: ${event.amount}")
+                        val now = System.currentTimeMillis()
+                        val date = getToday(now)
+                        val convertedAmount = event.amount.divide(BigInteger.TEN.pow(18))
+                        val transactionItem = TransactionItem("토큰 충전", date, convertedAmount, now)
+
+                        // Fragment가 아직 활성 상태인지 확인 후 처리
+                        if (isAdded) {
+                            addTransaction(transactionItem)
+                        } else {
+                            // Fragment가 더 이상 활성 상태가 아니라면 TransactionCache만 업데이트
+                            TransactionCache.addTransaction(transactionItem)
+                            Log.d(TAG, "Fragment가 이미 제거됨, 캐시만 업데이트: ${transactionItem.title}")
+                        }
+                    }
+                }, { error -> Log.e(TAG, "충전 이벤트 오류: ${error.message}") })
+
+            disposables.add(depositDisposable)
         } catch (e: Exception) {
             Log.e(TAG, "충전 이벤트 등록 실패: ${e.message}")
         }
 
-        // 2. 출금 이벤트
+        // 출금 이벤트 구독
         try {
-            bcm.lectureSystem.tokenWithdrawnEventFlowable(
+            val withdrawDisposable = bcm.lectureEventMonitor.tokenWithdrawnEventFlowable(
                 DefaultBlockParameterName.EARLIEST,
                 DefaultBlockParameterName.LATEST
-            ).subscribe({ event ->
-                if (event.userId == userId) {
-                    Log.d(TAG, "✅ 출금 이벤트 매치됨! 금액: ${event.amount}")
-                    val date = getToday()
-                    val convertedAmount = event.amount.divide(BigInteger.TEN.pow(18))
-                    val transactionItem = TransactionItem("토큰 출금", date, convertedAmount)
-                    addTransaction(transactionItem)
-                }
-            }, { error -> Log.e(TAG, "출금 이벤트 오류: ${error.message}") })
+            )
+                .subscribe({ event ->
+                    if (event.userId == userId) {
+                        Log.d(TAG, "출금 이벤트: ${event.amount}")
+                        val now = System.currentTimeMillis()
+                        val date = getToday(now)
+                        val convertedAmount = event.amount.divide(BigInteger.TEN.pow(18))
+                        val transactionItem = TransactionItem("토큰 출금", date, convertedAmount, now)
+
+                        // Fragment가 아직 활성 상태인지 확인 후 처리
+                        if (isAdded) {
+                            addTransaction(transactionItem)
+                        } else {
+                            // Fragment가 더 이상 활성 상태가 아니라면 TransactionCache만 업데이트
+                            TransactionCache.addTransaction(transactionItem)
+                            Log.d(TAG, "Fragment가 이미 제거됨, 캐시만 업데이트: ${transactionItem.title}")
+                        }
+                    }
+                }, { error -> Log.e(TAG, "출금 이벤트 오류: ${error.message}") })
+
+            disposables.add(withdrawDisposable)
         } catch (e: Exception) {
             Log.e(TAG, "출금 이벤트 등록 실패: ${e.message}")
         }
 
-        // 3. 강의 구매 이벤트
+        // 강의 구매 이벤트 구독
         try {
-            bcm.lectureSystem.lecturePurchasedEventFlowable(
+            val purchaseDisposable = bcm.lectureEventMonitor.lecturePurchasedEventFlowable(
                 DefaultBlockParameterName.EARLIEST,
                 DefaultBlockParameterName.LATEST
-            ).subscribe({ event ->
-                if (event.userId == userId) {
-                    Log.d(TAG, "✅ 강의 구매 이벤트 매치됨! 제목: ${event.lectureTitle}, 금액: ${event.amount}")
-                    val date = getToday()
-                    val convertedAmount = event.amount.divide(BigInteger.TEN.pow(18))
-                    // 강의 구매일 때는 강의 제목이 그대로 title로 들어감
-                    val transactionItem = TransactionItem(event.lectureTitle, date, convertedAmount)
-                    addTransaction(transactionItem)
-                }
-            }, { error -> Log.e(TAG, "강의 구매 이벤트 오류: ${error.message}") })
+            )
+                .subscribe({ event ->
+                    if (event.userId == userId) {
+                        Log.d(TAG, "강의 구매 이벤트: ${event.lectureTitle} - ${event.amount}")
+                        val now = System.currentTimeMillis()
+                        val date = getToday(now)
+                        val convertedAmount = event.amount.divide(BigInteger.TEN.pow(18))
+                        val transactionItem =
+                            TransactionItem(event.lectureTitle, date, convertedAmount, now)
+
+                        // Fragment가 아직 활성 상태인지 확인 후 처리
+                        if (isAdded) {
+                            addTransaction(transactionItem)
+                        } else {
+                            // Fragment가 더 이상 활성 상태가 아니라면 TransactionCache만 업데이트
+                            TransactionCache.addTransaction(transactionItem)
+                            Log.d(TAG, "Fragment가 이미 제거됨, 캐시만 업데이트: ${transactionItem.title}")
+                        }
+                    }
+                }, { error -> Log.e(TAG, "강의 구매 이벤트 오류: ${error.message}") })
+
+            disposables.add(purchaseDisposable)
         } catch (e: Exception) {
             Log.e(TAG, "강의 구매 이벤트 등록 실패: ${e.message}")
         }
 
-        // (선택적) 이력 조회는 그대로
+        // 새로 추가: 정산 이벤트 구독
+        try {
+            val settleDisposable = bcm.lectureEventMonitor.lectureSettledEventFlowable(
+                DefaultBlockParameterName.EARLIEST,
+                DefaultBlockParameterName.LATEST
+            )
+                .subscribe({ event ->
+                    // 정산금을 받는 참가자 ID가 현재 사용자인지 확인
+                    if (event.participantId == userId) {
+                        Log.d(
+                            TAG,
+                            "정산 이벤트: ${event.lectureTitle} - ${event.amount}, 참가자ID: ${event.participantId}"
+                        )
+                        val now = System.currentTimeMillis()
+                        val date = getToday(now)
+                        val convertedAmount = event.amount.divide(BigInteger.TEN.pow(18))
+                        // "강의 수입: 강의명" 형식으로 표시
+                        val transactionItem = TransactionItem(
+                            "강의 수입: ${event.lectureTitle}",
+                            date,
+                            convertedAmount,
+                            now
+                        )
+
+                        // Fragment가 아직 활성 상태인지 확인 후 처리
+                        if (isAdded) {
+                            addTransaction(transactionItem)
+                        } else {
+                            // Fragment가 더 이상 활성 상태가 아니라면 TransactionCache만 업데이트
+                            TransactionCache.addTransaction(transactionItem)
+                            Log.d(TAG, "Fragment가 이미 제거됨, 캐시만 업데이트: ${transactionItem.title}")
+                        }
+                    }
+                }, { error -> Log.e(TAG, "정산 이벤트 오류: ${error.message}") })
+
+            disposables.add(settleDisposable)
+        } catch (e: Exception) {
+            Log.e(TAG, "정산 이벤트 등록 실패: ${e.message}")
+        }
+
+        // onDestroyView에서 이벤트 구독을 취소할 수 있도록 disposables 저장
+        viewLifecycleOwner.lifecycle.addObserver(object :
+            androidx.lifecycle.LifecycleEventObserver {
+            override fun onStateChanged(
+                source: androidx.lifecycle.LifecycleOwner,
+                event: androidx.lifecycle.Lifecycle.Event
+            ) {
+                if (event == androidx.lifecycle.Lifecycle.Event.ON_DESTROY) {
+                    for (disposable in disposables) {
+                        if (!disposable.isDisposed) {
+                            disposable.dispose()
+                        }
+                    }
+                    Log.d(TAG, "이벤트 구독 취소됨")
+                }
+            }
+        })
+
         try {
             bcm.getTransactionHistory(userId)
         } catch (e: Exception) {
@@ -243,82 +445,136 @@ class MyWalletFragment : Fragment() {
         }
     }
 
-    private fun getToday(): String {
+    private fun getToday(timeMillis: Long): String {
         val dateFormat = SimpleDateFormat("yyyy / MM / dd", Locale.getDefault())
-        return dateFormat.format(Date(System.currentTimeMillis()))
+        return dateFormat.format(Date(timeMillis))
     }
 
-
     private fun addTransaction(transaction: TransactionItem) {
-        // 거래 내역 추가
-        transactions.add(0, transaction)
-        // 실시간 데이터가 있으므로 플래그 업데이트
-        isDataLoaded = true
+        // 현재 시간으로 타임스탬프 업데이트하여 항상 최신이 상단에 오도록 함
+        val currentTime = System.currentTimeMillis()
+        val updatedTransaction = transaction.copy(timestamp = currentTime)
+        Log.d(TAG, "트랜잭션 추가 시도: ${updatedTransaction.title}, 타임스탬프: $currentTime")
 
-        CoroutineScope(Dispatchers.Main).launch {
-            // 여기서 adapter에 이미 기본 거래 내역이 존재한다면, 새 거래 내역과 합쳐서 다시 갱신
-            transactionAdapter = TransactionAdapter(transactions.take(10))
-            binding.transactionList.adapter = transactionAdapter
-            showLoading(false)
+        // 향상된 TransactionCache의 addTransaction 메서드 사용
+        val added = TransactionCache.addTransaction(updatedTransaction)
+
+        if (added) {
+            isDataLoaded = true
+
+            // Fragment 유효성 체크 후 안전하게 UI 업데이트
+            CoroutineScope(Dispatchers.Main).launch {
+                // Fragment가 아직 활성 상태인지, 바인딩이 null이 아닌지 확인
+                if (isAdded && _binding != null) {
+                    Log.d(TAG, "UI 업데이트: 최신 거래 내역으로 RecyclerView 갱신")
+                    // 모든 트랜잭션 표시 (또는 제한된 수 표시)
+                    val transactions =
+                        TransactionCache.getRecentTransactions(TransactionCache.size())
+                    transactionAdapter = TransactionAdapter(transactions)
+                    binding.transactionList.adapter = transactionAdapter
+
+                    // 목록이 변경되었음을 알림
+                    transactionAdapter.notifyDataSetChanged()
+
+                    // 첫 번째 아이템으로 스크롤
+                    if (transactions.isNotEmpty()) {
+                        binding.transactionList.scrollToPosition(0)
+                    }
+
+                    showLoading(false)
+                } else {
+                    Log.d(TAG, "Fragment가 이미 제거되었거나 바인딩이 null입니다. UI 업데이트 건너뜀")
+                }
+            }
+        } else {
+            Log.d(TAG, "중복된 거래 무시: ${transaction.title}")
         }
     }
 
-
     private fun updateBalanceUI(balance: BigInteger) {
-        // 블록체인에서는 값이 10^18 단위로 저장되므로 나눠줘야 함
-        val divisor = BigInteger.TEN.pow(18) // 10^18
+        val divisor = BigInteger.TEN.pow(18)
         val actualBalance = balance.divide(divisor)
-
-        // CAT 잔액 포맷팅 및 표시
         val formatter = DecimalFormat("#,###")
         val formattedBalance = "${formatter.format(actualBalance)} CAT"
-
-        Log.d(TAG, "잔액 업데이트: 원본=$balance, 변환된 값=$actualBalance")
-
         binding.moneyCount.text = formattedBalance
+        Log.d(TAG, "잔액 업데이트: $formattedBalance")
     }
 
     private fun showDefaultTransactions() {
-        if (transactions.isEmpty()) {
-            // 기본 데이터에는 일반 숫자 값을 사용 (이미 10^18로 나눈 값)
+        if (TransactionCache.isEmpty()) {
             val defaultTransactions = listOf(
-                TransactionItem("데이터 분석 기초", "2025 / 03 / 25", BigInteger.valueOf(4)),
-                TransactionItem("일상 생활 관리", "2025 / 03 / 24", BigInteger.valueOf(30)),
-                TransactionItem("기본 법률 상식", "2025 / 03 / 23", BigInteger.valueOf(55)),
-                TransactionItem("스포츠 심리학", "2025 / 03 / 22", BigInteger.valueOf(6)),
-                TransactionItem("마케팅 전략", "2025 / 03 / 21", BigInteger.valueOf(4))
+                TransactionItem(
+                    "데이터 분석 기초",
+                    "2025 / 03 / 25",
+                    BigInteger.valueOf(4),
+                    System.currentTimeMillis()
+                ),
+                TransactionItem(
+                    "일상 생활 관리",
+                    "2025 / 03 / 24",
+                    BigInteger.valueOf(30),
+                    System.currentTimeMillis()
+                ),
+                TransactionItem(
+                    "기본 법률 상식",
+                    "2025 / 03 / 23",
+                    BigInteger.valueOf(55),
+                    System.currentTimeMillis()
+                ),
+                TransactionItem(
+                    "스포츠 심리학",
+                    "2025 / 03 / 22",
+                    BigInteger.valueOf(6),
+                    System.currentTimeMillis()
+                ),
+                TransactionItem(
+                    "마케팅 전략",
+                    "2025 / 03 / 21",
+                    BigInteger.valueOf(4),
+                    System.currentTimeMillis()
+                )
             )
-
+            TransactionCache.updateTransactions(defaultTransactions)
             transactionAdapter = TransactionAdapter(defaultTransactions)
             binding.transactionList.adapter = transactionAdapter
-
             Log.d(TAG, "기본 거래 내역 표시됨")
         }
     }
 
     private fun showDefaultData() {
-        // 기본 데이터로 UI 업데이트
         binding.moneyCount.text = "55 CAT"
         showDefaultTransactions()
-
         Log.d(TAG, "기본 데이터 표시됨")
     }
 
-    // 로딩 시작 시
     private fun showLoading(isLoading: Boolean) {
         if (isLoading) {
             binding.transactionList.visibility = View.INVISIBLE
             binding.loadingSpinner.visibility = View.VISIBLE
-            binding.blockTouchOverlay.visibility = View.VISIBLE  // 터치 차단 오버레이 활성화
-            binding.chargeBtn.isEnabled = false                // 버튼 클릭 비활성화
+            binding.blockTouchOverlay.visibility = View.VISIBLE
+            binding.chargeBtn.isEnabled = false
         } else {
             binding.transactionList.visibility = View.VISIBLE
             binding.loadingSpinner.visibility = View.GONE
-            binding.blockTouchOverlay.visibility = View.GONE    // 터치 차단 오버레이 비활성화
-            binding.chargeBtn.isEnabled = true                 // 버튼 클릭 활성화
+            binding.blockTouchOverlay.visibility = View.GONE
+            binding.chargeBtn.isEnabled = true
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // 화면이 다시 활성화될 때마다 데이터 새로고침 검사
+        val currentTime = System.currentTimeMillis()
+        val needsRefresh = lastRefreshTime == 0L || currentTime - lastRefreshTime > REFRESH_INTERVAL
+
+        if (needsRefresh) {
+            // 주기적인 새로고침이 필요한 경우에만 데이터 다시 로드
+            CoroutineScope(Dispatchers.Main).launch {
+                loadBlockchainData(true)
+                lastRefreshTime = currentTime
+            }
+        }
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

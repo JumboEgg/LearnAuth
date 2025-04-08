@@ -1,15 +1,12 @@
 package com.example.second_project.blockchain
 
 import android.util.Log
-import com.example.second_project.blockchain.monitor.LectureSystem
-import com.example.second_project.data.TransactionItem
+import com.example.second_project.blockchain.monitor.LectureEventMonitor
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.FlowableEmitter
-import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.web3j.abi.EventEncoder
-import org.web3j.abi.datatypes.Event
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.WalletUtils
 import org.web3j.protocol.Web3j
@@ -59,7 +56,7 @@ class BlockChainManager(
     private val gasProvider: ContractGasProvider = HighGasProvider()
 
     // 컨트랙트 인스턴스들
-    val lectureSystem: LectureSystem
+    val lectureEventMonitor: LectureEventMonitor
     val catToken: CATToken
     val forwarder: LectureForwarder
 
@@ -71,7 +68,7 @@ class BlockChainManager(
             "LectureSystem"    to "0xeE2dD174b049953495A246A5197E3e1D9929000D"
         )
 
-        lectureSystem = LectureSystem.load(
+        lectureEventMonitor = LectureEventMonitor.load(
             addresses["LectureSystem"]!!,
             web3j,
             txManager,
@@ -100,10 +97,10 @@ class BlockChainManager(
         fromBlock: DefaultBlockParameter,
         toBlock: DefaultBlockParameter
     ): Flowable<TransactionEvent> {
-        val event = lectureSystem.events["TokenDeposited"] ?: return Flowable.empty()
+        val event = lectureEventMonitor.events["TokenDeposited"] ?: return Flowable.empty()
 
         // 1) EthFilter 설정
-        val filter = EthFilter(fromBlock, toBlock, lectureSystem.contractAddress)
+        val filter = EthFilter(fromBlock, toBlock, lectureEventMonitor.contractAddress)
             .addSingleTopic(EventEncoder.encode(event))
         // 만약 userId별로 필터링하고 싶으면 addOptionalTopics("0x123abc...") 등을 추가
 
@@ -161,9 +158,9 @@ class BlockChainManager(
         fromBlock: DefaultBlockParameter,
         toBlock: DefaultBlockParameter
     ): Flowable<TransactionEvent> {
-        val event = lectureSystem.events["TokenWithdrawn"] ?: return Flowable.empty()
+        val event = lectureEventMonitor.events["TokenWithdrawn"] ?: return Flowable.empty()
 
-        val filter = EthFilter(fromBlock, toBlock, lectureSystem.contractAddress)
+        val filter = EthFilter(fromBlock, toBlock, lectureEventMonitor.contractAddress)
             .addSingleTopic(EventEncoder.encode(event))
 
         return Flowable.create({ emitter: FlowableEmitter<TransactionEvent> ->
@@ -208,9 +205,9 @@ class BlockChainManager(
         fromBlock: DefaultBlockParameter,
         toBlock: DefaultBlockParameter
     ): Flowable<LecturePurchaseEvent> {
-        val event = lectureSystem.events["LecturePurchased"] ?: return Flowable.empty()
+        val event = lectureEventMonitor.events["LecturePurchased"] ?: return Flowable.empty()
 
-        val filter = EthFilter(fromBlock, toBlock, lectureSystem.contractAddress)
+        val filter = EthFilter(fromBlock, toBlock, lectureEventMonitor.contractAddress)
             .addSingleTopic(EventEncoder.encode(event))
 
         return Flowable.create({ emitter: FlowableEmitter<LecturePurchaseEvent> ->
@@ -257,7 +254,7 @@ class BlockChainManager(
             // 이 함수는 earliest~latest 전체 구독이라
             // 퍼블릭 노드에서 filter not found가 빈번히 발생 가능
             // => 필요 없다면 제거 권장
-            lectureSystem.tokenDepositedEventFlowable(
+            lectureEventMonitor.tokenDepositedEventFlowable(
                 DefaultBlockParameterName.EARLIEST,
                 DefaultBlockParameterName.LATEST
             ).subscribe(
