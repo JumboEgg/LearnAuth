@@ -24,11 +24,13 @@ public class QReport extends EntityPathBase<Report> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    public final QLecture lecture;
+
     public final StringPath reportContent = createString("reportContent");
 
     public final NumberPath<Integer> reportType = createNumber("reportType", Integer.class);
 
-    public final QUserLecture userLecture;
+    public final QUser user;
 
     public QReport(String variable) {
         this(Report.class, forVariable(variable), INITS);
@@ -48,7 +50,8 @@ public class QReport extends EntityPathBase<Report> {
 
     public QReport(Class<? extends Report> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.userLecture = inits.isInitialized("userLecture") ? new QUserLecture(forProperty("userLecture"), inits.get("userLecture")) : null;
+        this.lecture = inits.isInitialized("lecture") ? new QLecture(forProperty("lecture"), inits.get("lecture")) : null;
+        this.user = inits.isInitialized("user") ? new QUser(forProperty("user")) : null;
     }
 
 }

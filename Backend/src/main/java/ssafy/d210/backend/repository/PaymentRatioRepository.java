@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface PaymentRatioRepository extends JpaRepository<PaymentRatio, Long> {
 
-    List<PaymentRatio> findPaymentRatiosByUserId(Long userId);
+    List<PaymentRatio> findPaymentRatiosByLectureId(Long lectureId);
 
 }

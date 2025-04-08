@@ -32,6 +32,8 @@ public class QUser extends EntityPathBase<User> {
 
     public final ListPath<PaymentRatio, QPaymentRatio> paymentRatioList = this.<PaymentRatio, QPaymentRatio>createList("paymentRatioList", PaymentRatio.class, QPaymentRatio.class, PathInits.DIRECT2);
 
+    public final ListPath<Report, QReport> reportList = this.<Report, QReport>createList("reportList", Report.class, QReport.class, PathInits.DIRECT2);
+
     public final StringPath userKey = createString("userKey");
 
     public final ListPath<UserLecture, QUserLecture> userLectureList = this.<UserLecture, QUserLecture>createList("userLectureList", UserLecture.class, QUserLecture.class, PathInits.DIRECT2);

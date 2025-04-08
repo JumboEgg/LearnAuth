@@ -57,4 +57,7 @@ public class Lecture {
     @OneToMany(mappedBy = "lecture")
     private  List<UserLecture> userLectureList;
 
+    @OneToMany(mappedBy = "lecture")
+    private List<Report> reportList;
+
 }
