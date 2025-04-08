@@ -208,9 +208,9 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                             val shortfall = requiredAmount.subtract(balance)
                             Log.e(TAG, "잔액 부족: 부족액(wei): $shortfall")
                             withContext(Dispatchers.Main) {
+                                hideLoadingOverlay()
                                 // 부족액을 원래 wei 단위 그대로 표시
                                 showNotEnoughDialog(shortfall)
-                                showChargeDialog()
                             }
                             return@launch
                         }
@@ -507,6 +507,7 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                     } catch (e: Exception) {
                         Log.e(TAG, "강의 구매 오류", e)
                         withContext(Dispatchers.Main) {
+                            hideLoadingOverlay()
                             Toast.makeText(
                                 requireContext(),
                                 "오류 발생: ${e.message}",
@@ -523,9 +524,12 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
     }
 
     fun showNotEnoughDialog(shortfall: BigInteger) {
+        val catShortfall = shortfall.toBigDecimal().divide(BigInteger.TEN.pow(18).toBigDecimal())
+        val formattedShortfall = catShortfall.stripTrailingZeros().toPlainString()
+
         AlertDialog.Builder(requireContext())
             .setTitle("잔액 부족")
-            .setMessage("CAT 잔액이 ${shortfall}만큼 부족합니다.\n충전 후 다시 시도해주세요.")
+            .setMessage("CAT 잔액이 ${formattedShortfall}만큼 부족합니다.\n충전 후 다시 시도해주세요.")
             .setPositiveButton("확인", null)
             .show()
     }
