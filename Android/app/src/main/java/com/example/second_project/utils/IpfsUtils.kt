@@ -3,19 +3,28 @@ package com.example.second_project.utils
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import com.example.second_project.BuildConfig
 import com.example.second_project.network.PinataApiClient
 import com.example.second_project.network.PinataResponse
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONObject
+import retrofit2.Response
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
-import retrofit2.Response
+import java.util.concurrent.TimeUnit
 
 object IpfsUtils {
-    private const val TAG = "IpfsUtils"
+    private const val TAG = "IpfsUtils_야옹"
+    private const val PINATA_API_URL = "https://api.pinata.cloud"
+    private const val IPFS_GATEWAY_URL = "https://j12d210.p.ssafy.io/ipfs"
+//    private const val IPFS_GATEWAY_URL = "https://gateway.pinata.cloud/ipfs"
 
     /**
      * Uri에서 파일을 가져와 IPFS에 업로드합니다.
@@ -53,17 +62,42 @@ object IpfsUtils {
 
     /**
      * JSON 데이터를 IPFS에 업로드합니다.
-     * @param apiKey Pinata API 키
      * @param jsonData 업로드할 JSON 데이터
-     * @return Response<PinataResponse>
+     * @return IPFS 해시 또는 null (실패 시)
      */
-    suspend fun uploadJsonToIpfs(apiKey: String, jsonData: Map<String, String>): Response<PinataResponse> {
+    suspend fun uploadJsonToIpfs(jsonData: JSONObject): String? {
         try {
+            Log.d(TAG, "IPFS 업로드 시작: $jsonData")
+            
+            // API 키 가져오기
+            val apiKey = ApiKeyProvider.getPinataApiKey()
+            if (apiKey.isBlank()) {
+                Log.e(TAG, "API 키를 가져올 수 없습니다.")
+                return null
+            }
+            
+            // JSON 데이터를 Map으로 변환
+            val jsonMap = mutableMapOf<String, String>()
+            jsonData.keys().forEach { key ->
+                jsonMap[key] = jsonData.getString(key)
+            }
+            
             // Pinata API 호출
-            return PinataApiClient.pinataService.pinJSONToIPFS(apiKey, jsonData)
+            val response = PinataApiClient.pinataService.pinJSONToIPFS(apiKey, jsonMap)
+            
+            // 응답 처리
+            if (response.isSuccessful) {
+                val ipfsHash = response.body()?.IpfsHash
+                Log.d(TAG, "JSON 업로드 성공: $ipfsHash")
+                Log.d(TAG, "IPFS 업로드 성공: CID = $ipfsHash")
+                return ipfsHash
+            } else {
+                Log.e(TAG, "JSON 업로드 실패: ${response.code()} - ${response.message()}")
+                return null
+            }
         } catch (e: Exception) {
             Log.e(TAG, "JSON 업로드 중 오류 발생", e)
-            throw e
+            return null
         }
     }
     
@@ -97,5 +131,40 @@ object IpfsUtils {
             it.moveToFirst()
             it.getString(nameIndex)
         } ?: "unknown_file"
+    }
+
+    // IPFS에서 JSON 데이터를 가져오기
+    fun getJsonFromIpfs(cid: String): JSONObject? {
+        val client = OkHttpClient.Builder()
+            .connectTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .build()
+
+        val request = Request.Builder()
+            .url("$IPFS_GATEWAY_URL/$cid")
+            .get()
+            .build()
+
+        return try {
+            val response = client.newCall(request).execute()
+            if (response.isSuccessful && response.body != null) {
+                val jsonString = response.body!!.string()
+                JSONObject(jsonString)
+            } else {
+                Log.e(TAG, "IPFS 데이터 가져오기 실패: ${response.code} - ${response.message}")
+                null
+            }
+        } catch (e: IOException) {
+            Log.e(TAG, "IPFS 데이터 가져오기 오류: ${e.message}")
+            null
+        }
+    }
+
+    // QR 코드에 사용할 URL 생성 (CID를 포함)
+    fun createQrCodeUrl(cid: String): String {
+        Log.d(TAG, "QR 코드 URL 생성: CID = $cid")
+        val url = "$IPFS_GATEWAY_URL/$cid"
+        Log.d(TAG, "생성된 QR 코드 URL: $url")
+        return url
     }
 } 

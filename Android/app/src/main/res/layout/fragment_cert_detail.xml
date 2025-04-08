@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="25dp"
         android:layout_marginTop="75dp"
-        android:text="임시 수료증"
+        android:text="수료증"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -59,7 +59,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="수료증을 발급받기 전에는 \n임시 수료증이 조회됩니다."
+        android:text=" "
         android:textColor="@color/text_gray"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -89,14 +89,14 @@
             android:rotation="-10"
             android:scrollHorizontally="true"
             android:singleLine="true"
-
             android:text="임시 수료증입니다."
             android:textColor="#26000000"
             android:textSize="52sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:visibility="gone"/>
 
         <ImageView
             android:id="@+id/imageCertBackground"
@@ -126,7 +126,7 @@
             style="@style/heading1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="SQLD 미리보기"
+            android:text=" "
             android:textColor="@color/primary_color"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -165,7 +165,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="end"
-                    android:text="이한나" />
+                    android:text=" "
+                    android:singleLine="true"/>
 
                 <TextView
                     style="@style/heading4"
@@ -189,7 +190,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="end"
-                    android:text="이한나" />
+                    android:text=" "
+                    android:singleLine="true"/>
 
                 <TextView
                     style="@style/heading4"
@@ -199,18 +201,19 @@
                     android:text="강의자" />
 
             </LinearLayout>
+
         </LinearLayout>
 
         <ImageView
             android:id="@+id/imgQR"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_margin="20dp"
-            android:background="@color/primary_color"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="24dp"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

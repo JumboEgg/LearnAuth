@@ -280,7 +280,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="24dp"
                 android:layout_marginBottom="97dp"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/quizBtn" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

@@ -42,6 +42,9 @@
         <action
             android:id="@+id/action_certFragment_to_certDetailFragment"
             app:destination="@id/certDetailFragment" />
+        <action
+            android:id="@+id/action_certFragment_to_certVerifyFragment"
+            app:destination="@id/certVerifyFragment" />
     </fragment>
 
     <fragment
@@ -55,7 +58,33 @@
         <argument
             android:name="lectureId"
             app:argType="integer" />
+        <action
+            android:id="@+id/action_certDetailFragment_to_certVerifyFragment"
+            app:destination="@id/certVerifyFragment" />
     </fragment>
+    
+    <!-- 수료증 검증 화면 -->
+    <fragment
+        android:id="@+id/certVerifyFragment"
+        android:name="com.example.second_project.ui.CertVerifyFragment"
+        android:label="수료증 검증"
+        tools:layout="@layout/fragment_cert_veify">
+        <argument
+            android:name="tokenId"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
+
+    <!-- 글로벌 액션 추가 -->
+    <action
+        android:id="@+id/action_global_certVerifyFragment"
+        app:destination="@id/certVerifyFragment"
+        app:launchSingleTop="true">
+        <argument
+            android:name="tokenId"
+            app:argType="string"
+            app:nullable="true" />
+    </action>
 
     <!-- ProfileFragment -->
     <fragment
@@ -223,6 +252,17 @@
                 android:name="subLectureId"
                 app:argType="integer"/>
         </action>
+        <!-- OwnedLectureFragment에서 OwnedLectureDetailFragment로 이동하는 액션 추가 -->
+        <action
+            android:id="@+id/action_ownedLectureFragment_to_ownedLectureDetailFragment"
+            app:destination="@id/ownedLectureDetailFragment">
+            <argument
+                android:name="lectureId"
+                app:argType="integer"/>
+            <argument
+                android:name="userId"
+                app:argType="integer"/>
+        </action>
     </fragment>
 
     <!-- 참여 강의 탭 -->
@@ -275,5 +315,17 @@
             app:destination="@id/lecturePlayFragment"/>
     </fragment>
 
+    <!-- OwnedLectureDetailFragment로 가는 글로벌 액션 추가 -->
+    <action
+        android:id="@+id/action_global_ownedLectureDetailFragment"
+        app:destination="@id/ownedLectureDetailFragment"
+        app:launchSingleTop="true">
+        <argument
+            android:name="lectureId"
+            app:argType="integer"/>
+        <argument
+            android:name="userId"
+            app:argType="integer"/>
+    </action>
 
 </navigation>

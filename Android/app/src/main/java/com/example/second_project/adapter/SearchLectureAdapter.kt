@@ -34,7 +34,7 @@ class SearchLectureAdapter(
             binding.lectureTeacherName.text = lecture.lecturer ?: "강의자 미정"
             // 강의 가격
             val price = decimal.format(lecture.price)
-            binding.lecturePrice.text = "${price}원"
+            binding.lecturePrice.text = "${price}CAT"
 
             // 썸네일 설정
             Log.d(TAG, "bind: lecture = $lecture")

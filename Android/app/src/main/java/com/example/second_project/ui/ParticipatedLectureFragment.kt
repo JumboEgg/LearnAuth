@@ -37,9 +37,16 @@ class ParticipatedLectureFragment : Fragment() {
 
         // RecyclerView 설정: 참여 강의 목록을 LinearLayoutManager로 표시
         val adapter = ParticipatedLectureAdapter { lectureItem ->
-            // 강의 클릭 시, Safe Args를 통해 Global Static Fragment로 이동 (여기서는 강의 제목을 전달)
-            val action = NavGraphDirections.actionGlobalStaticFragment(lectureItem.title)
-            findNavController().navigate(action)
+            val userId = UserSession.userId
+            val lectureId = lectureItem.lectureId
+            
+            // 부모 프래그먼트의 네비게이션 컨트롤러를 사용
+            val parentNavController = requireParentFragment().findNavController()
+            val action = NavGraphDirections.actionGlobalOwnedLectureDetailFragment(
+                lectureId = lectureId,
+                userId = userId
+            )
+            parentNavController.navigate(action)
         }
         binding.participatedRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.participatedRecyclerView.adapter = adapter
@@ -51,6 +58,16 @@ class ParticipatedLectureFragment : Fragment() {
         // 뷰모델에서 참여 강의 리스트를 관찰하여 어댑터에 업데이트
         viewModel.participatedLectures.observe(viewLifecycleOwner) { lectureList ->
             adapter.submitList(lectureList)
+            
+            // 데이터가 없을 때 메시지 표시
+            if (lectureList.isEmpty()) {
+                binding.emptyMessage.text = "참여한 강의가 없습니다."
+                binding.emptyMessage.visibility = View.VISIBLE
+                binding.participatedRecyclerView.visibility = View.GONE
+            } else {
+                binding.emptyMessage.visibility = View.GONE
+                binding.participatedRecyclerView.visibility = View.VISIBLE
+            }
         }
 
         // 새 강의 등록 버튼 클릭 시 RegisterMainFragment로 이동

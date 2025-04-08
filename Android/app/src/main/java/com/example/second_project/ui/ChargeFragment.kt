@@ -21,6 +21,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
 import java.math.BigInteger
+import kotlin.random.Random
 
 class ChargeFragment : Fragment() {
     private var _binding: FragmentChargeBinding? = null
@@ -107,22 +108,68 @@ class ChargeFragment : Fragment() {
      * 고양이 ImageView를 “화면 왼쪽→오른쪽”으로만 계속 달리게 하는 메서드
      * (한 번 달린 후 애니메이션 끝나면, 다시 왼쪽으로 복귀 후 반복)
      */
+    // 고양이 이미지의 랜덤 이동 애니메이션 시작 함수
     private fun startCatAnimation() {
-        // 레이아웃 파악 후에 계산하기 위해 post 사용
         binding.loadingOverlay.post {
-            // 현재 오버레이 폭
-            val parentWidth = binding.loadingOverlay.width
-            // 고양이 뷰 폭
-            val catWidth = binding.catImageView.width
-
-            if (parentWidth == 0 || catWidth == 0) {
-                Log.w("ChargeFragment", "화면/고양이 폭 측정 실패 → 기본 이동값 사용")
-                doSingleRun(600f) // 임시 하드코딩
-            } else {
-                val distanceX = (parentWidth - catWidth).toFloat()
-                doSingleRun(distanceX)
-            }
+            doSingleRun()
         }
+    }
+
+    // 고양이를 랜덤 위치로 이동시키는 함수
+    private fun doSingleRun() {
+        if (!isOverlayVisible) return  // 오버레이가 사라졌다면 중단
+
+        // 부모 오버레이(전체 로딩 화면)의 크기
+        val parentWidth = binding.loadingOverlay.width
+        val parentHeight = binding.loadingOverlay.height
+
+        // 고양이 이미지의 크기
+        val catWidth = binding.catImageView.width
+        val catHeight = binding.catImageView.height
+
+        if (parentWidth <= 0 || parentHeight <= 0 || catWidth <= 0 || catHeight <= 0) {
+            // 크기를 제대로 측정하지 못한 경우, 잠시 후 재시도
+            binding.loadingOverlay.postDelayed({ doSingleRun() }, 1000)
+            return
+        }
+
+        // 현재 고양이 이미지의 위치 (이미 애니메이션으로 인한 이동이 있을 수 있으므로 실제 x, y 좌표 사용)
+        val currentX = binding.catImageView.x
+        val currentY = binding.catImageView.y
+
+        // 고양이 이미지가 완전히 보일 수 있도록, x 좌표는 0 ~ (부모너비 - 이미지너비),
+        // y 좌표는 0 ~ (부모높이 - 이미지높이) 범위 내에서 랜덤하게 생성
+        val targetX = Random.nextInt(0, parentWidth - catWidth).toFloat()
+        val targetY = Random.nextInt(0, parentHeight - catHeight).toFloat()
+
+        // 현재 위치에서 타겟 위치까지의 차이(델타값)
+        val deltaX = targetX - currentX
+        val deltaY = targetY - currentY
+
+        val anim = TranslateAnimation(
+            Animation.ABSOLUTE, 0f,
+            Animation.ABSOLUTE, deltaX,
+            Animation.ABSOLUTE, 0f,
+            Animation.ABSOLUTE, deltaY
+        ).apply {
+            duration = 2000  // 애니메이션 지속 시간 (2초)
+            fillAfter = true  // 애니메이션 종료 후 그 위치에 그대로 둠
+            setAnimationListener(object : Animation.AnimationListener {
+                override fun onAnimationStart(animation: Animation) {}
+                override fun onAnimationRepeat(animation: Animation) {}
+                override fun onAnimationEnd(animation: Animation) {
+                    // 애니메이션 종료 후 실제 고양이 이미지의 위치 업데이트
+                    binding.catImageView.clearAnimation()
+                    binding.catImageView.x = targetX
+                    binding.catImageView.y = targetY
+                    // 오버레이가 여전히 활성화되어 있다면 다시 랜덤 이동 애니메이션 실행
+                    if (isOverlayVisible) {
+                        doSingleRun()
+                    }
+                }
+            })
+        }
+        binding.catImageView.startAnimation(anim)
     }
 
     /**
@@ -454,7 +501,7 @@ class ChargeFragment : Fragment() {
                             if (isAdded && !isRemoving) { // Fragment가 아직 유효한 경우에만
                                 requireActivity().onBackPressedDispatcher.onBackPressed()
                             }
-                        }, 3000)
+                        }, 100)
                     }
                 } catch (e: Exception) {
                     Log.e("ChargeFragment", "충전 후 잔액 확인 실패: ${e.message}")
