@@ -53,3 +53,9 @@ fun EditText.disableEmojis() {
     filters = currentFilters.toTypedArray()
 }
 
+fun isKoreanOrEnglishOnly(text: String): Boolean {
+    val regex = Regex("^[a-zA-Z가-힣]+$")
+    return regex.matches(text)
+}
+
+

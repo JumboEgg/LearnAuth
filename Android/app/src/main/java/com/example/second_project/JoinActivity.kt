@@ -13,6 +13,7 @@ import com.example.second_project.data.model.dto.response.SignupResponse
 import com.example.second_project.databinding.ActivityJoinBinding
 import com.example.second_project.network.ApiClient
 import com.example.second_project.network.SignupApiService
+import com.example.second_project.utils.isKoreanOrEnglishOnly
 import org.web3j.crypto.WalletUtils
 import retrofit2.Call
 import retrofit2.Callback
@@ -53,11 +54,29 @@ class JoinActivity : AppCompatActivity() {
                 Toast.makeText(this, "모든 항목을 입력해주세요.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+
+            if (!isKoreanOrEnglishOnly(name)) {
+                Toast.makeText(this, "실명은 한글 또는 영문만 입력 가능합니다.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (!isValidEmail(email)) {
+                Toast.makeText(this, "올바른 이메일 형식이 아닙니다.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+
             if (pw.length <8){
                 Toast.makeText(this,"비밀번호는 8자리 이상 부탁드립니다.",Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
             if (pw != pw2) {
                 Toast.makeText(this, "비밀번호가 일치하지 않습니다.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (!isKoreanOrEnglishOnly(nickname)) {
+                Toast.makeText(this, "닉네임은 한글 또는 영문만 입력 가능합니다.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -199,4 +218,10 @@ class JoinActivity : AppCompatActivity() {
         isPw2Visible = !isPw2Visible
         binding.joinPw2.setSelection(binding.joinPw2.text.length)
     }
+
+    // 이메일 형식 검사
+    private fun isValidEmail(email: String): Boolean {
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
 }
