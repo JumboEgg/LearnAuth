@@ -66,7 +66,15 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
                 binding.editTextPrice.editText?.clearFocus()
                 hideKeyboard(binding.root, requireContext())
             },
-            onDeleteClick = { position -> adapter.removeItem(position) },
+            onDeleteClick = { position ->
+                // ✅ adapter에서 먼저 삭제
+                val removedEmail = adapter.getParticipantData().getOrNull(position)?.first
+                adapter.removeItem(position)
+
+                // ✅ viewModel에서도 함께 삭제
+                removedEmail?.let { email ->
+                    viewModel.ratios.removeAll { it.email == email }
+                }},
             onNameClick = { position ->
                 var currentKeyword = ""
                 val dialogBinding = DialogRegisterSearchParticipantsBinding.inflate(layoutInflater)
