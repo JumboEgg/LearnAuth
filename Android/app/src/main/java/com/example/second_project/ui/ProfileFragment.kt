@@ -20,6 +20,7 @@ import com.example.second_project.data.TransactionCache
 import com.example.second_project.data.TransactionItem
 import com.example.second_project.viewmodel.ProfileViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.web3j.crypto.WalletUtils
@@ -240,28 +241,44 @@ class ProfileFragment : Fragment() {
     private suspend fun loadBalanceAsync() = withContext(Dispatchers.IO) {
         // context가 더 이상 유효하지 않은지 먼저 확인
         if (!isAdded) {
-            Log.d(
-                TAG,
-                "Fragment is not attached to context, cancelling balance update"
-            )
+            Log.d(TAG, "Fragment is not attached to context, cancelling balance update")
             return@withContext
         }
-        val context = context ?: return@withContext // null 체크 추가
+
+        val context = context ?: return@withContext
         val manager = UserSession.getBlockchainManagerIfAvailable(context)
+
         if (manager != null) {
             try {
                 // 지갑 주소 가져오기
-                val address = withContext(Dispatchers.IO) { manager.getMyWalletAddress() }
+                val address = manager.getMyWalletAddress()
                 Log.d(TAG, "📍 내 지갑 주소: $address")
+
                 // 주소 저장 (만약 아직 저장되지 않았다면)
                 if (UserSession.walletAddress.isNullOrEmpty()) {
                     UserSession.walletAddress = address
                 }
+
                 // wei 단위의 토큰 잔액 가져오기
-                val balanceInWei = withContext(Dispatchers.IO) { manager.getMyCatTokenBalance() }
+                val balanceInWei = manager.getMyCatTokenBalance()
                 Log.d(TAG, "💰 CATToken 잔액(wei): $balanceInWei")
+
+                // 충전 전/후 변화 로깅
+                val previousBalance = UserSession.lastKnownBalance
+                if (previousBalance != null) {
+                    val diff = balanceInWei.subtract(previousBalance)
+                    if (diff > BigInteger.ZERO) {
+                        Log.d(TAG, "💰 잔액 증가 감지: +${diff} wei")
+                    } else if (diff < BigInteger.ZERO) {
+                        Log.d(TAG, "💰 잔액 감소 감지: ${diff} wei")
+                    } else {
+                        Log.d(TAG, "💰 잔액 변화 없음")
+                    }
+                }
+
                 // UserSession에 마지막 잔액 저장 (나중에 참조 가능)
                 UserSession.lastKnownBalance = balanceInWei
+
                 // UI 업데이트는 메인 스레드에서 안전하게 수행하되, Fragment가 아직 유효한지 확인
                 withContext(Dispatchers.Main) {
                     if (isAdded && _binding != null) {
@@ -271,16 +288,18 @@ class ProfileFragment : Fragment() {
             } catch (e: Exception) {
                 Log.e(TAG, "잔액 조회 실패", e)
                 e.printStackTrace()
+
                 withContext(Dispatchers.Main) {
-                    if (isAdded && context != null) {
+                    if (isAdded && _binding != null && context != null) {
                         Toast.makeText(context, "잔액 조회 실패: ${e.message}", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
         } else {
             Log.w(TAG, "지갑 정보가 없습니다. 로그인 다시 해주세요")
+
             withContext(Dispatchers.Main) {
-                if (isAdded && context != null) {
+                if (isAdded && _binding != null && context != null) {
                     Toast.makeText(context, "지갑 정보가 없습니다. 로그인을 다시 해주세요", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -468,13 +487,73 @@ class ProfileFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // Fragment가 아직 활성 상태인 경우에만 코루틴 시작
-        if (isAdded && view != null) {
-            viewLifecycleOwner.lifecycleScope.launch {
-                // 백그라운드에서 잔액 가져오고 UI 업데이트
-                loadBalanceAsync()
 
-                // 백그라운드에서 트랜잭션 데이터 미리 로드 (지갑 화면으로 이동 전 준비)
+        // Fragment가 활성 상태인 경우에만 코루틴 시작
+        if (isAdded && view != null) {
+            // 즉시 UserSession의 캐시된 잔액을 표시 (있는 경우)
+            UserSession.lastKnownBalance?.let {
+                if (_binding != null) {
+                    updateBalanceDisplay(it)
+                }
+            }
+
+            // 블록체인에서 최신 잔액 확인 (비동기)
+            viewLifecycleOwner.lifecycleScope.launch {
+                // 잔액 로드 전 지갑 파일 검증 (필요한 경우만)
+                if (UserSession.walletFilePath == null || UserSession.walletAddress == null) {
+                    withContext(Dispatchers.IO) {
+                        handleWalletFile()
+                    }
+                }
+
+                // 블록체인에서 실제 잔액 로드 (최대 2회 시도)
+                var retryCount = 0
+                var success = false
+
+                while (retryCount < 2 && !success && isAdded) {
+                    try {
+                        withContext(Dispatchers.IO) {
+                            if (!isAdded) return@withContext
+
+                            val context = context ?: return@withContext
+                            val manager = UserSession.getBlockchainManagerIfAvailable(context)
+
+                            if (manager != null) {
+                                // 지갑 주소 확인
+                                val address = manager.getMyWalletAddress()
+                                Log.d(TAG, "📍 지갑 주소 확인: $address")
+
+                                // wei 단위의 토큰 잔액 가져오기
+                                val balanceInWei = manager.getMyCatTokenBalance()
+                                Log.d(TAG, "💰 CATToken 잔액(wei): $balanceInWei")
+
+                                // 이전 잔액과 새 잔액 비교 로깅
+                                val previousBalance = UserSession.lastKnownBalance
+                                Log.d(TAG, "이전 저장된 잔액(wei): $previousBalance")
+
+                                // 결과 저장
+                                UserSession.lastKnownBalance = balanceInWei
+                                success = true
+
+                                // UI 업데이트
+                                withContext(Dispatchers.Main) {
+                                    if (isAdded && _binding != null) {
+                                        updateBalanceDisplay(balanceInWei)
+                                    }
+                                }
+                            } else {
+                                Log.w(TAG, "지갑 관리자 초기화 실패")
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "잔액 조회 실패 (시도 ${retryCount + 1}): ${e.message}")
+                        retryCount++
+                        delay(1000) // 1초 대기 후 재시도
+                    }
+                }
+
+                // 트랜잭션 데이터 미리 로드 (지갑 화면으로 이동 전 준비)
+                // 잔액 로드 성공 여부와 상관없이 시도
                 preloadTransactionData()
             }
         }

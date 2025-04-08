@@ -138,7 +138,14 @@ class MyWalletFragment : Fragment() {
                 // 1. 최신 잔액 조회 후 갱신 (캐시된 데이터가 이미 표시되고 있음)
                 val actualBalance = blockChainManager!!.getMyCatTokenBalance()
                 UserSession.lastKnownBalance = actualBalance
-                withContext(Dispatchers.Main) { updateBalanceUI(actualBalance) }
+
+                // UI 업데이트는 메인 스레드에서 안전하게 처리
+                withContext(Dispatchers.Main) {
+                    // Fragment가 아직 유효한지 확인 후 UI 갱신
+                    if (isAdded && _binding != null) {
+                        updateBalanceUI(actualBalance)
+                    }
+                }
 
                 // 2. 이전 거래 내역 로드
                 loadHistoricalEvents()
@@ -150,19 +157,29 @@ class MyWalletFragment : Fragment() {
 
                 // 4. 일정 시간 동안 데이터가 없으면 기본 데이터 표시
                 kotlinx.coroutines.delay(3000) // 최적화: 5초에서 3초로 단축
+
+                // UI 업데이트는 메인 스레드에서 안전하게 처리
                 withContext(Dispatchers.Main) {
-                    if (TransactionCache.isEmpty() && !isDataLoaded) {
-                        showDefaultTransactions()
+                    // Fragment가 아직 유효한지 확인 후 UI 갱신
+                    if (isAdded && _binding != null) {
+                        if (TransactionCache.isEmpty() && !isDataLoaded) {
+                            showDefaultTransactions()
+                        }
+                        showLoading(false)
                     }
-                    showLoading(false)
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "블록체인 데이터 로드 오류: ${e.message}")
+
+                // UI 업데이트는 메인 스레드에서 안전하게 처리
                 withContext(Dispatchers.Main) {
-                    if (TransactionCache.isEmpty()) {
-                        showDefaultData()
+                    // Fragment가 아직 유효한지 확인 후 UI 갱신
+                    if (isAdded && _binding != null) {
+                        if (TransactionCache.isEmpty()) {
+                            showDefaultData()
+                        }
+                        showLoading(false)
                     }
-                    showLoading(false)
                 }
             }
         }
@@ -175,7 +192,8 @@ class MyWalletFragment : Fragment() {
         // 기존 캐시 데이터가 있다면 즉시 업데이트
         if (!TransactionCache.isEmpty()) {
             withContext(Dispatchers.Main) {
-                if (_binding != null) {
+                // Fragment가 아직 유효한지 확인 후 UI 갱신
+                if (isAdded && _binding != null) {
                     transactionAdapter =
                         TransactionAdapter(TransactionCache.getRecentTransactions(TransactionCache.size()))
                     binding.transactionList.adapter = transactionAdapter
@@ -258,7 +276,8 @@ class MyWalletFragment : Fragment() {
                 TransactionCache.updateTransactions(events)
 
                 withContext(Dispatchers.Main) {
-                    if (_binding != null) {
+                    // Fragment가 아직 유효한지 확인 후 UI 갱신
+                    if (isAdded && _binding != null) {
                         val transactions =
                             TransactionCache.getRecentTransactions(TransactionCache.size())
                         transactionAdapter = TransactionAdapter(transactions)
@@ -496,8 +515,14 @@ class MyWalletFragment : Fragment() {
         val actualBalance = balance.divide(divisor)
         val formatter = DecimalFormat("#,###")
         val formattedBalance = "${formatter.format(actualBalance)} CAT"
-        binding.moneyCount.text = formattedBalance
-        Log.d(TAG, "잔액 업데이트: $formattedBalance")
+
+        // 바인딩이 널이 아닌지 확인
+        if (_binding != null) {
+            binding.moneyCount.text = formattedBalance
+            Log.d(TAG, "잔액 업데이트: $formattedBalance")
+        } else {
+            Log.w(TAG, "잔액 업데이트 실패: 바인딩이 null입니다")
+        }
     }
 
     private fun showDefaultTransactions() {
@@ -508,56 +533,48 @@ class MyWalletFragment : Fragment() {
                     "2025 / 03 / 25",
                     BigInteger.valueOf(4),
                     System.currentTimeMillis()
-                ),
-                TransactionItem(
-                    "일상 생활 관리",
-                    "2025 / 03 / 24",
-                    BigInteger.valueOf(30),
-                    System.currentTimeMillis()
-                ),
-                TransactionItem(
-                    "기본 법률 상식",
-                    "2025 / 03 / 23",
-                    BigInteger.valueOf(55),
-                    System.currentTimeMillis()
-                ),
-                TransactionItem(
-                    "스포츠 심리학",
-                    "2025 / 03 / 22",
-                    BigInteger.valueOf(6),
-                    System.currentTimeMillis()
-                ),
-                TransactionItem(
-                    "마케팅 전략",
-                    "2025 / 03 / 21",
-                    BigInteger.valueOf(4),
-                    System.currentTimeMillis()
                 )
             )
             TransactionCache.updateTransactions(defaultTransactions)
-            transactionAdapter = TransactionAdapter(defaultTransactions)
-            binding.transactionList.adapter = transactionAdapter
-            Log.d(TAG, "기본 거래 내역 표시됨")
+
+            // 바인딩이 널이 아닌지 확인
+            if (_binding != null) {
+                transactionAdapter = TransactionAdapter(defaultTransactions)
+                binding.transactionList.adapter = transactionAdapter
+                Log.d(TAG, "기본 거래 내역 표시됨")
+            } else {
+                Log.w(TAG, "기본 거래 내역 표시 실패: 바인딩이 null입니다")
+            }
         }
     }
 
     private fun showDefaultData() {
-        binding.moneyCount.text = "55 CAT"
-        showDefaultTransactions()
-        Log.d(TAG, "기본 데이터 표시됨")
+        // 바인딩이 널이 아닌지 확인
+        if (_binding != null) {
+            binding.moneyCount.text = "55 CAT"
+            showDefaultTransactions()
+            Log.d(TAG, "기본 데이터 표시됨")
+        } else {
+            Log.w(TAG, "기본 데이터 표시 실패: 바인딩이 null입니다")
+        }
     }
 
     private fun showLoading(isLoading: Boolean) {
-        if (isLoading) {
-            binding.transactionList.visibility = View.INVISIBLE
-            binding.loadingSpinner.visibility = View.VISIBLE
-            binding.blockTouchOverlay.visibility = View.VISIBLE
-            binding.chargeBtn.isEnabled = false
+        // 바인딩이 널이 아닌지 확인
+        if (_binding != null) {
+            if (isLoading) {
+                binding.transactionList.visibility = View.INVISIBLE
+                binding.loadingSpinner.visibility = View.VISIBLE
+                binding.blockTouchOverlay.visibility = View.VISIBLE
+                binding.chargeBtn.isEnabled = false
+            } else {
+                binding.transactionList.visibility = View.VISIBLE
+                binding.loadingSpinner.visibility = View.GONE
+                binding.blockTouchOverlay.visibility = View.GONE
+                binding.chargeBtn.isEnabled = true
+            }
         } else {
-            binding.transactionList.visibility = View.VISIBLE
-            binding.loadingSpinner.visibility = View.GONE
-            binding.blockTouchOverlay.visibility = View.GONE
-            binding.chargeBtn.isEnabled = true
+            Log.w(TAG, "로딩 상태 변경 실패: 바인딩이 null입니다")
         }
     }
 
