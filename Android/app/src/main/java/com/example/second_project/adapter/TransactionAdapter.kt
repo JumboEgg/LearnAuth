@@ -31,7 +31,7 @@ class TransactionAdapter(private val transactionList: List<TransactionItem>) :
         val item = transactionList[position]
 
         // 거래 내역 설정
-        holder.lectureTitle.text = item.title  // 강의 제목s
+        holder.lectureTitle.text = item.title  // 강의 제목ssc
         holder.lectureDate.text = item.date       // 날짜
 
         val decimal = DecimalFormat("#,###")
