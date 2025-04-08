@@ -218,8 +218,8 @@ public class LectureManagementServiceImpl implements LectureManagementService {
                 || request.getCategoryName() == null
                 || request.getGoal() == null || request.getGoal().isBlank()
                 || request.getDescription() == null || request.getDescription().isBlank()
-                || request.getPrice() < 1) {
-            throw new InvalidLectureDataException("강의 필수 정보 누락, 가격 1미만");
+                || request.getPrice() < 0) {
+            throw new InvalidLectureDataException("강의 필수 정보 누락, 가격 음수");
         }
 
         // 2. 퀴즈 최소 3개 이상 등록
