@@ -5,52 +5,72 @@
     android:paddingVertical="8dp"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <ImageView
-        android:id="@+id/categoryIcon"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:visibility="invisible"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
-
     <LinearLayout
-        android:id="@+id/lectureInfo"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintStart_toEndOf="@id/categoryIcon"
-        android:layout_marginStart="16dp"
-        app:layout_constraintTop_toTopOf="@id/categoryIcon"
-        app:layout_constraintBottom_toBottomOf="@id/categoryIcon">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/transactionLectureTitle"
+        <ImageView
+            android:id="@+id/categoryIcon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <LinearLayout
+            android:id="@+id/lectureInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="인사 잘하는 법"
+            android:orientation="vertical"
+            android:layout_weight="3"
+            android:layout_marginEnd="10dp">
+
+            <TextView
+                android:id="@+id/transactionLectureTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="인사 잘하는 법"
+                style="@style/semibold16"
+                android:fontFamily="@font/pretendard_bold"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:scrollHorizontally="true"/>
+
+            <TextView
+                android:id="@+id/transactionLectureData"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="2025 / 03 / 26"
+                style="@style/medium12"
+                android:textColor="@color/text_gray"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/transactionLecturePrice"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:text="500 CAT"
             style="@style/semibold16"
             android:fontFamily="@font/pretendard_bold"
-            />
-
-        <TextView
-            android:id="@+id/transactionLectureData"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="2025 / 03 / 26"
-            style="@style/medium12"
-            android:textColor="@color/text_gray"/>
+            android:layout_weight="2"
+            android:gravity="end"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:scrollHorizontally="true"/>
 
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/transactionLecturePrice"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:text="500 CAT"
-        style="@style/semibold16"
-        android:fontFamily="@font/pretendard_bold"
-        app:layout_constraintTop_toTopOf="@id/categoryIcon"
-        app:layout_constraintBottom_toBottomOf="@id/categoryIcon"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

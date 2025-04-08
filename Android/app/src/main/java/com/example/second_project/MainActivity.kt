@@ -23,12 +23,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         
         // 로그인 상태 확인
-        if (UserSession.userId == 0) {
-            // 로그인되지 않은 경우 로그인 화면으로 이동
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
-            return
-        }
+//        if (UserSession.userId == 0) {
+//            // 로그인되지 않은 경우 로그인 화면으로 이동
+//            startActivity(Intent(this, LoginActivity::class.java))
+//            finish()
+//            return
+//        }
         
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
