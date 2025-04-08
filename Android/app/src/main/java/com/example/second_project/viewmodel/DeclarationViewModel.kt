@@ -13,6 +13,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
+private const val TAG = "DeclarationViewModel"
 class DeclarationViewModel : ViewModel() {
     private val _reportList = MutableLiveData<List<DeclarationItem>>()
     val reportList: LiveData<List<DeclarationItem>> get() = _reportList
@@ -25,6 +26,7 @@ class DeclarationViewModel : ViewModel() {
                 call: Call<ReportApiResponse>,
                 response: Response<ReportApiResponse>
             ) {
+                Log.d(TAG, "onResponse: ${response.body()}")
                 if (response.isSuccessful && response.body() != null) {
                     val apiReports = response.body()!!.data
                     // ReportData를 ReportItem으로 매핑합니다.
