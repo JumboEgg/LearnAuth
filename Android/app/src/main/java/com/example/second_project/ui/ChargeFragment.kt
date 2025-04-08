@@ -382,6 +382,7 @@ class ChargeFragment : Fragment() {
     }
 
     // 구매 버튼 처리
+// handlePurchase 메서드 수정
     private fun handlePurchase() {
         if (isCharging) {
             Toast.makeText(requireContext(), "충전 진행 중입니다!", Toast.LENGTH_SHORT).show()
@@ -396,12 +397,11 @@ class ChargeFragment : Fragment() {
 
         // 1 CAT = 10^18 wei
         val tokenUnit = BigInteger.TEN.pow(18)
-
         // 한도를 wei 단위로 변경: 1,000,000 CAT -> 1,000,000 * 10^18
         val limit = BigInteger.valueOf(1_000_000).multiply(tokenUnit)
-
         // 충전할 금액 (wei 단위)
         val depositAmountWei = BigInteger.valueOf(inputBase.toLong()).multiply(tokenUnit)
+
         Log.d("ChargeFragment", "충전 요청 금액(CAT): $inputBase")
         Log.d("ChargeFragment", "충전 요청 금액(wei): $depositAmountWei")
 
@@ -431,32 +431,47 @@ class ChargeFragment : Fragment() {
         val service = ApiClient.retrofit.create(PaymentApiService::class.java)
         service.deposit(request).enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                isCharging = false
-                // 충전이 끝난 후 뒤로가기 버튼 다시 활성화
-                backCallback.isEnabled = false
-
-                binding.purchaseBtn.isEnabled = true
-                binding.purchaseBtn.text = "충전하기"
-                hideLoadingOverlay() // 결제 끝 → 무조건 오버레이 숨김
+                // 충전 중 상태 유지 (잔액 확인 완료 시 verifyBalanceAfterCharge에서 해제)
+                binding.purchaseBtn.text = "잔액 확인 중..."
 
                 try {
                     val errorBody = response.errorBody()?.string()
                     if (!errorBody.isNullOrEmpty()) {
                         Log.d("ChargeFragment", "응답 상세: $errorBody")
                     }
-                } catch (e: Exception) { }
+                } catch (e: Exception) {
+                }
 
                 if (response.isSuccessful) {
                     Log.d("ChargeFragment", "✅ 충전 API 호출 성공")
-                    // 충전 성공 시 현재 잔액 업데이트
+
+                    // 서버 응답 즉시 메모리 상의 잔액 업데이트 (UI는 즉시 반영)
                     currentBalance = currentBalance.add(depositAmountWei)
                     updateChargeOutput(inputBase)
-                    Toast.makeText(requireContext(), "충전 완료!", Toast.LENGTH_SHORT).show()
+
+                    // 충전 진행 중임을 알리는 토스트 메시지
+                    Toast.makeText(
+                        requireContext(),
+                        "충전 요청 완료! 블록체인에 반영 중...",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
                     // 블록체인에서 실제 잔액 확인 (비동기)
                     verifyBalanceAfterCharge(depositAmountWei, inputBase)
                 } else {
                     Log.e("ChargeFragment", "❌ 충전 API 호출 실패: ${response.code()}")
-                    Toast.makeText(requireContext(), "충전 실패: ${response.code()}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        "충전 실패: ${response.code()}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    // 충전 실패 시 상태 초기화
+                    isCharging = false
+                    backCallback.isEnabled = false
+                    binding.purchaseBtn.isEnabled = true
+                    binding.purchaseBtn.text = "충전하기"
+                    hideLoadingOverlay()
                 }
             }
 
@@ -464,54 +479,129 @@ class ChargeFragment : Fragment() {
                 isCharging = false
                 // 충전 실패 시에도 뒤로가기 버튼 복원
                 backCallback.isEnabled = false
-
                 binding.purchaseBtn.isEnabled = true
                 binding.purchaseBtn.text = "충전하기"
                 hideLoadingOverlay()
 
                 Log.e("ChargeFragment", "❌ 충전 API 통신 오류: ${t.message}")
                 t.printStackTrace()
-
                 Toast.makeText(requireContext(), "통신 오류: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
+
     // 충전 후 잔액 확인 및 UserSession에 저장
+// verifyBalanceAfterCharge 메서드 수정
     private fun verifyBalanceAfterCharge(depositAmountWei: BigInteger, inputBase: Int) {
         val manager = UserSession.getBlockchainManagerIfAvailable(requireContext())
         if (manager != null) {
             Thread {
                 try {
-                    // 블록체인에 반영될 시간을 주기 위해 잠시 대기
-                    Thread.sleep(1000)
+                    // 블록체인에 반영될 시간을 주기 위해 대기 시간 증가 (1초 -> 5초)
+                    Thread.sleep(5000)
 
-                    // 실제 블록체인 잔액 확인
-                    val actualBalance = manager.getMyCatTokenBalance()
-                    Log.d("ChargeFragment", "충전 후 실제 잔액(wei): $actualBalance")
-                    Log.d("ChargeFragment", "기대 잔액(wei): ${currentBalance}")
-                    Log.d("ChargeFragment", "잔액 일치 여부: ${actualBalance == currentBalance}")
+                    // 실제 블록체인 잔액 확인 (최대 3회 시도)
+                    var actualBalance: BigInteger? = null
+                    var retryCount = 0
+                    var success = false
 
-                    // UserSession에 마지막 잔액 저장 - 이것이 핵심!
-                    UserSession.lastKnownBalance = actualBalance
+                    while (retryCount < 3 && !success) {
+                        try {
+                            // 실제 블록체인 잔액 확인
+                            actualBalance = manager.getMyCatTokenBalance()
+                            Log.d(
+                                "ChargeFragment",
+                                "충전 후 실제 잔액(wei): $actualBalance (시도 ${retryCount + 1})"
+                            )
 
-                    // UI 스레드에서 작업
-                    requireActivity().runOnUiThread {
-                        Toast.makeText(
-                            requireContext(),
-                            "충전이 완료되었습니다. 잔액이 업데이트 되었습니다.",
-                            Toast.LENGTH_LONG
-                        ).show()
-                        // 자동 뒤로가기 호출 전에 혹시 모를 콜백 막힘 상태를 해제
-                        backCallback.isEnabled = false
-                        binding.root.postDelayed({
-                            if (isAdded && !isRemoving) { // Fragment가 아직 유효한 경우
-                                requireActivity().onBackPressedDispatcher.onBackPressed()
+                            // 예상 잔액과 비교
+                            if (actualBalance >= currentBalance) {
+                                success = true
+                            } else {
+                                // 잔액이 예상보다 적으면 1초 더 기다리고 재시도
+                                Thread.sleep(1000)
+                                retryCount++
                             }
-                        }, 100)
+                        } catch (e: Exception) {
+                            Log.e("ChargeFragment", "잔액 조회 시도 ${retryCount + 1} 실패: ${e.message}")
+                            Thread.sleep(1000)
+                            retryCount++
+                        }
+                    }
+
+                    // 최종 결과 처리
+                    if (success && actualBalance != null) {
+                        Log.d("ChargeFragment", "충전 후 실제 잔액(wei): $actualBalance")
+                        Log.d("ChargeFragment", "기대 잔액(wei): ${currentBalance}")
+                        Log.d("ChargeFragment", "잔액 일치 여부: ${actualBalance >= currentBalance}")
+
+                        // UserSession에 마지막 잔액 저장 - 이것이 핵심!
+                        UserSession.lastKnownBalance = actualBalance
+
+                        // UI 스레드에서 작업
+                        requireActivity().runOnUiThread {
+                            if (isAdded && _binding != null) {
+                                Toast.makeText(
+                                    requireContext(),
+                                    "충전이 완료되었습니다. 잔액이 업데이트 되었습니다.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+
+                                // 자동 뒤로가기 호출 전에 혹시 모를 콜백 막힘 상태를 해제
+                                backCallback.isEnabled = false
+                                binding.root.postDelayed({
+                                    if (isAdded && !isRemoving) { // Fragment가 아직 유효한 경우
+                                        requireActivity().onBackPressedDispatcher.onBackPressed()
+                                    }
+                                }, 100)
+                            }
+                        }
+                    } else {
+                        // 잔액 확인 실패 또는 예상 잔액과 다름
+                        Log.e("ChargeFragment", "충전 후 잔액 확인 실패 또는 불일치")
+
+                        // UI 스레드에서 작업
+                        requireActivity().runOnUiThread {
+                            if (isAdded && _binding != null) {
+                                // 실패 토스트를 표시하지만 여전히 충전은 성공으로 간주 (서버 API는 성공했으므로)
+                                Toast.makeText(
+                                    requireContext(),
+                                    "충전은 완료되었으나 잔액 확인에 지연이 있을 수 있습니다.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+
+                                // 그래도 뒤로가기는 실행함
+                                backCallback.isEnabled = false
+                                binding.root.postDelayed({
+                                    if (isAdded && !isRemoving) {
+                                        requireActivity().onBackPressedDispatcher.onBackPressed()
+                                    }
+                                }, 100)
+                            }
+                        }
                     }
                 } catch (e: Exception) {
                     Log.e("ChargeFragment", "충전 후 잔액 확인 실패: ${e.message}")
                     e.printStackTrace()
+
+                    // UI 스레드에서 작업
+                    requireActivity().runOnUiThread {
+                        if (isAdded && _binding != null) {
+                            Toast.makeText(
+                                requireContext(),
+                                "충전은 완료되었으나 잔액 확인 중 오류가 발생했습니다.",
+                                Toast.LENGTH_LONG
+                            ).show()
+
+                            // 뒤로가기 실행
+                            backCallback.isEnabled = false
+                            binding.root.postDelayed({
+                                if (isAdded && !isRemoving) {
+                                    requireActivity().onBackPressedDispatcher.onBackPressed()
+                                }
+                            }, 100)
+                        }
+                    }
                 }
             }.start()
         }
