@@ -70,7 +70,7 @@
                         android:textSize="16sp"
                         android:letterSpacing="-0.02"
                         android:elevation="4dp"
-                        android:visibility="visible"/>
+                        android:visibility="gone"/>
 
                     <View
                         android:layout_width="8dp"
@@ -102,7 +102,7 @@
                         android:fontFamily="@font/pretendard_bold"
                         android:textSize="16sp"
                         android:letterSpacing="-0.02"
-                        android:visibility="visible"/>
+                        android:visibility="gone"/>
 
                 </LinearLayout>
 
