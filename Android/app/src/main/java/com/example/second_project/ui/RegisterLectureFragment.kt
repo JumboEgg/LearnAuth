@@ -1,5 +1,6 @@
 package com.example.second_project.ui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -16,7 +17,7 @@ import com.example.second_project.viewmodel.RegisterViewModel
 import com.example.second_project.utils.setEnterLimit
 import com.example.second_project.utils.disableEmojis
 
-class RegisterLectureFragment: Fragment(), RegisterStepSavable {
+class RegisterLectureFragment : Fragment(), RegisterStepSavable {
 
     private var _binding: FragmentRegisterLectureBinding? = null
     private val binding get() = _binding!!
@@ -39,8 +40,15 @@ class RegisterLectureFragment: Fragment(), RegisterStepSavable {
 
         viewModel.categoryList.observe(viewLifecycleOwner) { categories ->
             val categoryNames = categories.map { it.categoryName }
-            val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, categoryNames)
+            val adapter =
+                ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, categoryNames)
             binding.autoCompleteCategory.setAdapter(adapter)
+
+            binding.autoCompleteCategory.setOnClickListener {
+                KeyboardUtils.clearFocusAndHideKeyboard(it)
+                binding.autoCompleteCategory.showDropDown() // 드롭다운 메뉴 표시
+            }
+
 
             binding.autoCompleteCategory.setOnItemClickListener { _, _, position, _ ->
                 val selected = categoryNames[position]
