@@ -38,6 +38,8 @@ public class QLecture extends EntityPathBase<Lecture> {
 
     public final ListPath<Quiz, QQuiz> quizList = this.<Quiz, QQuiz>createList("quizList", Quiz.class, QQuiz.class, PathInits.DIRECT2);
 
+    public final ListPath<Report, QReport> reportList = this.<Report, QReport>createList("reportList", Report.class, QReport.class, PathInits.DIRECT2);
+
     public final ListPath<SubLecture, QSubLecture> subLectureList = this.<SubLecture, QSubLecture>createList("subLectureList", SubLecture.class, QSubLecture.class, PathInits.DIRECT2);
 
     public final StringPath title = createString("title");

@@ -8,7 +8,5 @@ import java.util.Optional;
 
 public interface ReportRepository extends JpaRepository<Report, Long> {
     // UserLecture entity 내의 userid로 신고 목록 조회
-    List<Report> findByUserLectureUserId(Long userId);
-
-    Optional<Report> findByUserLectureId(Long userLectureId);
+    List<Report> findReportsByUserId(Long userId);
 }

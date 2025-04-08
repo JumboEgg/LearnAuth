@@ -34,8 +34,6 @@ public class QUserLecture extends EntityPathBase<UserLecture> {
 
     public final NumberPath<Long> recentLectureId = createNumber("recentLectureId", Long.class);
 
-    public final QReport report;
-
     public final QUser user;
 
     public final ListPath<UserLectureTime, QUserLectureTime> userLectureTimeList = this.<UserLectureTime, QUserLectureTime>createList("userLectureTimeList", UserLectureTime.class, QUserLectureTime.class, PathInits.DIRECT2);
@@ -59,7 +57,6 @@ public class QUserLecture extends EntityPathBase<UserLecture> {
     public QUserLecture(Class<? extends UserLecture> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.lecture = inits.isInitialized("lecture") ? new QLecture(forProperty("lecture"), inits.get("lecture")) : null;
-        this.report = inits.isInitialized("report") ? new QReport(forProperty("report"), inits.get("report")) : null;
         this.user = inits.isInitialized("user") ? new QUser(forProperty("user")) : null;
     }
 

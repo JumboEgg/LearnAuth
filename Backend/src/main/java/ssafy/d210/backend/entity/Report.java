@@ -18,8 +18,6 @@ public class Report {
     @Column(name = "report_id")
     private Long id;
 
-    @OneToOne(mappedBy = "report")
-    private UserLecture userLecture;
 
     @NotNull
     private int reportType;
@@ -27,5 +25,12 @@ public class Report {
     @Length(max = 255)
     @NotNull
     private String reportContent;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Lecture lecture;
 
 }

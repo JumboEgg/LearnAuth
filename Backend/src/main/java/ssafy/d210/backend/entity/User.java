@@ -49,6 +49,9 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<PaymentRatio> paymentRatioList;
 
+    @OneToMany(mappedBy = "user")
+    private List<Report> reportList;
+
 
     public void createUser(SignupRequest userSignupRequest) {
         this.email = userSignupRequest.getEmail();
