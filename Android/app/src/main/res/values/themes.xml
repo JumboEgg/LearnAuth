@@ -7,6 +7,14 @@
         <item name="colorPrimary">@color/primary_color</item>
         <item name="colorSecondary">@color/background_color</item>
         <item name="colorSurface">@color/background_color</item>
+        <!-- 텍스트 입력 커서 색상 설정 -->
+        <item name="colorControlActivated">@color/primary_color</item>
+        <item name="colorAccent">@color/primary_color</item>
+        <item name="android:textColorHighlight">@color/primary_color</item>
+        <item name="android:textSelectHandle">@color/primary_color</item>
+        <item name="android:textSelectHandleLeft">@color/primary_color</item>
+        <item name="android:textSelectHandleRight">@color/primary_color</item>
+        <item name="android:textColorPrimary">@color/black</item>
     </style>
 
     <style name="Theme.Second_project.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
