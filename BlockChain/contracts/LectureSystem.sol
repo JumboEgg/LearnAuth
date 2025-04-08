@@ -96,7 +96,7 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
             require(hasRole(ADMIN_ROLE, sender), "Only user or admin can deposit tokens");
         }
         
-        require(catToken.transferFrom(admin, users[userId], amount), "Token transfer failed");
+        require(catToken.transferFrom(sender, users[userId], amount), "Token transfer failed");
         
         emit TokenDeposited(userId, amount, "deposit");
     }
@@ -119,6 +119,17 @@ contract LectureSystem is ERC721URIStorage, AccessControl, ERC2771Context {
         address sender = _msgSender();
         require(hasRole(ADMIN_ROLE, sender), "Only admin allowed");
         users[_userId] = _userAddress;
+    }
+
+    /**
+     * @dev 관리자 계정 추가
+     * @param _address 추가할 관리자 계정
+     */
+    function addAdminRole(address _address) external {
+        address sender = _msgSender();
+        require(hasRole(ADMIN_ROLE, sender), "Only admin allowed");
+        require(!hasRole(ADMIN_ROLE, _address), "This address is already an admin");
+        _grantRole(ADMIN_ROLE, _address);
     }
     
     // ================ Lecture Management Functions ================

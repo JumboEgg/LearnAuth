@@ -236,9 +236,11 @@ describe("LectureSystem with LectureForwarder", function () {
 
   // Additional Direct Function Tests
   describe("Direct Function Tests", function () {
-    it("Can check participants of lecture", async function () {
-      const data = await lectureSystem.getParticipants(LECTURE_ID);
-      console.log(data);
+    it("Can add Admin to LectureSystem", async function () {
+      await lectureSystem.connect(deployer).addAdminRole(user1.address);
+      await expect(
+        lectureSystem.connect(deployer).addAdminRole(user1.address)
+      ).to.be.revertedWith("This address is already an admin");
     })
 
     it("Admin can add users", async function () {
