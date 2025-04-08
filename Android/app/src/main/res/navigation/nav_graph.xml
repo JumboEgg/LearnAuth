@@ -252,6 +252,17 @@
                 android:name="subLectureId"
                 app:argType="integer"/>
         </action>
+        <!-- OwnedLectureFragment에서 OwnedLectureDetailFragment로 이동하는 액션 추가 -->
+        <action
+            android:id="@+id/action_ownedLectureFragment_to_ownedLectureDetailFragment"
+            app:destination="@id/ownedLectureDetailFragment">
+            <argument
+                android:name="lectureId"
+                app:argType="integer"/>
+            <argument
+                android:name="userId"
+                app:argType="integer"/>
+        </action>
     </fragment>
 
     <!-- 참여 강의 탭 -->
@@ -304,5 +315,17 @@
             app:destination="@id/lecturePlayFragment"/>
     </fragment>
 
+    <!-- OwnedLectureDetailFragment로 가는 글로벌 액션 추가 -->
+    <action
+        android:id="@+id/action_global_ownedLectureDetailFragment"
+        app:destination="@id/ownedLectureDetailFragment"
+        app:launchSingleTop="true">
+        <argument
+            android:name="lectureId"
+            app:argType="integer"/>
+        <argument
+            android:name="userId"
+            app:argType="integer"/>
+    </action>
 
 </navigation>
