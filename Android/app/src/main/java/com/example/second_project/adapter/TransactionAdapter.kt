@@ -38,7 +38,7 @@ class TransactionAdapter(private val transactionList: List<TransactionItem>) :
         val price = decimal.format(item.amount)
 
         // "토큰 충전"이 아닐 경우 "-" 접두사 추가 및 red 컬러 설정
-        if (item.title != "토큰 충전") {
+        if (item.title != "토큰 충전" && !item.title.startsWith("강의 수입:")) {
             holder.lecturePrice.text = "-${price} CAT"
 
         } else {
