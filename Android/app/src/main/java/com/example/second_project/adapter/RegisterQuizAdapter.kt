@@ -10,6 +10,7 @@ import com.example.second_project.R
 import com.example.second_project.data.model.dto.RegisterTempQuiz
 import com.example.second_project.databinding.ItemRegisterQuizDetailBinding
 import com.example.second_project.utils.KeyboardUtils
+import com.example.second_project.utils.disableEmojis
 
 class RegisterQuizAdapter : RecyclerView.Adapter<RegisterQuizAdapter.ViewHolder>() {
 
@@ -38,6 +39,7 @@ class RegisterQuizAdapter : RecyclerView.Adapter<RegisterQuizAdapter.ViewHolder>
 
             // 문제 내용
             binding.editTextTitle.editText?.setText(quiz.question)
+            binding.editTextTitle.editText?.disableEmojis()
             binding.editTextTitle.editText?.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) {
                     quiz.question = binding.editTextTitle.editText?.text.toString().trim()
@@ -46,6 +48,7 @@ class RegisterQuizAdapter : RecyclerView.Adapter<RegisterQuizAdapter.ViewHolder>
 
             // 선택지 1
             binding.editAnswer1.editText?.setText(quiz.options[0])
+            binding.editAnswer1.editText?.disableEmojis()
             binding.editAnswer1.editText?.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) {
                     quiz.options[0] = binding.editAnswer1.editText?.text.toString().trim()
@@ -54,6 +57,7 @@ class RegisterQuizAdapter : RecyclerView.Adapter<RegisterQuizAdapter.ViewHolder>
 
             // 선택지 2
             binding.editAnswer2.editText?.setText(quiz.options[1])
+            binding.editAnswer2.editText?.disableEmojis()
             binding.editAnswer2.editText?.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) {
                     quiz.options[1] = binding.editAnswer2.editText?.text.toString().trim()
@@ -62,6 +66,7 @@ class RegisterQuizAdapter : RecyclerView.Adapter<RegisterQuizAdapter.ViewHolder>
 
             // 선택지 3
             binding.editAnswer3.editText?.setText(quiz.options[2])
+            binding.editAnswer3.editText?.disableEmojis()
             binding.editAnswer3.editText?.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) {
                     quiz.options[2] = binding.editAnswer3.editText?.text.toString().trim()

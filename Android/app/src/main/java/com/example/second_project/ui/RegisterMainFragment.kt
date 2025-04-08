@@ -1,6 +1,7 @@
 package com.example.second_project.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,10 +13,13 @@ import com.example.second_project.R
 import com.example.second_project.databinding.FragmentMainBinding
 import com.example.second_project.databinding.FragmentRegisterMainBinding
 import com.example.second_project.interfaces.RegisterStepSavable
+import com.example.second_project.utils.LoadingOverlayHelper
 import com.example.second_project.viewmodel.MainViewModel
 import com.example.second_project.viewmodel.RegisterViewModel
 
 class RegisterMainFragment: Fragment() {
+
+    private lateinit var loadingHelperMain: LoadingOverlayHelper
 
     private var _binding: FragmentRegisterMainBinding? = null
     private val binding get() = _binding!!
@@ -38,6 +42,12 @@ class RegisterMainFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        loadingHelperMain = LoadingOverlayHelper(
+            activity = requireActivity(),
+            overlayView = binding.loadingOverlay,
+            catView = binding.catImageView
+        )
 
         binding.btnStop.setOnClickListener {
             findNavController().popBackStack()
@@ -94,5 +104,16 @@ class RegisterMainFragment: Fragment() {
         viewModel.reset()
 
     }
+
+    fun showGlobalLoading() {
+        Log.d("LoadingOverlayHelper", "Main: showGlobalLoading() 호출됨")
+        loadingHelperMain.show()
+    }
+
+    fun hideGlobalLoading() {
+        Log.d("LoadingOverlayHelper", "Main: hideGlobalLoading() 호출됨")
+        loadingHelperMain.hide()
+    }
+
 
 }

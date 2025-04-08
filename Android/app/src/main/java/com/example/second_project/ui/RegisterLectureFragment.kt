@@ -14,6 +14,7 @@ import com.example.second_project.interfaces.RegisterStepSavable
 import com.example.second_project.utils.KeyboardUtils
 import com.example.second_project.viewmodel.RegisterViewModel
 import com.example.second_project.utils.setEnterLimit
+import com.example.second_project.utils.disableEmojis
 
 class RegisterLectureFragment: Fragment(), RegisterStepSavable {
 
@@ -51,11 +52,15 @@ class RegisterLectureFragment: Fragment(), RegisterStepSavable {
 
         // 화면 전환하고 돌아와도 작성 기록 유지
         binding.editTextTitle.editText?.setText(viewModel.title)
+        binding.editTextTitle.editText?.disableEmojis()
+
         if (viewModel.categoryName.isNotBlank()) {
             binding.autoCompleteCategory.setText(viewModel.categoryName, false)
         }
         binding.editTextGoal.editText?.setText(viewModel.goal)
+        binding.editTextGoal.editText?.disableEmojis()
         binding.editTextContent.editText?.setText(viewModel.description)
+        binding.editTextContent.editText?.disableEmojis()
 
         // 다음 단계로 이동하는 하단 버튼
         binding.btnToUploadFile.setOnClickListener {

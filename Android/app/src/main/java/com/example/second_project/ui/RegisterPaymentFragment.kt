@@ -27,6 +27,8 @@ import com.example.second_project.databinding.FragmentRegisterPaymentBinding
 import com.example.second_project.interfaces.RegisterStepSavable
 import com.example.second_project.utils.KeyboardUtils.hideKeyboard
 import com.example.second_project.viewmodel.RegisterViewModel
+import com.example.second_project.utils.disableEmojis
+import com.example.second_project.utils.disableEmojis
 
 class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
 
@@ -56,13 +58,23 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
         binding.recyclerParticipants.visibility = View.VISIBLE
         binding.recyclerParticipants.layoutManager = LinearLayoutManager(requireContext())
 
+        binding.editTextPrice.editText?.disableEmojis()
+
         // 어댑터 초기화
         adapter = RegisterParticipantsAdapter(
             onLecturerToggle = { position ->
                 binding.editTextPrice.editText?.clearFocus()
                 hideKeyboard(binding.root, requireContext())
             },
-            onDeleteClick = { position -> adapter.removeItem(position) },
+            onDeleteClick = { position ->
+                // ✅ adapter에서 먼저 삭제
+                val removedEmail = adapter.getParticipantData().getOrNull(position)?.first
+                adapter.removeItem(position)
+
+                // ✅ viewModel에서도 함께 삭제
+                removedEmail?.let { email ->
+                    viewModel.ratios.removeAll { it.email == email }
+                }},
             onNameClick = { position ->
                 var currentKeyword = ""
                 val dialogBinding = DialogRegisterSearchParticipantsBinding.inflate(layoutInflater)
@@ -71,6 +83,7 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
                     .create()
 
                 dialogBinding.searchInputText.text?.clear()
+                dialogBinding.searchInputText.disableEmojis()
                 dialogBinding.recyclerUserList.visibility = View.GONE
                 dialogBinding.textNoResult.visibility = View.GONE
                 dialogBinding.layoutSelectedUser.visibility = View.GONE
@@ -234,7 +247,6 @@ class RegisterPaymentFragment : Fragment(), RegisterStepSavable {
 
 
         // 가격 설정
-        // binding.editTextPrice.editText?.setText(if (viewModel.price == 0) "" else viewModel.price.toString())
         binding.editTextPrice.editText?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
 

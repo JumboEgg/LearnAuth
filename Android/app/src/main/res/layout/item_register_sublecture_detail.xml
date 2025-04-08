@@ -71,8 +71,16 @@
                     android:textColor="@color/text_gray"
                     android:maxLines="1"
                     android:singleLine="true"
-                    android:maxLength="64"/>
+                    android:maxLength="32"/>
             </com.google.android.material.textfield.TextInputLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="32자 이하의 제목만 가능합니다"
+                style="@style/body2"
+                android:textColor="@color/text_gray"
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="5dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -110,7 +118,7 @@
                         android:maxLines="1"
                         android:singleLine="true"
                         android:fontFamily="@font/pretendard_medium"
-                        android:maxLength="64"/>
+                        android:maxLength="50"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <androidx.appcompat.widget.AppCompatButton
@@ -128,6 +136,14 @@
                     android:textSize="16sp"/>
                     
             </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="50자 이하의 제목만 가능합니다"
+                style="@style/body2"
+                android:textColor="@color/text_gray"
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="5dp"/>
 
             <LinearLayout
                 android:id="@+id/linearConfirmYoutube"

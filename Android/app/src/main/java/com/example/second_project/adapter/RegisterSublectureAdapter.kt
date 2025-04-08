@@ -10,6 +10,7 @@ import com.example.second_project.R
 import com.example.second_project.data.model.dto.RegisterTempSubLecture
 import com.example.second_project.data.model.dto.request.SubLecture
 import com.example.second_project.databinding.ItemRegisterSublectureDetailBinding
+import com.example.second_project.utils.disableEmojis
 
 class RegisterSublectureAdapter (
     private val subLectureCount: () -> Int,
@@ -61,7 +62,9 @@ class RegisterSublectureAdapter (
             }
 
             binding.editTextTitle.editText?.setText(item.title)
+            binding.editTextTitle.editText?.disableEmojis()
             binding.editURL.editText?.setText(item.inputUrl)
+            binding.editURL.editText?.disableEmojis()
 
             // 불러온 제목 보여주기
             binding.textYoutubeTitle.text = item.videoTitle

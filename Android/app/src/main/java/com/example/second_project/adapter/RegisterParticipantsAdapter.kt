@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.second_project.R
 import com.example.second_project.databinding.ItemRegisterParticipantsBinding
 import androidx.core.widget.addTextChangedListener
-
+import com.example.second_project.utils.disableEmojis
 
 class RegisterParticipantsAdapter(
     private val onDeleteClick: (Int) -> Unit,
@@ -62,9 +62,6 @@ class RegisterParticipantsAdapter(
     }
 
 
-
-
-
     inner class ViewHolder(private val binding: ItemRegisterParticipantsBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
@@ -86,6 +83,7 @@ class RegisterParticipantsAdapter(
 
                 binding.editTextRatioParticipants.editText?.setText(ratioList.getOrNull(position)?.toString() ?: "")
 
+                binding.editTextRatioParticipants.editText?.disableEmojis()
                 binding.editTextRatioParticipants.editText?.addTextChangedListener {
                     val ratio = it.toString().toIntOrNull() ?: 0
                     if (adapterPosition in ratioList.indices) {
