@@ -101,7 +101,8 @@ public class CertificateServiceImpl implements CertificateService{
     }
 
     @Override
-    public ResponseSuccessDto<CertificateToken> saveCertificate(BigInteger tokenId, Long lectureId, Long userId) {
+    public ResponseSuccessDto<CertificateToken> saveCertificate(BigInteger tokenId, Long lectureId, Long userId, String cid) {
+
         UserLecture userLecture = findByUserIdAndLectureId(userId, lectureId)
                 .orElseThrow(() -> {
                     log.error("UserLecture with userId {} and lectureId {} doesn't exist", userId, lectureId);
@@ -114,7 +115,7 @@ public class CertificateServiceImpl implements CertificateService{
         }
         int token = tokenId.intValue();
         userLecture.setCertificate(token);
-
+        userLecture.setQrCode(cid);
         CertificateToken certificateToken = CertificateToken.builder()
                 .token(token)
                 .build();
