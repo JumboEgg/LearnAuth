@@ -106,10 +106,11 @@
                 android:layout_marginTop="28dp"
                 android:paddingHorizontal="8dp"
                 android:text="직접 입력"
+                android:visibility="invisible"
                 android:textColor="@color/text_gray"
                 app:layout_constraintTop_toBottomOf="@id/chargeOptions" />
 
-            <EditText
+            <TextView
                 android:id="@+id/chargeInput"
                 style="@style/medium20"
                 android:layout_width="0dp"
