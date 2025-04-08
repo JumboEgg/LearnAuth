@@ -32,6 +32,7 @@ class LecturePlayFragment: Fragment() {
     private var currentSubLectureId: Int = 0
     private var playingSubLectureId: Int = 0 // 현재 재생 중인 sublecture의 ID를 저장하는 변수 추가
     private var allSubLectures: List<SubLecture> = emptyList()
+    private var isFirstLoad: Boolean = true // 최초 로드 여부를 확인하는 플래그 추가
 
     private val viewModel: OwnedLectureDetailViewModel by lazy {
         OwnedLectureDetailViewModel(LectureDetailRepository())
@@ -65,6 +66,12 @@ class LecturePlayFragment: Fragment() {
 
 
         Log.d(TAG, "onViewCreated: $currentLectureId, $userId, $currentSubLectureId")
+
+        // 초기 버튼 상태 설정 - 모든 버튼 숨기기
+        binding.playPreviousBtnVisible.visibility = View.GONE
+        binding.playPreviousGone.visibility = View.GONE
+        binding.playNextBtnVisible.visibility = View.GONE
+        binding.playNextBtnGone.visibility = View.GONE
 
         viewModel.fetchLectureDetail(currentLectureId, userId)
 
@@ -254,7 +261,9 @@ class LecturePlayFragment: Fragment() {
         Log.d(TAG, "updateBtnColors: currentOrder = $currentOrder")
         Log.d(TAG, "updateBtnColors: previousSubLecture = $previousSubLecture")
         Log.d(TAG, "updateBtnColors: nextSubLecture = $nextSubLecture")
+        Log.d(TAG, "updateBtnColors: isFirstLoad = $isFirstLoad")
 
+        // 이전 버튼 상태 업데이트
         if (previousSubLecture != null) {
             binding.playPreviousBtnVisible.visibility = View.VISIBLE
             binding.playPreviousGone.visibility = View.GONE
@@ -263,12 +272,18 @@ class LecturePlayFragment: Fragment() {
             binding.playPreviousGone.visibility = View.VISIBLE
         }
 
+        // 다음 버튼 상태 업데이트
         if (nextSubLecture != null) {
             binding.playNextBtnVisible.visibility = View.VISIBLE
             binding.playNextBtnGone.visibility = View.GONE
         } else {
             binding.playNextBtnVisible.visibility = View.GONE
             binding.playNextBtnGone.visibility = View.VISIBLE
+        }
+        
+        // 최초 로드 완료 표시
+        if (isFirstLoad) {
+            isFirstLoad = false
         }
     }
 
