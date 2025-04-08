@@ -127,6 +127,10 @@ dependencies {
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
     kapt("com.github.bumptech.glide:compiler:4.16.0")
 
+    // QR 코드 생성 라이브러리
+    implementation("com.google.zxing:core:3.5.2")
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+
     // youtube iframe api
     implementation ("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.1")
 

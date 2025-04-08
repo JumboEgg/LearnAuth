@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="25dp"
         android:layout_marginTop="75dp"
-        android:text="임시 수료증"
+        android:text="수료증"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -89,7 +89,6 @@
             android:rotation="-10"
             android:scrollHorizontally="true"
             android:singleLine="true"
-
             android:text="임시 수료증입니다."
             android:textColor="#26000000"
             android:textSize="52sp"
@@ -199,18 +198,19 @@
                     android:text="강의자" />
 
             </LinearLayout>
+
         </LinearLayout>
 
         <ImageView
             android:id="@+id/imgQR"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_margin="20dp"
-            android:background="@color/primary_color"
+            android:layout_marginEnd="30dp"
+            android:layout_marginBottom="30dp"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
