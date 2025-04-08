@@ -50,6 +50,7 @@ import org.json.JSONObject
 import java.net.URLDecoder
 import java.util.regex.Pattern
 import androidx.core.content.res.ResourcesCompat
+import android.graphics.Bitmap
 
 private const val TAG = "CertDetailFragment_야옹"
 private const val IPFS_GATEWAY_URL = "https://j12d210.p.ssafy.io/ipfs"
@@ -580,12 +581,21 @@ class CertDetailFragment : Fragment() {
             // "강의자" 라벨
             canvas.drawText("강의자", teacherX, teacherY + namePaint.textSize + 10, teacherLabelPaint)
             
-            // QR 코드 (중앙 하단)
+            // QR 코드 (우측 하단)
             val qrBitmap = (binding.imgQR.drawable as? BitmapDrawable)?.bitmap
             qrBitmap?.let {
-                val qrX = (pageInfo.pageWidth - it.width) / 2f
-                val qrY = pageInfo.pageHeight * 0.85f // 페이지 높이의 85% 지점
-                canvas.drawBitmap(it, qrX, qrY, null)
+                // QR 코드 크기 조정 (원본의 40%로 축소)
+                val scaledWidth = (it.width * 0.4).toInt()
+                val scaledHeight = (it.height * 0.4).toInt()
+                val scaledQrBitmap = Bitmap.createScaledBitmap(it, scaledWidth, scaledHeight, true)
+                
+                // 우측 하단 모서리에 배치 (여백 40픽셀)
+                val qrX = pageInfo.pageWidth - scaledWidth - 40f
+                val qrY = pageInfo.pageHeight - scaledHeight - 40f
+                canvas.drawBitmap(scaledQrBitmap, qrX, qrY, null)
+                
+                // 메모리 해제
+                scaledQrBitmap.recycle()
             }
             
             // 페이지 완성

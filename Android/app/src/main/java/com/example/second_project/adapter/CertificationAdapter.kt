@@ -43,6 +43,11 @@ class CertificationAdapter(
             binding.root.setOnClickListener {
                 onItemClick(item)
             }
+
+            // "자세히 보기" 버튼 클릭 이벤트 추가
+            binding.buttonDetail.setOnClickListener {
+                onItemClick(item)
+            }
         }
 
         private fun getColorForCategory(category:String):Int{
