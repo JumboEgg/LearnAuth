@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import com.example.second_project.R
 import com.example.second_project.UserSession
@@ -36,6 +37,8 @@ class ChargeFragment : Fragment() {
     private var isCharging = false // 중복 전송 방지용 flag
     private var isOverlayVisible = false
 
+    private lateinit var backCallback: OnBackPressedCallback
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -45,12 +48,21 @@ class ChargeFragment : Fragment() {
         return binding.root
     }
 
+
     // ChargeFragment에 handleWalletFile 함수 추가 및 onViewCreated 수정
     // ---------------------------------------------
     // onViewCreated
     // ---------------------------------------------
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        backCallback = object : OnBackPressedCallback(false) {
+            override fun handleOnBackPressed() {
+                // 뒤로가기 눌려도 아무런 동작을 하지 않음
+            }
+        }
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, backCallback)
+
 
         Log.d("ChargeFragment", "onViewCreated 시작")
         Log.d(
@@ -77,6 +89,8 @@ class ChargeFragment : Fragment() {
 
         // 결제 버튼
         binding.purchaseBtn.setOnClickListener {
+            backCallback.isEnabled = true
+
             showLoadingOverlay()
             startCatAnimation()
             handlePurchase()  // 결제 로직
@@ -418,44 +432,39 @@ class ChargeFragment : Fragment() {
         service.deposit(request).enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 isCharging = false
+                // 충전이 끝난 후 뒤로가기 버튼 다시 활성화
+                backCallback.isEnabled = false
+
                 binding.purchaseBtn.isEnabled = true
                 binding.purchaseBtn.text = "충전하기"
+                hideLoadingOverlay() // 결제 끝 → 무조건 오버레이 숨김
 
-                // 응답 로깅
-                Log.d("ChargeFragment", "충전 API 응답 코드: ${response.code()}")
                 try {
                     val errorBody = response.errorBody()?.string()
                     if (!errorBody.isNullOrEmpty()) {
                         Log.d("ChargeFragment", "응답 상세: $errorBody")
                     }
-                } catch (e: Exception) {
-                }
-                hideLoadingOverlay() // 결제 끝 → 무조건 오버레이 숨김
+                } catch (e: Exception) { }
 
                 if (response.isSuccessful) {
                     Log.d("ChargeFragment", "✅ 충전 API 호출 성공")
-
                     // 충전 성공 시 현재 잔액 업데이트
                     currentBalance = currentBalance.add(depositAmountWei)
                     updateChargeOutput(inputBase)
-
-                    // 성공 메시지
                     Toast.makeText(requireContext(), "충전 완료!", Toast.LENGTH_SHORT).show()
-
                     // 블록체인에서 실제 잔액 확인 (비동기)
                     verifyBalanceAfterCharge(depositAmountWei, inputBase)
                 } else {
                     Log.e("ChargeFragment", "❌ 충전 API 호출 실패: ${response.code()}")
-                    Toast.makeText(
-                        requireContext(),
-                        "충전 실패: ${response.code()}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(requireContext(), "충전 실패: ${response.code()}", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<Void>, t: Throwable) {
                 isCharging = false
+                // 충전 실패 시에도 뒤로가기 버튼 복원
+                backCallback.isEnabled = false
+
                 binding.purchaseBtn.isEnabled = true
                 binding.purchaseBtn.text = "충전하기"
                 hideLoadingOverlay()
@@ -463,12 +472,10 @@ class ChargeFragment : Fragment() {
                 Log.e("ChargeFragment", "❌ 충전 API 통신 오류: ${t.message}")
                 t.printStackTrace()
 
-                Toast.makeText(requireContext(), "통신 오류: ${t.message}", Toast.LENGTH_SHORT)
-                    .show()
+                Toast.makeText(requireContext(), "통신 오류: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
-
     // 충전 후 잔액 확인 및 UserSession에 저장
     private fun verifyBalanceAfterCharge(depositAmountWei: BigInteger, inputBase: Int) {
         val manager = UserSession.getBlockchainManagerIfAvailable(requireContext())
@@ -476,7 +483,7 @@ class ChargeFragment : Fragment() {
             Thread {
                 try {
                     // 블록체인에 반영될 시간을 주기 위해 잠시 대기
-                    Thread.sleep(1500)
+                    Thread.sleep(1000)
 
                     // 실제 블록체인 잔액 확인
                     val actualBalance = manager.getMyCatTokenBalance()
@@ -489,16 +496,15 @@ class ChargeFragment : Fragment() {
 
                     // UI 스레드에서 작업
                     requireActivity().runOnUiThread {
-                        // 충전 완료 메시지 강화
                         Toast.makeText(
                             requireContext(),
                             "충전이 완료되었습니다. 잔액이 업데이트 되었습니다.",
                             Toast.LENGTH_LONG
                         ).show()
-
-                        // 3초 후 자동으로 이전 화면으로 돌아가기 (선택사항)
+                        // 자동 뒤로가기 호출 전에 혹시 모를 콜백 막힘 상태를 해제
+                        backCallback.isEnabled = false
                         binding.root.postDelayed({
-                            if (isAdded && !isRemoving) { // Fragment가 아직 유효한 경우에만
+                            if (isAdded && !isRemoving) { // Fragment가 아직 유효한 경우
                                 requireActivity().onBackPressedDispatcher.onBackPressed()
                             }
                         }, 100)
