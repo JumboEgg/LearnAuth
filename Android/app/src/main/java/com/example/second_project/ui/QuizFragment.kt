@@ -271,24 +271,27 @@ class QuizFragment : Fragment() {
 
         dialogBinding.dialogImage.setImageResource(resultIcon)
         dialogBinding.dialogMessage.text = resultMessage
-        // 퀴즈 통과 시 certificate = true로 설정
-        ApiClient.quizService.completeQuiz(
-            lectureId = lectureId.toInt(),
-            userId = userId.toInt(),
-            requestBody = QuizCompleteRequest(completeQuiz = true)
-        ).enqueue(object : Callback<QuizResponse> {
-            override fun onResponse(call: Call<QuizResponse>, response: Response<QuizResponse>) {
-                if (response.isSuccessful) {
-                    Log.d(TAG, "퀴즈 완료 처리 성공")
-                } else {
-                    Log.e(TAG, "퀴즈 완료 처리 실패: ${response.code()}")
+        
+        // 퀴즈 통과 시에만 API 호출
+        if (isPass) {
+            ApiClient.quizService.completeQuiz(
+                lectureId = lectureId.toInt(),
+                userId = userId.toInt(),
+                requestBody = QuizCompleteRequest(completeQuiz = true)
+            ).enqueue(object : Callback<QuizResponse> {
+                override fun onResponse(call: Call<QuizResponse>, response: Response<QuizResponse>) {
+                    if (response.isSuccessful) {
+                        Log.d(TAG, "퀴즈 완료 처리 성공")
+                    } else {
+                        Log.e(TAG, "퀴즈 완료 처리 실패: ${response.code()}")
+                    }
                 }
-            }
 
-            override fun onFailure(call: Call<QuizResponse>, t: Throwable) {
-                Log.e(TAG, "퀴즈 완료 처리 실패: ${t.message}")
-            }
-        })
+                override fun onFailure(call: Call<QuizResponse>, t: Throwable) {
+                    Log.e(TAG, "퀴즈 완료 처리 실패: ${t.message}")
+                }
+            })
+        }
 
         val dialog = builder.create()
         dialogBinding.dialogButton.setOnClickListener {
