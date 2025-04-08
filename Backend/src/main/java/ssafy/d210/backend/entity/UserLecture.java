@@ -38,9 +38,8 @@ public class UserLecture {
     @Column(columnDefinition = "TEXT")
     private String qrCode;
 
-//    @OneToOne
-//    @JoinColumn(name = "report_id")
-//    private Report report;
+    @ColumnDefault("0")
+    private Integer report = 0;
 
     @OneToMany(mappedBy = "userLecture")
     private List<UserLectureTime> userLectureTimeList;
