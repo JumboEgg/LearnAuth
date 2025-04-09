@@ -4,12 +4,16 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.ActionMode
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
+import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -26,6 +30,7 @@ class RegisterLectureFragment : Fragment(), RegisterStepSavable {
     private val binding get() = _binding!!
     private val viewModel: RegisterViewModel by activityViewModels()
     private var ignoreTextChanges = false
+    private var currentActionMode: ActionMode? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,7 +42,23 @@ class RegisterLectureFragment : Fragment(), RegisterStepSavable {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.root.isFocusableInTouchMode = true
+        binding.root.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                // ActionMode가 활성화된 상태라면 종료
+                currentActionMode?.finish()
 
+                // 포커스 클리어
+                val currentFocus = activity?.currentFocus
+                if (currentFocus != null && currentFocus !is EditText) {
+                    currentFocus.clearFocus()
+                }
+
+                false // 이벤트를 소비하지 않고 계속 전파
+            } else {
+                false
+            }
+        }
         // 뷰 초기화 전에 ViewModel 데이터 복원
         restoreViewModelData()
 
@@ -59,6 +80,31 @@ class RegisterLectureFragment : Fragment(), RegisterStepSavable {
         val goalEditText = binding.editTextGoal.editText
         val contentEditText = binding.editTextContent.editText
 
+        listOf(
+            binding.editTextTitle.editText,
+            binding.editTextGoal.editText,
+            binding.editTextContent.editText
+        ).forEach { editText ->
+
+            editText?.customSelectionActionModeCallback = object : ActionMode.Callback {
+                override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+                    // ActionMode 참조 저장
+                    currentActionMode = mode
+                    return true // 기본 메뉴 생성 허용
+                }
+
+                override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean = false
+
+                override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean = false
+
+                override fun onDestroyActionMode(mode: ActionMode) {
+                    // ActionMode 참조 제거
+                    if (currentActionMode == mode) {
+                        currentActionMode = null
+                    }
+                }
+            }
+        }
         // Emoji 비활성화
         titleEditText?.disableEmojis()
         goalEditText?.disableEmojis()
@@ -273,4 +319,5 @@ class RegisterLectureFragment : Fragment(), RegisterStepSavable {
         super.onDestroyView()
         _binding = null
     }
+
 }
