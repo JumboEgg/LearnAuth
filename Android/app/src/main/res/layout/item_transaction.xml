@@ -56,7 +56,7 @@
 
         <TextView
             android:id="@+id/transactionLecturePrice"
-            android:layout_width="0dp"
+            android:layout_width="120dp"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             android:text="500 CAT"
@@ -69,7 +69,7 @@
             android:marqueeRepeatLimit="marquee_forever"
             android:focusable="true"
             android:focusableInTouchMode="true"
-            android:scrollHorizontally="true"/>
+            android:scrollHorizontally="true" />
 
     </LinearLayout>
 

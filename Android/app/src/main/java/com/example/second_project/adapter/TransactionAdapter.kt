@@ -32,7 +32,9 @@ class TransactionAdapter(private val transactionList: List<TransactionItem>) :
 
         // 거래 내역 설정
         holder.lectureTitle.text = item.title  // 강의 제목ssc
+        holder.lectureTitle.isSelected = true
         holder.lectureDate.text = item.date       // 날짜
+        holder.lecturePrice.isSelected = true
 
         val decimal = DecimalFormat("#,###")
         val price = decimal.format(item.amount)

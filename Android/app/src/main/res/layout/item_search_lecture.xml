@@ -14,14 +14,15 @@
         android:backgroundTint="@color/white"
         android:padding="4dp">
 
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/lectureImg"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:scaleType="centerCrop"
             android:src="@drawable/sample_plzdelete"
             app:layout_constraintDimensionRatio="H, 16:9"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearanceOverlay="@style/ImageRoundedCorner"/>
 
         <LinearLayout
             android:id="@+id/lectureTitleLayout"
