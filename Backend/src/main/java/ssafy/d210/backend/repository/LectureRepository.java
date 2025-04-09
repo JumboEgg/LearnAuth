@@ -176,7 +176,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
                    l.price as price,
                    l.goal as goal,
                    l.description as description,
-                   u.name as lecturer,
+                   u.nickname as lecturer,
                    sl.sub_lecture_url as lectureUrl,
                    c.category_name as categoryName,
                    l.CID as CID
