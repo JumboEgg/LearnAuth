@@ -145,5 +145,10 @@
             <item name="shapeAppearanceOverlay">@drawable/bg_radius_20</item>
         </style>
 
+    <style name="ImageRoundedCorner" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+
 
 </resources>

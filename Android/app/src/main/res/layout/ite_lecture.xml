@@ -16,14 +16,15 @@
         android:padding="12dp">
 
         <!-- 고양이 이미지 -->
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/lectureImage"
             android:layout_width="128dp"
             android:layout_height="64dp"
             android:scaleType="centerCrop"
             android:src="@drawable/white"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearanceOverlay="@style/ImageRoundedCorner"/>
 
         <!-- 카테고리 (법률) -->
         <TextView
