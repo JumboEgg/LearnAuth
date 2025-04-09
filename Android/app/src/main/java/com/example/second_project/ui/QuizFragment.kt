@@ -17,6 +17,7 @@ import com.example.second_project.R
 import com.example.second_project.data.QuizQuestion
 import com.example.second_project.data.model.dto.response.QuizData
 import com.example.second_project.data.model.dto.response.QuizResponse
+import com.example.second_project.data.repository.LectureDetailRepository
 import com.example.second_project.databinding.DialogQuizResultBinding
 import com.example.second_project.databinding.FragmentQuizBinding
 import com.example.second_project.databinding.DialogTimeoutBinding
@@ -44,6 +45,9 @@ class QuizFragment : Fragment() {
     private var userHasAnswered = false
     private var selectedOption: Int? = null
     private var quizDataList: List<QuizData> = emptyList()
+    private var lectureTitle: String = "" // 강의 제목을 저장할 변수 추가
+
+    private val lectureDetailRepository = LectureDetailRepository() // LectureDetailRepository 인스턴스 추가
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -61,6 +65,9 @@ class QuizFragment : Fragment() {
         binding.btnBack.setOnClickListener {
             findNavController().popBackStack()
         }
+
+        // 강의 제목 가져오기
+        fetchLectureTitle()
 
         // 퀴즈 데이터 가져오기
         fetchQuizData()
@@ -104,6 +111,14 @@ class QuizFragment : Fragment() {
             checkAnswer()
             timer?.cancel()
             moveToNextOrResult()
+        }
+    }
+
+    private fun fetchLectureTitle() {
+        lectureDetailRepository.fetchLectureDetail(lectureId.toInt(), userId.toInt()).observe(viewLifecycleOwner) { response ->
+            response?.let {
+                lectureTitle = it.data.title
+            }
         }
     }
 
@@ -271,6 +286,7 @@ class QuizFragment : Fragment() {
 
         dialogBinding.dialogImage.setImageResource(resultIcon)
         dialogBinding.dialogMessage.text = resultMessage
+        dialogBinding.dialogTitle.text = lectureTitle // 강의 제목 표시
         
         // 퀴즈 통과 시에만 API 호출
         if (isPass) {

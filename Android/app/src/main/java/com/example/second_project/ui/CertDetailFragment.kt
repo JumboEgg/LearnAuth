@@ -351,8 +351,33 @@ class CertDetailFragment : Fragment() {
                 val teacherName = binding.textNameLecturer.text.toString()
                 val teacherWallet = viewModel.certificateDetail.value?.data?.teacherWallet ?: ""
                 
-                // 카테고리 정보 가져오기 (예시로 "데이터"로 설정, 실제로는 API에서 가져와야 함)
-                val category = "데이터" // 실제 카테고리 정보로 대체 필요
+                // 카테고리 정보 가져오기
+                var category = " " // 기본값
+                
+                // 수료증 목록에서 카테고리 정보 가져오기
+                val certificateApiService = ApiClient.retrofit.create(CertificateApiService::class.java)
+                val certificateResponse = withContext(Dispatchers.IO) {
+                    try {
+                        certificateApiService.getCertificates(userId).execute()
+                    } catch (e: Exception) {
+                        Log.e(TAG, "카테고리 정보 가져오기 실패: ${e.message}")
+                        null
+                    }
+                }
+                
+                // 해당 강의의 카테고리 정보 찾기
+                if (certificateResponse?.isSuccessful == true && certificateResponse.body() != null) {
+                    val certificates = certificateResponse.body()!!.data
+                    val certificate = certificates.find { it.lectureId == lectureId }
+                    if (certificate != null) {
+                        category = certificate.categoryName
+                        Log.d(TAG, "카테고리 정보 가져오기 성공: $category")
+                    } else {
+                        Log.e(TAG, "해당 강의의 카테고리 정보를 찾을 수 없습니다.")
+                    }
+                } else {
+                    Log.e(TAG, "카테고리 정보 가져오기 실패: ${certificateResponse?.code()} - ${certificateResponse?.message()}")
+                }
                 
                 // IPFS에 업로드할 JSON 데이터 생성
                 val jsonData = JSONObject().apply {
@@ -641,7 +666,7 @@ class CertDetailFragment : Fragment() {
             
             // 강의자 정보 (하단 우측)
             val teacherName = binding.textNameLecturer.text.toString()
-            val teacherX = pageInfo.pageWidth * 0.70f // 75%에서 65%로 변경 (중앙에 더 가깝게)
+            val teacherX = pageInfo.pageWidth * 0.65f // 75%에서 65%로 변경 (중앙에 더 가깝게)
             val teacherY = pageInfo.pageHeight * 0.75f // 페이지 높이의 75% 지점
             
             // 강의자 이름
@@ -654,8 +679,8 @@ class CertDetailFragment : Fragment() {
             val qrBitmap = (binding.imgQR.drawable as? BitmapDrawable)?.bitmap
             qrBitmap?.let {
                 // QR 코드 크기 조정 (원본의 40%로 축소)
-                val scaledWidth = (it.width * 0.4).toInt()
-                val scaledHeight = (it.height * 0.4).toInt()
+                val scaledWidth = (it.width * 0.2).toInt()
+                val scaledHeight = (it.height * 0.2).toInt()
                 val scaledQrBitmap = Bitmap.createScaledBitmap(it, scaledWidth, scaledHeight, true)
                 
                 // 우측 하단 모서리에 배치 (여백 40픽셀)
