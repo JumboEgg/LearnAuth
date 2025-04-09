@@ -836,6 +836,7 @@ class CertDetailFragment : Fragment() {
         isOverlayVisible = true
         binding.btnCertSave.isEnabled = false
         binding.loadingOverlay.visibility = View.VISIBLE
+        Glide.with(this).load(R.raw.loadingimg2).override(560, 560).into(binding.catImageView)
     }
 
     private fun hideLoadingOverlay() {
@@ -854,66 +855,66 @@ class CertDetailFragment : Fragment() {
     // 고양이 이미지의 랜덤 이동 애니메이션 시작 함수
     private fun startCatAnimation() {
         binding.loadingOverlay.post {
-            doSingleRun()
+//            doSingleRun()
         }
     }
 
     // 고양이를 랜덤 위치로 이동시키는 함수
-    private fun doSingleRun() {
-        if (!isOverlayVisible) return  // 오버레이가 사라졌다면 중단
-
-        // 부모 오버레이(전체 로딩 화면)의 크기
-        val parentWidth = binding.loadingOverlay.width
-        val parentHeight = binding.loadingOverlay.height
-
-        // 고양이 이미지의 크기
-        val catWidth = binding.catImageView.width
-        val catHeight = binding.catImageView.height
-
-        if (parentWidth <= 0 || parentHeight <= 0 || catWidth <= 0 || catHeight <= 0) {
-            // 크기를 제대로 측정하지 못한 경우, 잠시 후 재시도
-            binding.loadingOverlay.postDelayed({ doSingleRun() }, 1000)
-            return
-        }
-
-        // 현재 고양이 이미지의 위치 (이미 애니메이션으로 인한 이동이 있을 수 있으므로 실제 x, y 좌표 사용)
-        val currentX = binding.catImageView.x
-        val currentY = binding.catImageView.y
-
-        // 고양이 이미지가 완전히 보일 수 있도록, x 좌표는 0 ~ (부모너비 - 이미지너비),
-        // y 좌표는 0 ~ (부모높이 - 이미지높이) 범위 내에서 랜덤하게 생성
-        val targetX = Random.nextInt(0, parentWidth - catWidth).toFloat()
-        val targetY = Random.nextInt(0, parentHeight - catHeight).toFloat()
-
-        // 현재 위치에서 타겟 위치까지의 차이(델타값)
-        val deltaX = targetX - currentX
-        val deltaY = targetY - currentY
-
-        val anim = TranslateAnimation(
-            Animation.ABSOLUTE, 0f,
-            Animation.ABSOLUTE, deltaX,
-            Animation.ABSOLUTE, 0f,
-            Animation.ABSOLUTE, deltaY
-        ).apply {
-            duration = 2000  // 애니메이션 지속 시간 (2초)
-            fillAfter = true  // 애니메이션 종료 후 그 위치에 그대로 둠
-            setAnimationListener(object : Animation.AnimationListener {
-                override fun onAnimationStart(animation: Animation) {}
-                override fun onAnimationRepeat(animation: Animation) {}
-                override fun onAnimationEnd(animation: Animation) {
-                    // 애니메이션 종료 후 실제 고양이 이미지의 위치 업데이트
-                    binding.catImageView.clearAnimation()
-                    binding.catImageView.x = targetX
-                    binding.catImageView.y = targetY
-                    // 오버레이가 여전히 활성화되어 있다면 다시 랜덤 이동 애니메이션 실행
-                    if (isOverlayVisible) {
-                        doSingleRun()
-                    }
-                }
-            })
-        }
-        binding.catImageView.startAnimation(anim)
-    }
+//    private fun doSingleRun() {
+//        if (!isOverlayVisible) return  // 오버레이가 사라졌다면 중단
+//
+//        // 부모 오버레이(전체 로딩 화면)의 크기
+//        val parentWidth = binding.loadingOverlay.width
+//        val parentHeight = binding.loadingOverlay.height
+//
+//        // 고양이 이미지의 크기
+//        val catWidth = binding.catImageView.width
+//        val catHeight = binding.catImageView.height
+//
+//        if (parentWidth <= 0 || parentHeight <= 0 || catWidth <= 0 || catHeight <= 0) {
+//            // 크기를 제대로 측정하지 못한 경우, 잠시 후 재시도
+//            binding.loadingOverlay.postDelayed({ doSingleRun() }, 1000)
+//            return
+//        }
+//
+//        // 현재 고양이 이미지의 위치 (이미 애니메이션으로 인한 이동이 있을 수 있으므로 실제 x, y 좌표 사용)
+//        val currentX = binding.catImageView.x
+//        val currentY = binding.catImageView.y
+//
+//        // 고양이 이미지가 완전히 보일 수 있도록, x 좌표는 0 ~ (부모너비 - 이미지너비),
+//        // y 좌표는 0 ~ (부모높이 - 이미지높이) 범위 내에서 랜덤하게 생성
+//        val targetX = Random.nextInt(0, parentWidth - catWidth).toFloat()
+//        val targetY = Random.nextInt(0, parentHeight - catHeight).toFloat()
+//
+//        // 현재 위치에서 타겟 위치까지의 차이(델타값)
+//        val deltaX = targetX - currentX
+//        val deltaY = targetY - currentY
+//
+//        val anim = TranslateAnimation(
+//            Animation.ABSOLUTE, 0f,
+//            Animation.ABSOLUTE, deltaX,
+//            Animation.ABSOLUTE, 0f,
+//            Animation.ABSOLUTE, deltaY
+//        ).apply {
+//            duration = 2000  // 애니메이션 지속 시간 (2초)
+//            fillAfter = true  // 애니메이션 종료 후 그 위치에 그대로 둠
+//            setAnimationListener(object : Animation.AnimationListener {
+//                override fun onAnimationStart(animation: Animation) {}
+//                override fun onAnimationRepeat(animation: Animation) {}
+//                override fun onAnimationEnd(animation: Animation) {
+//                    // 애니메이션 종료 후 실제 고양이 이미지의 위치 업데이트
+//                    binding.catImageView.clearAnimation()
+//                    binding.catImageView.x = targetX
+//                    binding.catImageView.y = targetY
+//                    // 오버레이가 여전히 활성화되어 있다면 다시 랜덤 이동 애니메이션 실행
+//                    if (isOverlayVisible) {
+//                        doSingleRun()
+//                    }
+//                }
+//            })
+//        }
+//        binding.catImageView.startAnimation(anim)
+//    }
 
     /**
      * "왼쪽→오른쪽" 단 한 번 달린 뒤, 애니메이션이 끝나면

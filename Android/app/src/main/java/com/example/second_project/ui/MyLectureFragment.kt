@@ -53,8 +53,8 @@ class MyLectureFragment : Fragment() {
                 .inflate(R.layout.custom_tab, null, false)
 
             val tabText = customTab.findViewById<TextView>(R.id.tabText)
-          tabText.text = tabTitles[position]
-          tab.customView = tabText
+            tabText.text = tabTitles[position]
+            tab.customView = tabText
         }.attach()
 
         binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
@@ -73,6 +73,18 @@ class MyLectureFragment : Fragment() {
 
         binding.backBtn.setOnClickListener {
             findNavController().popBackStack()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // ViewPager2의 현재 페이지에 따라 데이터 새로고침
+        val fragments = childFragmentManager.fragments
+        if (fragments.isNotEmpty()) {
+            when (binding.viewPager.currentItem) {
+                0 -> (fragments[0] as? OwnedLectureFragment)?.refreshData()
+                1 -> (fragments[0] as? ParticipatedLectureFragment)?.refreshData()
+            }
         }
     }
 
