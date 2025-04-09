@@ -117,27 +117,6 @@ class MyWalletFragment : Fragment() {
     }
 
     // 새로운 함수: 백그라운드에서 데이터 새로고침
-    private fun refreshDataInBackground() {
-        val currentTime = System.currentTimeMillis()
-        val needsRefresh = lastRefreshTime == 0L || currentTime - lastRefreshTime > REFRESH_INTERVAL
-
-        // 여기서는 화면 표시를 차단하지 않고 백그라운드에서 진행
-        if (needsRefresh || !TransactionCache.isFresh() || TransactionCache.isEmpty()) {
-            CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    // 로딩 표시는 이미 UI에 있으므로 추가로 표시하지 않음
-                    loadBlockchainData(needsRefresh)
-                    lastRefreshTime = currentTime
-                } catch (e: Exception) {
-                    Log.e(TAG, "백그라운드 데이터 로드 실패: ${e.message}")
-                }
-            }
-        } else {
-            Log.d(TAG, "캐시된 데이터 사용 중 (마지막 새로고침: ${Date(lastRefreshTime)})")
-            // 이미 데이터가 있으면 로딩 표시 제거
-            showLoading(false)
-        }
-    }
 
     private fun setupUI() {
         // RecyclerView와 Adapter 설정
@@ -283,7 +262,7 @@ class MyWalletFragment : Fragment() {
         val endBlock = DefaultBlockParameterName.LATEST
 
         try {
-            // 세 이벤트 카테고리를 가져와서 ParsedEvent로 변환 후 합칩니다.
+            // 세 이벤트 카테고리를 가져와서 변환
             val depositedEvents = bcm.lectureEventMonitor.getEventLogs(
                 "TokenDeposited",
                 userId,
@@ -323,7 +302,7 @@ class MyWalletFragment : Fragment() {
                     TransactionItem(evt.title, evt.date, evt.amount, evt.timestamp)
                 }
 
-            // 새로 추가: 정산 이벤트 조회
+            // 정산 이벤트 조회
             val settlementEvents = bcm.lectureEventMonitor.getSettlementEventLogs(
                 userId,
                 bcm.web3j,
@@ -336,39 +315,24 @@ class MyWalletFragment : Fragment() {
                     TransactionItem(evt.title, evt.date, evt.amount, evt.timestamp)
                 }
 
-            // 전체 이벤트를 하나로 합친 후 타임스탬프 기준 내림차순 정렬합니다.
+            // 전체 이벤트를 하나로 합침 (중복 제거는 updateTransactions에서 처리)
             val events = (depositedEvents + withdrawnEvents + purchasedEvents + settlementEvents)
-                .sortedByDescending { it.timestamp }
-
-            // 정렬 확인용 로깅
-            if (events.isNotEmpty()) {
-                Log.d(TAG, "정렬된 이벤트 첫 5개:")
-                events.take(5).forEachIndexed { index, evt ->
-                    Log.d(TAG, "[$index] ${evt.title}: ${evt.timestamp}, ${evt.date}")
-                }
-            }
 
             if (events.isNotEmpty()) {
-                // 향상된 TransactionCache 사용
+                // 이벤트가 있을 경우에만 업데이트 (빈 리스트로 업데이트하지 않음)
                 TransactionCache.updateTransactions(events)
 
                 withContext(Dispatchers.Main) {
-                    // Fragment가 아직 유효한지 확인 후 UI 갱신
                     if (isAdded && _binding != null) {
+                        // UI 갱신
                         val transactions =
                             TransactionCache.getRecentTransactions(TransactionCache.size())
-                        transactionAdapter = TransactionAdapter(transactions)
-                        binding.transactionList.adapter = transactionAdapter
-
-                        // 리스트가 변경되었음을 명시적으로 알림
-                        transactionAdapter.notifyDataSetChanged()
-
-                        // 첫 아이템으로 스크롤 (최신 거래를 보여주기 위해)
                         if (transactions.isNotEmpty()) {
+                            transactionAdapter = TransactionAdapter(transactions)
+                            binding.transactionList.adapter = transactionAdapter
                             binding.transactionList.scrollToPosition(0)
+                            isDataLoaded = true
                         }
-
-                        isDataLoaded = true
                     }
                 }
             }
@@ -378,117 +342,335 @@ class MyWalletFragment : Fragment() {
         }
     }
 
+    private val safeDisposables = mutableListOf<SafeDisposable>()
+
     // setupTransactionEvents 메서드 수정
-    private suspend fun setupTransactionEvents() {
-        val bcm = blockChainManager ?: return
+    private fun setupTransactionEvents() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val bcm = blockChainManager ?: return@launch
 
-        // 이벤트 구독 취소를 위한 Disposable 객체들을 저장
-        val disposables = mutableListOf<io.reactivex.rxjava3.disposables.Disposable>()
+            // 기존 구독이 있다면 모두 해제 (중복 구독 방지)
+            for (disposable in safeDisposables) {
+                disposable.dispose()
+            }
+            safeDisposables.clear()
 
-        // 충전 이벤트 구독
+            Log.d(TAG, "이벤트 구독 설정 시작")
+
+            // 이벤트 구독 설정
+            setupDepositEventSubscription(bcm)
+            setupWithdrawEventSubscription(bcm)
+            setupPurchaseEventSubscription(bcm)
+            setupSettlementEventSubscription(bcm)
+
+            // 이벤트 구독 해제를 위한 라이프사이클 옵저버 설정
+            withContext(Dispatchers.Main) {
+                if (!isAdded) return@withContext
+
+                viewLifecycleOwner.lifecycle.addObserver(object :
+                    androidx.lifecycle.LifecycleEventObserver {
+                    override fun onStateChanged(
+                        source: androidx.lifecycle.LifecycleOwner,
+                        event: androidx.lifecycle.Lifecycle.Event
+                    ) {
+                        if (event == androidx.lifecycle.Lifecycle.Event.ON_DESTROY) {
+                            // 백그라운드에서 안전하게 dispose 호출
+                            CoroutineScope(Dispatchers.IO).launch {
+                                for (disposable in safeDisposables) {
+                                    disposable.dispose()
+                                }
+                                Log.d(TAG, "이벤트 구독 취소됨")
+                            }
+                        }
+                    }
+                })
+            }
+
+            Log.d(TAG, "이벤트 구독 설정 완료")
+        }
+    }
+
+    private fun refreshDataInBackground() {
+        val currentTime = System.currentTimeMillis()
+        val needsRefresh = lastRefreshTime == 0L || currentTime - lastRefreshTime > REFRESH_INTERVAL
+
+        // 최초 로드 또는 오래된 데이터일 경우 새로고침
+        if (needsRefresh || !TransactionCache.isFresh() || TransactionCache.isEmpty()) {
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    // 로딩 표시는 이미 UI에 있으므로 추가로 표시하지 않음
+                    loadBlockchainData(needsRefresh)
+                    lastRefreshTime = currentTime
+                } catch (e: Exception) {
+                    Log.e(TAG, "백그라운드 데이터 로드 실패: ${e.message}")
+                }
+            }
+        } else {
+            Log.d(TAG, "캐시된 데이터 사용 중 (마지막 새로고침: ${Date(lastRefreshTime)})")
+            // 이미 데이터가 있으면 로딩 표시 제거
+            showLoading(false)
+        }
+    }
+
+    private fun setupDepositEventSubscription(bcm: BlockChainManager) {
         try {
+            // 메인 스레드에서 네트워크 작업 수행하지 않도록 수정
+            // 블록 번호 가져오는 부분 제거하고 LATEST만 사용
+            Log.d(TAG, "충전 이벤트 구독 시작")
+
             val depositDisposable = bcm.lectureEventMonitor.tokenDepositedEventFlowable(
-                DefaultBlockParameterName.EARLIEST,
+                DefaultBlockParameter.valueOf(BigInteger.valueOf(12345678L)),
                 DefaultBlockParameterName.LATEST
             )
                 .subscribe({ event ->
+                    Log.d(
+                        TAG,
+                        "충전 이벤트 감지: userId=${event.userId}, 내 userId=$userId, 금액=${event.amount}"
+                    )
                     if (event.userId == userId) {
-                        Log.d(TAG, "충전 이벤트: ${event.amount}")
+                        Log.d(TAG, "내 충전 이벤트 감지: ${event.amount}")
                         val now = System.currentTimeMillis()
                         val date = getToday(now)
                         val convertedAmount = event.amount.divide(BigInteger.TEN.pow(18))
                         val transactionItem = TransactionItem("토큰 충전", date, convertedAmount, now)
 
-                        // Fragment가 아직 활성 상태인지 확인 후 처리
-                        if (isAdded) {
-                            addTransaction(transactionItem)
-                        } else {
-                            // Fragment가 더 이상 활성 상태가 아니라면 TransactionCache만 업데이트
-                            TransactionCache.addTransaction(transactionItem)
-                            Log.d(TAG, "Fragment가 이미 제거됨, 캐시만 업데이트: ${transactionItem.title}")
+                        // UI 스레드에서 처리
+                        CoroutineScope(Dispatchers.Main).launch {
+                            if (isAdded && _binding != null) {
+                                // 1. 먼저 TransactionCache에 추가
+                                val added = TransactionCache.addTransaction(transactionItem)
+                                Log.d(TAG, "트랜잭션 추가 결과: $added")
+
+                                // 2. 잔액도 같이 새로고침 - IO 스레드에서 수행
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    try {
+                                        val newBalance = bcm.getMyCatTokenBalance()
+                                        UserSession.lastKnownBalance = newBalance
+
+                                        // UI 업데이트는 메인 스레드로
+                                        withContext(Dispatchers.Main) {
+                                            if (isAdded && _binding != null) {
+                                                updateBalanceUI(newBalance)
+                                                Log.d(TAG, "이벤트 발생으로 잔액 업데이트: $newBalance")
+
+                                                // 3. UI 강제 업데이트
+                                                if (TransactionCache.isEmpty()) {
+                                                    Log.d(TAG, "TransactionCache가 비어있음")
+                                                } else {
+                                                    Log.d(
+                                                        TAG,
+                                                        "거래 내역 업데이트: ${TransactionCache.size()}개"
+                                                    )
+                                                    val transactions =
+                                                        TransactionCache.getRecentTransactions()
+
+                                                    transactionAdapter =
+                                                        TransactionAdapter(transactions)
+                                                    binding.transactionList.adapter =
+                                                        transactionAdapter
+                                                    if (transactions.isNotEmpty()) {
+                                                        binding.transactionList.scrollToPosition(0)
+                                                    }
+                                                    binding.transactionList.visibility =
+                                                        View.VISIBLE
+                                                }
+                                                showLoading(false)
+                                            }
+                                        }
+                                    } catch (e: Exception) {
+                                        Log.e(TAG, "이벤트 후 잔액 업데이트 실패", e)
+                                    }
+                                }
+                            } else {
+                                // Fragment가 더 이상 활성 상태가 아니라면 TransactionCache만 업데이트
+                                TransactionCache.addTransaction(transactionItem)
+                                Log.d(TAG, "Fragment가 이미 제거됨, 캐시만 업데이트: ${transactionItem.title}")
+                            }
                         }
                     }
-                }, { error -> Log.e(TAG, "충전 이벤트 오류: ${error.message}") })
+                }, { error ->
+                    Log.e(TAG, "충전 이벤트 오류: ${error.message}")
+                    error.printStackTrace()
+                })
 
-            disposables.add(depositDisposable)
+            safeDisposables.add(SafeDisposable(depositDisposable))
+            Log.d(TAG, "충전 이벤트 구독 설정 완료")
         } catch (e: Exception) {
             Log.e(TAG, "충전 이벤트 등록 실패: ${e.message}")
+            e.printStackTrace()
         }
+    }
 
-        // 출금 이벤트 구독
+    private fun setupWithdrawEventSubscription(bcm: BlockChainManager) {
         try {
+            // 메인 스레드에서 네트워크 작업 수행하지 않도록 수정
+            Log.d(TAG, "출금 이벤트 구독 시작")
+
             val withdrawDisposable = bcm.lectureEventMonitor.tokenWithdrawnEventFlowable(
-                DefaultBlockParameterName.EARLIEST,
+                DefaultBlockParameter.valueOf(BigInteger.valueOf(12345678L)),
                 DefaultBlockParameterName.LATEST
             )
                 .subscribe({ event ->
+                    Log.d(
+                        TAG,
+                        "출금 이벤트 감지: userId=${event.userId}, 내 userId=$userId, 금액=${event.amount}"
+                    )
                     if (event.userId == userId) {
-                        Log.d(TAG, "출금 이벤트: ${event.amount}")
+                        Log.d(TAG, "내 출금 이벤트 감지: ${event.amount}")
                         val now = System.currentTimeMillis()
                         val date = getToday(now)
                         val convertedAmount = event.amount.divide(BigInteger.TEN.pow(18))
                         val transactionItem = TransactionItem("토큰 출금", date, convertedAmount, now)
 
-                        // Fragment가 아직 활성 상태인지 확인 후 처리
-                        if (isAdded) {
-                            addTransaction(transactionItem)
-                        } else {
-                            // Fragment가 더 이상 활성 상태가 아니라면 TransactionCache만 업데이트
-                            TransactionCache.addTransaction(transactionItem)
-                            Log.d(TAG, "Fragment가 이미 제거됨, 캐시만 업데이트: ${transactionItem.title}")
+                        // UI 스레드에서 처리
+                        CoroutineScope(Dispatchers.Main).launch {
+                            if (isAdded && _binding != null) {
+                                // 1. 먼저 TransactionCache에 추가
+                                val added = TransactionCache.addTransaction(transactionItem)
+                                Log.d(TAG, "트랜잭션 추가 결과: $added")
+
+                                // 2. 잔액도 같이 새로고침 - IO 스레드에서 수행
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    try {
+                                        val newBalance = bcm.getMyCatTokenBalance()
+                                        UserSession.lastKnownBalance = newBalance
+
+                                        // UI 업데이트는 메인 스레드로
+                                        withContext(Dispatchers.Main) {
+                                            if (isAdded && _binding != null) {
+                                                updateBalanceUI(newBalance)
+                                                Log.d(TAG, "이벤트 발생으로 잔액 업데이트: $newBalance")
+
+                                                // 3. UI 강제 업데이트
+                                                val transactions =
+                                                    TransactionCache.getRecentTransactions()
+                                                transactionAdapter =
+                                                    TransactionAdapter(transactions)
+                                                binding.transactionList.adapter = transactionAdapter
+                                                binding.transactionList.visibility = View.VISIBLE
+                                                if (transactions.isNotEmpty()) {
+                                                    binding.transactionList.scrollToPosition(0)
+                                                }
+                                            }
+                                        }
+                                    } catch (e: Exception) {
+                                        Log.e(TAG, "이벤트 후 잔액 업데이트 실패", e)
+                                    }
+                                }
+                            } else {
+                                // Fragment가 더 이상 활성 상태가 아니라면 TransactionCache만 업데이트
+                                TransactionCache.addTransaction(transactionItem)
+                                Log.d(TAG, "Fragment가 이미 제거됨, 캐시만 업데이트: ${transactionItem.title}")
+                            }
                         }
                     }
-                }, { error -> Log.e(TAG, "출금 이벤트 오류: ${error.message}") })
+                }, { error ->
+                    Log.e(TAG, "출금 이벤트 오류: ${error.message}")
+                    error.printStackTrace()
+                })
 
-            disposables.add(withdrawDisposable)
+            safeDisposables.add(SafeDisposable(withdrawDisposable))
+            Log.d(TAG, "출금 이벤트 구독 설정 완료")
         } catch (e: Exception) {
             Log.e(TAG, "출금 이벤트 등록 실패: ${e.message}")
+            e.printStackTrace()
         }
+    }
 
-        // 강의 구매 이벤트 구독
+    private fun setupPurchaseEventSubscription(bcm: BlockChainManager) {
         try {
+            // 메인 스레드에서 네트워크 작업 수행하지 않도록 수정
+            Log.d(TAG, "강의 구매 이벤트 구독 시작")
+
             val purchaseDisposable = bcm.lectureEventMonitor.lecturePurchasedEventFlowable(
-                DefaultBlockParameterName.EARLIEST,
+                DefaultBlockParameter.valueOf(BigInteger.valueOf(12345678L)),
                 DefaultBlockParameterName.LATEST
             )
                 .subscribe({ event ->
+                    Log.d(
+                        TAG,
+                        "강의 구매 이벤트 감지: userId=${event.userId}, 내 userId=$userId, 강의=${event.lectureTitle}, 금액=${event.amount}"
+                    )
                     if (event.userId == userId) {
-                        Log.d(TAG, "강의 구매 이벤트: ${event.lectureTitle} - ${event.amount}")
+                        Log.d(TAG, "내 강의 구매 이벤트 감지: ${event.lectureTitle} - ${event.amount}")
                         val now = System.currentTimeMillis()
                         val date = getToday(now)
                         val convertedAmount = event.amount.divide(BigInteger.TEN.pow(18))
                         val transactionItem =
                             TransactionItem(event.lectureTitle, date, convertedAmount, now)
 
-                        // Fragment가 아직 활성 상태인지 확인 후 처리
-                        if (isAdded) {
-                            addTransaction(transactionItem)
-                        } else {
-                            // Fragment가 더 이상 활성 상태가 아니라면 TransactionCache만 업데이트
-                            TransactionCache.addTransaction(transactionItem)
-                            Log.d(TAG, "Fragment가 이미 제거됨, 캐시만 업데이트: ${transactionItem.title}")
+                        // UI 스레드에서 처리
+                        CoroutineScope(Dispatchers.Main).launch {
+                            if (isAdded && _binding != null) {
+                                // 1. 먼저 TransactionCache에 추가
+                                val added = TransactionCache.addTransaction(transactionItem)
+                                Log.d(TAG, "트랜잭션 추가 결과: $added")
+
+                                // 2. 잔액도 같이 새로고침 - IO 스레드에서 수행
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    try {
+                                        val newBalance = bcm.getMyCatTokenBalance()
+                                        UserSession.lastKnownBalance = newBalance
+
+                                        // UI 업데이트는 메인 스레드로
+                                        withContext(Dispatchers.Main) {
+                                            if (isAdded && _binding != null) {
+                                                updateBalanceUI(newBalance)
+                                                Log.d(TAG, "이벤트 발생으로 잔액 업데이트: $newBalance")
+
+                                                // 3. UI 강제 업데이트
+                                                val transactions =
+                                                    TransactionCache.getRecentTransactions()
+                                                transactionAdapter =
+                                                    TransactionAdapter(transactions)
+                                                binding.transactionList.adapter = transactionAdapter
+                                                binding.transactionList.visibility = View.VISIBLE
+                                                if (transactions.isNotEmpty()) {
+                                                    binding.transactionList.scrollToPosition(0)
+                                                }
+                                            }
+                                        }
+                                    } catch (e: Exception) {
+                                        Log.e(TAG, "이벤트 후 잔액 업데이트 실패", e)
+                                    }
+                                }
+                            } else {
+                                // Fragment가 더 이상 활성 상태가 아니라면 TransactionCache만 업데이트
+                                TransactionCache.addTransaction(transactionItem)
+                                Log.d(TAG, "Fragment가 이미 제거됨, 캐시만 업데이트: ${transactionItem.title}")
+                            }
                         }
                     }
-                }, { error -> Log.e(TAG, "강의 구매 이벤트 오류: ${error.message}") })
+                }, { error ->
+                    Log.e(TAG, "강의 구매 이벤트 오류: ${error.message}")
+                    error.printStackTrace()
+                })
 
-            disposables.add(purchaseDisposable)
+            safeDisposables.add(SafeDisposable(purchaseDisposable))
+            Log.d(TAG, "강의 구매 이벤트 구독 설정 완료")
         } catch (e: Exception) {
             Log.e(TAG, "강의 구매 이벤트 등록 실패: ${e.message}")
+            e.printStackTrace()
         }
+    }
 
-        // 새로 추가: 정산 이벤트 구독
+    private fun setupSettlementEventSubscription(bcm: BlockChainManager) {
         try {
+            // 메인 스레드에서 네트워크 작업 수행하지 않도록 수정
+            Log.d(TAG, "정산 이벤트 구독 시작")
+
             val settleDisposable = bcm.lectureEventMonitor.lectureSettledEventFlowable(
-                DefaultBlockParameterName.EARLIEST,
+                DefaultBlockParameter.valueOf(BigInteger.valueOf(12345678L)),
                 DefaultBlockParameterName.LATEST
             )
                 .subscribe({ event ->
+                    Log.d(
+                        TAG,
+                        "정산 이벤트 감지: participantId=${event.participantId}, 내 userId=$userId, 강의=${event.lectureTitle}, 금액=${event.amount}"
+                    )
                     // 정산금을 받는 참가자 ID가 현재 사용자인지 확인
                     if (event.participantId == userId) {
-                        Log.d(
-                            TAG,
-                            "정산 이벤트: ${event.lectureTitle} - ${event.amount}, 참가자ID: ${event.participantId}"
-                        )
+                        Log.d(TAG, "내 정산 이벤트 감지: ${event.lectureTitle} - ${event.amount}")
                         val now = System.currentTimeMillis()
                         val date = getToday(now)
                         val convertedAmount = event.amount.divide(BigInteger.TEN.pow(18))
@@ -500,60 +682,65 @@ class MyWalletFragment : Fragment() {
                             now
                         )
 
-                        // Fragment가 아직 활성 상태인지 확인 후 처리
-                        if (isAdded) {
-                            addTransaction(transactionItem)
-                        } else {
-                            // Fragment가 더 이상 활성 상태가 아니라면 TransactionCache만 업데이트
-                            TransactionCache.addTransaction(transactionItem)
-                            Log.d(TAG, "Fragment가 이미 제거됨, 캐시만 업데이트: ${transactionItem.title}")
+                        // UI 스레드에서 처리
+                        CoroutineScope(Dispatchers.Main).launch {
+                            if (isAdded && _binding != null) {
+                                // 1. 먼저 TransactionCache에 추가
+                                val added = TransactionCache.addTransaction(transactionItem)
+                                Log.d(TAG, "트랜잭션 추가 결과: $added")
+
+                                // 2. 잔액도 같이 새로고침 - IO 스레드에서 수행
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    try {
+                                        val newBalance = bcm.getMyCatTokenBalance()
+                                        UserSession.lastKnownBalance = newBalance
+
+                                        // UI 업데이트는 메인 스레드로
+                                        withContext(Dispatchers.Main) {
+                                            if (isAdded && _binding != null) {
+                                                updateBalanceUI(newBalance)
+                                                Log.d(TAG, "이벤트 발생으로 잔액 업데이트: $newBalance")
+
+                                                // 3. UI 강제 업데이트
+                                                val transactions =
+                                                    TransactionCache.getRecentTransactions()
+                                                transactionAdapter =
+                                                    TransactionAdapter(transactions)
+                                                binding.transactionList.adapter = transactionAdapter
+                                                binding.transactionList.visibility = View.VISIBLE
+                                                if (transactions.isNotEmpty()) {
+                                                    binding.transactionList.scrollToPosition(0)
+                                                }
+                                            }
+                                        }
+                                    } catch (e: Exception) {
+                                        Log.e(TAG, "이벤트 후 잔액 업데이트 실패", e)
+                                    }
+                                }
+                            } else {
+                                // Fragment가 더 이상 활성 상태가 아니라면 TransactionCache만 업데이트
+                                TransactionCache.addTransaction(transactionItem)
+                                Log.d(TAG, "Fragment가 이미 제거됨, 캐시만 업데이트: ${transactionItem.title}")
+                            }
                         }
                     }
-                }, { error -> Log.e(TAG, "정산 이벤트 오류: ${error.message}") })
+                }, { error ->
+                    Log.e(TAG, "정산 이벤트 오류: ${error.message}")
+                    error.printStackTrace()
+                })
 
-            disposables.add(settleDisposable)
+            safeDisposables.add(SafeDisposable(settleDisposable))
+            Log.d(TAG, "정산 이벤트 구독 설정 완료")
         } catch (e: Exception) {
             Log.e(TAG, "정산 이벤트 등록 실패: ${e.message}")
+            e.printStackTrace()
         }
-
-        // onDestroyView에서 이벤트 구독을 취소할 수 있도록 disposables 저장
-        viewLifecycleOwner.lifecycle.addObserver(object :
-            androidx.lifecycle.LifecycleEventObserver {
-            override fun onStateChanged(
-                source: androidx.lifecycle.LifecycleOwner,
-                event: androidx.lifecycle.Lifecycle.Event
-            ) {
-                if (event == androidx.lifecycle.Lifecycle.Event.ON_DESTROY) {
-                    for (disposable in disposables) {
-                        if (!disposable.isDisposed) {
-                            disposable.dispose()
-                        }
-                    }
-                    Log.d(TAG, "이벤트 구독 취소됨")
-                }
-            }
-        })
-
-        try {
-            bcm.getTransactionHistory(userId)
-        } catch (e: Exception) {
-            Log.e(TAG, "거래 이력 조회 실패: ${e.message}")
-        }
-    }
-
-    private fun getToday(timeMillis: Long): String {
-        val dateFormat = SimpleDateFormat("yyyy / MM / dd", Locale.getDefault())
-        return dateFormat.format(Date(timeMillis))
     }
 
     private fun addTransaction(transaction: TransactionItem) {
-        // 현재 시간으로 타임스탬프 업데이트하여 항상 최신이 상단에 오도록 함
-        val currentTime = System.currentTimeMillis()
-        val updatedTransaction = transaction.copy(timestamp = currentTime)
-        Log.d(TAG, "트랜잭션 추가 시도: ${updatedTransaction.title}, 타임스탬프: $currentTime")
+        Log.d(TAG, "트랜잭션 추가 시도: ${transaction.title}")
 
-        // 향상된 TransactionCache의 addTransaction 메서드 사용
-        val added = TransactionCache.addTransaction(updatedTransaction)
+        val added = TransactionCache.addTransaction(transaction)
 
         if (added) {
             isDataLoaded = true
@@ -563,14 +750,12 @@ class MyWalletFragment : Fragment() {
                 // Fragment가 아직 활성 상태인지, 바인딩이 null이 아닌지 확인
                 if (isAdded && _binding != null) {
                     Log.d(TAG, "UI 업데이트: 최신 거래 내역으로 RecyclerView 갱신")
-                    // 모든 트랜잭션 표시 (또는 제한된 수 표시)
+
+                    // 모든 트랜잭션 표시
                     val transactions =
                         TransactionCache.getRecentTransactions(TransactionCache.size())
                     transactionAdapter = TransactionAdapter(transactions)
                     binding.transactionList.adapter = transactionAdapter
-
-                    // 목록이 변경되었음을 알림
-                    transactionAdapter.notifyDataSetChanged()
 
                     // 첫 번째 아이템으로 스크롤
                     if (transactions.isNotEmpty()) {
@@ -586,6 +771,12 @@ class MyWalletFragment : Fragment() {
             Log.d(TAG, "중복된 거래 무시: ${transaction.title}")
         }
     }
+
+    private fun getToday(timeMillis: Long): String {
+        val dateFormat = SimpleDateFormat("yyyy / MM / dd", Locale.getDefault())
+        return dateFormat.format(Date(timeMillis))
+    }
+
 
     private fun updateBalanceUI(balance: BigInteger) {
         val divisor = BigInteger.TEN.pow(18)
@@ -711,7 +902,33 @@ class MyWalletFragment : Fragment() {
     }
 
     override fun onDestroyView() {
+        // 백그라운드에서 안전하게 dispose 호출
+        CoroutineScope(Dispatchers.IO).launch {
+            for (disposable in safeDisposables) {
+                disposable.dispose()
+            }
+            Log.d(TAG, "onDestroyView에서 이벤트 구독 취소됨")
+        }
+
         super.onDestroyView()
         _binding = null
     }
+}
+
+class SafeDisposable(private val disposable: io.reactivex.rxjava3.disposables.Disposable) {
+    fun dispose() {
+        // IO 스레드에서 안전하게 dispose
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                if (!disposable.isDisposed) {
+                    disposable.dispose()
+                }
+            } catch (e: Exception) {
+                Log.e("SafeDisposable", "Dispose 오류: ${e.message}")
+            }
+        }
+    }
+
+    val isDisposed: Boolean
+        get() = disposable.isDisposed
 }
