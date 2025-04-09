@@ -1,12 +1,16 @@
 package com.example.second_project.network
 
 import com.example.second_project.BuildConfig
+import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object ApiClient {
+    // Gson 객체 추가
+    val gson = Gson()
+    
     // 실제 API 서버의 Base URL로 변경하세요.
     private val okHttpClient: OkHttpClient = OkHttpClient.Builder()
         .addInterceptor(TokenInterceptor()) // TokenInterceptor 추가

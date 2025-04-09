@@ -200,13 +200,14 @@ class LecturePlayFragment: Fragment() {
             } else {
                 Log.e(TAG, "updateLectureContent: 유효한 유튜브 URL이 아님.")
             }
-
-            // 이전/다음 버튼 상태 업데이트
-            updateBtnColors()
             
             // 서버에서 최신 데이터 가져오기
             refreshSubLectureList()
-            
+
+
+            // 이전/다음 버튼 상태 업데이트
+            updateBtnColors()
+
             // 이전 sublecture의 재생 시간 저장
             if (prevTimeSec > 0) {
                 watchTimeMap[prevSubLectureId] = prevTimeSec

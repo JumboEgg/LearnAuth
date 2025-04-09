@@ -11,6 +11,15 @@ import retrofit2.http.Query
 import retrofit2.http.Body
 import retrofit2.http.POST
 
+// 오류 응답을 처리하기 위한 데이터 클래스
+data class ErrorResponse(
+    val timestamp: String,
+    val status: Int,
+    val error: String,
+    val message: String? = null,
+    val path: String
+)
+
 interface CertificateApiService {
     @GET("/api/certificate")
     fun getCertificates(@Query("userId") userId: Int): Call<CertificateResponse>
@@ -21,7 +30,7 @@ interface CertificateApiService {
         @Query("lectureId") lectureId: Int
     ): Call<CertificateDetailResponse>
 
-    @PATCH("api/certificate/lecture/{lectureId}/certification")
+    @PATCH("/api/certificate/lecture/{lectureId}/certification")
     fun issueCertificate(
         @Path("lectureId") lectureId: Int,
         @Body requestBody: CertificateIssueRequest
@@ -30,5 +39,5 @@ interface CertificateApiService {
 
 data class CertificateIssueRequest(
     val userId: Int,
-    val cid: String? = null
+    val cid: String
 )

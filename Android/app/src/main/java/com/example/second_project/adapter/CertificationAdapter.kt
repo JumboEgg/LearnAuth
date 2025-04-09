@@ -28,6 +28,9 @@ class CertificationAdapter(
             val categoryTextColor = getCategoryTextColor(item.categoryName)
             binding.textCategoryCertification.setTextColor(categoryTextColor)
 
+            val titleTextColor = getTitleTextColor(item.categoryName)
+            binding.textTitleMyCertification.setTextColor(titleTextColor)
+
             // "자세히 보기" 버튼 텍스트 색상 변경
             val buttonTextColor = getCategoryTextColor(item.categoryName)
             binding.buttonDetail.setTextColor(buttonTextColor)
@@ -85,6 +88,19 @@ class CertificationAdapter(
                 "통계학" -> ContextCompat.getColor(context, R.color.data_sub)
                 "마케팅" -> ContextCompat.getColor(context, R.color.marketing_sub)
                 "체육" -> ContextCompat.getColor(context, R.color.sport_sub)
+                else -> ContextCompat.getColor(context, R.color.white)
+            }
+        }
+
+        private fun getTitleTextColor(category: String): Int {
+            val context = binding.root.context
+            return when (category) {
+                "수학" -> ContextCompat.getColor(context, R.color.black)
+                "생물학" -> ContextCompat.getColor(context, R.color.white)
+                "법률" -> ContextCompat.getColor(context, R.color.white)
+                "통계학" -> ContextCompat.getColor(context, R.color.black)
+                "마케팅" -> ContextCompat.getColor(context, R.color.white)
+                "체육" -> ContextCompat.getColor(context, R.color.black)
                 else -> ContextCompat.getColor(context, R.color.white)
             }
         }
