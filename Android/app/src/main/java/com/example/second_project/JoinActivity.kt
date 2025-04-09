@@ -15,6 +15,7 @@ import com.example.second_project.databinding.ActivityJoinBinding
 import com.example.second_project.network.ApiClient
 import com.example.second_project.network.SignupApiService
 import com.example.second_project.utils.isKoreanOrEnglishOnly
+import org.json.JSONObject
 import org.web3j.crypto.WalletUtils
 import retrofit2.Call
 import retrofit2.Callback
@@ -136,11 +137,28 @@ class JoinActivity : AppCompatActivity() {
                                     finish()
                                 } else {
                                     // 실패 시 로그/토스트 후, 다시 가입 화면 복귀
-                                    Toast.makeText(
-                                        this@JoinActivity,
-                                        "회원가입 실패: ${response.message()}",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    val errorBody = response.errorBody()?.string()
+                                    try {
+                                        val errorMessage = JSONObject(errorBody).getJSONObject("error").getString("message")
+                                        if (errorMessage == "이미 사용중인 이메일입니다.") {
+                                            Toast.makeText(this@JoinActivity, errorMessage, Toast.LENGTH_SHORT).show()
+                                        } else if (errorMessage == "이미 사용중인 닉네임입니다.") {
+                                            Toast.makeText(this@JoinActivity, errorMessage, Toast.LENGTH_SHORT).show()
+                                        } else {
+                                            Toast.makeText(this@JoinActivity, "회원가입 실패! 다시 시도하세요", Toast.LENGTH_SHORT).show()
+                                        }
+                                        Log.d("joinerror", "회원가입 오류 메시지: $errorMessage")
+                                    } catch (e: Exception) {
+                                        Toast.makeText(this@JoinActivity, "회원가입 실패! 다시 시도하세요", Toast.LENGTH_SHORT).show()
+                                        Log.e("joinerror", "에러 메시지 파싱 실패: ${e.message}, 원본: $errorBody")
+                                    }
+
+
+//                                    Toast.makeText(
+//                                        this@JoinActivity,
+//                                        "회원가입 실패: ${response}",
+//                                        Toast.LENGTH_SHORT
+//                                    ).show()
                                     hideTouchGameUI()
                                     enableBackButton() // 뒤로가기 버튼 다시 활성화
                                 }
