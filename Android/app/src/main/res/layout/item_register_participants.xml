@@ -1,38 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintTop_toTopOf="parent"
-        android:padding="5dp">
+        android:padding="5dp"
+        app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/editTextNameParticipants"
             style="@style/body1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="4"
             android:background="@drawable/bg_radius_20"
+            android:paddingHorizontal="5dp"
             android:textColorHint="@color/text_gray"
             app:boxStrokeColor="@color/button_gray"
-            app:boxStrokeWidth="1dp"
-            android:layout_weight="4"
-            android:paddingHorizontal="5dp">
+            app:boxStrokeWidth="1dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editRegisterUser"
                 style="@style/body1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="검색"
-                android:paddingStart="14dp"
-                android:textColor="@color/text_gray"                android:maxLines="1"
                 android:drawableEnd="@drawable/search"
-                android:singleLine="true"/>
+                android:hint="검색"
+                android:maxLines="1"
+                android:paddingStart="14dp"
+                android:singleLine="true"
+                android:textColor="@color/text_gray" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -46,12 +47,12 @@
                 style="@style/body1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="3"
                 android:background="@drawable/bg_radius_20"
+                android:paddingHorizontal="5dp"
                 android:textColorHint="@color/text_gray"
                 app:boxStrokeColor="@color/button_gray"
-                app:boxStrokeWidth="1dp"
-                android:layout_weight="3"
-                android:paddingHorizontal="5dp">
+                app:boxStrokeWidth="1dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editRatioParticipants"
@@ -59,22 +60,22 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="숫자"
-                    android:paddingStart="14dp"
-                    android:textColor="@color/text_gray"
-                    android:maxLines="1"
                     android:inputType="number"
+                    android:maxLength="3"
+                    android:maxLines="1"
+                    android:paddingStart="14dp"
                     android:singleLine="true"
-                    android:maxLength="3"/>
+                    android:textColor="@color/text_gray" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
+                style="@style/semibold16"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="%"
-                style="@style/semibold16"
                 android:layout_weight="1"
-                android:gravity="center" />
+                android:gravity="center"
+                android:text="%" />
 
 
         </LinearLayout>
@@ -85,14 +86,15 @@
             android:layout_height="match_parent"
             android:layout_weight="2"
             android:paddingTop="5dp">
+
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_process_unchecked"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -101,14 +103,15 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:paddingTop="5dp">
+
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/cancel"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>
