@@ -42,7 +42,7 @@ class SearchViewModel : ViewModel() {
         currentLecturePage = 1
         isLectureLoading = false
         isLectureLastPage = false
-//        _lectures.value = emptyList()
+        _lectures.value = emptyList()
 
         Log.d(TAG, "강의 목록 초기화됨")
     }
