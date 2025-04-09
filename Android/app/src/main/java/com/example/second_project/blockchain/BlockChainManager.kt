@@ -30,7 +30,7 @@ private const val TAG = "BlockChainManager_야옹"
 data class TransactionEvent(
     val userId: BigInteger,
     val amount: BigInteger,
-    val activityType: String // 예: "Deposit", "Withdraw"
+    val activityType: String
 )
 
 data class LecturePurchaseEvent(
