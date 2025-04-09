@@ -33,13 +33,16 @@ class SearchViewModel : ViewModel() {
     // 현재 카테고리 ID 추적 (요청 식별용)
     private var currentCategoryId = 0
 
+    val isLectureLoadingPublic: Boolean
+        get() = isLectureLoading
+
     /** 기본 강의 목록을 초기화할 때 사용 **/
     fun resetLectures() {
         loadedLectures.clear()
         currentLecturePage = 1
         isLectureLoading = false
         isLectureLastPage = false
-        _lectures.value = emptyList()
+//        _lectures.value = emptyList()
 
         Log.d(TAG, "강의 목록 초기화됨")
     }
