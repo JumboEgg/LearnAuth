@@ -172,4 +172,35 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <FrameLayout
+            android:id="@+id/loadingOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#80000000"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/catImageView"
+                android:layout_width="132dp"
+                android:layout_height="132dp"
+                android:elevation="4dp"
+                android:layout_gravity="center"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="수료증을 가져오는 중..."
+                android:layout_gravity="center"
+                android:textColor="@color/white"
+                android:layout_marginTop="20dp"
+                style="@style/medium16"/>
+
+        </FrameLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
