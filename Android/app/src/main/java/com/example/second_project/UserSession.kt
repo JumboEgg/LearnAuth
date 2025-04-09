@@ -3,6 +3,9 @@ package com.example.second_project
 import android.content.Context
 import android.content.SharedPreferences
 import com.example.second_project.blockchain.BlockChainManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import org.web3j.crypto.WalletUtils
 import java.io.File
 import java.math.BigInteger
@@ -17,17 +20,37 @@ object UserSession {
     private const val KEY_WALLET_PATH = "wallet_path"
     private const val KEY_WALLET_ADDRESS = "wallet_address"
     private const val KEY_WALLET_PASSWORD = "wallet_password"
+    private const val KEY_IS_CHARGING = "is_charging" // 충전 상태 저장용 키 추가
 
     private lateinit var preferences: SharedPreferences
 
     // 마지막으로 알려진 잔액 (메모리에만 저장)
     var lastKnownBalance: BigInteger? = null
 
+    // 충전 관련 상태 변수 추가 (앱 재시작 시에는 초기화되지만 화면 전환 시에는 유지)
+    var isCharging: Boolean = false
+        get() = field || preferences.getBoolean(KEY_IS_CHARGING, false)
+        set(value) {
+            field = value
+            preferences.edit().putBoolean(KEY_IS_CHARGING, value).apply()
+        }
+
+    // 충전 금액 정보 (메모리에만 저장)
+    var pendingChargeAmount: BigInteger? = null
+    var pendingChargeAmountBase: Int? = null
+
+    // 앱 전체 스코프 (화면 전환과 독립적인 코루틴)
+    val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    // 앱 컨텍스트 (Toast 메시지 등에 사용)
+    lateinit var applicationContext: Context
+
     // BlockChainManager를 인메모리로 캐싱
     private var _blockchainManager: BlockChainManager? = null
 
     fun init(context: Context) {
         preferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        applicationContext = context.applicationContext
     }
 
     var userId: Int
@@ -35,31 +58,37 @@ object UserSession {
         set(value) {
             preferences.edit().putInt(KEY_USER_ID, value).apply()
         }
+
     var accessToken: String?
         get() = preferences.getString(KEY_ACCESS_TOKEN, null)
         set(value) {
             preferences.edit().putString(KEY_ACCESS_TOKEN, value).apply()
         }
+
     var refreshToken: String?
         get() = preferences.getString(KEY_REFRESH_TOKEN, null)
         set(value) {
             preferences.edit().putString(KEY_REFRESH_TOKEN, value).apply()
         }
+
     var nickname: String?
         get() = preferences.getString(KEY_NICKNAME, "")
         set(value) {
             preferences.edit().putString(KEY_NICKNAME, value).apply()
         }
+
     var name: String?
         get() = preferences.getString(KEY_USER_NAME, "")
         set(value) {
             preferences.edit().putString(KEY_USER_NAME, value).apply()
         }
+
     var walletAddress: String?
         get() = preferences.getString(KEY_WALLET_ADDRESS, null)
         set(value) {
             preferences.edit().putString(KEY_WALLET_ADDRESS, value).apply()
         }
+
     var walletFilePath: String?
         get() = preferences.getString(KEY_WALLET_PATH, null)
         set(value) {
@@ -70,6 +99,7 @@ object UserSession {
                 preferences.edit().putString(KEY_WALLET_PATH, value).apply()
             }
         }
+
     var walletPassword: String?
         get() = preferences.getString(KEY_WALLET_PASSWORD, null)
         set(value) {
@@ -92,7 +122,6 @@ object UserSession {
 
         val path = walletFilePath
         val address = walletAddress
-
         var manager: BlockChainManager? = null
 
         // 1. 파일 경로를 통한 로드 시도
@@ -123,7 +152,6 @@ object UserSession {
             val walletFiles = context.filesDir.listFiles { file ->
                 file.name.startsWith("UTC--") && file.name.endsWith(".json")
             }
-
             if (walletFiles != null && walletFiles.isNotEmpty()) {
                 // 2-1. 주소가 일치하는 지갑 파일 찾기
                 for (walletFile in walletFiles) {
@@ -139,6 +167,7 @@ object UserSession {
                         android.util.Log.d("UserSession", "지갑 파일 검증 실패: ${walletFile.name}")
                     }
                 }
+
                 // 2-2. 일치하는 파일이 없다면 첫 번째 유효한 지갑 사용
                 if (manager == null) {
                     android.util.Log.w(
@@ -183,5 +212,11 @@ object UserSession {
     fun clear() {
         preferences.edit().clear().apply()
         _blockchainManager = null
+
+        // 메모리 상태 변수도 초기화
+        lastKnownBalance = null
+        isCharging = false
+        pendingChargeAmount = null
+        pendingChargeAmountBase = null
     }
 }
