@@ -31,6 +31,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
 import java.math.BigInteger
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -95,15 +96,6 @@ class ProfileFragment : Fragment() {
         // profileMenu1 -> MyWalletFragment 이동
         // (최적화: 이동하기 전에 트랜잭션 데이터 미리 로드)
         binding.profileMenu1.setOnClickListener {
-            // 지갑 페이지로 이동하기 전에 데이터 로드 상태 확인
-            if (TransactionCache.isEmpty() && !isPreloadingTransactions) {
-                // 사용자가 명시적으로 클릭했을 때 빠른 로드 시작
-                viewLifecycleOwner.lifecycleScope.launch {
-                    preloadTransactionData(true)
-                }
-            }
-
-            // 즉시 화면 이동 (백그라운드에서 데이터 로드 계속됨)
             findNavController().navigate(R.id.action_profileFragment_to_myWalletFragment)
         }
 
@@ -308,25 +300,22 @@ class ProfileFragment : Fragment() {
 
     // 잔액 표시 업데이트
     private fun updateBalanceDisplay(balanceInWei: java.math.BigInteger) {
-        // 10^18로 나누어 일반 단위로 변환
         val TOKEN_UNIT = java.math.BigInteger.TEN.pow(18)
-        val displayBalance = balanceInWei.divide(TOKEN_UNIT)
-        // 소수점 이하 처리 (필요한 경우)
-        val remainder = balanceInWei.remainder(TOKEN_UNIT)
-        val decimalPlaces = 2 // 소수점 이하 표시할 자릿수
-        var decimalPart = ""
-        if (remainder > java.math.BigInteger.ZERO) {
-            // 소수점 이하 계산
-            val remainderString = remainder.toString().padStart(18, '0')
-            decimalPart = "." + remainderString.substring(
-                0,
-                Math.min(decimalPlaces, remainderString.length)
-            ).trimEnd('0')
+
+        // 18자리 정밀도로 나눈 후 BigDecimal로 변환
+        val balanceDecimal = balanceInWei.toBigDecimal()
+            .divide(TOKEN_UNIT.toBigDecimal(), 18, java.math.RoundingMode.HALF_UP)
+
+        // 천 단위 콤마 + 소수점 둘째 자리까지 고정
+        val numberFormat = NumberFormat.getNumberInstance(Locale.US).apply {
+            maximumFractionDigits = 2
+            minimumFractionDigits = 2
+            roundingMode = java.math.RoundingMode.HALF_UP
         }
-        // 최종 표시 잔액
-        val formattedBalance = "${displayBalance}${decimalPart}"
+
+        val formattedBalance = numberFormat.format(balanceDecimal)
+
         Log.d(TAG, "💰 표시용 CATToken 잔액: $formattedBalance")
-        // UI 업데이트
         binding.moneyCount.text = "$formattedBalance CAT"
     }
 

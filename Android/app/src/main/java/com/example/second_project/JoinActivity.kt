@@ -6,6 +6,7 @@ import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.example.second_project.data.model.dto.request.SignupRequest
@@ -32,6 +33,9 @@ class JoinActivity : AppCompatActivity() {
     // 비밀번호 표시 여부
     private var isPwVisible = false
     private var isPw2Visible = false
+
+    // 뒤로가기 콜백
+    private var backPressedCallback: OnBackPressedCallback? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,8 +70,8 @@ class JoinActivity : AppCompatActivity() {
             }
 
 
-            if (pw.length <8){
-                Toast.makeText(this,"비밀번호는 8자리 이상 부탁드립니다.",Toast.LENGTH_SHORT).show()
+            if (pw.length < 8) {
+                Toast.makeText(this, "비밀번호는 8자리 이상 부탁드립니다.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             if (pw != pw2) {
@@ -123,7 +127,12 @@ class JoinActivity : AppCompatActivity() {
                                         Toast.LENGTH_SHORT
                                     ).show()
                                     // 회원가입 성공 → LoginActivity로 이동
-                                    startActivity(Intent(this@JoinActivity, LoginActivity::class.java))
+                                    startActivity(
+                                        Intent(
+                                            this@JoinActivity,
+                                            LoginActivity::class.java
+                                        )
+                                    )
                                     finish()
                                 } else {
                                     // 실패 시 로그/토스트 후, 다시 가입 화면 복귀
@@ -133,6 +142,7 @@ class JoinActivity : AppCompatActivity() {
                                         Toast.LENGTH_SHORT
                                     ).show()
                                     hideTouchGameUI()
+                                    enableBackButton() // 뒤로가기 버튼 다시 활성화
                                 }
                             }
 
@@ -143,6 +153,7 @@ class JoinActivity : AppCompatActivity() {
                                     Toast.LENGTH_SHORT
                                 ).show()
                                 hideTouchGameUI()
+                                enableBackButton() // 뒤로가기 버튼 다시 활성화
                             }
                         })
                     }
@@ -155,6 +166,7 @@ class JoinActivity : AppCompatActivity() {
                             Toast.LENGTH_SHORT
                         ).show()
                         hideTouchGameUI()
+                        enableBackButton() // 뒤로가기 버튼 다시 활성화
                     }
                 }
             }.start()
@@ -169,10 +181,24 @@ class JoinActivity : AppCompatActivity() {
 
     /** 뒤로가기 버튼 무효화 */
     private fun disableBackButton() {
-        onBackPressedDispatcher.addCallback(this) {
+        // 기존 콜백이 있다면 제거
+        backPressedCallback?.remove()
+
+        // 새 콜백 생성 및 등록
+        backPressedCallback = onBackPressedDispatcher.addCallback(this) {
             // 아무 것도 하지 않음
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(false)
+    }
+
+    /** 뒤로가기 버튼 다시 활성화 */
+    private fun enableBackButton() {
+        // 콜백 제거
+        backPressedCallback?.remove()
+        backPressedCallback = null
+
+        // 액션바 뒤로가기 버튼 활성화 (액션바가 있는 경우)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
     /** (A) 터치 게임 UI 보여주기 */

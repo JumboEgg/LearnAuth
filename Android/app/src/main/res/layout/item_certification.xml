@@ -11,16 +11,18 @@
     <TextView
         android:id="@+id/textCategoryCertification"
         style="@style/heading5"
-        android:layout_width="wrap_content"
+        android:layout_width="44dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="2dp"
         android:paddingRight="5dp"
         android:paddingLeft="5dp"
         android:paddingTop="3dp"
         android:paddingBottom="3dp"
-        android:text="데이터"
+        android:text=" "
+        android:layout_marginTop="16dp"
+        android:textAlignment="center"
         android:background="@drawable/bg_category_certificate"
-        app:layout_constraintBottom_toTopOf="@+id/textTitleMyCertification"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="@+id/textTitleMyCertification" />
 
     <TextView
@@ -29,24 +31,26 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="20dp"
+        android:layout_marginVertical="6dp"
         android:ellipsize="marquee"
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:marqueeRepeatLimit="marquee_forever"
         android:scrollHorizontally="true"
         android:singleLine="true"
-        android:text="데이터 교육"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="  "
+        app:layout_constraintBottom_toTopOf="@id/buttonDetail"
+        app:layout_constraintTop_toBottomOf="@id/textCategoryCertification"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"/>
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/buttonDetail"
         style="@style/heading4"
+        android:fontFamily="@font/tmoney_round_wind_extrabold"
         android:layout_width="100dp"
         android:layout_height="35dp"
-        android:layout_marginTop="3dp"
+        android:layout_marginBottom="8dp"
         android:background="@drawable/bg_radius_20"
         android:backgroundTint="@color/white"
         android:text=" 자세히 보기"

@@ -2,12 +2,17 @@ package com.example.second_project.ui
 
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.second_project.R
 import com.example.second_project.UserSession
 import com.example.second_project.adapter.TransactionAdapter
@@ -17,6 +22,7 @@ import com.example.second_project.data.TransactionItem
 import com.example.second_project.databinding.FragmentMywalletBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.web3j.protocol.core.DefaultBlockParameter
@@ -42,6 +48,7 @@ class MyWalletFragment : Fragment() {
 
     // 최적화: 데이터 새로고침 간격 (밀리초) - 2분으로 설정
     private val REFRESH_INTERVAL = 2 * 60 * 1000L
+    private var isLoading = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -56,10 +63,80 @@ class MyWalletFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "userId: $userId (decimal), 0x${userId.toString(16)} (hex)")
 
+        // 1. UI 초기 설정 (즉시 수행)
         setupUI()
 
-        // 최적화: 캐시된 데이터 즉시 표시 후 필요한 경우에만 새로고침
-        displayCachedDataAndRefreshIfNeeded()
+        // 2. 기본 UI 상태 설정 (로딩 표시)
+        showLoading(true)
+
+        // 3. 캐시된 데이터가 있으면 즉시 표시
+        if (UserSession.lastKnownBalance != null) {
+            updateBalanceUI(UserSession.lastKnownBalance!!)
+        } else {
+            binding.moneyCount.text = "로딩 중..."
+        }
+
+        // 4. 캐시된 거래 내역 즉시 표시
+        if (!TransactionCache.isEmpty()) {
+            showTransactionData(TransactionCache.getRecentTransactions(TransactionCache.size()))
+        }
+
+        // 5. 백그라운드에서 데이터 로드 (화면 표시 지연 없음)
+        CoroutineScope(Dispatchers.Main).launch {
+            // 약간의 지연을 줘서 UI가 먼저 그려지게 함
+            delay(100)
+            // 이제 백그라운드에서 데이터 새로고침
+            refreshDataInBackground()
+        }
+
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                // 로딩 중일 때는 아무 작업도 하지 않음 (뒤로가기 무시)
+                if (isLoading) {
+                    Log.d(TAG, "로딩 중에 뒤로가기 버튼이 눌렸지만 무시됨")
+                } else {
+                    // 로딩 중이 아니면 정상적으로 뒤로가기 동작 수행
+                    this.remove() // 현재 콜백 제거
+                    requireActivity().onBackPressed() // 뒤로가기 동작 수행
+                }
+            }
+        }
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
+    }
+
+    private fun showTransactionData(transactions: List<TransactionItem>) {
+        if (transactions.isEmpty()) {
+            showDefaultTransactions()
+        } else {
+            transactionAdapter = TransactionAdapter(transactions)
+            binding.transactionList.adapter = transactionAdapter
+            binding.transactionList.visibility = View.VISIBLE
+        }
+        showLoading(false)
+        isDataLoaded = true
+    }
+
+    // 새로운 함수: 백그라운드에서 데이터 새로고침
+    private fun refreshDataInBackground() {
+        val currentTime = System.currentTimeMillis()
+        val needsRefresh = lastRefreshTime == 0L || currentTime - lastRefreshTime > REFRESH_INTERVAL
+
+        // 여기서는 화면 표시를 차단하지 않고 백그라운드에서 진행
+        if (needsRefresh || !TransactionCache.isFresh() || TransactionCache.isEmpty()) {
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    // 로딩 표시는 이미 UI에 있으므로 추가로 표시하지 않음
+                    loadBlockchainData(needsRefresh)
+                    lastRefreshTime = currentTime
+                } catch (e: Exception) {
+                    Log.e(TAG, "백그라운드 데이터 로드 실패: ${e.message}")
+                }
+            }
+        } else {
+            Log.d(TAG, "캐시된 데이터 사용 중 (마지막 새로고침: ${Date(lastRefreshTime)})")
+            // 이미 데이터가 있으면 로딩 표시 제거
+            showLoading(false)
+        }
     }
 
     private fun setupUI() {
@@ -527,6 +604,41 @@ class MyWalletFragment : Fragment() {
 
     private fun showDefaultTransactions() {
         if (TransactionCache.isEmpty()) {
+            // "거래 내역이 없습니다" 메시지를 보여주기 위한 어댑터 설정
+            val emptyAdapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+                inner class EmptyViewHolder(val textView: TextView) :
+                    RecyclerView.ViewHolder(textView)
+
+                override fun onCreateViewHolder(
+                    parent: ViewGroup,
+                    viewType: Int
+                ): RecyclerView.ViewHolder {
+                    val textView = TextView(requireContext()).apply {
+                        text = "거래 내역이 없습니다."
+                        textSize = 16f
+                        gravity = Gravity.CENTER
+                        layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT
+                        )
+                        setTextColor(ContextCompat.getColor(requireContext(), R.color.text_gray))
+                        setPadding(0, 50, 0, 50)
+                    }
+                    return EmptyViewHolder(textView)
+                }
+
+                override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+                }
+
+                override fun getItemCount(): Int = 1
+            }
+
+            // RecyclerView에 어댑터 설정
+            binding.transactionList.adapter = emptyAdapter
+            binding.transactionList.visibility = View.VISIBLE
+            Log.d(TAG, "거래 내역이 없음 메시지 표시됨")
+        } else {
+            // 기존 코드: 더미 거래 내역 표시
             val defaultTransactions = listOf(
                 TransactionItem(
                     "데이터 분석 기초",
@@ -541,6 +653,7 @@ class MyWalletFragment : Fragment() {
             if (_binding != null) {
                 transactionAdapter = TransactionAdapter(defaultTransactions)
                 binding.transactionList.adapter = transactionAdapter
+                binding.transactionList.visibility = View.VISIBLE
                 Log.d(TAG, "기본 거래 내역 표시됨")
             } else {
                 Log.w(TAG, "기본 거래 내역 표시 실패: 바인딩이 null입니다")
@@ -551,7 +664,7 @@ class MyWalletFragment : Fragment() {
     private fun showDefaultData() {
         // 바인딩이 널이 아닌지 확인
         if (_binding != null) {
-            binding.moneyCount.text = "55 CAT"
+            binding.moneyCount.text = "loading..."
             showDefaultTransactions()
             Log.d(TAG, "기본 데이터 표시됨")
         } else {
@@ -559,17 +672,21 @@ class MyWalletFragment : Fragment() {
         }
     }
 
-    private fun showLoading(isLoading: Boolean) {
+    private fun showLoading(loading: Boolean) {
+        isLoading = loading
+
         // 바인딩이 널이 아닌지 확인
         if (_binding != null) {
-            if (isLoading) {
+            if (loading) {
                 binding.transactionList.visibility = View.INVISIBLE
                 binding.loadingSpinner.visibility = View.VISIBLE
+                binding.loadingText.visibility = View.VISIBLE
                 binding.blockTouchOverlay.visibility = View.VISIBLE
                 binding.chargeBtn.isEnabled = false
             } else {
                 binding.transactionList.visibility = View.VISIBLE
                 binding.loadingSpinner.visibility = View.GONE
+                binding.loadingText.visibility = View.GONE
                 binding.blockTouchOverlay.visibility = View.GONE
                 binding.chargeBtn.isEnabled = true
             }
