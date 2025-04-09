@@ -836,7 +836,7 @@ class CertDetailFragment : Fragment() {
         isOverlayVisible = true
         binding.btnCertSave.isEnabled = false
         binding.loadingOverlay.visibility = View.VISIBLE
-        Glide.with(this).load(R.raw.loadingcat).override(560, 560).into(binding.catImageView)
+        Glide.with(this).load(R.raw.loadingimg2).override(560, 560).into(binding.catImageView)
     }
 
     private fun hideLoadingOverlay() {
