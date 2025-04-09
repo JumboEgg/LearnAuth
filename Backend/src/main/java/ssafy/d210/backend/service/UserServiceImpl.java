@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
+import ssafy.d210.backend.blockchain.AccountManager;
+import ssafy.d210.backend.blockchain.ContractServiceFactory;
+import ssafy.d210.backend.blockchain.RelayerAccount;
 import ssafy.d210.backend.contracts.LectureForwarder;
 import ssafy.d210.backend.contracts.LectureSystem;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
@@ -14,6 +17,7 @@ import ssafy.d210.backend.dto.request.user.SignupRequest;
 import ssafy.d210.backend.dto.response.user.SignupResponse;
 import ssafy.d210.backend.entity.User;
 import ssafy.d210.backend.enumeration.response.HereStatus;
+import ssafy.d210.backend.exception.service.BlockchainException;
 import ssafy.d210.backend.exception.service.DuplicatedValueException;
 import ssafy.d210.backend.exception.service.PasswordIsNotAllowed;
 import ssafy.d210.backend.redis.DistributedLock;
@@ -33,14 +37,12 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ResponseUtil responseUtil;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    private final Web3j web3j;
-    private final Credentials credentials;
-    private final LectureForwarder lectureForwarder;
-    private final LectureSystem lectureSystem;
+    private final AccountManager accountManager;
+    private final ContractServiceFactory contractServiceFactory;
 
 
     @Override
-    @Transactional(rollbackFor = {Exception.class, PasswordIsNotAllowed.class})
+    @Transactional(rollbackFor = {Exception.class, PasswordIsNotAllowed.class, BlockchainException.class})
     @DistributedLock(key = "#userSignupRequest.email")
     public ResponseSuccessDto<SignupResponse> signup(SignupRequest userSignupRequest) throws Exception {
 
@@ -85,8 +87,13 @@ public class UserServiceImpl implements UserService {
     }
 
     // Lecture System 컨트랙트에 사용자 지갑 등록
-    private TransactionReceipt addUserToContract(Long userId, String userAddress) throws Exception {
-        log.info("Adding user with userId {} and wallet address {} to blockchain", userId, userAddress);
+    private TransactionReceipt addUserToContract(Long userId, String userAddress) {
+        RelayerAccount account = null;
+        try {
+            account = accountManager.acquireAccount(AccountManager.OperationType.REGISTRATION);
+            LectureSystem lectureSystem = contractServiceFactory.createLectureSystem(account);
+
+            log.info("Adding user with userId {} and wallet address {} to blockchain", userId, userAddress);
 
             BigInteger userIdBigInt = BigInteger.valueOf(userId);
 
@@ -97,5 +104,11 @@ public class UserServiceImpl implements UserService {
             TransactionReceipt receipt = future.get();
             log.info("User with userId {} added successfully. Transaction Hash: {}", userId, receipt.getTransactionHash());
             return receipt;
+        } catch (Exception e) {
+            log.error("Transaction failed : ", e);
+            throw new BlockchainException("블록체인 사용자 등록 실패", e);
+        } finally {
+            accountManager.releaseAccount(account, AccountManager.OperationType.REGISTRATION);
+        }
     }
 }

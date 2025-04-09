@@ -12,6 +12,9 @@ import org.springframework.stereotype.Service;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.response.PollingTransactionReceiptProcessor;
 import org.web3j.utils.Numeric;
+import ssafy.d210.backend.blockchain.AccountManager;
+import ssafy.d210.backend.blockchain.ContractServiceFactory;
+import ssafy.d210.backend.blockchain.RelayerAccount;
 import ssafy.d210.backend.contracts.LectureForwarder;
 import ssafy.d210.backend.dto.request.transaction.ForwardRequest;
 import ssafy.d210.backend.dto.request.transaction.SignedRequest;
@@ -25,36 +28,31 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MetaTransactionServiceImpl implements MetaTransactionService{
 
-    private final Web3j web3j;
-    private final ContractGasProvider gasProvider;
-    private final LectureForwarder lectureForwarder;
-
-    @Value("${blockchain.rpc.chain-id}")
-    private int CHAIN_ID;
-    @Value("${blockchain.relayer.private-key}")
-    private String BC_PRIVATE_KEY;
-    @Value("${blockchain.forwarder.address}")
-    private String BC_FORWARDER;
+    private final AccountManager accountManager;
+    private final ContractServiceFactory contractServiceFactory;
 
     @Override
-    public boolean executeMetaTransaction(SignedRequest signedRequest) {
+    public boolean executeMetaTxs(SignedRequest approveRequest, SignedRequest purchaseRequest) {
+        RelayerAccount account = null;
         try {
-            Credentials credentials = Credentials.create(BC_PRIVATE_KEY);
-            PollingTransactionReceiptProcessor processor = new PollingTransactionReceiptProcessor(
-                    web3j,
-                    TransactionManager.DEFAULT_POLLING_FREQUENCY,
-                    TransactionManager.DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH
-            );
-            TransactionManager txManager = new RawTransactionManager(web3j, credentials, CHAIN_ID, processor);
-            log.info("🚀 트랜잭션 보내는 relayer address: {}", credentials.getAddress());
+            account = accountManager.acquireAccount(AccountManager.OperationType.LECTURE_PURCHASE);
+            LectureForwarder forwarder = contractServiceFactory.createLectureForwarder(account);
 
-            LectureForwarder forwarder = LectureForwarder.load(
-                    BC_FORWARDER,
-                    web3j,
-                    txManager,
-                    gasProvider
-            );
+            log.info("🚀 트랜잭션 보내는 relayer address: {}", account.getAddress());
 
+            if(executeMetaTransaction(forwarder, approveRequest))
+                if(executeMetaTransaction(forwarder, purchaseRequest))
+                    return true;
+        } catch (Exception e) {
+            log.error("Transaction failed : ", e);
+        } finally {
+            accountManager.releaseAccount(account, AccountManager.OperationType.LECTURE_PURCHASE);
+        }
+        return false;
+    }
+
+    private boolean executeMetaTransaction(LectureForwarder forwarder, SignedRequest signedRequest) {
+        try {
             ForwardRequest request = signedRequest.getRequest();
             byte[] signatureBytes = Numeric.hexStringToByteArray(signedRequest.getSignature());
             byte[] dataBytes = Numeric.hexStringToByteArray(request.getData());

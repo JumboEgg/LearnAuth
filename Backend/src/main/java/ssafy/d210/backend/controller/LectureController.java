@@ -122,9 +122,8 @@ public class LectureController {
             if (price <= 0) {
                 return ResponseEntity.ok(lectureService.purchaseLecture(request.getUserId(), request.getLectureId()));
             }
-            if (metaTransactionService.executeMetaTransaction(request.getApproveRequest()))
-                if (metaTransactionService.executeMetaTransaction(request.getPurchaseRequest()))
-                    return ResponseEntity.ok(lectureService.purchaseLecture(request.getUserId(), request.getLectureId()));
+            if (metaTransactionService.executeMetaTxs(request.getApproveRequest(), request.getPurchaseRequest()))
+                return ResponseEntity.ok(lectureService.purchaseLecture(request.getUserId(), request.getLectureId()));
         }
         return ResponseEntity.ok(ResponseSuccessDto.builder().data(false).build());
     }
