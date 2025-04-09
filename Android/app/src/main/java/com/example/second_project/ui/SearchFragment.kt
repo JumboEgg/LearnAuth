@@ -254,6 +254,7 @@ class SearchFragment : Fragment() {
             val keyword = binding.searchInputText.text.toString().trim()
             // 검색어가 없을 때만 강의 목록 갱신
             if (keyword.isEmpty()) {
+//                if (viewModel.isLectureLoading) return@observe
                 // 로딩 표시 숨김
                 showLoading(false)
 
@@ -296,6 +297,7 @@ class SearchFragment : Fragment() {
                 }
             }
         }
+
     }
 
     // 로딩 표시/숨김 함수
