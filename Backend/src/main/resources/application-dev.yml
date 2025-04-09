@@ -62,7 +62,7 @@ blockchain:
     url: https://rpc-amoy.polygon.technology/
     chain-id: 80002
   relayer:
-    private-key: ${BC_PRIVATE_KEY}
+    private-keys: ${BC_PRIVATE_KEY_1},${BC_PRIVATE_KEY_2},${BC_PRIVATE_KEY_3},${BC_PRIVATE_KEY_4},${BC_PRIVATE_KEY_5},${BC_PRIVATE_KEY_6}
   forwarder:
     address: ${BC_FORWARDER}
   cat-token:

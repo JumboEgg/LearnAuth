@@ -9,6 +9,9 @@ import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.utils.Convert;
+import ssafy.d210.backend.blockchain.AccountManager;
+import ssafy.d210.backend.blockchain.ContractServiceFactory;
+import ssafy.d210.backend.blockchain.RelayerAccount;
 import ssafy.d210.backend.contracts.CATToken;
 import ssafy.d210.backend.contracts.LectureForwarder;
 import ssafy.d210.backend.contracts.LectureSystem;
@@ -37,6 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Slf4j
 @Service
@@ -45,7 +50,8 @@ import java.util.concurrent.CompletableFuture;
 public class CertificateServiceImpl implements CertificateService{
     private final UserLectureRepository userLectureRepository;
     private final ResponseUtil responseUtil;
-    private final LectureSystem lectureSystem;
+    private final AccountManager accountManager;
+    private final ContractServiceFactory contractServiceFactory;
 
     @Override
     @Transactional
@@ -96,8 +102,15 @@ public class CertificateServiceImpl implements CertificateService{
     // 수료증 발급 try catch -> 예외 throw
     public BigInteger issueCertificate(Long userId, String cid) throws Exception {
         CompletableFuture<TransactionReceipt> future = issueCertificateToContract(userId, cid);
-        TransactionReceipt receipt = future.get();
-        return extractTokenIdFromReceipt(receipt);
+        try {
+            // 트랜잭션 타임아웃 설정 (2분)
+            TransactionReceipt receipt = future.get(2, TimeUnit.MINUTES);
+            return extractTokenIdFromReceipt(receipt);
+        } catch (TimeoutException e) {
+            future.cancel(true);
+            log.error("Transaction timed out for user {}: {}", userId, e.getMessage());
+            throw new BlockchainException("Transaction timed out after 2 minutes", e);
+        }
     }
 
     @Override
@@ -131,7 +144,10 @@ public class CertificateServiceImpl implements CertificateService{
 
 
     public CompletableFuture<TransactionReceipt> issueCertificateToContract(Long userId, String cid) {
+        RelayerAccount account = null;
         try {
+            account = accountManager.acquireAccount(AccountManager.OperationType.REGISTRATION);
+            LectureSystem lectureSystem = contractServiceFactory.createLectureSystem(account);
             log.info("Issue NFT to userId {} with cid {}", userId, cid);
             // NFT 생성
             log.info("Executing issueCertificate");
@@ -148,6 +164,8 @@ public class CertificateServiceImpl implements CertificateService{
         } catch (Exception e) {
             log.error("Error in depositToken: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to deposit token", e);
+        } finally {
+            accountManager.releaseAccount(account, AccountManager.OperationType.REGISTRATION);
         }
     }
 
@@ -162,7 +180,7 @@ public class CertificateServiceImpl implements CertificateService{
     private BigInteger extractTokenIdFromReceipt(TransactionReceipt receipt) {
         try {
             // Extract events from the transaction receipt
-            List<LectureSystem.NFTIssuedEventResponse> events = lectureSystem
+            List<LectureSystem.NFTIssuedEventResponse> events = LectureSystem
                     .getNFTIssuedEvents(receipt);
 
             if (events.isEmpty()) {

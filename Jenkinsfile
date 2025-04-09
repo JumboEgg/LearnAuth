@@ -24,7 +24,12 @@ pipeline {
         SPRING_DATA_REDIS_PORT = '6379'
         REDIS_PASSWORD = credentials('REDIS_PASSWORD')
 
-        BC_PRIVATE_KEY = credentials('BC_PRIVATE_KEY')
+        BC_PRIVATE_KEY_1 = credentials('BC_PRIVATE_KEY_1')
+        BC_PRIVATE_KEY_2 = credentials('BC_PRIVATE_KEY_2')
+        BC_PRIVATE_KEY_3 = credentials('BC_PRIVATE_KEY_3')
+        BC_PRIVATE_KEY_4 = credentials('BC_PRIVATE_KEY_4')
+        BC_PRIVATE_KEY_5 = credentials('BC_PRIVATE_KEY_5')
+        BC_PRIVATE_KEY_6 = credentials('BC_PRIVATE_KEY_6')
         BC_FORWARDER = credentials('BC_FORWARDER')
         BC_TOKEN = credentials('BC_TOKEN')
         BC_LECTURE = credentials('BC_LECTURE')
@@ -105,7 +110,12 @@ pipeline {
                                       -e SPRING_PROFILES_ACTIVE=dev \
                                       -e PORT=${DOCKER_PORT} \
                                       -e JWT_SECRET=${JWT_SECRET} \
-                                      -e BC_PRIVATE_KEY=${BC_PRIVATE_KEY} \
+                                      -e BC_PRIVATE_KEY_1=${BC_PRIVATE_KEY_1} \
+                                      -e BC_PRIVATE_KEY_2=${BC_PRIVATE_KEY_2} \
+                                      -e BC_PRIVATE_KEY_3=${BC_PRIVATE_KEY_3} \
+                                      -e BC_PRIVATE_KEY_4=${BC_PRIVATE_KEY_4} \
+                                      -e BC_PRIVATE_KEY_5=${BC_PRIVATE_KEY_5} \
+                                      -e BC_PRIVATE_KEY_6=${BC_PRIVATE_KEY_6} \
                                       -e BC_FORWARDER=${BC_FORWARDER} \
                                       -e BC_TOKEN=${BC_TOKEN} \
                                       -e BC_LECTURE=${BC_LECTURE} \

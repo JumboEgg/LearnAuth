@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.web3j.protocol.core.RemoteFunctionCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import ssafy.d210.backend.blockchain.AccountManager;
+import ssafy.d210.backend.blockchain.ContractServiceFactory;
+import ssafy.d210.backend.blockchain.RelayerAccount;
 import ssafy.d210.backend.contracts.LectureSystem;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.request.lecture.LectureRegisterRequest;
@@ -45,14 +48,14 @@ public class LectureManagementServiceImpl implements LectureManagementService {
     private final UserLectureRepository userLectureRepository;
     private final UserLectureTimeRepository userLectureTimeRepository;
     private final ResponseUtil<Boolean> responseUtil;
-    private final LectureSystem lectureSystem;
+    private final AccountManager accountManager;
+    private final ContractServiceFactory contractServiceFactory;
 
     @Override
     @DistributedLock(key = "#registerLecture")
     @Transactional(rollbackFor = {Exception.class, BlockchainException.class})
     public ResponseSuccessDto<Boolean> registerLecture(LectureRegisterRequest request) throws Exception {
         // 예외 발생 시 GlobalExceptionHandler, try-catch 제거
-
         isValidationForLecture(request);
 
         Set<String> emailset = new HashSet<>();
@@ -170,26 +173,33 @@ public class LectureManagementServiceImpl implements LectureManagementService {
         userLectureTimeRepository.saveAll(userLectureTimes);
 
         // 블록체인에 강의를 등록하는 기능. 필요에 의해 앞쪽에 삽입될 수도 있습니다.
-        List<LectureSystem.Participant> participants = paymentRatios.stream().map(
-                paymentRatio -> new LectureSystem.Participant(
-                        BigInteger.valueOf(paymentRatio.getUser().getId()),
-                        BigInteger.valueOf(paymentRatio.getRatio())
-                )
-        ).toList();
+        RelayerAccount account = null;
+        try {
+            account = accountManager.acquireAccount(AccountManager.OperationType.REGISTRATION);
+            LectureSystem lectureSystem = contractServiceFactory.createLectureSystem(account);
 
+            List<LectureSystem.Participant> participants = paymentRatios.stream().map(
+                    paymentRatio -> new LectureSystem.Participant(
+                            BigInteger.valueOf(paymentRatio.getUser().getId()),
+                            BigInteger.valueOf(paymentRatio.getRatio())
+                    )
+            ).toList();
 
-        RemoteFunctionCall<TransactionReceipt> tx = lectureSystem.createLecture(
-                BigInteger.valueOf(savedLecture.getId()),
-                request.getTitle(),
-                participants
-        );
-        TransactionReceipt receipt = tx.send();
-        if (receipt.isStatusOK()) {
-            log.info("Lecture created on blockchain with ID: {}", savedLecture.getId());
-        } else {
-            log.error("Blockchain transaction failed. Status: {}", receipt.getStatus());
-            // 적절한 오류 처리
-            throw new BlockchainException("블록체인 이슈로 강의등록 실패, 트랜잭션 롤백");
+            RemoteFunctionCall<TransactionReceipt> tx = lectureSystem.createLecture(
+                    BigInteger.valueOf(savedLecture.getId()),
+                    request.getTitle(),
+                    participants
+            );
+            TransactionReceipt receipt = tx.send();
+            if (receipt.isStatusOK()) {
+                log.info("Lecture created on blockchain with ID: {}", savedLecture.getId());
+            } else {
+                log.error("Blockchain transaction failed. Status: {}", receipt.getStatus());
+                // 적절한 오류 처리
+                throw new BlockchainException("블록체인 이슈로 강의등록 실패, 트랜잭션 롤백");
+            }
+        } finally {
+            accountManager.releaseAccount(account, AccountManager.OperationType.REGISTRATION);
         }
 
         return responseUtil.successResponse(true, HereStatus.SUCCESS_LECTURE_REGISTERED);

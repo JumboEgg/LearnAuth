@@ -25,22 +25,7 @@ import ssafy.d210.backend.util.ResponseUtil;
 @Tag(name = "PaymentController", description = "토큰 구매 및 차감")
 public class PaymentController {
 
-    private final ResponseUtil responseUtil;
     private final PaymentService paymentService;
-    private final MetaTransactionService metaTransactionService;
-
-    // 토큰 추가
-    @PatchMapping("/withdrawal")
-    @Operation(summary = "토큰 차감", description = "출금 시 {userId}에서 {quantity}만큼 토큰을 차감한다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "토큰 차감 완료")
-    })
-    public ResponseEntity<ResponseSuccessDto<Boolean>> withdrawToken(
-            @RequestBody SignedRequest signedRequest
-            ) {
-        ResponseSuccessDto<Boolean> res = responseUtil.successResponse(metaTransactionService.executeMetaTransaction(signedRequest), HereStatus.SUCCESS_LECTURE);
-        return ResponseEntity.ok(res);
-    }
 
     // 토큰 차감
     @PatchMapping("/deposit")

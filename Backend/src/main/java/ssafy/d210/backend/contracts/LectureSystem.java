@@ -51,6 +51,8 @@ public class LectureSystem extends Contract {
 
     public static final String FUNC_DEFAULT_ADMIN_ROLE = "DEFAULT_ADMIN_ROLE";
 
+    public static final String FUNC_ADDADMINROLE = "addAdminRole";
+
     public static final String FUNC_ADDUSER = "addUser";
 
     public static final String FUNC_ADMIN = "admin";
@@ -706,6 +708,14 @@ public class LectureSystem extends Contract {
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {}));
         return executeRemoteCallSingleValueReturn(function, byte[].class);
+    }
+
+    public RemoteFunctionCall<TransactionReceipt> addAdminRole(String _address) {
+        final Function function = new Function(
+                FUNC_ADDADMINROLE, 
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _address)), 
+                Collections.<TypeReference<?>>emptyList());
+        return executeRemoteCallTransaction(function);
     }
 
     public RemoteFunctionCall<TransactionReceipt> addUser(BigInteger _userId, String _userAddress) {
