@@ -43,8 +43,15 @@ class LecturePlayFragment: Fragment() {
     private var youTubePlayer: YouTubePlayer? = null
     private var lastKnownSecondWatched: Int = 0
     private val watchTimeMap = mutableMapOf<Int, Int>() // 각 subLectureId별 시청 시간 저장
-
-
+    
+    // 자동 저장을 위한 Handler 추가
+    private val autoSaveHandler = Handler(Looper.getMainLooper())
+    private val autoSaveRunnable = object : Runnable {
+        override fun run() {
+            saveCurrentWatchTime(currentSubLectureId)
+            autoSaveHandler.postDelayed(this, 4000) // 5초마다 실행
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -132,6 +139,8 @@ class LecturePlayFragment: Fragment() {
                                 youTubePlayer = player
                                 val startSecond = subLecture.continueWatching
                                 player.cueVideo(videoId, startSecond.toFloat())
+                                // 영상이 준비되면 자동 저장 시작
+                                autoSaveHandler.post(autoSaveRunnable)
                             }
                             override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
                                 lastKnownSecondWatched = second.toInt()
@@ -326,7 +335,7 @@ class LecturePlayFragment: Fragment() {
         }
         
         // 완강 여부 판단 (강의 길이의 98% 이상 시청 시 완강으로 간주)
-        val endFlag = finalTimeSec >= lectureLength * 0.98
+        val endFlag = finalTimeSec >= lectureLength * 0.80
         
         // 완강 여부 로그 추가
         Log.d(TAG, "완강 여부 판단: subLectureId=$forSubLectureId, 시간=${finalTimeSec}초, 강의길이=${lectureLength}초, 완강여부=$endFlag")
@@ -369,10 +378,9 @@ class LecturePlayFragment: Fragment() {
 
     private fun saveCurrentWatchTimeAndNavigate(newSubLectureId: Int) {
         val prevId = currentSubLectureId
-        // 현재 진행 상황 먼저 저장
+        // 현재 진행 상황 저장 (자동 저장이 있지만, 이동 시점의 정확한 시간을 위해 한 번 더 저장)
         saveCurrentWatchTime(prevId)
-
-        // 새로운 sublecture로 이동하고 리스트 갱신
+        // 새로운 sublecture로 이동
         updateLectureContent(newSubLectureId)
     }
     
@@ -412,15 +420,18 @@ class LecturePlayFragment: Fragment() {
 
     override fun onPause() {
         super.onPause()
-        // 화면이 일시 중지될 때 현재 재생 시간 저장
+        // 자동 저장 중지
+        autoSaveHandler.removeCallbacks(autoSaveRunnable)
+        // 마지막으로 한 번 더 저장
         saveCurrentWatchTime(currentSubLectureId)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        // 화면이 파괴될 때 현재 재생 시간 저장
+        // 자동 저장 중지
+        autoSaveHandler.removeCallbacks(autoSaveRunnable)
+        // 마지막으로 한 번 더 저장
         saveCurrentWatchTime(currentSubLectureId)
-        // YouTubePlayerView 생명주기 해제
         binding.youtubePlayerView.release()
         _binding = null
     }
