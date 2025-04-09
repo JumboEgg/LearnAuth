@@ -579,7 +579,7 @@ class MyWalletFragment : Fragment() {
 
     private fun setupPurchaseEventSubscription(bcm: BlockChainManager) {
         try {
-            // 메인 스레드에서 네트워크 작업 수행하지 않도록 수정
+            // 메인 스레드에서 네트워크 작업 수행하지 않도록 수정s
             Log.d(TAG, "강의 구매 이벤트 구독 시작")
 
             val purchaseDisposable = bcm.lectureEventMonitor.lecturePurchasedEventFlowable(
