@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
@@ -27,13 +28,16 @@ class MainFragment : Fragment() {
     private lateinit var recommendedAdapter: LectureAdapter
     private lateinit var recentAdapter: LectureAdapter
     private val bannerHandler = Handler(Looper.getMainLooper())
+    private var isUserInteracting = false
+    private var isAutoScrolling = false
     private val bannerRunnable = object : Runnable {
-        var currentItem = 0
         override fun run() {
-            if (currentItem >= 3) {
-                currentItem = 0
+            if (!isUserInteracting && !isAutoScrolling) {
+                isAutoScrolling = true
+                val nextItem = (binding.bannerArea.currentItem + 1) % 3
+                binding.bannerArea.currentItem = nextItem
+                isAutoScrolling = false
             }
-            binding.bannerArea.currentItem = currentItem++
             bannerHandler.postDelayed(this, 3000)
         }
     }
@@ -178,6 +182,47 @@ class MainFragment : Fragment() {
                 }
             }
             binding.bannerArea.adapter = bannerAdapter
+            
+            // 페이지 변경 이벤트 감지
+            binding.bannerArea.registerOnPageChangeCallback(object : androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    super.onPageSelected(position)
+                    if (!isUserInteracting) {
+                        // 타이머 리셋
+                        bannerHandler.removeCallbacks(bannerRunnable)
+                        bannerHandler.postDelayed(bannerRunnable, 3000)
+                    }
+                }
+
+                override fun onPageScrollStateChanged(state: Int) {
+                    super.onPageScrollStateChanged(state)
+                    when (state) {
+                        androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_DRAGGING -> {
+                            isUserInteracting = true
+                            bannerHandler.removeCallbacks(bannerRunnable)
+                        }
+                        androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_IDLE -> {
+                            isUserInteracting = false
+                            bannerHandler.postDelayed(bannerRunnable, 3000)
+                        }
+                    }
+                }
+            })
+
+            // 터치 이벤트 감지
+            binding.bannerArea.setOnTouchListener { _, event ->
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        isUserInteracting = true
+                        bannerHandler.removeCallbacks(bannerRunnable)
+                    }
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                        isUserInteracting = false
+                        bannerHandler.postDelayed(bannerRunnable, 3000)
+                    }
+                }
+                false
+            }
         }
     }
     
