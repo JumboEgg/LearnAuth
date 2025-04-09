@@ -452,7 +452,7 @@ class ProfileFragment : Fragment() {
             if (response.isSuccessful && response.body() != null) {
                 val certificateResponse = response.body()!!
                 // certificate 값이 0보다 큰 항목의 수 계산 (수료증이 발급된 항목)
-                val certificateCount = certificateResponse.data.count { it.certificate > 0 }
+                val certificateCount = certificateResponse.data.count { it.certificateDate != null}
 
                 Log.d(TAG, "수료증 개수: $certificateCount")
 

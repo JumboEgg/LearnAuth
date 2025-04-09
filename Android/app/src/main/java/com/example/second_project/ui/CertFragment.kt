@@ -18,6 +18,7 @@ class CertFragment : Fragment() {
     private var _binding: FragmentCertBinding? = null
     private val binding get() = _binding!!
     private val viewModel: CertViewModel by viewModels()
+    private lateinit var adapter: CertificationAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -30,7 +31,12 @@ class CertFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val adapter = CertificationAdapter(emptyList()) { certificateData ->
+        setupRecyclerView()
+        loadCertificateList()
+    }
+
+    private fun setupRecyclerView() {
+        adapter = CertificationAdapter(emptyList()) { certificateData ->
             val userId = UserSession.userId
             val lectureId = certificateData.lectureId
             val action = CertFragmentDirections.actionCertFragmentToCertDetailFragment(
@@ -53,6 +59,17 @@ class CertFragment : Fragment() {
                 adapter.updateList(certificateList)
             }
         }
+    }
+
+    private fun loadCertificateList() {
+        val userId = UserSession.userId
+        viewModel.fetchCertificates(userId)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // 화면이 다시 보일 때마다 데이터 새로고침
+        loadCertificateList()
     }
 
     override fun onDestroyView() {
