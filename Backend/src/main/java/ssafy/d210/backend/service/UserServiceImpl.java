@@ -10,15 +10,10 @@ import org.web3j.protocol.Web3j;
 import ssafy.d210.backend.contracts.LectureForwarder;
 import ssafy.d210.backend.contracts.LectureSystem;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
-import ssafy.d210.backend.dto.request.user.LoginRequest;
 import ssafy.d210.backend.dto.request.user.SignupRequest;
-import ssafy.d210.backend.dto.response.user.LoginResponse;
 import ssafy.d210.backend.dto.response.user.SignupResponse;
 import ssafy.d210.backend.entity.User;
-import ssafy.d210.backend.entity.UserLecture;
 import ssafy.d210.backend.enumeration.response.HereStatus;
-import ssafy.d210.backend.exception.DefaultException;
-import ssafy.d210.backend.exception.service.BlockchainException;
 import ssafy.d210.backend.exception.service.DuplicatedValueException;
 import ssafy.d210.backend.exception.service.PasswordIsNotAllowed;
 import ssafy.d210.backend.redis.DistributedLock;
@@ -27,7 +22,6 @@ import ssafy.d210.backend.util.ResponseUtil;
 
 import java.math.BigInteger;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
@@ -46,7 +40,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = {Exception.class, PasswordIsNotAllowed.class})
     @DistributedLock(key = "#userSignupRequest.email")
     public ResponseSuccessDto<SignupResponse> signup(SignupRequest userSignupRequest) throws Exception {
 
@@ -72,8 +66,7 @@ public class UserServiceImpl implements UserService {
                 .nickname(newUser.getNickname())
                 .message("회원가입이 완료되었습니다.")
                 .build();
-        ResponseSuccessDto<SignupResponse> res = responseUtil.successResponse(userSignupResponse, HereStatus.SUCCESS_SIGNUP);
-        return res;
+        return responseUtil.successResponse(userSignupResponse, HereStatus.SUCCESS_SIGNUP);
     }
 
     @Transactional(readOnly = true)
@@ -88,14 +81,6 @@ public class UserServiceImpl implements UserService {
         if (nicknameExists) {
             log.error("중복 닉네임: {}", nickname);
             throw new DuplicatedValueException("이미 사용중인 닉네임입니다.");
-        }
-    }
-
-    // 이메일 중복 확인
-    private void isEmailDuplicated(User newUser) {
-        if (userRepository.existsByEmail(newUser.getEmail())) {
-            log.error("중복 이메일: {}", newUser.getEmail());
-            throw new DuplicatedValueException("이미 사용중인 이메일입니다.");
         }
     }
 
