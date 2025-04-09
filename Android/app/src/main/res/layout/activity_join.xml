@@ -4,18 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/joinMainLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:background="@color/background_color">
 
-    <ScrollView
-        android:id="@+id/scrollView"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:fillViewport="true">
+        app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
             android:id="@+id/joinFormLayout"
@@ -369,7 +365,10 @@
                 app:layout_constraintTop_toBottomOf="@id/joinNicknameContainer"
                 android:padding="15dp"/>
         </LinearLayout>
-    </ScrollView>
+
+
+
+    </androidx.core.widget.NestedScrollView>
 
     <FrameLayout
         android:id="@+id/touchGameLayout"
