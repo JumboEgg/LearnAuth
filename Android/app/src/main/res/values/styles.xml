@@ -149,6 +149,14 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">8dp</item>
     </style>
-
+    <style name="OptimizedTextInputEditText" parent="@style/body1">
+        <!-- 입력 성능을 위한 속성들 -->
+        <item name="android:freezesText">false</item>
+        <item name="android:textIsSelectable">true</item>
+        <item name="android:inputType">text</item>
+        <item name="android:imeOptions">actionNext</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:maxLines">1</item>
+    </style>
 
 </resources>

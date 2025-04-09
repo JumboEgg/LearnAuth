@@ -6,61 +6,46 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
-    <ScrollView
+    <TextView
+        android:id="@+id/titleEntireLecture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="퀴즈 등록하기"
+        style="@style/heading2"
+        android:layout_marginTop="25dp"
+        android:layout_marginStart="25dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerQuiz"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="25dp"
+        android:layout_marginTop="16dp"
+        android:nestedScrollingEnabled="false"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/btnDone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/titleEntireLecture"
+        android:layout_marginBottom="24dp"
+        tools:visibility="visible" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="25dp"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/titleEntireLecture"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="퀴즈 등록하기"
-                style="@style/heading2" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerQuiz"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                tools:visibility="visible" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btnAddQuiz"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="퀴즈 추가하기"
-                android:background="@drawable/bg_radius_20"
-                style="@style/semibold16"
-                android:textColor="@color/text_white_gray"
-                android:drawableStart="@drawable/add_24px"
-                android:drawablePadding="8dp"
-                android:layout_gravity="center"
-                android:layout_marginTop="20dp"
-                android:visibility="gone"/>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnDone"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="30dp"
-                app:cornerRadius="20dp"
-                android:backgroundTint="@color/primary_color"
-                android:text="강의 등록 완료하기"
-                android:textColor="@color/white"
-                android:padding="15dp"
-                style="@style/heading4"
-                android:layout_marginBottom="30dp"
-                android:layout_marginTop="20dp"/>
-
-        </LinearLayout>
-
-    </ScrollView>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnDone"
+        style="@style/heading4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="30dp"
+        android:layout_marginBottom="30dp"
+        android:backgroundTint="@color/primary_color"
+        android:padding="15dp"
+        android:text="강의 등록 완료하기"
+        android:textColor="@color/white"
+        app:cornerRadius="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

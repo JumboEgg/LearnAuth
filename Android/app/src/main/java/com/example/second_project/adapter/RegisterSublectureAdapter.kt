@@ -4,7 +4,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
-import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.second_project.R
@@ -13,11 +12,11 @@ import com.example.second_project.data.model.dto.request.SubLecture
 import com.example.second_project.databinding.ItemRegisterSublectureDetailBinding
 import com.example.second_project.utils.disableEmojis
 
-class RegisterSublectureAdapter(
+class RegisterSublectureAdapter (
     private val subLectureCount: () -> Int,
     private val onDeleteClick: (Int) -> Unit,
     private val onLoadVideoClick: (position: Int, url: String) -> Unit
-) : RecyclerView.Adapter<RegisterSublectureAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<RegisterSublectureAdapter.ViewHolder>(){
 
     private val tempSubLectures = mutableListOf<RegisterTempSubLecture>()
     private val isExpandedList = mutableListOf<Boolean>()
@@ -31,36 +30,26 @@ class RegisterSublectureAdapter(
 
             binding.linearConfirmYoutube.visibility = if (item.isLocked) View.VISIBLE else View.GONE
             // 제목 업데이트 (ex. 개별 강의 1)
-
             binding.textSubLectureIndex.text = "개별 강의 ${position + 1}"
 
-            val isExpanded = isExpandedList[position]
-            binding.linearToggleArea.visibility = if (isExpanded) View.VISIBLE else View.GONE
-
-            binding.btnToggleSubLecture.setImageResource(
-                if (isExpanded) R.drawable.keyboard_arrow_up_24px
-                else R.drawable.keyboard_arrow_down_24px
-            )
-
+            // 초기 펼침 상태 설정
+            binding.linearToggleArea.visibility = if (isExpandedList[position]) View.VISIBLE else View.GONE
 
             // 펼침/접힘 토글
-            binding.linearLayout.setOnClickListener {
-                // 중복 클릭 방지
-                binding.linearLayout.isClickable = false
+            binding.btnToggleSubLecture.setOnClickListener {
 
-                // 상태 토글
-                val newExpanded = !isExpandedList[position]
-                isExpandedList[position] = newExpanded
+                val expanded = !isExpandedList[position]
+                isExpandedList[position] = expanded
 
-                // UI 업데이트
-                binding.linearToggleArea.visibility = if (newExpanded) View.VISIBLE else View.GONE
-                binding.btnToggleSubLecture.setImageResource(
-                    if (newExpanded) R.drawable.keyboard_arrow_up_24px
-                    else R.drawable.keyboard_arrow_down_24px
-                )
+                // 아이콘 변경
+                val iconRes = if (expanded) {
+                    R.drawable.keyboard_arrow_up_24px
+                } else {
+                    R.drawable.keyboard_arrow_down_24px
+                }
+                binding.btnToggleSubLecture.setImageResource(iconRes)
 
-                // 약간의 딜레이 후 다시 클릭 가능하게 설정
-                binding.linearLayout.postDelayed({ binding.linearLayout.isClickable = true }, 100)
+                notifyItemChanged(position)
             }
 
             // 삭제 버튼
@@ -141,11 +130,7 @@ class RegisterSublectureAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = ItemRegisterSublectureDetailBinding.inflate(
-            LayoutInflater.from(parent.context),
-            parent,
-            false
-        )
+        val binding = ItemRegisterSublectureDetailBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding)
     }
 
