@@ -53,7 +53,7 @@ public class LectureManagementServiceImpl implements LectureManagementService {
 
     @Override
     @DistributedLock(key = "#registerLecture")
-    @Transactional(rollbackFor = {Exception.class, BlockchainException.class})
+    @Transactional(rollbackFor = {Exception.class, BlockchainException.class, Throwable.class})
     public ResponseSuccessDto<Boolean> registerLecture(LectureRegisterRequest request) throws Exception {
         // 예외 발생 시 GlobalExceptionHandler, try-catch 제거
         isValidationForLecture(request);
