@@ -1,6 +1,8 @@
 package com.example.second_project.ui
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -163,14 +165,22 @@ class LecturePlayFragment: Fragment() {
         }
 
         binding.lectureDetailBack.setOnClickListener {
-            saveCurrentWatchTime(currentSubLectureId)
-            findNavController().popBackStack()
+            saveCurrentWatchTime(currentSubLectureId) {
+                findNavController().popBackStack()
+            }
+
+//            findNavController().popBackStack()
+//            Handler(Looper.getMainLooper()).postDelayed({
+//                findNavController().popBackStack()
+//            }, 300)
         }
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                saveCurrentWatchTime(currentSubLectureId)
-                findNavController().popBackStack()
+                saveCurrentWatchTime(currentSubLectureId){
+                    findNavController().popBackStack()
+                }
+//                findNavController().popBackStack()
             }
         })
 
@@ -288,7 +298,7 @@ class LecturePlayFragment: Fragment() {
         }
     }
 
-    private fun saveCurrentWatchTime(forSubLectureId: Int) {
+    private fun saveCurrentWatchTime(forSubLectureId: Int, onComplete: () -> Unit = {}) {
         val lectureData = viewModel.lectureDetail.value?.data ?: return
         val userLectureId = lectureData.userLectureId
         val subLecture = lectureData.subLectures.find { it.subLectureId == forSubLectureId } ?: return
@@ -348,6 +358,8 @@ class LecturePlayFragment: Fragment() {
             (binding.playLectureList.adapter as? OwnedLectureDetailAdapter)?.updateSubLectureList(allSubLectures)
             Log.d(TAG, "sublecture 리스트 갱신: subLectureId=$forSubLectureId, 시간=${finalTimeSec}초")
         }
+
+        onComplete()
     }
 
     private fun saveCurrentWatchTimeAndNavigate(newSubLectureId: Int) {

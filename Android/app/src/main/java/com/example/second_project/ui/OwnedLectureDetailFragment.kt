@@ -104,7 +104,7 @@ class OwnedLectureDetailFragment : Fragment() {
 
                 // "완강한 강의인지 아닌지 조건문 추가 필요"
                 if ( foundSubLecture != null ) {
-                    binding.ownedDetailPlayBtn.text = "${foundSubLecture.lectureOrder}강 - 이어보기"
+                    binding.ownedDetailPlayBtn.text = "${foundSubLecture.lectureOrder}강 시청하기"
                     subLectureId = it.data.recentLectureId
                 } else {
                     binding.ownedDetailPlayBtn.text = "수강하기"
