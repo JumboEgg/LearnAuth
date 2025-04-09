@@ -22,9 +22,9 @@ class BannerAdapter(
     // 기본 이미지 리소스 ID 리스트
     companion object {
         private val DEFAULT_BANNER_IMAGES = listOf(
-            R.drawable.sample_plzdelete,
-            R.drawable.sample_plzdelete2,
-            R.drawable.sample_plzdelete3
+            R.drawable.white,
+            R.drawable.white,
+            R.drawable.white
         )
     }
 
