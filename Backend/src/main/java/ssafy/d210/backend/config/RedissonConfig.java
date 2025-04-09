@@ -192,7 +192,7 @@ public class RedissonConfig {
         RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer))
-                .entryTtl(Duration.ofMinutes(10L))
+                .entryTtl(Duration.ofMinutes(1L))
                 .disableCachingNullValues();
 
         return RedisCacheManager.builder(redisConnectionFactory)
