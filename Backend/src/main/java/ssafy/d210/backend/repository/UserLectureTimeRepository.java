@@ -15,8 +15,9 @@ public interface UserLectureTimeRepository extends JpaRepository<UserLectureTime
         select COUNT(*)
         from UserLectureTime ult
         join UserLecture ul
-        on ul.id = ult.userLecture.id
+        on ult.userLecture.id = ul.id
         and ult.endFlag = 1
+        and ul.id = :lectureId
     """)
     int countUserLectureTimesByLectureId(@Param("lectureId") Long lectureId);
 }
