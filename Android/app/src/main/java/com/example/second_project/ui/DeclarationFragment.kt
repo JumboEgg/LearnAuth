@@ -27,12 +27,14 @@ class DeclarationFragment : Fragment() {
 
     private var _binding: FragmentDeclarationBinding? = null
     private val binding get() = _binding!!
-
+    private var isDialogShowing = false  // 다이얼로그 표시 중인지 여부
     private val viewModel: DeclarationViewModel by viewModels()
 
     private val reportAdapter: ReportAdapter by lazy {
         ReportAdapter { selectedReport ->
-            showReportDetailDialog(selectedReport)
+            if (!isDialogShowing) {  // 다이얼로그가 표시 중이 아닐 때만 실행
+                showReportDetailDialog(selectedReport)
+            }
         }
     }
 
@@ -70,6 +72,7 @@ class DeclarationFragment : Fragment() {
      * 신고 항목 클릭 시 상세정보 다이얼로그 표시
      */
     private fun showReportDetailDialog(reportItem: DeclarationItem) {
+        isDialogShowing = true  // 다이얼로그 표시 플래그 설정
         val reportApiService = ApiClient.retrofit.create(ReportApiService::class.java)
         reportApiService.getReportDetail(reportItem.reportId)
             .enqueue(object : Callback<ReportDetailResponse> {
@@ -89,6 +92,11 @@ class DeclarationFragment : Fragment() {
                         val alertDialog = AlertDialog.Builder(requireContext())
                             .setView(dialogBinding.root)
                             .create()
+
+                        // 다이얼로그가 닫힐 때 플래그 초기화
+                        alertDialog.setOnDismissListener {
+                            isDialogShowing = false
+                        }
 
                         dialogBinding.btnCloseDialog.setOnClickListener {
                             alertDialog.dismiss()
