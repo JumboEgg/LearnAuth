@@ -61,7 +61,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="강의자로 참여"
-            style="@style/semibold16"
+            style="@style/semibold14"
             android:textColor="@color/text_white_blue"
             android:layout_marginTop="8dp"
             app:layout_constraintStart_toStartOf="@id/category"

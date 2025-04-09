@@ -28,9 +28,10 @@ class OwnedLectureAdapter(
             binding.lectureTitle.text = item.title
             // 학습률: learningRate가 Double이라면, 백분율로 변환하여 표시
             val percentage = String.format("%.0f", item.learningRate * 100)
-            binding.progressBar.text = "학습률 ${percentage}%"
+//            binding.progressBar.text = "학습률 ${percentage}%"
             // 이어보기 버튼: isLecturer에 따라 텍스트를 다르게 설정합니다.
-            binding.lectureButton.text = if (item.isLecturer) "이어서 보기" else "수강하기"
+            binding.lectureButton.text = if (item.recentId != null) "이어서 보기" else "수강하기"
+            Log.d(TAG, "bind: 야옹야옹 ${item.title}, ${item.recentId}")
             
             // 썸네일 로딩
             item.lectureUrl?.let { videoId ->
