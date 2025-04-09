@@ -102,12 +102,11 @@ class RegisterQuizFragment: Fragment(), RegisterStepSavable {
                     binding.btnDone.text = "강의 등록 완료하기"
                     // IPFS 업로드 성공 후 강의 등록 진행
                     registerLecture()
-                    (parentFragment as? RegisterMainFragment)?.hideGlobalLoading()
                 }
                 is IpfsUploadState.Error -> {
                     binding.btnDone.isEnabled = true
                     binding.btnDone.text = "강의 등록 완료하기"
-                    (activity as? RegisterMainFragment)?.hideGlobalLoading()
+                    (parentFragment as? RegisterMainFragment)?.hideGlobalLoading()
                     Toast.makeText(requireContext(), "파일 업로드 실패: ${state.message}", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -150,6 +149,8 @@ class RegisterQuizFragment: Fragment(), RegisterStepSavable {
             },
             onError = { message ->
                 Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                (parentFragment as? RegisterMainFragment)?.hideGlobalLoading()
+
             }
         )
     }
