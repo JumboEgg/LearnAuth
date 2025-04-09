@@ -543,18 +543,23 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
         val catShortfall = shortfall.toBigDecimal().divide(BigInteger.TEN.pow(18).toBigDecimal())
         val formattedShortfall = catShortfall.stripTrailingZeros().toPlainString()
         isDialogShowing = true  // 다이얼로그 표시 플래그 설정
-        AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle("잔액 부족")
             .setMessage("CAT 잔액이 ${formattedShortfall}만큼 부족합니다.\n충전 후 다시 시도해주세요.")
             .setPositiveButton("확인") { _, _ ->
                 blockBackDuringPaymentCallback.remove()
+                isDialogShowing = false
             }
-            .show()
+            .create()
+
+        dialog.setOnDismissListener {
+            isDialogShowing = false
+        }
     }
 
     fun showPaymentConfirmDialog(price: BigInteger, onConfirm: () -> Unit) {
         isDialogShowing = true  // 다이얼로그 표시 플래그 설정
-        AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle("결제 확인")
             .setMessage("${price} CAT을 사용하여 강의를 구매하시겠습니까?")
             .setPositiveButton("결제") { _, _ ->
@@ -566,9 +571,12 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
 
                 Log.d(TAG, "결제 취소 버튼 클릭됨.")
                 blockBackDuringPaymentCallback.remove()
-
             }
             .show()
+
+        dialog.setOnDismissListener {
+            isDialogShowing = false
+        }
     }
 
     fun showChargeDialog() {
@@ -595,6 +603,7 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                 isDialogShowing = false
             }
             dialog.dismiss()
+            isDialogShowing = false
         }
 
         dialog.show()
