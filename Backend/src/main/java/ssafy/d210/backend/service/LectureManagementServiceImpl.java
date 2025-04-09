@@ -154,6 +154,7 @@ public class LectureManagementServiceImpl implements LectureManagementService {
                     UserLecture userLecture = new UserLecture();
                     userLecture.setUser(user);
                     userLecture.setLecture(savedLecture);
+                    userLecture.setReport(1);
 
                     return userLecture;
 
