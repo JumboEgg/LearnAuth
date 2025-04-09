@@ -279,7 +279,11 @@ class LecturePlayFragment: Fragment() {
         
         // 현재 sublecture의 순서를 기준으로 이전/다음 sublecture 찾기
         val currentOrder = currentSubLecture?.lectureOrder ?: 0
-        val previousSubLecture = allSubLectures.find { it.lectureOrder == currentOrder - 1 }
+        val previousSubLecture = if (currentOrder > 0) {
+            allSubLectures.find { it.lectureOrder == currentOrder - 1 }
+        } else {
+            null
+        }
         val nextSubLecture = allSubLectures.find { it.lectureOrder == currentOrder + 1 }
 
         Log.d(TAG, "updateBtnColors: allSubLectures size = ${allSubLectures.size}")
