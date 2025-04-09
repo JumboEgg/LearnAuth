@@ -24,7 +24,8 @@ object KeyboardUtils {
 
     fun clearFocusAndHideKeyboard(view: View) {
         view.clearFocus()
-        val imm = view.context.getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+        val imm =
+            view.context.getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as? InputMethodManager
         imm?.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
@@ -35,7 +36,8 @@ object KeyboardUtils {
      */
     fun safeMoveFocus(fromEditText: EditText, toEditText: EditText) {
         // IMM 서비스 가져오기
-        val imm = fromEditText.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm =
+            fromEditText.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
         // 현재 EditText에서 텍스트 입력을 강제로 완료
         imm.isActive(fromEditText)
@@ -62,8 +64,14 @@ object KeyboardUtils {
      * EditText의 현재 텍스트를 강제로 커밋하여 입력 내용이 손실되지 않도록 합니다
      */
     fun forceCommitText(editText: EditText) {
-        val imm = editText.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.isActive(editText)
+        try {
+            // InputMethodManager 활성화 상태 확인 (키보드가 표시된 경우만)
+            val imm =
+                editText.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.isActive(editText)
+        } catch (e: Exception) {
+            // 예외 발생 시 무시 (키보드가 없는 경우)
+        }
     }
 
     /**

@@ -25,6 +25,7 @@ class RegisterLectureFragment : Fragment(), RegisterStepSavable {
     private var _binding: FragmentRegisterLectureBinding? = null
     private val binding get() = _binding!!
     private val viewModel: RegisterViewModel by activityViewModels()
+    private var ignoreTextChanges = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,14 +38,14 @@ class RegisterLectureFragment : Fragment(), RegisterStepSavable {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 뷰 초기화 전에 ViewModel 데이터 복원
+        restoreViewModelData()
+
         // 기본 설정
         setupEditTexts()
 
         // 카테고리
         setupCategory()
-
-        // 화면 전환하고 돌아와도 작성 기록 유지
-        restoreViewModelData()
 
         // 다음 단계로 이동하는 하단 버튼
         binding.btnToUploadFile.setOnClickListener {
@@ -79,11 +80,11 @@ class RegisterLectureFragment : Fragment(), RegisterStepSavable {
 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                 override fun afterTextChanged(s: Editable?) {
-                    viewModel.title = s.toString()
+                    if (!ignoreTextChanges) viewModel.title = s.toString()
                 }
             })
 
-            setOnFocusChangeListener { _, hasFocus ->
+            setOnFocusChangeListener { v, hasFocus ->
                 if (!hasFocus) {
                     // 포커스를 잃을 때 강제로 텍스트 커밋
                     KeyboardUtils.forceCommitText(this)
@@ -113,7 +114,7 @@ class RegisterLectureFragment : Fragment(), RegisterStepSavable {
 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                 override fun afterTextChanged(s: Editable?) {
-                    viewModel.goal = s.toString()
+                    if (!ignoreTextChanges) viewModel.goal = s.toString()
                 }
             })
 
@@ -147,7 +148,7 @@ class RegisterLectureFragment : Fragment(), RegisterStepSavable {
 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                 override fun afterTextChanged(s: Editable?) {
-                    viewModel.description = s.toString()
+                    if (!ignoreTextChanges) viewModel.description = s.toString()
                 }
             })
 
@@ -156,6 +157,14 @@ class RegisterLectureFragment : Fragment(), RegisterStepSavable {
                     // 포커스를 잃을 때 강제로 텍스트 커밋
                     KeyboardUtils.forceCommitText(this)
                 }
+            }
+
+            setOnEditorActionListener { _, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    KeyboardUtils.forceCommitText(this)
+                    KeyboardUtils.hideKeyboard(this, requireContext())
+                    true
+                } else false
             }
         }
     }
@@ -177,18 +186,17 @@ class RegisterLectureFragment : Fragment(), RegisterStepSavable {
                         binding.editTextTitle.editText?.let { KeyboardUtils.forceCommitText(it) }
                         binding.editTextGoal.editText?.let { KeyboardUtils.forceCommitText(it) }
                         binding.editTextContent.editText?.let { KeyboardUtils.forceCommitText(it) }
-
                         KeyboardUtils.hideKeyboard(currentFocusView, requireContext())
                     }
 
                     // 혹시 이미 열려있는 드롭다운이 있다면 먼저 닫아줍니다.
                     binding.autoCompleteCategory.dismissDropDown()
 
-                    // 키보드 애니메이션 시간 후 드롭다운을 표시합니다.
+                    // 즉시 요청하고 짧은 지연 후 표시 (지연시간 단축)
+                    binding.autoCompleteCategory.requestFocus()
                     view.postDelayed({
-                        binding.autoCompleteCategory.requestFocus()
                         binding.autoCompleteCategory.showDropDown()
-                    }, 300)
+                    }, 100) // 300ms에서 100ms로 단축
 
                     // 이벤트를 소비하여 기본 동작(자동 드롭다운)을 막습니다.
                     true
@@ -210,15 +218,28 @@ class RegisterLectureFragment : Fragment(), RegisterStepSavable {
     }
 
     private fun restoreViewModelData() {
-        // 이전 데이터가 있으면 복원
-        binding.editTextTitle.editText?.setText(viewModel.title)
+        try {
+            // 텍스트 변경 감지 일시 중지
+            ignoreTextChanges = true
 
-        if (viewModel.categoryName.isNotBlank()) {
-            binding.autoCompleteCategory.setText(viewModel.categoryName, false)
+            // 이전 데이터가 있으면 복원
+            binding.editTextTitle.editText?.setText(viewModel.title)
+
+            if (viewModel.categoryName.isNotBlank()) {
+                binding.autoCompleteCategory.setText(viewModel.categoryName, false)
+            }
+
+            binding.editTextGoal.editText?.setText(viewModel.goal)
+            binding.editTextContent.editText?.setText(viewModel.description)
+
+            // 커서 위치 조정
+            binding.editTextTitle.editText?.setSelection(viewModel.title.length)
+            binding.editTextGoal.editText?.setSelection(viewModel.goal.length)
+            binding.editTextContent.editText?.setSelection(viewModel.description.length)
+        } finally {
+            // 텍스트 변경 감지 재개
+            ignoreTextChanges = false
         }
-
-        binding.editTextGoal.editText?.setText(viewModel.goal)
-        binding.editTextContent.editText?.setText(viewModel.description)
     }
 
     // 프래그먼트 전환 시 ViewModel에 데이터 저장 - 인터페이스로
@@ -243,14 +264,13 @@ class RegisterLectureFragment : Fragment(), RegisterStepSavable {
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
-
         // 현재 포커스가 있는 EditText 처리
         val currentFocus = activity?.currentFocus
         if (currentFocus is TextInputEditText) {
             KeyboardUtils.forceCommitText(currentFocus)
         }
 
+        super.onDestroyView()
         _binding = null
     }
 }
