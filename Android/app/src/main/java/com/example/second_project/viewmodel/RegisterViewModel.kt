@@ -21,8 +21,7 @@ import kotlinx.coroutines.launch
 import com.example.second_project.data.model.dto.request.QuizOption
 import com.example.second_project.data.model.dto.response.RegisterEmailResponse
 
-class RegisterViewModel : ViewModel(){
-
+class RegisterViewModel : ViewModel() {
     // 등록 강의 카테고리 드롭다운 메뉴
     private val _categoryList = MutableLiveData<List<CategoryResponse>>()
     val categoryList: LiveData<List<CategoryResponse>> = _categoryList
@@ -31,13 +30,10 @@ class RegisterViewModel : ViewModel(){
     // 사용자 검색 결과 상태
     private val _searchResults = MutableLiveData<List<RegisterEmailResponse>>()
     val searchResults: LiveData<List<RegisterEmailResponse>> = _searchResults
-
     private val _totalResults = MutableLiveData<Int>()
     val totalResults: LiveData<Int> = _totalResults
-
     private val _currentPage = MutableLiveData<Int>()
     val currentPage: LiveData<Int> = _currentPage
-
 
     // IPFS 업로드 상태
     private val _ipfsUploadState = MutableLiveData<IpfsUploadState>()
@@ -45,6 +41,44 @@ class RegisterViewModel : ViewModel(){
 
     // IPFS 해시 저장
     private var ipfsHash: String? = null
+
+    // 기본 강의 정보 (Getter와 Setter 최적화)
+    private var _title: String = ""
+    var title: String
+        get() = _title
+        set(value) {
+            _title = value
+        }
+
+    private var _categoryName: String = ""
+    var categoryName: String
+        get() = _categoryName
+        set(value) {
+            _categoryName = value
+        }
+
+    private var _goal: String = ""
+    var goal: String
+        get() = _goal
+        set(value) {
+            _goal = value
+        }
+
+    private var _description: String = ""
+    var description: String
+        get() = _description
+        set(value) {
+            _description = value
+        }
+
+    var price: Int = 0
+    val ratios = mutableListOf<Ratio>() // 강의자/참여자
+    val subLectures = mutableListOf<SubLecture>()
+    val quizzes = mutableListOf<Quiz>()
+
+    // 파일 정보
+    var selectedLectureFileName: String? = null
+    var selectedLectureFileUri: Uri? = null
 
     fun fetchCategories() {
         viewModelScope.launch {
@@ -62,28 +96,11 @@ class RegisterViewModel : ViewModel(){
         }
     }
 
-
-    var title: String = ""
-        set(value) { field = value.trim() }
-    var categoryName: String = ""
-    var goal: String = ""
-        set(value) { field = value.trim() }
-    var description: String = ""
-    var price: Int = 0
-
-    val ratios = mutableListOf<Ratio>() // 강의자/참여자
-    val subLectures = mutableListOf<SubLecture>()
-    val quizzes = mutableListOf<Quiz>()
-
-    // 파일 정보
-    var selectedLectureFileName: String? = null
-    var selectedLectureFileUri: Uri? = null
-
     fun reset() {
-        title = ""
-        categoryName = ""
-        goal = ""
-        description = ""
+        _title = ""
+        _categoryName = ""
+        _goal = ""
+        _description = ""
         price = 0
         ratios.clear()
         subLectures.clear()
@@ -97,10 +114,10 @@ class RegisterViewModel : ViewModel(){
 
     fun toRequest(): RegisterLectureRequest {
         return RegisterLectureRequest(
-            title = title,
-            categoryName = categoryName,
-            goal = goal,
-            description = description,
+            title = _title.trim(),
+            categoryName = _categoryName,
+            goal = _goal.trim(),
+            description = _description,
             price = price,
             ratios = ratios,
             subLectures = subLectures,
@@ -110,19 +127,19 @@ class RegisterViewModel : ViewModel(){
     }
 
     fun isValid(): Boolean {
-        if (title.isBlank()) {
+        if (_title.isBlank()) {
             Log.e("isValid", "제목이 비어있음")
             return false
         }
-        if (categoryName.isBlank()) {
+        if (_categoryName.isBlank()) {
             Log.e("isValid", "카테고리명이 비어있음")
             return false
         }
-        if (goal.isBlank()) {
+        if (_goal.isBlank()) {
             Log.e("isValid", "목표가 비어있음")
             return false
         }
-        if (description.isBlank()) {
+        if (_description.isBlank()) {
             Log.e("isValid", "설명이 비어있음")
             return false
         }
@@ -154,10 +171,8 @@ class RegisterViewModel : ViewModel(){
             Log.e("isValid", "퀴즈 중 정답이 하나가 아닌 항목 있음")
             return false
         }
-
         return true
     }
-
 
     fun fetchYoutubeMetaData(
         videoId: String,
@@ -242,9 +257,7 @@ class RegisterViewModel : ViewModel(){
             onError("업로드할 파일이 선택되지 않았습니다.")
             return
         }
-
         _ipfsUploadState.value = IpfsUploadState.Loading
-
         viewModelScope.launch {
             try {
                 Log.d("uploadFileToIpfs", "파일 업로드 시작: $fileUri")
@@ -273,7 +286,6 @@ class RegisterViewModel : ViewModel(){
     ) {
         viewModelScope.launch {
             val request = toRequest()
-
             // ✅ 요청 본문 로그 출력
             Log.d("registerLecture", "요청 데이터: $request")
             runCatching {
@@ -303,16 +315,13 @@ class RegisterViewModel : ViewModel(){
                     val data = response.body()?.data
                     val newResults = data?.searchResults ?: emptyList()
                     val currentList = _searchResults.value.orEmpty()
-
                     _searchResults.value = if (page == 1) {
                         newResults
                     } else {
                         currentList + newResults
                     }
-
                     _totalResults.value = data?.totalResults ?: 0
                     _currentPage.value = data?.currentPage ?: 1
-
                     Log.d("searchUsers", "검색 성공: ${response.code()} ${response.body()}")
                 } else {
                     Log.d("searchUsers", "검색 실패: ${response.code()}")
@@ -332,8 +341,6 @@ class RegisterViewModel : ViewModel(){
     fun isEmailAlreadyRegistered(email: String): Boolean {
         return ratios.any { it.email == email }
     }
-
-
 }
 
 /**
