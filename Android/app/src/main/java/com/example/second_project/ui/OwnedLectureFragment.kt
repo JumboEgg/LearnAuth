@@ -80,4 +80,10 @@ class OwnedLectureFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
+    fun refreshData() {
+        val userId = UserSession.userId
+        Log.d("OwnedLectureFragment", "Refreshing owned lectures for userId: $userId")
+        viewModel.loadOwnedLectures(userId)
+    }
 }

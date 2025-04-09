@@ -1,5 +1,6 @@
 package com.example.second_project.data.repository
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.second_project.data.model.dto.response.OwnedLectureResponse
@@ -22,13 +23,16 @@ object OwnedLectureRepository {
                 response: Response<OwnedLectureResponse>
             ) {
                 if (response.isSuccessful && response.body() != null) {
+                    Log.d("OwnedLectureRepository", "API 응답 성공: ${response.body()}")
                     data.value = response.body()!!.data
                 } else {
+                    Log.e("OwnedLectureRepository", "API 응답 실패: ${response.code()}, ${response.message()}")
                     data.value = emptyList()
                 }
             }
 
             override fun onFailure(call: Call<OwnedLectureResponse>, t: Throwable) {
+                Log.e("OwnedLectureRepository", "API 호출 실패: ${t.message}", t)
                 data.value = emptyList()
             }
         })

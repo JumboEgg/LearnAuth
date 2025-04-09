@@ -8,22 +8,18 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.second_project.BuildConfig
+import androidx.recyclerview.widget.RecyclerView
 import com.example.second_project.adapter.RegisterQuizAdapter
 import com.example.second_project.data.model.dto.RegisterTempQuiz
 import com.example.second_project.databinding.FragmentRegisterQuizBinding
 import com.example.second_project.interfaces.RegisterStepSavable
 import com.example.second_project.utils.ApiKeyProvider
 import com.example.second_project.utils.KeyboardUtils
-import com.example.second_project.utils.LoadingOverlayHelper
 import com.example.second_project.viewmodel.IpfsUploadState
 import com.example.second_project.viewmodel.RegisterViewModel
-import kotlinx.coroutines.launch
 
-class RegisterQuizFragment: Fragment(), RegisterStepSavable {
-
+class RegisterQuizFragment : Fragment(), RegisterStepSavable {
     private var _binding: FragmentRegisterQuizBinding? = null
     private val binding get() = _binding!!
     private lateinit var quizAdapter: RegisterQuizAdapter
@@ -40,29 +36,69 @@ class RegisterQuizFragment: Fragment(), RegisterStepSavable {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 리사이클러뷰 세팅
-        binding.recyclerQuiz.layoutManager = LinearLayoutManager(requireContext())
-        quizAdapter = RegisterQuizAdapter()
+        // 리사이클러뷰 세팅 - 주요 개선 부분
+        val layoutManager = LinearLayoutManager(requireContext())
+        layoutManager.isSmoothScrollbarEnabled = true
+
+        // 리사이클러뷰 스크롤 개선 설정
+        binding.recyclerQuiz.apply {
+            this.layoutManager = layoutManager
+            itemAnimator = null // 애니메이션 비활성화로 스크롤 점프 방지
+            setHasFixedSize(false) // 동적 크기 변화 허용
+            isNestedScrollingEnabled = false // 중첩 스크롤 비활성화
+
+            // 스크롤 리스너 추가 - 포커스 변경 시 키보드 숨김
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                        // 스크롤 시작 시 포커스 해제 및 키보드 숨김
+                        recyclerView.findFocus()?.let { focusedView ->
+                            KeyboardUtils.clearFocusAndHideKeyboard(focusedView)
+                        }
+                    }
+                }
+            })
+        }
+
+        // 어댑터 초기화 및 삭제 콜백 개선
+        quizAdapter = RegisterQuizAdapter(
+            onDeleteClick = { position ->
+                if (quizAdapter.getItems().size > 3) {
+                    quizAdapter.removeQuiz(position)
+                } else {
+                    Toast.makeText(requireContext(), "퀴즈는 최소 3개 이상 등록해야 합니다.", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
+        )
         binding.recyclerQuiz.adapter = quizAdapter
-        binding.recyclerQuiz.visibility = View.VISIBLE
 
         // ✅ 항상 3개는 유지, 작성한 내용 있으면 유지
         val tempList = viewModel.tempQuizzes.toMutableList()
-        repeat(3 - tempList.size) {
-            tempList.add(RegisterTempQuiz())
+        if (tempList.isEmpty()) {
+            // 처음 진입 시 기본 3개 퀴즈 추가
+            repeat(3) {
+                tempList.add(RegisterTempQuiz())
+            }
+        } else {
+            // 기존 데이터가 3개 미만이면 추가
+            repeat(3 - tempList.size) {
+                tempList.add(RegisterTempQuiz())
+            }
         }
         quizAdapter.setItems(tempList)
 
+        // 리사이클러뷰 표시
+        binding.recyclerQuiz.visibility = View.VISIBLE
 
         binding.btnDone.setOnClickListener {
-
-            requireActivity().currentFocus?.let {
-                KeyboardUtils.clearFocusAndHideKeyboard(it)
+            // 키보드 숨기기
+            requireActivity().currentFocus?.let { focusView ->
+                KeyboardUtils.clearFocusAndHideKeyboard(focusView)
             }
 
             if (!saveDataToViewModel()) return@setOnClickListener
-            viewModel.tempQuizzes.clear()
-            viewModel.tempQuizzes.addAll(quizAdapter.getItems())
 
             // ✅ 최종 변환
             viewModel.convertTempToFinalSubLectures()
@@ -90,24 +126,28 @@ class RegisterQuizFragment: Fragment(), RegisterStepSavable {
                 is IpfsUploadState.Loading -> {
                     binding.btnDone.isEnabled = false
                     binding.btnDone.text = "업로드 중..."
-//                    (activity as? RegisterMainFragment)?.showGlobalLoading()
                     (parentFragment as? RegisterMainFragment)?.also {
                         Log.d("RegisterQuizFragment", "✅ showGlobalLoading 호출됨")
                         it.showGlobalLoading()
                     }
-
                 }
+
                 is IpfsUploadState.Success -> {
                     binding.btnDone.isEnabled = true
                     binding.btnDone.text = "강의 등록 완료하기"
                     // IPFS 업로드 성공 후 강의 등록 진행
                     registerLecture()
                 }
+
                 is IpfsUploadState.Error -> {
                     binding.btnDone.isEnabled = true
                     binding.btnDone.text = "강의 등록 완료하기"
                     (parentFragment as? RegisterMainFragment)?.hideGlobalLoading()
-                    Toast.makeText(requireContext(), "파일 업로드 실패: ${state.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        "파일 업로드 실패: ${state.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
@@ -126,12 +166,8 @@ class RegisterQuizFragment: Fragment(), RegisterStepSavable {
         viewModel.uploadFileToIpfs(
             context = requireContext(),
             apiKey = pinataApiKey,
-            onSuccess = { hash ->
-//                Toast.makeText(requireContext(), "파일 업로드 성공: $hash", Toast.LENGTH_SHORT).show()
-            },
-            onError = { message ->
-//                Toast.makeText(requireContext(), "파일 업로드 실패: $message", Toast.LENGTH_SHORT).show()
-            }
+            onSuccess = { /* 성공 콜백 */ },
+            onError = { /* 에러 콜백 */ }
         )
     }
 
@@ -142,7 +178,8 @@ class RegisterQuizFragment: Fragment(), RegisterStepSavable {
         viewModel.registerLecture(
             onSuccess = {
                 if (isAdded) {
-                    Toast.makeText(requireContext(), "강의가 성공적으로 등록되었습니다!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "강의가 성공적으로 등록되었습니다!", Toast.LENGTH_SHORT)
+                        .show()
                     viewModel.reset()
                     requireActivity().supportFragmentManager.popBackStack()
                 }
@@ -150,7 +187,6 @@ class RegisterQuizFragment: Fragment(), RegisterStepSavable {
             onError = { message ->
                 Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                 (parentFragment as? RegisterMainFragment)?.hideGlobalLoading()
-
             }
         )
     }
@@ -164,29 +200,47 @@ class RegisterQuizFragment: Fragment(), RegisterStepSavable {
             return false
         }
 
+        var isValid = true
         tempQuizzes.forEachIndexed { index, quiz ->
             val question = quiz.question.trim()
             val options = quiz.options.map { it.trim() }
 
             if (question.isBlank()) {
-                Toast.makeText(requireContext(), "${index + 1}번째 퀴즈의 문제를 입력해주세요.", Toast.LENGTH_SHORT).show()
-                return false
+                Toast.makeText(
+                    requireContext(),
+                    "${index + 1}번째 퀴즈의 문제를 입력해주세요.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                isValid = false
+                return@forEachIndexed
             }
 
             if (options.any { it.isBlank() }) {
-                Toast.makeText(requireContext(), "${index + 1}번째 퀴즈의 보기 항목을 모두 입력해주세요.", Toast.LENGTH_SHORT).show()
-                return false
+                Toast.makeText(
+                    requireContext(),
+                    "${index + 1}번째 퀴즈의 보기 항목을 모두 입력해주세요.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                isValid = false
+                return@forEachIndexed
             }
 
             if (quiz.correctAnswerIndex !in 0..2) {
-                Toast.makeText(requireContext(), "${index + 1}번째 퀴즈의 정답을 선택해주세요.", Toast.LENGTH_SHORT).show()
-                return false
+                Toast.makeText(
+                    requireContext(),
+                    "${index + 1}번째 퀴즈의 정답을 선택해주세요.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                isValid = false
+                return@forEachIndexed
             }
 
             // trim 적용 후 저장
             quiz.question = question
             quiz.options = options.toMutableList()
         }
+
+        if (!isValid) return false
 
         viewModel.tempQuizzes.clear()
         viewModel.tempQuizzes.addAll(quizAdapter.getItems())

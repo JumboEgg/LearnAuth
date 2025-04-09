@@ -80,4 +80,10 @@ class ParticipatedLectureFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
+    fun refreshData() {
+        val userId = UserSession.userId
+        Log.d("ParticipatedLectureFragment", "Refreshing participated lectures for userId: $userId")
+        viewModel.loadParticipatedLectures(userId)
+    }
 }

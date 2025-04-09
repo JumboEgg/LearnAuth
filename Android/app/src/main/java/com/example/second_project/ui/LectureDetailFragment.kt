@@ -54,6 +54,7 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
     private var _binding: FragmentLectureDetailBinding? = null
     private val binding get() = _binding!!
     private var isOverlayVisible = false
+    private var isDialogShowing = false  // 다이얼로그 표시 중인지 여부
     private val viewModel: LectureDetailViewModel by viewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -137,11 +138,13 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                 val lectureData = it.data
                 binding.buyBtn.setOnClickListener { _ ->
                     Log.d(TAG, "구매 버튼 클릭됨 - 강의ID: ${lectureData.lectureId}")
-                    handleLecturePurchase(
-                        lectureData.lectureId,
-                        lectureData.price,
-                        lectureData.title
-                    )
+                    if (!isDialogShowing) {  // 다이얼로그가 표시 중이 아닐 때만 실행
+                        handleLecturePurchase(
+                            lectureData.lectureId,
+                            lectureData.price,
+                            lectureData.title
+                        )
+                    }
                 }
 
             } ?: run {
@@ -539,7 +542,7 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
     fun showNotEnoughDialog(shortfall: BigInteger) {
         val catShortfall = shortfall.toBigDecimal().divide(BigInteger.TEN.pow(18).toBigDecimal())
         val formattedShortfall = catShortfall.stripTrailingZeros().toPlainString()
-
+        isDialogShowing = true  // 다이얼로그 표시 플래그 설정
         AlertDialog.Builder(requireContext())
             .setTitle("잔액 부족")
             .setMessage("CAT 잔액이 ${formattedShortfall}만큼 부족합니다.\n충전 후 다시 시도해주세요.")
@@ -550,6 +553,7 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
     }
 
     fun showPaymentConfirmDialog(price: BigInteger, onConfirm: () -> Unit) {
+        isDialogShowing = true  // 다이얼로그 표시 플래그 설정
         AlertDialog.Builder(requireContext())
             .setTitle("결제 확인")
             .setMessage("${price} CAT을 사용하여 강의를 구매하시겠습니까?")
@@ -558,6 +562,8 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                 onConfirm()
             }
             .setNegativeButton("취소") { _, _ ->
+                isDialogShowing = false
+
                 Log.d(TAG, "결제 취소 버튼 클릭됨.")
                 blockBackDuringPaymentCallback.remove()
 
@@ -585,6 +591,9 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
         val cancelBtn: Button = dialogView.findViewById(R.id.chargeNoBtn)
         cancelBtn.setOnClickListener {
             Log.d(TAG, "충전 다이얼로그 취소 버튼 클릭됨.")
+            dialog.setOnDismissListener {
+                isDialogShowing = false
+            }
             dialog.dismiss()
         }
 
