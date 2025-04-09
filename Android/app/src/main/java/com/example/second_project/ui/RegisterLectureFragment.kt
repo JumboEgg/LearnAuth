@@ -1,11 +1,14 @@
 package com.example.second_project.ui
 
-import android.annotation.SuppressLint
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -13,16 +16,15 @@ import androidx.fragment.app.activityViewModels
 import com.example.second_project.databinding.FragmentRegisterLectureBinding
 import com.example.second_project.interfaces.RegisterStepSavable
 import com.example.second_project.utils.KeyboardUtils
-import com.example.second_project.viewmodel.RegisterViewModel
-import com.example.second_project.utils.setEnterLimit
 import com.example.second_project.utils.disableEmojis
+import com.example.second_project.utils.setEnterLimit
+import com.example.second_project.viewmodel.RegisterViewModel
+import com.google.android.material.textfield.TextInputEditText
 
 class RegisterLectureFragment : Fragment(), RegisterStepSavable {
-
     private var _binding: FragmentRegisterLectureBinding? = null
     private val binding get() = _binding!!
     private val viewModel: RegisterViewModel by activityViewModels()
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,56 +37,201 @@ class RegisterLectureFragment : Fragment(), RegisterStepSavable {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 카테고리
-        viewModel.fetchCategories()
+        // 기본 설정
+        setupEditTexts()
 
+        // 카테고리
+        setupCategory()
+
+        // 화면 전환하고 돌아와도 작성 기록 유지
+        restoreViewModelData()
+
+        // 다음 단계로 이동하는 하단 버튼
+        binding.btnToUploadFile.setOnClickListener {
+            (parentFragment as? RegisterMainFragment)?.moveToStep(1)
+        }
+    }
+
+    private fun setupEditTexts() {
+        // TextInputEditText 레퍼런스
+        val titleEditText = binding.editTextTitle.editText
+        val goalEditText = binding.editTextGoal.editText
+        val contentEditText = binding.editTextContent.editText
+
+        // Emoji 비활성화
+        titleEditText?.disableEmojis()
+        goalEditText?.disableEmojis()
+        contentEditText?.disableEmojis()
+
+        // 줄바꿈 제한 설정
+        contentEditText?.setEnterLimit(10)
+
+        // 제목 EditText 설정
+        titleEditText?.apply {
+            addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                override fun afterTextChanged(s: Editable?) {
+                    viewModel.title = s.toString()
+                }
+            })
+
+            setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus) {
+                    // 포커스를 잃을 때 강제로 텍스트 커밋
+                    KeyboardUtils.forceCommitText(this)
+                }
+            }
+
+            setOnEditorActionListener { _, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_NEXT) {
+                    // 다음 필드로 이동 전에 현재 텍스트 커밋
+                    KeyboardUtils.forceCommitText(this)
+                    binding.autoCompleteCategory.requestFocus()
+                    true
+                } else false
+            }
+        }
+
+        // 목표 EditText 설정
+        goalEditText?.apply {
+            addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                override fun afterTextChanged(s: Editable?) {
+                    viewModel.goal = s.toString()
+                }
+            })
+
+            setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus) {
+                    // 포커스를 잃을 때 강제로 텍스트 커밋
+                    KeyboardUtils.forceCommitText(this)
+                }
+            }
+
+            setOnEditorActionListener { _, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_NEXT) {
+                    // 다음 필드로 이동 전에 현재 텍스트 커밋
+                    KeyboardUtils.forceCommitText(this)
+                    contentEditText?.requestFocus()
+                    true
+                } else false
+            }
+        }
+
+        // 내용 EditText 설정
+        contentEditText?.apply {
+            addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                override fun afterTextChanged(s: Editable?) {
+                    viewModel.description = s.toString()
+                }
+            })
+
+            setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus) {
+                    // 포커스를 잃을 때 강제로 텍스트 커밋
+                    KeyboardUtils.forceCommitText(this)
+                }
+            }
+        }
+    }
+
+    private fun setupCategory() {
+        viewModel.fetchCategories()
         viewModel.categoryList.observe(viewLifecycleOwner) { categories ->
             val categoryNames = categories.map { it.categoryName }
             val adapter =
                 ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, categoryNames)
             binding.autoCompleteCategory.setAdapter(adapter)
 
-            binding.autoCompleteCategory.setOnClickListener {
-                KeyboardUtils.clearFocusAndHideKeyboard(it)
-                binding.autoCompleteCategory.showDropDown() // 드롭다운 메뉴 표시
-            }
+            binding.autoCompleteCategory.setOnTouchListener { view, motionEvent ->
+                if (motionEvent.action == MotionEvent.ACTION_UP) {
+                    // 현재 포커스가 있는 뷰에서 키보드를 먼저 숨깁니다.
+                    val currentFocusView = requireActivity().currentFocus
+                    if (currentFocusView != null) {
+                        // 포커스를 잃기 전에 모든 텍스트 필드의 내용을 커밋
+                        binding.editTextTitle.editText?.let { KeyboardUtils.forceCommitText(it) }
+                        binding.editTextGoal.editText?.let { KeyboardUtils.forceCommitText(it) }
+                        binding.editTextContent.editText?.let { KeyboardUtils.forceCommitText(it) }
 
+                        KeyboardUtils.hideKeyboard(currentFocusView, requireContext())
+                    }
+
+                    // 혹시 이미 열려있는 드롭다운이 있다면 먼저 닫아줍니다.
+                    binding.autoCompleteCategory.dismissDropDown()
+
+                    // 키보드 애니메이션 시간 후 드롭다운을 표시합니다.
+                    view.postDelayed({
+                        binding.autoCompleteCategory.requestFocus()
+                        binding.autoCompleteCategory.showDropDown()
+                    }, 300)
+
+                    // 이벤트를 소비하여 기본 동작(자동 드롭다운)을 막습니다.
+                    true
+                } else {
+                    false
+                }
+            }
 
             binding.autoCompleteCategory.setOnItemClickListener { _, _, position, _ ->
                 val selected = categoryNames[position]
                 viewModel.categoryName = selected
                 Log.d("CategorySelect", "선택된 카테고리: $selected")
                 KeyboardUtils.hideKeyboard(binding.autoCompleteCategory, requireContext())
+
+                // 카테고리 선택 후 다음 필드로 이동
+                binding.editTextGoal.editText?.requestFocus()
             }
         }
+    }
 
-        // 화면 전환하고 돌아와도 작성 기록 유지
+    private fun restoreViewModelData() {
+        // 이전 데이터가 있으면 복원
         binding.editTextTitle.editText?.setText(viewModel.title)
-        binding.editTextTitle.editText?.disableEmojis()
 
         if (viewModel.categoryName.isNotBlank()) {
             binding.autoCompleteCategory.setText(viewModel.categoryName, false)
         }
+
         binding.editTextGoal.editText?.setText(viewModel.goal)
-        binding.editTextGoal.editText?.disableEmojis()
         binding.editTextContent.editText?.setText(viewModel.description)
-        binding.editTextContent.editText?.disableEmojis()
-
-        // 다음 단계로 이동하는 하단 버튼
-        binding.btnToUploadFile.setOnClickListener {
-            (parentFragment as? RegisterMainFragment)?.moveToStep(1)
-        }
-
-        binding.editTextContent.editText?.setEnterLimit(10)
-
     }
 
     // 프래그먼트 전환 시 ViewModel에 데이터 저장 - 인터페이스로
     override fun saveDataToViewModel(): Boolean {
-        viewModel.title = binding.editTextTitle.editText?.text.toString()
+        // 현재 포커스가 있는 뷰가 EditText라면 강제로 커밋
+        val currentFocus = activity?.currentFocus
+        if (currentFocus is TextInputEditText) {
+            KeyboardUtils.forceCommitText(currentFocus)
+        }
+
+        // 데이터 저장은 TextWatcher에서 실시간으로 하므로 다시 할 필요 없음
+        // 다만 카테고리는 수동으로 저장
         viewModel.categoryName = binding.autoCompleteCategory.text.toString()
-        viewModel.goal = binding.editTextGoal.editText?.text.toString()
-        viewModel.description = binding.editTextContent.editText?.text.toString()
 
         // 모든 항목 입력 여부 확인
         if (viewModel.title.isBlank() || viewModel.categoryName.isBlank() || viewModel.goal.isBlank() || viewModel.description.isBlank()) {
@@ -97,7 +244,13 @@ class RegisterLectureFragment : Fragment(), RegisterStepSavable {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
 
+        // 현재 포커스가 있는 EditText 처리
+        val currentFocus = activity?.currentFocus
+        if (currentFocus is TextInputEditText) {
+            KeyboardUtils.forceCommitText(currentFocus)
+        }
+
+        _binding = null
     }
 }
