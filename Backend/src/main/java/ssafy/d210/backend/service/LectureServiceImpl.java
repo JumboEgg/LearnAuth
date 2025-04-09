@@ -358,13 +358,17 @@ public class LectureServiceImpl implements LectureService{
         int finishedSubLectureCount = finishedSubLectureCountFuture.join();
         SubLecture subLectureUrl = subLectureUrlFuture.join();
 
+        double learningRate = 0.0;
+        if (subLectureCount > 0) {
+            learningRate = (finishedSubLectureCount * 100.0) / subLectureCount;
+        }
         return LectureResponse.builder()
                 .isLecturer(profile.getIsLecturer())
                 .title(profile.getTitle())
                 .lecturer(profile.getLecturer())
                 .categoryName(profile.getCategoryName())
                 .lectureId(profile.getLectureId())
-                .learningRate(subLectureCount * 1.0 / finishedSubLectureCount)
+                .learningRate(learningRate)
                 .lectureUrl(subLectureUrl.getSubLectureUrl())
                 .build();
     }
