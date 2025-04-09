@@ -165,61 +165,61 @@
 //
 //
 //
-////
-////
-////
-////
-////    @Test
-////    void 강의제목누락실패() throws Exception {
-////        LectureRegisterRequest request = makeValidRequest();
-////        request.setTitle(null);
-////        prepareBasicMocks(request);
-////
-////        ResponseSuccessDto<Boolean> response = lectureManagementService.registerLecture(request);
-////
-////        assertThat(response.getData()).isFalse();
-////        assertThat(response.getStatus()).isEqualTo(HereStatus.FAIL_LECTURE_REGISTERED.name());
-////    }
-////
-////    @Test
-////    void 퀴즈3개미만실패() throws Exception {
-////        LectureRegisterRequest request = makeValidRequest();
-////        request.setQuizzes(List.of(request.getQuizzes().get(0)));
-////        prepareBasicMocks(request);
-////
-////        ResponseSuccessDto<Boolean> response = lectureManagementService.registerLecture(request);
-////
-////        assertThat(response.getData()).isFalse();
-////        assertThat(response.getStatus()).isEqualTo((HereStatus.FAIL_LECTURE_REGISTERED.name()));
-////    }
-////
-////    @Test
-////    void ratio없음실패() throws Exception {
-////        LectureRegisterRequest request = makeValidRequest();
-////        request.setRatios(null);
-////        prepareBasicMocks(request);
-////
-////        ResponseSuccessDto<Boolean> res = lectureManagementService.registerLecture(request);
-////
-////        assertThat(res.getData()).isFalse();
-////        assertThat(res.getStatus()).isEqualTo(HereStatus.FAIL_LECTURE_REGISTERED.name());
-////    }
-////
-////    @Test
-////    void 중복이메일실패() throws Exception {
-////        LectureRegisterRequest request = makeValidRequest();
-////        RatioRequest r2 = new RatioRequest();
-////        r2.setEmail("1@gmail.com");
-////        r2.setRatio(0);
-////        r2.setLecturer(false);
-////        request.setRatios(List.of(request.getRatios().get(0), r2));
-////        prepareBasicMocks(request);
-////
-////        ResponseSuccessDto<Boolean> res = lectureManagementService.registerLecture(request);
-////
-////        assertThat(res.getData()).isFalse();
-////        assertThat(res.getStatus()).isEqualTo(HereStatus.FAIL_LECTURE_REGISTERED.name());
-////    }
+//
+//
+//
+//
+//    @Test
+//    void 강의제목누락실패() throws Exception {
+//        LectureRegisterRequest request = makeValidRequest();
+//        request.setTitle(null);
+//        prepareBasicMocks(request);
+//
+//        ResponseSuccessDto<Boolean> response = lectureManagementService.registerLecture(request);
+//
+//        assertThat(response.getData()).isFalse();
+//        assertThat(response.getStatus()).isEqualTo(HereStatus.FAIL_LECTURE_REGISTERED.name());
+//    }
+//
+//    @Test
+//    void 퀴즈3개미만실패() throws Exception {
+//        LectureRegisterRequest request = makeValidRequest();
+//        request.setQuizzes(List.of(request.getQuizzes().get(0)));
+//        prepareBasicMocks(request);
+//
+//        ResponseSuccessDto<Boolean> response = lectureManagementService.registerLecture(request);
+//
+//        assertThat(response.getData()).isFalse();
+//        assertThat(response.getStatus()).isEqualTo((HereStatus.FAIL_LECTURE_REGISTERED.name()));
+//    }
+//
+//    @Test
+//    void ratio없음실패() throws Exception {
+//        LectureRegisterRequest request = makeValidRequest();
+//        request.setRatios(null);
+//        prepareBasicMocks(request);
+//
+//        ResponseSuccessDto<Boolean> res = lectureManagementService.registerLecture(request);
+//
+//        assertThat(res.getData()).isFalse();
+//        assertThat(res.getStatus()).isEqualTo(HereStatus.FAIL_LECTURE_REGISTERED.name());
+//    }
+//
+//    @Test
+//    void 중복이메일실패() throws Exception {
+//        LectureRegisterRequest request = makeValidRequest();
+//        RatioRequest r2 = new RatioRequest();
+//        r2.setEmail("1@gmail.com");
+//        r2.setRatio(0);
+//        r2.setLecturer(false);
+//        request.setRatios(List.of(request.getRatios().get(0), r2));
+//        prepareBasicMocks(request);
+//
+//        ResponseSuccessDto<Boolean> res = lectureManagementService.registerLecture(request);
+//
+//        assertThat(res.getData()).isFalse();
+//        assertThat(res.getStatus()).isEqualTo(HereStatus.FAIL_LECTURE_REGISTERED.name());
+//    }
 //
 //
 //}
