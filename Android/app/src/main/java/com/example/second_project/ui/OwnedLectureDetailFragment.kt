@@ -70,7 +70,7 @@ class OwnedLectureDetailFragment : Fragment() {
         var subLectureId: Int? = null
         var cid: String? = null
 
-
+        binding.declarationBtn.visibility = View.GONE
         viewModel.fetchLectureDetail(lectureId, userId)
         binding.loadingProgressBar.visibility = View.VISIBLE
 
@@ -90,8 +90,8 @@ class OwnedLectureDetailFragment : Fragment() {
                 binding.lectureDetailTeacher.text = it.data.lecturer ?: "강의자 미정"
                 binding.lectureDetailGoal.text = it.data.goal
 
-                val reportId = it.data.reportId
-                binding.declarationBtn.visibility = if (reportId == null || reportId == 0) {
+                val reportId = it.data.report
+                binding.declarationBtn.visibility = if (reportId == 0) {
                     View.VISIBLE
                 } else {
                     View.INVISIBLE
