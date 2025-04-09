@@ -81,7 +81,7 @@
                         android:singleLine="true"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        android:maxLength="32"/>
+                        android:maxLength="16"/>
 
 
                     <TextView
@@ -151,7 +151,7 @@
                     android:paddingVertical="15dp"
                     android:singleLine="true"
                     android:inputType="textEmailAddress"
-                    android:maxLength="32"/>
+                    android:maxLength="25"/>
             </LinearLayout>
 
             <LinearLayout
@@ -204,7 +204,7 @@
                         android:singleLine="true"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        android:maxLength="32"/>
+                        android:maxLength="25"/>
 
                     <ImageButton
                         android:id="@+id/joinPwShow"
@@ -279,12 +279,12 @@
                         android:background="@drawable/seletor_radio_button"
                         android:hint="비밀번호 재확인"
                         android:inputType="textPassword"
+                        android:maxLength="25"
                         android:paddingHorizontal="20dp"
                         android:paddingVertical="15dp"
                         android:singleLine="true"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        android:maxLength="32"/>
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <ImageButton
                         android:id="@+id/joinPwShow2"
@@ -348,7 +348,7 @@
                     android:paddingHorizontal="20dp"
                     android:paddingVertical="15dp"
                     android:singleLine="true"
-                    android:maxLength="32"/>
+                    android:maxLength="10"/>
             </LinearLayout>
 
             <androidx.appcompat.widget.AppCompatButton
