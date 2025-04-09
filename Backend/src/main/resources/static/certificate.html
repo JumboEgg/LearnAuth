@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>수료증 확인</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -19,18 +19,18 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
-            line-height: 1.6;
+            padding: 10px;
+            line-height: 1.5;
             color: #333;
         }
 
         .certificate-container {
             background-color: #ffffff;
             border: none;
-            max-width: 800px;
+            max-width: 100%;
             width: 100%;
-            padding: 50px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            padding: 30px 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
             position: relative;
             border-radius: 8px;
             overflow: hidden;
@@ -38,10 +38,10 @@
 
         .certificate-border {
             position: absolute;
-            top: 15px;
-            left: 15px;
-            right: 15px;
-            bottom: 15px;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
             border: 1px solid #c9a959;
             border-radius: 4px;
             pointer-events: none;
@@ -65,76 +65,78 @@
 
         .certificate-header {
             text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 30px;
             position: relative;
         }
 
         .certificate-header::after {
             content: "";
             position: absolute;
-            bottom: -20px;
+            bottom: -15px;
             left: 50%;
             transform: translateX(-50%);
-            width: 100px;
+            width: 80px;
             height: 2px;
             background-color: #c9a959;
         }
 
         .certificate-header h1 {
             font-family: 'Noto Serif KR', serif;
-            font-size: 38px;
+            font-size: 28px;
             font-weight: 700;
             color: #2c3e50;
-            margin-bottom: 12px;
-            letter-spacing: 10px;
+            margin-bottom: 8px;
+            letter-spacing: 5px;
         }
 
         .certificate-header h2 {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 400;
             color: #777;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
             text-transform: uppercase;
         }
 
         .certificate-content {
-            margin-top: 40px;
+            margin-top: 30px;
             position: relative;
             z-index: 1;
         }
 
         .certificate-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: baseline;
+            margin-bottom: 15px;
             padding-bottom: 15px;
             border-bottom: 1px solid #eee;
+            word-break: break-word;
         }
 
         .info-label {
             font-weight: 600;
             color: #2c3e50;
-            min-width: 150px;
-            font-size: 16px;
+            font-size: 14px;
+            padding-right: 10px;
         }
 
         .info-value {
             text-align: right;
             color: #555;
             font-weight: 500;
-            font-size: 16px;
+            font-size: 14px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .certificate-seal {
-            position: absolute;
-            bottom: 40px;
-            right: 50px;
-            width: 100px;
-            height: 100px;
+            position: relative;
+            width: 80px;
+            height: 80px;
             display: flex;
             justify-content: center;
             align-items: center;
-            transform: rotate(-15deg);
+            margin: 20px auto 0;
         }
 
         .seal-inner {
@@ -151,7 +153,7 @@
         .seal-inner::before {
             content: '인증';
             font-weight: bold;
-            font-size: 22px;
+            font-size: 18px;
             color: #c9a959;
         }
 
@@ -160,52 +162,54 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 120px;
+            font-size: 70px;
             color: rgba(0, 0, 0, 0.03);
             font-weight: bold;
             pointer-events: none;
             font-family: 'Noto Serif KR', serif;
             z-index: 0;
+            white-space: nowrap;
         }
 
         .loading, .error {
             text-align: center;
             padding: 20px;
             color: #666;
+            font-size: 14px;
         }
 
         .error {
             color: #cc0000;
         }
 
-        @media (max-width: 768px) {
+        /* 삼성 갤럭시 시리즈 특화 스타일 */
+        @media screen and (max-width: 360px) {
             .certificate-container {
-                padding: 30px;
+                padding: 20px 15px;
             }
 
             .certificate-header h1 {
-                font-size: 30px;
-                letter-spacing: 5px;
+                font-size: 24px;
+                letter-spacing: 3px;
             }
 
-            .certificate-info {
-                flex-direction: column;
+            .certificate-header h2 {
+                font-size: 12px;
             }
 
             .info-label, .info-value {
-                text-align: left;
-                margin-bottom: 5px;
-            }
-
-            .certificate-seal {
-                position: static;
-                margin: 30px auto;
-                transform: none;
+                font-size: 13px;
             }
 
             .watermark {
-                font-size: 80px;
+                font-size: 50px;
             }
+        }
+
+        /* 긴 텍스트를 위한 스타일 (지갑 주소 등) */
+        .info-value.long-text {
+            font-size: 12px;
+            word-break: break-all;
         }
     </style>
 </head>
@@ -300,7 +304,7 @@
             </div>
             <div class="certificate-info">
                 <div class="info-label">지갑 주소</div>
-                <div class="info-value">${cleanUserWallet}</div>
+                <div class="info-value long-text">${cleanUserWallet}</div>
             </div>
         `;
 
