@@ -86,45 +86,30 @@ class LecturePlayFragment: Fragment() {
 
         viewModel.lectureDetail.observe(viewLifecycleOwner) { detail ->
             detail?.let {
+                // 1. 기본 데이터 설정 (빠른 데이터 처리)
                 allSubLectures = it.data.subLectures ?: emptyList()
-                val subLecture = allSubLectures.find { sub -> sub.subLectureId == currentSubLectureId }
-
+                
+                // 2. 강의 제목 설정 (텍스트만 있는 빠른 UI)
                 if (it.data.lectureId == currentLectureId) {
                     binding.playLectureName.text = it.data.title
                 }
 
-                // subLecture가 null이 아닐 경우, 제목 설정
+                // 3. 현재 서브강의 정보 찾기
+                val subLecture = allSubLectures.find { sub -> sub.subLectureId == currentSubLectureId }
+
+                // 4. 기본 텍스트 정보 설정 (빠른 UI)
                 if (subLecture != null) {
                     binding.playTitle.text = subLecture.subLectureTitle
                     binding.playNum.text = "${subLecture.lectureOrder}강"
-
-                    val videoId = subLecture.lectureUrl
-                    Log.d(TAG, "onViewCreated: ${subLecture.lectureUrl}")
-                    Log.d(TAG, "썸네일: $videoId")
-                    if (videoId != null) {
-                        // ▶️ 유튜브 영상 로딩
-                        binding.youtubePlayerView.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
-                            override fun onReady(player: YouTubePlayer) {
-                                youTubePlayer = player
-                                val startSecond = subLecture.continueWatching
-                                player.cueVideo(videoId, startSecond.toFloat())
-                            }
-                            override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
-                                lastKnownSecondWatched = second.toInt()
-                                // 현재 재생 중인 sublecture의 ID를 키로 사용하여 watchTimeMap 업데이트
-                                watchTimeMap[playingSubLectureId] = second.toInt()
-                                Log.d(TAG, "재생 시간 업데이트: subLectureId=$playingSubLectureId, 시간=${second.toInt()}초")
-                            }
-                        })
-                    } else {
-                        Log.e(TAG, "onViewCreated: 유효한 유튜브 URL이 아님.", )
-                    }
                 } else {
                     binding.playTitle.text = "강의 제목 없음"
                     binding.playNum.text = " "
                 }
 
-                // RecyclerView 설정
+                // 5. 이전/다음 버튼 상태 업데이트 (빠른 UI)
+                updateBtnColors()
+
+                // 6. RecyclerView 설정 (썸네일이 포함된 리스트)
                 val adapter = OwnedLectureDetailAdapter(
                     subLectureList = allSubLectures,
                     onItemClick = { subLecture ->
@@ -136,8 +121,28 @@ class LecturePlayFragment: Fragment() {
                 binding.playLectureList.adapter = adapter
                 binding.playLectureList.isNestedScrollingEnabled = false
 
-                // 현재 시청 중인 sublecture의 상태 업데이트
-                updateBtnColors()
+                // 7. 유튜브 영상 로딩 (가장 느린 작업)
+                if (subLecture != null) {
+                    val videoId = subLecture.lectureUrl
+                    Log.d(TAG, "onViewCreated: ${subLecture.lectureUrl}")
+                    Log.d(TAG, "썸네일: $videoId")
+                    if (videoId != null) {
+                        binding.youtubePlayerView.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
+                            override fun onReady(player: YouTubePlayer) {
+                                youTubePlayer = player
+                                val startSecond = subLecture.continueWatching
+                                player.cueVideo(videoId, startSecond.toFloat())
+                            }
+                            override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
+                                lastKnownSecondWatched = second.toInt()
+                                watchTimeMap[playingSubLectureId] = second.toInt()
+                                Log.d(TAG, "재생 시간 업데이트: subLectureId=$playingSubLectureId, 시간=${second.toInt()}초")
+                            }
+                        })
+                    } else {
+                        Log.e(TAG, "onViewCreated: 유효한 유튜브 URL이 아님.", )
+                    }
+                }
             }
         }
 
