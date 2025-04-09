@@ -51,7 +51,10 @@ import java.net.URLDecoder
 import java.util.regex.Pattern
 import androidx.core.content.res.ResourcesCompat
 import android.graphics.Bitmap
+import android.view.animation.Animation
+import android.view.animation.TranslateAnimation
 import com.example.second_project.network.ErrorResponse
+import kotlin.random.Random
 
 private const val TAG = "CertDetailFragment_야옹"
 private const val IPFS_GATEWAY_URL = "https://j12d210.p.ssafy.io/ipfs"
@@ -64,6 +67,8 @@ class CertDetailFragment : Fragment() {
     private val args: CertDetailFragmentArgs by navArgs()
     private var isCertificateIssued = false
     private var currentCid: String? = null
+    private var isOverlayVisible = false
+    private var isFragmentActive = false  // Fragment 활성화 상태를 추적하는 변수 추가
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -75,6 +80,7 @@ class CertDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        isFragmentActive = true  // Fragment가 활성화됨
 
         // Safe Args를 통해 전달받은 userId와 lectureId 사용
         val userId = args.userId
@@ -218,6 +224,8 @@ class CertDetailFragment : Fragment() {
     
     // 수료증 상태에 따라 UI 업데이트
     private fun updateUIForCertificateStatus() {
+        if (!isFragmentActive || _binding == null) return  // Fragment가 비활성화되었거나 binding이 null이면 리턴
+        
         if (isCertificateIssued) {
             binding.textTitleCertDetail.text = "수료증"
             binding.msgOnCert.visibility = View.GONE
@@ -327,6 +335,8 @@ class CertDetailFragment : Fragment() {
 
         dialogBinding.btnConfirmCert.setOnClickListener {
             dialog.dismiss()
+            showLoadingOverlay()
+            startCatAnimation()
             issueCertificate(userId, lectureId)
         }
     }
@@ -430,10 +440,14 @@ class CertDetailFragment : Fragment() {
                                             Toast.makeText(requireContext(), "인증서가 성공적으로 발급되었습니다.", Toast.LENGTH_SHORT).show()
                                             // 인증서 상세 정보 다시 로드
                                             loadCertificateDetail()
+                                            // 로딩 오버레이 숨기기
+                                            hideLoadingOverlay()
                                         }
                                     } else {
                                         requireActivity().runOnUiThread {
                                             Toast.makeText(requireContext(), "인증서 발급에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                                            // 로딩 오버레이 숨기기
+                                            hideLoadingOverlay()
                                         }
                                     }
                                 }
@@ -491,15 +505,21 @@ class CertDetailFragment : Fragment() {
                         }
                         
                         Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
+                        // 로딩 오버레이 숨기기
+                        hideLoadingOverlay()
                     }
                 } else {
                     Log.e(TAG, "IPFS 업로드 실패")
                     Toast.makeText(requireContext(), "IPFS 업로드에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    // 로딩 오버레이 숨기기
+                    hideLoadingOverlay()
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "수료증 발급 중 오류 발생: ${e.message}")
                 Log.e(TAG, "오류 스택 트레이스: ${e.stackTraceToString()}")
                 Toast.makeText(requireContext(), "오류가 발생했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
+                // 로딩 오버레이 숨기기
+                hideLoadingOverlay()
             } finally {
                 // 프로그레스바 숨기기
                 binding.loadingProgressBar.visibility = View.GONE
@@ -811,8 +831,131 @@ class CertDetailFragment : Fragment() {
         checkCertificateIssued(userId, lectureId)
     }
 
+    // 로딩 페이지 만들기 (임시)
+    private fun showLoadingOverlay() {
+        isOverlayVisible = true
+        binding.btnCertSave.isEnabled = false
+        binding.loadingOverlay.visibility = View.VISIBLE
+    }
+
+    private fun hideLoadingOverlay() {
+        isOverlayVisible = false
+        // 애니메이션 정지
+        binding.catImageView.clearAnimation()
+        // 오버레이 숨기기
+        binding.loadingOverlay.visibility = View.GONE
+        binding.btnCertSave.isEnabled = true
+    }
+
+    /**
+     * 고양이 ImageView를 "화면 왼쪽→오른쪽"으로만 계속 달리게 하는 메서드
+     * (한 번 달린 후 애니메이션 끝나면, 다시 왼쪽으로 복귀 후 반복)
+     */
+    // 고양이 이미지의 랜덤 이동 애니메이션 시작 함수
+    private fun startCatAnimation() {
+        binding.loadingOverlay.post {
+            doSingleRun()
+        }
+    }
+
+    // 고양이를 랜덤 위치로 이동시키는 함수
+    private fun doSingleRun() {
+        if (!isOverlayVisible) return  // 오버레이가 사라졌다면 중단
+
+        // 부모 오버레이(전체 로딩 화면)의 크기
+        val parentWidth = binding.loadingOverlay.width
+        val parentHeight = binding.loadingOverlay.height
+
+        // 고양이 이미지의 크기
+        val catWidth = binding.catImageView.width
+        val catHeight = binding.catImageView.height
+
+        if (parentWidth <= 0 || parentHeight <= 0 || catWidth <= 0 || catHeight <= 0) {
+            // 크기를 제대로 측정하지 못한 경우, 잠시 후 재시도
+            binding.loadingOverlay.postDelayed({ doSingleRun() }, 1000)
+            return
+        }
+
+        // 현재 고양이 이미지의 위치 (이미 애니메이션으로 인한 이동이 있을 수 있으므로 실제 x, y 좌표 사용)
+        val currentX = binding.catImageView.x
+        val currentY = binding.catImageView.y
+
+        // 고양이 이미지가 완전히 보일 수 있도록, x 좌표는 0 ~ (부모너비 - 이미지너비),
+        // y 좌표는 0 ~ (부모높이 - 이미지높이) 범위 내에서 랜덤하게 생성
+        val targetX = Random.nextInt(0, parentWidth - catWidth).toFloat()
+        val targetY = Random.nextInt(0, parentHeight - catHeight).toFloat()
+
+        // 현재 위치에서 타겟 위치까지의 차이(델타값)
+        val deltaX = targetX - currentX
+        val deltaY = targetY - currentY
+
+        val anim = TranslateAnimation(
+            Animation.ABSOLUTE, 0f,
+            Animation.ABSOLUTE, deltaX,
+            Animation.ABSOLUTE, 0f,
+            Animation.ABSOLUTE, deltaY
+        ).apply {
+            duration = 2000  // 애니메이션 지속 시간 (2초)
+            fillAfter = true  // 애니메이션 종료 후 그 위치에 그대로 둠
+            setAnimationListener(object : Animation.AnimationListener {
+                override fun onAnimationStart(animation: Animation) {}
+                override fun onAnimationRepeat(animation: Animation) {}
+                override fun onAnimationEnd(animation: Animation) {
+                    // 애니메이션 종료 후 실제 고양이 이미지의 위치 업데이트
+                    binding.catImageView.clearAnimation()
+                    binding.catImageView.x = targetX
+                    binding.catImageView.y = targetY
+                    // 오버레이가 여전히 활성화되어 있다면 다시 랜덤 이동 애니메이션 실행
+                    if (isOverlayVisible) {
+                        doSingleRun()
+                    }
+                }
+            })
+        }
+        binding.catImageView.startAnimation(anim)
+    }
+
+    /**
+     * "왼쪽→오른쪽" 단 한 번 달린 뒤, 애니메이션이 끝나면
+     * 다시 왼쪽 위치로 순간 이동 & 재시작하여 계속 반복.
+     */
+    private fun doSingleRun(distanceX: Float) {
+        if (!isOverlayVisible) return  // 이미 오버레이가 사라졌다면 중단
+
+        // 고양이를 왼쪽 시작 위치로 초기화
+        binding.catImageView.translationX = 0f
+
+        // "왼쪽(0f) → 오른쪽(distanceX)" 한 번 이동
+        val anim = TranslateAnimation(
+            Animation.ABSOLUTE, 0f,
+            Animation.ABSOLUTE, distanceX,
+            Animation.ABSOLUTE, 0f,
+            Animation.ABSOLUTE, 0f
+        ).apply {
+            duration = 2000  // 이동 시간 (2초 예시)
+            fillAfter = true // 애니메이션 끝나면 그 위치에 유지
+            setAnimationListener(object : Animation.AnimationListener {
+                override fun onAnimationStart(animation: Animation) {}
+                override fun onAnimationRepeat(animation: Animation) {}
+                override fun onAnimationEnd(animation: Animation) {
+                    // 고양이가 오른쪽까지 도달한 뒤
+                    // 다시 왼쪽으로 순간이동 후, 새 애니메이션 반복
+                    binding.catImageView.post {
+                        if (isOverlayVisible) {
+                            // 다음 달리기 시작
+                            doSingleRun(distanceX)
+                        }
+                    }
+                }
+            })
+        }
+
+        binding.catImageView.startAnimation(anim)
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
+        isFragmentActive = false  // Fragment가 비활성화됨
         _binding = null
     }
 }
