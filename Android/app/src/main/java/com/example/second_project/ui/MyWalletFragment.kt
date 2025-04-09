@@ -921,14 +921,24 @@ class SafeDisposable(private val disposable: io.reactivex.rxjava3.disposables.Di
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 if (!disposable.isDisposed) {
-                    disposable.dispose()
+                    try {
+                        disposable.dispose()
+                    } catch (e: Exception) {
+                        // Just log the error but don't rethrow
+                        Log.e("SafeDisposable", "Dispose 오류 (무시됨): ${e.message}")
+                    }
                 }
             } catch (e: Exception) {
-                Log.e("SafeDisposable", "Dispose 오류: ${e.message}")
+                Log.e("SafeDisposable", "Dispose 상태 확인 오류: ${e.message}")
             }
         }
     }
 
     val isDisposed: Boolean
-        get() = disposable.isDisposed
+        get() = try {
+            disposable.isDisposed
+        } catch (e: Exception) {
+            Log.e("SafeDisposable", "isDisposed 확인 오류: ${e.message}")
+            true // Safety - assume it's disposed if we can't check
+        }
 }

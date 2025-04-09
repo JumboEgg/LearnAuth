@@ -135,10 +135,14 @@ object TransactionCache {
      * @return 동일하면 true, 그렇지 않으면 false
      */
     private fun isSameTransaction(tx1: TransactionItem, tx2: TransactionItem): Boolean {
-        // 제목, 날짜, 금액이 같으면 동일한 거래로 간주
+        val timeThreshold = 1000L
+        val isSameTime = Math.abs(tx1.timestamp - tx2.timestamp) < timeThreshold
+
+        // 제목, 날짜, 금액이 같고 타임스탬프가 유사한 경우에만 동일한 거래로 판단
         return tx1.title == tx2.title &&
                 tx1.date == tx2.date &&
-                tx1.amount.compareTo(tx2.amount) == 0
+                tx1.amount.compareTo(tx2.amount) == 0 &&
+                isSameTime
     }
 
     /**
