@@ -128,7 +128,7 @@ class LecturePlayFragment: Fragment() {
                 val adapter = OwnedLectureDetailAdapter(
                     subLectureList = allSubLectures,
                     onItemClick = { subLecture ->
-                        saveCurrentWatchTime(currentSubLectureId)
+                        saveCurrentWatchTime(subLecture.subLectureId)
                         updateLectureContent(subLecture.subLectureId)
                     }
                 )
@@ -180,7 +180,7 @@ class LecturePlayFragment: Fragment() {
                 saveCurrentWatchTime(currentSubLectureId){
                     findNavController().popBackStack()
                 }
-//                findNavController().popBackStack()
+                findNavController().popBackStack()
             }
         })
 
@@ -191,11 +191,11 @@ class LecturePlayFragment: Fragment() {
         if (subLecture != null) {
             // 현재 sublecture의 재생 시간 저장
             val prevSubLectureId = currentSubLectureId
-            val prevTimeSec = lastKnownSecondWatched
-            
+            saveCurrentWatchTime(prevSubLectureId)  // 이전 강의의 재생 시간을 먼저 저장
+
             // currentSubLectureId 업데이트
             currentSubLectureId = subLectureId
-            playingSubLectureId = subLectureId // playingSubLectureId도 함께 업데이트
+            playingSubLectureId = subLectureId
 
             binding.playTitle.text = subLecture.subLectureTitle
             binding.playNum.text = "${subLecture.lectureOrder}강"
@@ -210,19 +210,12 @@ class LecturePlayFragment: Fragment() {
             } else {
                 Log.e(TAG, "updateLectureContent: 유효한 유튜브 URL이 아님.")
             }
-            
+
             // 서버에서 최신 데이터 가져오기
             refreshSubLectureList()
 
-
             // 이전/다음 버튼 상태 업데이트
             updateBtnColors()
-
-            // 이전 sublecture의 재생 시간 저장
-            if (prevTimeSec > 0) {
-                watchTimeMap[prevSubLectureId] = prevTimeSec
-                Log.d(TAG, "이전 sublecture 재생 시간 저장: subLectureId=$prevSubLectureId, 시간=${prevTimeSec}초")
-            }
         }
     }
 
@@ -230,20 +223,20 @@ class LecturePlayFragment: Fragment() {
     private fun refreshSubLectureList() {
         val lectureData = viewModel.lectureDetail.value?.data ?: return
         val userId = userId
-        
+
         // 서버에서 최신 데이터 가져오기
         viewModel.fetchLectureDetail(currentLectureId, userId)
-        
+
         // 데이터가 업데이트되면 UI 갱신
         viewModel.lectureDetail.observe(viewLifecycleOwner) { detail ->
             detail?.let {
                 allSubLectures = it.data.subLectures ?: emptyList()
-                
+
                 // 완강 상태 로그 추가
                 allSubLectures.forEach { subLecture ->
                     Log.d(TAG, "서버에서 가져온 sublecture 상태: subLectureId=${subLecture.subLectureId}, 제목=${subLecture.subLectureTitle}, 완강여부=${subLecture.endFlag}, 시청시간=${subLecture.continueWatching}초")
                 }
-                
+
                 // RecyclerView 어댑터 갱신
                 val adapter = OwnedLectureDetailAdapter(
                     subLectureList = allSubLectures,
@@ -253,7 +246,7 @@ class LecturePlayFragment: Fragment() {
                     }
                 )
                 binding.playLectureList.adapter = adapter
-                
+
                 Log.d(TAG, "서버에서 sublecture 리스트 갱신 완료: 총 ${allSubLectures.size}개")
             }
         }
@@ -262,7 +255,7 @@ class LecturePlayFragment: Fragment() {
     private fun updateBtnColors() {
         // 현재 sublecture 찾기
         val currentSubLecture = allSubLectures.find { it.subLectureId == currentSubLectureId }
-        
+
         // 현재 sublecture의 순서를 기준으로 이전/다음 sublecture 찾기
         val currentOrder = currentSubLecture?.lectureOrder ?: 0
         val previousSubLecture = allSubLectures.find { it.lectureOrder == currentOrder - 1 }
@@ -291,7 +284,7 @@ class LecturePlayFragment: Fragment() {
             binding.playNextBtnVisible.visibility = View.GONE
             binding.playNextBtnGone.visibility = View.VISIBLE
         }
-        
+
         // 최초 로드 완료 표시
         if (isFirstLoad) {
             isFirstLoad = false
@@ -312,17 +305,17 @@ class LecturePlayFragment: Fragment() {
         } else {
             watchTimeMap[forSubLectureId] ?: subLecture.continueWatching
         }
-        
+
         // 현재 시간이 0이면 이전에 저장된 시간을 사용합니다.
         val finalTimeSec = if (currentTimeSec == 0 && forSubLectureId == playingSubLectureId) {
             subLecture.continueWatching
         } else {
             currentTimeSec
         }
-        
+
         // 완강 여부 판단 (강의 길이의 98% 이상 시청 시 완강으로 간주)
         val endFlag = finalTimeSec >= lectureLength * 0.98
-        
+
         // 완강 여부 로그 추가
         Log.d(TAG, "완강 여부 판단: subLectureId=$forSubLectureId, 시간=${finalTimeSec}초, 강의길이=${lectureLength}초, 완강여부=$endFlag")
 
@@ -331,7 +324,7 @@ class LecturePlayFragment: Fragment() {
         // 서버에 저장 요청
         viewModel.saveWatchTime(userLectureId, forSubLectureId, finalTimeSec, endFlag)
         viewModel.updateLastViewedLecture(userLectureId, forSubLectureId)
-        
+
         // 로컬에서 sublecture 상태 업데이트
         var needUpdate = false
         if (endFlag && !subLecture.endFlag) {
@@ -345,13 +338,13 @@ class LecturePlayFragment: Fragment() {
                 Log.d(TAG, "sublecture 완강 상태 업데이트: subLectureId=$forSubLectureId")
             }
         }
-        
+
         // watchTimeMap 업데이트
         if (finalTimeSec > 0) {
             watchTimeMap[forSubLectureId] = finalTimeSec
             Log.d(TAG, "watchTimeMap 업데이트: subLectureId=$forSubLectureId, 시간=${finalTimeSec}초")
         }
-        
+
         // watchTimeMap이 업데이트되었으므로 UI 갱신
         if (needUpdate || finalTimeSec > 0) {
             // RecyclerView 어댑터 갱신
@@ -370,7 +363,7 @@ class LecturePlayFragment: Fragment() {
         // 새로운 sublecture로 이동하고 리스트 갱신
         updateLectureContent(newSubLectureId)
     }
-    
+
     // sublecture로 이동할 때 리스트를 갱신하는 메서드
     private fun updateSubLectureList(newSubLectureId: Int) {
         // 현재 시청 중인 sublecture의 상태 업데이트
@@ -380,7 +373,7 @@ class LecturePlayFragment: Fragment() {
             val currentTimeSec = watchTimeMap[currentSubLectureId] ?: subLecture.continueWatching
             val lectureLength = subLecture.lectureLength
             val isCompleted = currentTimeSec >= lectureLength * 0.98
-            
+
             // 완강 상태 업데이트
             if (isCompleted && !subLecture.endFlag) {
                 // 로컬에서만 상태 업데이트 (실제 DB 업데이트는 saveCurrentWatchTime에서 처리)
@@ -394,13 +387,13 @@ class LecturePlayFragment: Fragment() {
                 }
             }
         }
-        
+
         // 새로운 sublecture로 이동
         currentSubLectureId = newSubLectureId
-        
+
         // 서버에서 최신 데이터 가져오기
         refreshSubLectureList()
-        
+
         // 이전/다음 버튼 상태 업데이트
         updateBtnColors()
     }
