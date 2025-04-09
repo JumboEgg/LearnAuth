@@ -4,54 +4,225 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>수료증 확인</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
             background-color: #f5f5f5;
-        }
-        .certificate-container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .certificate-header {
-            text-align: center;
-            margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
             color: #333;
         }
+
+        .certificate-container {
+            background-color: #ffffff;
+            border: none;
+            max-width: 800px;
+            width: 100%;
+            padding: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .certificate-border {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            bottom: 15px;
+            border: 1px solid #c9a959;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+        .certificate-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.03;
+            background-image: linear-gradient(45deg, #000 25%, transparent 25%),
+            linear-gradient(-45deg, #000 25%, transparent 25%),
+            linear-gradient(45deg, transparent 75%, #000 75%),
+            linear-gradient(-45deg, transparent 75%, #000 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            pointer-events: none;
+        }
+
+        .certificate-header {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .certificate-header::after {
+            content: "";
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background-color: #c9a959;
+        }
+
+        .certificate-header h1 {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 38px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            letter-spacing: 10px;
+        }
+
+        .certificate-header h2 {
+            font-size: 16px;
+            font-weight: 400;
+            color: #777;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .certificate-content {
+            margin-top: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
         .certificate-info {
+            display: flex;
+            justify-content: space-between;
             margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
         }
+
         .info-label {
-            font-weight: bold;
-            color: #555;
+            font-weight: 600;
+            color: #2c3e50;
+            min-width: 150px;
+            font-size: 16px;
         }
+
         .info-value {
-            margin-left: 10px;
+            text-align: right;
+            color: #555;
+            font-weight: 500;
+            font-size: 16px;
         }
-        .loading {
+
+        .certificate-seal {
+            position: absolute;
+            bottom: 40px;
+            right: 50px;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: rotate(-15deg);
+        }
+
+        .seal-inner {
+            width: 100%;
+            height: 100%;
+            border: 2px solid #c9a959;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(201, 169, 89, 0.05);
+        }
+
+        .seal-inner::before {
+            content: '인증';
+            font-weight: bold;
+            font-size: 22px;
+            color: #c9a959;
+        }
+
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 120px;
+            color: rgba(0, 0, 0, 0.03);
+            font-weight: bold;
+            pointer-events: none;
+            font-family: 'Noto Serif KR', serif;
+            z-index: 0;
+        }
+
+        .loading, .error {
             text-align: center;
             padding: 20px;
+            color: #666;
         }
+
         .error {
-            color: red;
-            text-align: center;
-            padding: 20px;
+            color: #cc0000;
+        }
+
+        @media (max-width: 768px) {
+            .certificate-container {
+                padding: 30px;
+            }
+
+            .certificate-header h1 {
+                font-size: 30px;
+                letter-spacing: 5px;
+            }
+
+            .certificate-info {
+                flex-direction: column;
+            }
+
+            .info-label, .info-value {
+                text-align: left;
+                margin-bottom: 5px;
+            }
+
+            .certificate-seal {
+                position: static;
+                margin: 30px auto;
+                transform: none;
+            }
+
+            .watermark {
+                font-size: 80px;
+            }
         }
     </style>
 </head>
 <body>
 <div class="certificate-container">
+    <div class="certificate-pattern"></div>
+    <div class="certificate-border"></div>
+    <div class="watermark">수료증</div>
     <div class="certificate-header">
-        <h1>수료증 확인</h1>
+        <h1>수 료 증</h1>
+        <h2>Certificate of Completion</h2>
     </div>
-    <div id="certificate-content">
+    <div class="certificate-content" id="certificate-content">
         <div class="loading">수료증 정보를 불러오는 중...</div>
+    </div>
+    <div class="certificate-seal">
+        <div class="seal-inner"></div>
     </div>
 </div>
 
@@ -65,7 +236,6 @@
 
     // URL에서 CID 가져오기
     function getCidFromUrl() {
-        // URL 파라미터에서 CID 추출
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get('cid');
     }
@@ -109,27 +279,27 @@
 
         let html = `
             <div class="certificate-info">
-                <div class="info-label">수료자:</div>
+                <div class="info-label">수료자</div>
                 <div class="info-value">${data.userName || '정보 없음'}</div>
             </div>
             <div class="certificate-info">
-                <div class="info-label">강의명:</div>
+                <div class="info-label">강의명</div>
                 <div class="info-value">${data.lectureTitle || '정보 없음'}</div>
             </div>
             <div class="certificate-info">
-                <div class="info-label">강사명:</div>
+                <div class="info-label">강사명</div>
                 <div class="info-value">${data.teacherName || '정보 없음'}</div>
             </div>
             <div class="certificate-info">
-                <div class="info-label">카테고리:</div>
+                <div class="info-label">카테고리</div>
                 <div class="info-value">${data.category || '정보 없음'}</div>
             </div>
             <div class="certificate-info">
-                <div class="info-label">수료 일자:</div>
+                <div class="info-label">수료 일자</div>
                 <div class="info-value">${data.certificateDate || '정보 없음'}</div>
             </div>
             <div class="certificate-info">
-                <div class="info-label">지갑 주소:</div>
+                <div class="info-label">지갑 주소</div>
                 <div class="info-value">${cleanUserWallet}</div>
             </div>
         `;
