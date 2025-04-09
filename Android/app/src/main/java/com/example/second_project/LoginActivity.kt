@@ -5,8 +5,11 @@ import android.os.Bundle
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.second_project.data.TransactionCache
+import com.example.second_project.data.TransactionItem
 import com.example.second_project.data.model.dto.request.LogInRequest
 import com.example.second_project.data.model.dto.response.LoginResponse
 import com.example.second_project.databinding.ActivityLoginBinding
@@ -17,6 +20,9 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
 import org.web3j.crypto.WalletUtils
+import org.web3j.protocol.core.DefaultBlockParameter
+import org.web3j.protocol.core.DefaultBlockParameterName
+import java.math.BigInteger
 
 class LoginActivity : AppCompatActivity() {
 
@@ -59,6 +65,9 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
+        // 로그인 버튼 비활성화 및 로딩 UI 표시
+        showLoading(true)
+
         val loginRequest = LogInRequest(email = email, password = password)
         val apiService = ApiClient.retrofit.create(LoginApiService::class.java)
 
@@ -71,24 +80,25 @@ class LoginActivity : AppCompatActivity() {
                     UserSession.name = loginData.name
                     Log.d("TAG", "onResponse 이름: ${UserSession.name}")
 
-                    Toast.makeText(this@LoginActivity, "로그인 성공", Toast.LENGTH_SHORT).show()
-
                     val accessToken = response.headers()["access"]
                     val refreshToken = response.headers()["refresh"]
-
                     Log.d("LoginActivity", "Access Token: $accessToken")
                     Log.d("LoginActivity", "Refresh Token: $refreshToken")
-
                     UserSession.accessToken = accessToken
                     UserSession.refreshToken = refreshToken
 
                     // 지갑 처리 로직
                     handleWallet(loginData.wallet)
 
+                    // 지갑 정보 처리 후 백그라운드에서 캐시 데이터 미리 로드
+                    preloadCacheData()
+
+                    Toast.makeText(this@LoginActivity, "로그인 성공", Toast.LENGTH_SHORT).show()
                     val intent = Intent(this@LoginActivity, MainActivity::class.java)
                     startActivity(intent)
                     finish()
                 } else {
+                    showLoading(false)
                     Toast.makeText(
                         this@LoginActivity,
                         "로그인 실패: ${response.message()}",
@@ -98,13 +108,83 @@ class LoginActivity : AppCompatActivity() {
             }
 
             override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                showLoading(false)
                 Toast.makeText(this@LoginActivity, "네트워크 오류: ${t.message}", Toast.LENGTH_SHORT)
                     .show()
             }
         })
     }
 
-    // LoginActivity.kt의 handleWallet 함수만 수정
+    // 로딩 UI 표시/숨김 함수
+    private fun showLoading(isLoading: Boolean) {
+        if (isLoading) {
+            // 로그인 버튼 텍스트 숨기고 프로그레스바 표시
+            binding.loginBtn.text = ""
+            binding.loginProgressBar.visibility = View.VISIBLE
+
+            // 오버레이 및 로딩 메시지 표시
+            binding.loginOverlay.visibility = View.VISIBLE
+            binding.loginLoadingText.visibility = View.VISIBLE
+
+            // 버튼 비활성화
+            binding.loginBtn.isEnabled = false
+            binding.loginToJoinBtn.isEnabled = false
+
+            // 입력 필드 비활성화
+            binding.loginId.isEnabled = false
+            binding.loginPw.isEnabled = false
+            binding.loginPwShow.isEnabled = false
+        } else {
+            // 로그인 버튼 텍스트 복원하고 프로그레스바 숨김
+            binding.loginBtn.text = "로그인하기"
+            binding.loginProgressBar.visibility = View.GONE
+
+            // 오버레이 및 로딩 메시지 숨김
+            binding.loginOverlay.visibility = View.GONE
+            binding.loginLoadingText.visibility = View.GONE
+
+            // 버튼 활성화
+            binding.loginBtn.isEnabled = true
+            binding.loginToJoinBtn.isEnabled = true
+
+            // 입력 필드 활성화
+            binding.loginId.isEnabled = true
+            binding.loginPw.isEnabled = true
+            binding.loginPwShow.isEnabled = true
+        }
+    }
+
+    // 캐시 데이터 미리 로드 함수
+// 캐시 데이터 미리 로드 함수 (지갑 잔액만 로드)
+    private fun preloadCacheData() {
+        // 백그라운드에서 실행
+        Thread {
+            try {
+                Log.d("LoginActivity", "지갑 잔액 미리 로드 시작")
+
+                // 1. BlockChainManager 초기화
+                val blockChainManager = UserSession.getBlockchainManagerIfAvailable(this)
+                if (blockChainManager == null) {
+                    Log.e("LoginActivity", "BlockChainManager 초기화 실패")
+                    return@Thread
+                }
+
+                // 2. 잔액 조회 및 저장
+                try {
+                    val balance = blockChainManager.getMyCatTokenBalance()
+                    UserSession.lastKnownBalance = balance
+                    Log.d("LoginActivity", "지갑 잔액 로드 완료: $balance")
+                } catch (e: Exception) {
+                    Log.e("LoginActivity", "지갑 잔액 로드 실패", e)
+                }
+
+                Log.d("LoginActivity", "잔액 데이터 로드 완료")
+            } catch (e: Exception) {
+                Log.e("LoginActivity", "잔액 데이터 미리 로드 중 오류 발생", e)
+            }
+        }.start()
+    }
+
 
     private fun handleWallet(dbWalletPath: String) {
         // 로그인 시 입력한 비밀번호
