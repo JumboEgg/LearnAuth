@@ -33,6 +33,8 @@ import com.example.second_project.network.ApiClient
 import com.example.second_project.network.ReportApiService
 import com.example.second_project.ui.LecturePlayFragmentDirections.Companion.actionOwnedLectureDetailFragmentToLecturePlayFragment
 import com.example.second_project.utils.YoutubeUtil
+import com.example.second_project.utils.disableEmojis
+import com.example.second_project.utils.isKoreanOrEnglishOnly
 import com.example.second_project.viewmodel.OwnedLectureDetailViewModel
 import retrofit2.Call
 import retrofit2.Callback
@@ -294,6 +296,10 @@ class OwnedLectureDetailFragment : Fragment() {
 
         val dialogBinding = DialogReportBinding.bind(dialogView)
         val reportOptions = dialogBinding.reportOptions
+
+        // 이모지 거절
+        dialogBinding.reportContent.disableEmojis()
+
         val reportContent = dialogBinding.reportContent
         val reportBtn = dialogBinding.reportBtn
 
@@ -320,6 +326,11 @@ class OwnedLectureDetailFragment : Fragment() {
             }
             if (content.length > 255) {
                 Toast.makeText(requireContext(), "신고 내용은 255자 이하로 작성해 주세요.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (!isKoreanOrEnglishOnly(content)) {
+                Toast.makeText(requireContext(), "한글과 영어를 입력해주세요.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -358,7 +369,4 @@ class OwnedLectureDetailFragment : Fragment() {
             })
         }
     }
-
-
-
 }
