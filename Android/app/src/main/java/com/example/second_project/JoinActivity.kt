@@ -1,10 +1,13 @@
 package com.example.second_project
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
 import android.util.Log
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
@@ -25,7 +28,6 @@ import java.io.File
 private const val TAG = "JoinActivity_야옹"
 
 class JoinActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityJoinBinding
 
     // 클릭 카운트 변수 (터치 게임용)
@@ -38,6 +40,9 @@ class JoinActivity : AppCompatActivity() {
     // 뒤로가기 콜백
     private var backPressedCallback: OnBackPressedCallback? = null
 
+    // 회원가입 진행 중 상태
+    private var isSigningUp = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityJoinBinding.inflate(layoutInflater)
@@ -47,8 +52,26 @@ class JoinActivity : AppCompatActivity() {
         binding.joinPwShow.setOnClickListener { changePasswordVisibility() }
         binding.joinPwShow2.setOnClickListener { changePassword2Visibility() }
 
+        val editTextList = listOf(
+            binding.joinName,
+            binding.joinEmail,
+            binding.joinPw,
+            binding.joinPw2,
+            binding.joinNickname
+        )
+
+        editTextList.forEach { editText ->
+            // 키보드 응답성 향상을 위한 설정
+            editText.setSelectAllOnFocus(true)
+            editText.isSaveEnabled = true
+            editText.isFocusableInTouchMode = true
+            editText.inputType = editText.inputType or android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+        }
+
         // [회원가입하기] 버튼
         binding.joinBtn.setOnClickListener {
+            if (isSigningUp) return@setOnClickListener // 이미 진행 중이면 중복 클릭 방지
+
             val email = binding.joinEmail.text.toString().trim()
             val pw = binding.joinPw.text.toString()
             val pw2 = binding.joinPw2.text.toString()
@@ -70,11 +93,11 @@ class JoinActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-
             if (pw.length < 8) {
                 Toast.makeText(this, "비밀번호는 8자리 이상 부탁드립니다.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+
             if (pw != pw2) {
                 Toast.makeText(this, "비밀번호가 일치하지 않습니다.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -84,6 +107,9 @@ class JoinActivity : AppCompatActivity() {
                 Toast.makeText(this, "닉네임은 한글 또는 영문만 입력 가능합니다.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+
+            // 회원가입 진행 중 상태 설정
+            isSigningUp = true
 
             // 뒤로가기 버튼 비활성화
             disableBackButton()
@@ -113,6 +139,7 @@ class JoinActivity : AppCompatActivity() {
                         wallet = walletAddress,
                         name = name
                     )
+
                     val apiService = ApiClient.retrofit.create(SignupApiService::class.java)
 
                     runOnUiThread {
@@ -127,6 +154,7 @@ class JoinActivity : AppCompatActivity() {
                                         response.body()!!.data.message,
                                         Toast.LENGTH_SHORT
                                     ).show()
+
                                     // 회원가입 성공 → LoginActivity로 이동
                                     startActivity(
                                         Intent(
@@ -139,26 +167,43 @@ class JoinActivity : AppCompatActivity() {
                                     // 실패 시 로그/토스트 후, 다시 가입 화면 복귀
                                     val errorBody = response.errorBody()?.string()
                                     try {
-                                        val errorMessage = JSONObject(errorBody).getJSONObject("error").getString("message")
+                                        val errorMessage =
+                                            JSONObject(errorBody).getJSONObject("error")
+                                                .getString("message")
                                         if (errorMessage == "이미 사용중인 이메일입니다.") {
-                                            Toast.makeText(this@JoinActivity, errorMessage, Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(
+                                                this@JoinActivity,
+                                                errorMessage,
+                                                Toast.LENGTH_SHORT
+                                            ).show()
                                         } else if (errorMessage == "이미 사용중인 닉네임입니다.") {
-                                            Toast.makeText(this@JoinActivity, errorMessage, Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(
+                                                this@JoinActivity,
+                                                errorMessage,
+                                                Toast.LENGTH_SHORT
+                                            ).show()
                                         } else {
-                                            Toast.makeText(this@JoinActivity, "회원가입 실패! 다시 시도하세요", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(
+                                                this@JoinActivity,
+                                                "회원가입 실패! 다시 시도하세요",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
                                         }
                                         Log.d("joinerror", "회원가입 오류 메시지: $errorMessage")
                                     } catch (e: Exception) {
-                                        Toast.makeText(this@JoinActivity, "회원가입 실패! 다시 시도하세요", Toast.LENGTH_SHORT).show()
-                                        Log.e("joinerror", "에러 메시지 파싱 실패: ${e.message}, 원본: $errorBody")
+                                        Toast.makeText(
+                                            this@JoinActivity,
+                                            "회원가입 실패! 다시 시도하세요",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        Log.e(
+                                            "joinerror",
+                                            "에러 메시지 파싱 실패: ${e.message}, 원본: $errorBody"
+                                        )
                                     }
 
-
-//                                    Toast.makeText(
-//                                        this@JoinActivity,
-//                                        "회원가입 실패: ${response}",
-//                                        Toast.LENGTH_SHORT
-//                                    ).show()
+                                    // 회원가입 진행 중 상태 해제
+                                    isSigningUp = false
                                     hideTouchGameUI()
                                     enableBackButton() // 뒤로가기 버튼 다시 활성화
                                 }
@@ -170,6 +215,9 @@ class JoinActivity : AppCompatActivity() {
                                     "네트워크 오류: ${t.message}",
                                     Toast.LENGTH_SHORT
                                 ).show()
+
+                                // 회원가입 진행 중 상태 해제
+                                isSigningUp = false
                                 hideTouchGameUI()
                                 enableBackButton() // 뒤로가기 버튼 다시 활성화
                             }
@@ -183,6 +231,9 @@ class JoinActivity : AppCompatActivity() {
                             "Wallet 생성 실패: ${e.message}",
                             Toast.LENGTH_SHORT
                         ).show()
+
+                        // 회원가입 진행 중 상태 해제
+                        isSigningUp = false
                         hideTouchGameUI()
                         enableBackButton() // 뒤로가기 버튼 다시 활성화
                     }
@@ -201,7 +252,6 @@ class JoinActivity : AppCompatActivity() {
     private fun disableBackButton() {
         // 기존 콜백이 있다면 제거
         backPressedCallback?.remove()
-
         // 새 콜백 생성 및 등록
         backPressedCallback = onBackPressedDispatcher.addCallback(this) {
             // 아무 것도 하지 않음
@@ -266,6 +316,11 @@ class JoinActivity : AppCompatActivity() {
     // 이메일 형식 검사
     private fun isValidEmail(email: String): Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    private fun showKeyboard(view: View) {
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
     }
 
 }
