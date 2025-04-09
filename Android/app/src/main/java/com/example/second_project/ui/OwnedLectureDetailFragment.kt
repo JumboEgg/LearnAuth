@@ -29,6 +29,7 @@ import com.example.second_project.data.model.dto.response.SubLecture
 import com.example.second_project.data.repository.LectureDetailRepository
 import com.example.second_project.databinding.DialogReportBinding
 import com.example.second_project.databinding.FragmentOwnedLectureDetailBinding
+import com.example.second_project.interfaces.OnSingleClickListener
 import com.example.second_project.network.ApiClient
 import com.example.second_project.network.ReportApiService
 import com.example.second_project.ui.LecturePlayFragmentDirections.Companion.actionOwnedLectureDetailFragmentToLecturePlayFragment
@@ -253,10 +254,11 @@ class OwnedLectureDetailFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-        binding.declarationBtn.setOnClickListener {
-            showReportDialog(userId, lectureId)
-        }
-
+        binding.declarationBtn.setOnClickListener(object : OnSingleClickListener() {
+            override fun onSingleClick(v: View?) {
+                showReportDialog(userId, lectureId)
+            }
+        })
         // 자료 받기 구현
         binding.downloadBtn.setOnClickListener {
 
@@ -268,7 +270,6 @@ class OwnedLectureDetailFragment : Fragment() {
                 Toast.makeText(requireContext(), "등록된 자료가 없습니다.", Toast.LENGTH_SHORT).show()
             }
         }
-
     }
 
     fun createIpfsDownloadUrl(cid: String, gateway: String = "https://gateway.pinata.cloud"): String {
@@ -326,11 +327,6 @@ class OwnedLectureDetailFragment : Fragment() {
             }
             if (content.length > 255) {
                 Toast.makeText(requireContext(), "신고 내용은 255자 이하로 작성해 주세요.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            if (!isKoreanOrEnglishOnly(content)) {
-                Toast.makeText(requireContext(), "한글과 영어를 입력해주세요.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
