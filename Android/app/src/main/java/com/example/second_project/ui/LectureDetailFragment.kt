@@ -50,6 +50,7 @@ import java.math.BigInteger
 private const val TAG = "LectureDetailFragment_야옹"
 
 class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
+    lateinit var blockBackDuringPaymentCallback: OnBackPressedCallback
     private var _binding: FragmentLectureDetailBinding? = null
     private val binding get() = _binding!!
     private var isOverlayVisible = false
@@ -162,6 +163,15 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
 
     // 구매 버튼 클릭 이벤트 처리 함수
     fun handleLecturePurchase(lectureId: Int, price: Int, lectureTitle: String) {
+
+        // 뒤로가기 임시 차단
+        blockBackDuringPaymentCallback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                Toast.makeText(requireContext(), "결제 처리 중입니다. 잠시만 기다려주세요.", Toast.LENGTH_SHORT).show()
+            }
+        }
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, blockBackDuringPaymentCallback)
+
         try {
             Log.d(TAG, "강의 구매 시작 - 강의ID: $lectureId, 가격: $price, 제목: $lectureTitle")
 
@@ -209,6 +219,7 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                             Log.e(TAG, "잔액 부족: 부족액(wei): $shortfall")
                             withContext(Dispatchers.Main) {
                                 hideLoadingOverlay()
+                                blockBackDuringPaymentCallback.remove()
                                 // 부족액을 원래 wei 단위 그대로 표시
                                 showNotEnoughDialog(shortfall)
                             }
@@ -469,6 +480,7 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                                         Log.d(TAG, "강의 구매 성공! 소요 시간: $elapsedTime ms")
                                         // 로딩 끄기
                                         hideLoadingOverlay()
+                                        blockBackDuringPaymentCallback.remove()
                                         findNavController().navigate(
                                             R.id.ownedLectureDetailFragment,
                                             bundleOf("lectureId" to lectureId),
@@ -508,6 +520,7 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                         Log.e(TAG, "강의 구매 오류", e)
                         withContext(Dispatchers.Main) {
                             hideLoadingOverlay()
+                            blockBackDuringPaymentCallback.remove()
                             Toast.makeText(
                                 requireContext(),
                                 "오류 발생: ${e.message}",
@@ -530,7 +543,9 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
         AlertDialog.Builder(requireContext())
             .setTitle("잔액 부족")
             .setMessage("CAT 잔액이 ${formattedShortfall}만큼 부족합니다.\n충전 후 다시 시도해주세요.")
-            .setPositiveButton("확인", null)
+            .setPositiveButton("확인") { _, _ ->
+                blockBackDuringPaymentCallback.remove()
+            }
             .show()
     }
 
@@ -544,6 +559,8 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
             }
             .setNegativeButton("취소") { _, _ ->
                 Log.d(TAG, "결제 취소 버튼 클릭됨.")
+                blockBackDuringPaymentCallback.remove()
+
             }
             .show()
     }

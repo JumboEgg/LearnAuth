@@ -128,7 +128,7 @@ class LecturePlayFragment: Fragment() {
                 val adapter = OwnedLectureDetailAdapter(
                     subLectureList = allSubLectures,
                     onItemClick = { subLecture ->
-                        saveCurrentWatchTime(subLecture.subLectureId)
+                        saveCurrentWatchTime(currentSubLectureId)
                         updateLectureContent(subLecture.subLectureId)
                     }
                 )
