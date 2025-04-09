@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Profile;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.protocol.core.RemoteFunctionCall;
@@ -38,7 +39,7 @@ import static org.mockito.Mockito.*;
 // mockito 활용하여 테스트 코드 작성
 // mockito : java 오픈소스 테스트 프레임워크
 @ExtendWith(MockitoExtension.class)
-@Profile("local")
+@ConditionalOnExpression("'${spring.profiles.active}' != 'dev'")
 @MockitoSettings(strictness = Strictness.LENIENT)
 class LectureManagementServiceImplTest {
 //    // 필요한 Repository와 유틸을 Mock으로 만들어서 실제 DB 없어도 테스트 가능하게 한다.
