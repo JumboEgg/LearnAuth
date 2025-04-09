@@ -11,17 +11,22 @@ import android.view.animation.TranslateAnimation
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.second_project.R
 import com.example.second_project.UserSession
 import com.example.second_project.data.model.dto.request.DepositRequest
 import com.example.second_project.databinding.FragmentChargeBinding
 import com.example.second_project.network.ApiClient
 import com.example.second_project.network.PaymentApiService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
 import java.math.BigInteger
+import java.text.NumberFormat
+import java.util.Locale
 import kotlin.random.Random
 
 class ChargeFragment : Fragment() {
@@ -58,27 +63,27 @@ class ChargeFragment : Fragment() {
 
         backCallback = object : OnBackPressedCallback(false) {
             override fun handleOnBackPressed() {
-                // 뒤로가기 눌려도 아무런 동작을 하지 않음
             }
         }
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, backCallback)
 
+        // 2) 기본 값 세팅
+        selectedBaseAmount = getBaseAmountFromRadioButton()
+        binding.chargeInput.setText(selectedBaseAmount.toString())
 
         Log.d("ChargeFragment", "onViewCreated 시작")
         Log.d(
             "ChargeFragment",
             "지갑: ${UserSession.walletFilePath}, pw=${UserSession.walletPassword != null}"
         )
-
-        // 1) 지갑 파일 처리
-        handleWalletFile()
-
-        // 2) 기본 값 세팅
-        selectedBaseAmount = getBaseAmountFromRadioButton()
-        binding.chargeInput.setText(selectedBaseAmount.toString())
-
-        // 3) 잔액 불러오기
-        loadCurrentBalance()
+        binding.root.post {
+            // 지갑 파일 처리는 Dispatchers.IO에서 실행하여 메인 스레드 차단 없이 진행
+            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                handleWalletFile()
+            }
+            // 잔액 조회도 코루틴을 통해 백그라운드에서 진행 (loadCurrentBalance() 내부도 이미 코루틴 사용)
+            loadCurrentBalance()
+        }
 
         // 라디오 버튼 변경 시
         binding.chargeOptions.setOnCheckedChangeListener { _, _ ->
@@ -90,7 +95,6 @@ class ChargeFragment : Fragment() {
         // 결제 버튼
         binding.purchaseBtn.setOnClickListener {
             backCallback.isEnabled = true
-
             showLoadingOverlay()
             startCatAnimation()
             handlePurchase()  // 결제 로직
@@ -349,32 +353,29 @@ class ChargeFragment : Fragment() {
         }
     }
 
-    // 현재 잔액 로드
     private fun loadCurrentBalance() {
         val manager = UserSession.getBlockchainManagerIfAvailable(requireContext())
         if (manager != null) {
-            Thread {
+            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
                 try {
-                    // 지갑 주소 확인 (디버깅용)
                     val address = manager.getMyWalletAddress()
                     Log.d("ChargeFragment", "충전 대상 지갑 주소: $address")
 
-                    // wei 단위의 잔액 가져오기
                     val balance = manager.getMyCatTokenBalance()
                     Log.d("ChargeFragment", "현재 잔액(wei): $balance")
 
                     currentBalance = balance
-                    requireActivity().runOnUiThread {
+                    // UI 업데이트는 메인 스레드에서 처리
+                    launch(Dispatchers.Main) {
                         updateChargeOutput(selectedBaseAmount)
                     }
                 } catch (e: Exception) {
-                    e.printStackTrace()
                     Log.e("ChargeFragment", "잔액 조회 실패: ${e.message}")
-                    requireActivity().runOnUiThread {
+                    launch(Dispatchers.Main) {
                         Toast.makeText(requireContext(), "잔액 조회 실패", Toast.LENGTH_SHORT).show()
                     }
                 }
-            }.start()
+            }
         } else {
             Log.e("ChargeFragment", "BlockchainManager 초기화 실패 - 지갑 정보를 확인하세요")
             Toast.makeText(requireContext(), "지갑 정보 초기화 실패", Toast.LENGTH_SHORT).show()
@@ -497,34 +498,28 @@ class ChargeFragment : Fragment() {
         if (manager != null) {
             Thread {
                 try {
-                    // 블록체인에 반영될 시간을 주기 위해 대기 시간 증가 (1초 -> 5초)
-                    Thread.sleep(5000)
-
-                    // 실제 블록체인 잔액 확인 (최대 3회 시도)
+                    // 초기 대기 제거: 즉시 잔액 확인을 시작
                     var actualBalance: BigInteger? = null
                     var retryCount = 0
                     var success = false
 
+                    // 최대 3회 재시도 (지연은 최소화: 100ms)
                     while (retryCount < 3 && !success) {
                         try {
-                            // 실제 블록체인 잔액 확인
                             actualBalance = manager.getMyCatTokenBalance()
                             Log.d(
                                 "ChargeFragment",
                                 "충전 후 실제 잔액(wei): $actualBalance (시도 ${retryCount + 1})"
                             )
-
-                            // 예상 잔액과 비교
                             if (actualBalance >= currentBalance) {
                                 success = true
                             } else {
-                                // 잔액이 예상보다 적으면 1초 더 기다리고 재시도
-                                Thread.sleep(1000)
+                                Thread.sleep(100)  // 기존 1초보다 훨씬 짧은 지연
                                 retryCount++
                             }
                         } catch (e: Exception) {
                             Log.e("ChargeFragment", "잔액 조회 시도 ${retryCount + 1} 실패: ${e.message}")
-                            Thread.sleep(1000)
+                            Thread.sleep(100)
                             retryCount++
                         }
                     }
@@ -535,10 +530,9 @@ class ChargeFragment : Fragment() {
                         Log.d("ChargeFragment", "기대 잔액(wei): ${currentBalance}")
                         Log.d("ChargeFragment", "잔액 일치 여부: ${actualBalance >= currentBalance}")
 
-                        // UserSession에 마지막 잔액 저장 - 이것이 핵심!
+                        // 최신 잔액을 UserSession에 저장
                         UserSession.lastKnownBalance = actualBalance
 
-                        // UI 스레드에서 작업
                         requireActivity().runOnUiThread {
                             if (isAdded && _binding != null) {
                                 Toast.makeText(
@@ -547,30 +541,23 @@ class ChargeFragment : Fragment() {
                                     Toast.LENGTH_LONG
                                 ).show()
 
-                                // 자동 뒤로가기 호출 전에 혹시 모를 콜백 막힘 상태를 해제
                                 backCallback.isEnabled = false
                                 binding.root.postDelayed({
-                                    if (isAdded && !isRemoving) { // Fragment가 아직 유효한 경우
+                                    if (isAdded && !isRemoving) {
                                         requireActivity().onBackPressedDispatcher.onBackPressed()
                                     }
                                 }, 100)
                             }
                         }
                     } else {
-                        // 잔액 확인 실패 또는 예상 잔액과 다름
                         Log.e("ChargeFragment", "충전 후 잔액 확인 실패 또는 불일치")
-
-                        // UI 스레드에서 작업
                         requireActivity().runOnUiThread {
                             if (isAdded && _binding != null) {
-                                // 실패 토스트를 표시하지만 여전히 충전은 성공으로 간주 (서버 API는 성공했으므로)
                                 Toast.makeText(
                                     requireContext(),
                                     "충전은 완료되었으나 잔액 확인에 지연이 있을 수 있습니다.",
                                     Toast.LENGTH_LONG
                                 ).show()
-
-                                // 그래도 뒤로가기는 실행함
                                 backCallback.isEnabled = false
                                 binding.root.postDelayed({
                                     if (isAdded && !isRemoving) {
@@ -583,8 +570,6 @@ class ChargeFragment : Fragment() {
                 } catch (e: Exception) {
                     Log.e("ChargeFragment", "충전 후 잔액 확인 실패: ${e.message}")
                     e.printStackTrace()
-
-                    // UI 스레드에서 작업
                     requireActivity().runOnUiThread {
                         if (isAdded && _binding != null) {
                             Toast.makeText(
@@ -592,8 +577,6 @@ class ChargeFragment : Fragment() {
                                 "충전은 완료되었으나 잔액 확인 중 오류가 발생했습니다.",
                                 Toast.LENGTH_LONG
                             ).show()
-
-                            // 뒤로가기 실행
                             backCallback.isEnabled = false
                             binding.root.postDelayed({
                                 if (isAdded && !isRemoving) {
@@ -626,16 +609,26 @@ class ChargeFragment : Fragment() {
 
     // 충전 정보 표시 업데이트
     private fun updateChargeOutput(amount: Int) {
-        // 사용자가 입력한 기본 금액(예: 5000 CAT)은 그대로 표시
-        binding.chargeOutput.text = "$amount CAT"
+        // 사용자가 선택한 기본 금액에 천 단위 콤마를 추가해 표시 (예: "5,000 CAT")
+        binding.chargeOutput.text = String.format(Locale.KOREA, "%,d CAT", amount)
 
         val tokenUnit = BigInteger.TEN.pow(18)
-
-        // currentBalance는 이미 wei 단위이므로, 충전 금액도 wei로 변환하여 합산
+        // currentBalance는 wei 단위이므로, 충전할 금액도 wei 단위로 변환 후 합산
         val totalWei = currentBalance.add(BigInteger.valueOf(amount.toLong()).multiply(tokenUnit))
-        val displayTotal = totalWei.divide(tokenUnit)
 
-        binding.chargeResult.text = "충전 후 ${displayTotal} CAT 보유 예상"
+        // totalWei를 BigDecimal로 변환하여 CAT 단위 계산 (18자리 정밀도)
+        val totalDecimal = totalWei.toBigDecimal()
+            .divide(tokenUnit.toBigDecimal(), 18, java.math.RoundingMode.HALF_UP)
+
+        // NumberFormat 설정: 소수점 둘째 자리까지 반올림, 천 단위 콤마 포함
+        val numberFormat = NumberFormat.getNumberInstance(Locale.US).apply {
+            maximumFractionDigits = 2
+            minimumFractionDigits = 2
+            roundingMode = java.math.RoundingMode.HALF_UP
+        }
+        val formattedTotal = numberFormat.format(totalDecimal)
+
+        binding.chargeResult.text = "충전 후 $formattedTotal CAT 보유 예상"
     }
 
     override fun onDestroyView() {
