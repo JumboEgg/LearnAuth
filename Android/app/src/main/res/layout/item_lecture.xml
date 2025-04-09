@@ -51,6 +51,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
+                android:id="@+id/lectureCategory"
                 style="@style/semibold10"
                 android:layout_width="50dp"
                 android:layout_height="wrap_content"
@@ -59,7 +60,7 @@
                 android:backgroundTint="@color/primary_color"
                 android:gravity="center"
                 android:padding="3dp"
-                android:text="데이터"
+                android:text=" "
                 android:textColor="@color/white"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

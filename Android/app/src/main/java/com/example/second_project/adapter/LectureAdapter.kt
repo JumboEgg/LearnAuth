@@ -59,6 +59,7 @@ class LectureAdapter(
             binding.lectureTitle.text = item.title
             binding.lectureTitle.isSelected = true
             binding.lectureTeacherName.text = item.lecturer   // 강의자 정보 바인딩
+            binding.lectureCategory.text = item.categoryName
             val price = decimal.format(item.price)
             binding.lecturePrice.text = "${price}CAT"
             
