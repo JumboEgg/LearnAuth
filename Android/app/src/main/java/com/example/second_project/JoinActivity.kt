@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
 import com.example.second_project.data.model.dto.request.SignupRequest
 import com.example.second_project.data.model.dto.response.SignupResponse
 import com.example.second_project.databinding.ActivityJoinBinding
@@ -288,19 +289,25 @@ class JoinActivity : AppCompatActivity() {
 
     /** (A) 터치 게임 UI 보여주기 */
     private fun showTouchGameUI() {
+        showLoadingOverlay()
+        startCatAnimation()
+
+
         // 회원가입 입력 UI 컨테이너를 숨기고
-        binding.joinFormLayout.visibility = android.view.View.GONE
+//        binding.joinFormLayout.visibility = android.view.View.GONE
         // 터치 게임 UI는 루트에 그대로 남김
-        binding.touchGameLayout.visibility = android.view.View.VISIBLE
-        // 클릭 카운트 초기화
-        clickCount = 0
-        binding.clickCountText.text = "클릭 수: 0"
+//        binding.touchGameLayout.visibility = android.view.View.VISIBLE
+//        // 클릭 카운트 초기화
+//        clickCount = 0
+//        binding.clickCountText.text = "클릭 수: 0"
     }
 
     /** (B) 터치 게임 UI 숨기기 */
     private fun hideTouchGameUI() {
-        binding.joinFormLayout.visibility = android.view.View.VISIBLE
-        binding.touchGameLayout.visibility = android.view.View.GONE
+        hideLoadingOverlay()
+
+//        binding.joinFormLayout.visibility = android.view.View.VISIBLE
+//        binding.touchGameLayout.visibility = android.view.View.GONE
     }
 
     /** 비밀번호 입력 가시화 토글 */
@@ -338,6 +345,29 @@ class JoinActivity : AppCompatActivity() {
     private fun showKeyboard(view: View) {
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
+    }
+
+    private fun showLoadingOverlay() {
+        binding.loadingOverlay.visibility = View.VISIBLE
+        Glide.with(this).load(R.raw.loadingimg2).override(560, 560).into(binding.catImageView)
+    }
+
+    private fun hideLoadingOverlay() {
+        // 애니메이션 정지
+        binding.catImageView.clearAnimation()
+        // 오버레이 숨기기
+        binding.loadingOverlay.visibility = View.GONE
+    }
+
+    /**
+     * 고양이 ImageView를 "화면 왼쪽→오른쪽"으로만 계속 달리게 하는 메서드
+     * (한 번 달린 후 애니메이션 끝나면, 다시 왼쪽으로 복귀 후 반복)
+     */
+    // 고양이 이미지의 랜덤 이동 애니메이션 시작 함수
+    private fun startCatAnimation() {
+        binding.loadingOverlay.post {
+//            doSingleRun()
+        }
     }
 
 }
