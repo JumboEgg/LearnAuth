@@ -180,8 +180,9 @@
                     android:imeOptions="actionDone"
                     android:inputType="textMultiLine"
                     android:maxLength="255"
-                    android:maxLines="5"
                     android:minLines="5"
+                    android:nestedScrollingEnabled="true"
+                    android:scrollbars="vertical"
                     android:paddingStart="14dp"
                     android:saveEnabled="true"
                     android:textColor="@color/text_gray" />
