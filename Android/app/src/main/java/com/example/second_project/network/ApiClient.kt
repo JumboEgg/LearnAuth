@@ -1,6 +1,8 @@
 package com.example.second_project.network
 
 import com.example.second_project.BuildConfig
+import com.example.second_project.data.model.dto.response.CertificateDetailResponse
+import com.example.second_project.data.model.dto.response.CertificateDetailData
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
@@ -11,9 +13,8 @@ import java.util.concurrent.TimeUnit
 object ApiClient {
     // Gson 객체 추가
     val gson: Gson = GsonBuilder()
-        .serializeNulls()
-        .registerTypeAdapter(Double::class.java, InfinityTypeAdapter())
-        .registerTypeAdapter(String::class.java, StringInfinityTypeAdapter())
+        .registerTypeAdapter(CertificateDetailResponse::class.java, CertificateDetailResponse.typeAdapter)
+        .registerTypeAdapter(CertificateDetailData::class.java, CertificateDetailData.typeAdapter)
         .create()
     
     // 실제 API 서버의 Base URL로 변경하세요.
