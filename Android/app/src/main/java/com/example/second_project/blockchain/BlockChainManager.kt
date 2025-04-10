@@ -74,9 +74,9 @@ class BlockChainManager(
     init {
         // 실제 배포 주소 (예시는 가짜)
         val addresses = mapOf(
-            "LectureForwarder" to "0x6C8dB305b62f8b2C25d89EB8cBcD34f04A1b18Da",
-            "CATToken" to "0xBbA194679E8C86c722Ea5423e26f47D18d0f7633",
-            "LectureSystem" to "0x967a5f3B77949DE8b7ebf7392fF2B63dc1a5add0"
+            "LectureForwarder" to "0x18d2C0FD83e4136F047D6dd09AC1646bEF49d8e8",
+            "CATToken" to "0xA03C7D8aC9B0BF1bCB85013f126FE8994eCBd256",
+            "LectureSystem" to "0xf40A92343c89DB8AF50DeD6CD6f14E0ce6492A47"
         )
 
         lectureEventMonitor = LectureEventMonitor.load(

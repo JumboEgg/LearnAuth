@@ -24,13 +24,15 @@ object UserSession {
     private const val KEY_IS_CHARGING = "is_charging" // 충전 상태 저장용 키 추가
     private const val KEY_CHARGING_START_TIME = "charging_start_time" // 충전 시작 시간 저장용 키 추가
 
+    // 강의 구매 관련 키 추가
+    private const val KEY_PURCHASING_LECTURE_IDS = "purchasing_lecture_ids"
+    private const val KEY_PURCHASE_START_TIME_PREFIX = "purchase_start_time_"
+
     private lateinit var preferences: SharedPreferences
-
-
     var lastBalanceUpdateTime: Long = 0
         private set
-    // 마지막으로 알려진 잔액 (메모리에만 저장)
 
+    // 마지막으로 알려진 잔액 (메모리에만 저장)
     var lastKnownBalance: BigInteger? = null
         set(value) {
             field = value
@@ -64,7 +66,6 @@ object UserSession {
                 preferences.edit().remove(KEY_CHARGING_START_TIME).apply()
             }
         }
-
 
     private const val KEY_PENDING_CHARGE_AMOUNT = "pending_charge_amount"
     private const val KEY_PENDING_CHARGE_AMOUNT_BASE = "pending_charge_amount_base"
@@ -109,9 +110,20 @@ object UserSession {
     // BlockChainManager를 인메모리로 캐싱
     private var _blockchainManager: BlockChainManager? = null
 
+    // 구매 중인 강의 ID 집합 추가
+    private val purchasingLectureIds = mutableSetOf<Int>()
+
     fun init(context: Context) {
         preferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         applicationContext = context.applicationContext
+
+        // 저장된 구매 중인 강의 ID 목록 불러오기
+        val purchasingIds =
+            preferences.getStringSet(KEY_PURCHASING_LECTURE_IDS, emptySet()) ?: emptySet()
+        synchronized(purchasingLectureIds) {
+            purchasingLectureIds.clear()
+            purchasingLectureIds.addAll(purchasingIds.map { it.toInt() })
+        }
     }
 
     var userId: Int
@@ -166,6 +178,59 @@ object UserSession {
         set(value) {
             preferences.edit().putString(KEY_WALLET_PASSWORD, value).apply()
         }
+
+    /**
+     * 강의 구매 상태를 설정합니다.
+     * @param lectureId 구매 중인 강의 ID
+     * @param isPurchasing 구매 중 여부
+     */
+    fun setLecturePurchasing(lectureId: Int, isPurchasing: Boolean) {
+        synchronized(purchasingLectureIds) {
+            if (isPurchasing) {
+                purchasingLectureIds.add(lectureId)
+                // 구매 시작 시간 기록
+                preferences.edit().putLong(
+                    "$KEY_PURCHASE_START_TIME_PREFIX$lectureId",
+                    System.currentTimeMillis()
+                ).apply()
+            } else {
+                purchasingLectureIds.remove(lectureId)
+                // 구매 시작 시간 삭제
+                preferences.edit().remove("$KEY_PURCHASE_START_TIME_PREFIX$lectureId").apply()
+            }
+
+            // 구매 중인 강의 ID 목록 저장
+            preferences.edit().putStringSet(
+                KEY_PURCHASING_LECTURE_IDS,
+                purchasingLectureIds.map { it.toString() }.toSet()
+            ).apply()
+        }
+        android.util.Log.d(
+            "UserSession",
+            "강의 구매 상태 변경: lectureId=$lectureId, isPurchasing=$isPurchasing"
+        )
+    }
+
+    /**
+     * 특정 강의의 구매 중 여부를 확인합니다.
+     * @param lectureId 확인할 강의 ID
+     * @return 구매 중이면 true, 아니면 false
+     */
+    fun isLecturePurchasing(lectureId: Int): Boolean {
+        synchronized(purchasingLectureIds) {
+            return purchasingLectureIds.contains(lectureId)
+        }
+    }
+
+    /**
+     * 특정 강의의 구매 시작 시간을 반환합니다.
+     * @param lectureId 강의 ID
+     * @return 구매 시작 시간(밀리초), 없으면 null
+     */
+    fun getLecturePurchaseStartTime(lectureId: Int): Long? {
+        val time = preferences.getLong("$KEY_PURCHASE_START_TIME_PREFIX$lectureId", 0)
+        return if (time > 0) time else null
+    }
 
     /**
      * 지갑 정보를 로드하고 BlockChainManager 인스턴스를 캐싱하여 반환합니다.
@@ -234,7 +299,10 @@ object UserSession {
                             val credentials = WalletUtils.loadCredentials(password, walletFile)
                             walletFilePath = walletFile.name
                             walletAddress = credentials.address
-                            android.util.Log.d("UserSession", "대체 지갑 업데이트: 주소=${credentials.address}")
+                            android.util.Log.d(
+                                "UserSession",
+                                "대체 지갑 업데이트: 주소=${credentials.address}"
+                            )
                             manager = BlockChainManager(password, walletFile)
                             break
                         } catch (e: Exception) {
@@ -264,7 +332,6 @@ object UserSession {
                     val address = manager.getMyWalletAddress()
                     walletAddress = address
                     android.util.Log.d("UserSession", "BlockChainManager 사전 초기화 성공: $address")
-
                     // 잔액 미리 가져오기
                     try {
                         val balance = manager.getMyCatTokenBalance()
@@ -274,7 +341,6 @@ object UserSession {
                         android.util.Log.e("UserSession", "사전 잔액 로드 실패: ${e.message}")
                     }
                 } else {
-
                 }
             } catch (e: Exception) {
                 android.util.Log.e("UserSession", "BlockChainManager 사전 초기화 실패: ${e.message}")
@@ -289,7 +355,6 @@ object UserSession {
     fun clear() {
         preferences.edit().clear().apply()
         _blockchainManager = null
-
         // 메모리 상태 변수도 초기화
         lastKnownBalance = null
         isCharging = false
@@ -297,5 +362,9 @@ object UserSession {
         pendingChargeAmountBase = null
         chargingStartTime = null
 
+        // 구매 중인 강의 ID 목록 초기화
+        synchronized(purchasingLectureIds) {
+            purchasingLectureIds.clear()
+        }
     }
 }

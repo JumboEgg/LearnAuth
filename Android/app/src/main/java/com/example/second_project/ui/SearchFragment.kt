@@ -91,16 +91,13 @@ class SearchFragment : Fragment() {
                 // 검색 모드
                 viewModel.resetSearchResults()
                 // 약간의 지연을 주어 UI가 먼저 업데이트되도록 함
-                Handler(Looper.getMainLooper()).postDelayed({
-                    viewModel.searchLectures(keyword, currentCategory)
-                }, 50)
+                viewModel.searchLectures(keyword, currentCategory)
             } else {
                 // 일반 강의 모드
                 viewModel.resetLectures()
                 // 약간의 지연을 주어 UI가 먼저 업데이트되도록 함
-                Handler(Looper.getMainLooper()).postDelayed({
-                    viewModel.loadLectures(position)
-                }, 50)
+                viewModel.loadLectures(position)
+
             }
         }
 
