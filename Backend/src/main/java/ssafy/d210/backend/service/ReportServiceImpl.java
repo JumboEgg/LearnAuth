@@ -1,5 +1,5 @@
 package ssafy.d210.backend.service;
-//
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,13 +7,10 @@ import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.request.report.ReportRequest;
 import ssafy.d210.backend.dto.response.report.ReportDetailResponse;
 import ssafy.d210.backend.dto.response.report.ReportResponse;
-import ssafy.d210.backend.entity.Lecture;
-import ssafy.d210.backend.entity.PaymentRatio;
 import ssafy.d210.backend.entity.Report;
 import ssafy.d210.backend.entity.UserLecture;
 import ssafy.d210.backend.enumeration.response.HereStatus;
 import ssafy.d210.backend.exception.service.EntityIsNullException;
-import ssafy.d210.backend.exception.service.LectureNotFoundException;
 import ssafy.d210.backend.redis.DistributedLock;
 import ssafy.d210.backend.repository.PaymentRatioRepository;
 import ssafy.d210.backend.repository.ReportRepository;
@@ -21,9 +18,8 @@ import ssafy.d210.backend.repository.UserLectureRepository;
 import ssafy.d210.backend.repository.UserRepository;
 import ssafy.d210.backend.util.ResponseUtil;
 
-import java.util.ArrayList;
+
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
