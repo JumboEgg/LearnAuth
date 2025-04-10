@@ -138,6 +138,7 @@ class SearchFragment : Fragment() {
                 }
             }
         }
+        searchLectureAdapter.notifyDataSetChanged()
 
         binding.lectureList.apply {
             layoutManager = GridLayoutManager(context, 2)
