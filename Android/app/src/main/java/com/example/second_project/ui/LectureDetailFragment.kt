@@ -1,5 +1,6 @@
 package com.example.second_project.ui
 
+import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -80,6 +81,12 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
 
         binding.lectureDetailList.layoutManager = LinearLayoutManager(requireContext())
         binding.lectureDetailName.isSelected = true
+
+        // 고양이 이미지 설정 (GIF)
+        Glide.with(this)
+            .asGif()
+            .load(R.raw.loadingimg2)
+            .into(binding.catImageView)
 
         Log.d(TAG, "onViewCreated: 뷰 생성됨.")
 
@@ -600,12 +607,17 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
     private fun showLoadingOverlay() {
         isOverlayVisible = true
         binding.loadingOverlay.visibility = View.VISIBLE
+        // 고양이 이미지 애니메이션 시작
+        val rotation = ObjectAnimator.ofFloat(binding.catImageView, "rotation", 0f, 360f)
+        rotation.duration = 2000
+        rotation.repeatCount = ObjectAnimator.INFINITE
+        rotation.start()
     }
 
     private fun hideLoadingOverlay() {
         isOverlayVisible = false
-        // 애니메이션 정지
-        binding.catImageView.clearAnimation()
+        // 고양이 이미지 애니메이션 중지
+        binding.catImageView.animate().cancel()
         // 오버레이 숨기기
         binding.loadingOverlay.visibility = View.GONE
     }
