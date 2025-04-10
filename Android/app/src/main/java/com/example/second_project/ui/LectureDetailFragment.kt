@@ -590,7 +590,7 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                             hideLoadingOverlay()
                             Toast.makeText(
                                 requireContext(),
-                                "오류 발생: ${e.message}",
+                                "오류가 발생했습니다.",
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
@@ -599,7 +599,7 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
             }
         } catch (e: Exception) {
             Log.e(TAG, "강의 구매 처리 중 오류 발생", e)
-            Toast.makeText(requireContext(), "구매 오류: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "구매 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
         }
     }
 
