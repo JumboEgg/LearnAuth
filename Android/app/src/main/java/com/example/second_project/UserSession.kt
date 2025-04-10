@@ -6,6 +6,7 @@ import com.example.second_project.blockchain.BlockChainManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import org.web3j.crypto.WalletUtils
 import java.io.File
 import java.math.BigInteger
@@ -21,11 +22,28 @@ object UserSession {
     private const val KEY_WALLET_ADDRESS = "wallet_address"
     private const val KEY_WALLET_PASSWORD = "wallet_password"
     private const val KEY_IS_CHARGING = "is_charging" // 충전 상태 저장용 키 추가
+    private const val KEY_CHARGING_START_TIME = "charging_start_time" // 충전 시작 시간 저장용 키 추가
 
     private lateinit var preferences: SharedPreferences
 
+
+    var lastBalanceUpdateTime: Long = 0
+        private set
     // 마지막으로 알려진 잔액 (메모리에만 저장)
+
     var lastKnownBalance: BigInteger? = null
+        set(value) {
+            field = value
+            // 값이 변경될 때마다 타임스탬프도 업데이트 (최신성 추적용)
+            if (value != null) {
+                lastBalanceUpdateTime = System.currentTimeMillis()
+            }
+        }
+
+    fun isBalanceFresh(maxAgeMs: Long = 30000): Boolean { // 기본값은 30초
+        return lastKnownBalance != null &&
+                System.currentTimeMillis() - lastBalanceUpdateTime < maxAgeMs
+    }
 
     // 충전 관련 상태 변수 추가 (앱 재시작 시에는 초기화되지만 화면 전환 시에는 유지)
     var isCharging: Boolean = false
@@ -35,9 +53,52 @@ object UserSession {
             preferences.edit().putBoolean(KEY_IS_CHARGING, value).apply()
         }
 
+    var chargingStartTime: Long? = null
+        get() = if (field != null) field else preferences.getLong(KEY_CHARGING_START_TIME, 0)
+            .let { if (it > 0) it else null }
+        set(value) {
+            field = value
+            if (value != null) {
+                preferences.edit().putLong(KEY_CHARGING_START_TIME, value).apply()
+            } else {
+                preferences.edit().remove(KEY_CHARGING_START_TIME).apply()
+            }
+        }
+
+
+    private const val KEY_PENDING_CHARGE_AMOUNT = "pending_charge_amount"
+    private const val KEY_PENDING_CHARGE_AMOUNT_BASE = "pending_charge_amount_base"
+
     // 충전 금액 정보 (메모리에만 저장)
     var pendingChargeAmount: BigInteger? = null
+        get() {
+            if (field != null) return field
+            val amountString = preferences.getString(KEY_PENDING_CHARGE_AMOUNT, null)
+            return if (amountString != null) BigInteger(amountString) else null
+        }
+        set(value) {
+            field = value
+            if (value != null) {
+                preferences.edit().putString(KEY_PENDING_CHARGE_AMOUNT, value.toString()).apply()
+            } else {
+                preferences.edit().remove(KEY_PENDING_CHARGE_AMOUNT).apply()
+            }
+        }
+
     var pendingChargeAmountBase: Int? = null
+        get() {
+            if (field != null) return field
+            val hasValue = preferences.contains(KEY_PENDING_CHARGE_AMOUNT_BASE)
+            return if (hasValue) preferences.getInt(KEY_PENDING_CHARGE_AMOUNT_BASE, 0) else null
+        }
+        set(value) {
+            field = value
+            if (value != null) {
+                preferences.edit().putInt(KEY_PENDING_CHARGE_AMOUNT_BASE, value).apply()
+            } else {
+                preferences.edit().remove(KEY_PENDING_CHARGE_AMOUNT_BASE).apply()
+            }
+        }
 
     // 앱 전체 스코프 (화면 전환과 독립적인 코루틴)
     val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -111,7 +172,7 @@ object UserSession {
      * 이미 캐시되어 있다면 재사용합니다.
      */
     fun getBlockchainManagerIfAvailable(context: Context): BlockChainManager? {
-        // 이미 생성된 블록체인 매니저가 있다면 바로 반환
+        // 이미 생성된 블록체인 매니저가 있다면 바로 반환 (캐싱)
         _blockchainManager?.let { return it }
 
         val password = walletPassword
@@ -124,42 +185,40 @@ object UserSession {
         val address = walletAddress
         var manager: BlockChainManager? = null
 
-        // 1. 파일 경로를 통한 로드 시도
-        if (!path.isNullOrEmpty()) {
-            if (!path.startsWith("0x")) {
-                val walletFile = File(context.filesDir, path)
-                if (walletFile.exists()) {
-                    try {
-                        // 지갑 파일 유효성 검증
-                        val credentials = WalletUtils.loadCredentials(password, walletFile)
-                        // 저장된 주소가 없거나 다른 경우 업데이트
-                        if (address == null || credentials.address != address) {
-                            walletAddress = credentials.address
-                        }
-                        manager = BlockChainManager(password, walletFile)
-                        android.util.Log.d("UserSession", "BlockChainManager 초기화 성공: $path")
-                    } catch (e: Exception) {
-                        android.util.Log.e("UserSession", "BlockChainManager 초기화 실패: ${e.message}")
-                        e.printStackTrace()
+        // 1. 파일 경로를 통한 로드 시도 (최적화: 빠른 실패 경로 추가)
+        if (!path.isNullOrEmpty() && !path.startsWith("0x")) {
+            val walletFile = File(context.filesDir, path)
+            if (walletFile.exists()) {
+                try {
+                    // 지갑 파일 유효성 검증
+                    val credentials = WalletUtils.loadCredentials(password, walletFile)
+                    // 저장된 주소가 없거나 다른 경우 업데이트
+                    if (address == null || credentials.address != address) {
+                        walletAddress = credentials.address
                     }
+                    manager = BlockChainManager(password, walletFile)
+                    android.util.Log.d("UserSession", "BlockChainManager 초기화 성공: $path")
+                } catch (e: Exception) {
+                    android.util.Log.e("UserSession", "BlockChainManager 초기화 실패: ${e.message}")
                 }
             }
         }
 
-        // 2. 파일 경로가 없거나 실패한 경우, 저장된 지갑 주소를 기준으로 로드
+        // 2. 저장된 지갑 주소를 기준으로 로드 (파일 경로가 없거나 실패한 경우)
         if (manager == null && !address.isNullOrEmpty()) {
             android.util.Log.d("UserSession", "지갑 주소로 시도: $address")
             val walletFiles = context.filesDir.listFiles { file ->
                 file.name.startsWith("UTC--") && file.name.endsWith(".json")
             }
+
             if (walletFiles != null && walletFiles.isNotEmpty()) {
-                // 2-1. 주소가 일치하는 지갑 파일 찾기
+                // 2-1. 주소가 일치하는 지갑 파일 찾기 (최적화: 병렬 검색 구현 가능)
                 for (walletFile in walletFiles) {
                     try {
                         val credentials = WalletUtils.loadCredentials(password, walletFile)
                         if (credentials.address.equals(address, ignoreCase = true)) {
                             android.util.Log.d("UserSession", "✅ 일치하는 지갑 파일 발견: ${walletFile.name}")
-                            preferences.edit().putString(KEY_WALLET_PATH, walletFile.name).apply()
+                            walletFilePath = walletFile.name
                             manager = BlockChainManager(password, walletFile)
                             break
                         }
@@ -170,19 +229,12 @@ object UserSession {
 
                 // 2-2. 일치하는 파일이 없다면 첫 번째 유효한 지갑 사용
                 if (manager == null) {
-                    android.util.Log.w(
-                        "UserSession",
-                        "⚠️ 주소($address)와 일치하는 지갑 파일이 없습니다. 첫 번째 지갑 사용."
-                    )
                     for (walletFile in walletFiles) {
                         try {
                             val credentials = WalletUtils.loadCredentials(password, walletFile)
-                            preferences.edit().putString(KEY_WALLET_PATH, walletFile.name).apply()
+                            walletFilePath = walletFile.name
                             walletAddress = credentials.address
-                            android.util.Log.d(
-                                "UserSession",
-                                "대체 지갑 업데이트: 주소=${credentials.address}"
-                            )
+                            android.util.Log.d("UserSession", "대체 지갑 업데이트: 주소=${credentials.address}")
                             manager = BlockChainManager(password, walletFile)
                             break
                         } catch (e: Exception) {
@@ -190,18 +242,43 @@ object UserSession {
                         }
                     }
                 }
-            } else {
-                android.util.Log.e("UserSession", "지갑 파일을 찾을 수 없습니다.")
             }
         }
 
+        // 성공적으로 생성된 매니저를 캐시에 저장
         if (manager != null) {
-            // 성공적으로 로드한 경우 캐시에 저장 후 반환
             _blockchainManager = manager
             return manager
         } else {
             android.util.Log.e("UserSession", "사용 가능한 지갑을 찾을 수 없습니다.")
             return null
+        }
+    }
+
+    fun preInitializeBlockchainManager(context: Context) {
+        applicationScope.launch(Dispatchers.IO) {
+            try {
+                val manager = getBlockchainManagerIfAvailable(context)
+                if (manager != null) {
+                    // 지갑 주소 미리 가져오기
+                    val address = manager.getMyWalletAddress()
+                    walletAddress = address
+                    android.util.Log.d("UserSession", "BlockChainManager 사전 초기화 성공: $address")
+
+                    // 잔액 미리 가져오기
+                    try {
+                        val balance = manager.getMyCatTokenBalance()
+                        lastKnownBalance = balance
+                        android.util.Log.d("UserSession", "사전 잔액 로드 성공: $balance wei")
+                    } catch (e: Exception) {
+                        android.util.Log.e("UserSession", "사전 잔액 로드 실패: ${e.message}")
+                    }
+                } else {
+
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("UserSession", "BlockChainManager 사전 초기화 실패: ${e.message}")
+            }
         }
     }
 
@@ -218,5 +295,7 @@ object UserSession {
         isCharging = false
         pendingChargeAmount = null
         pendingChargeAmountBase = null
+        chargingStartTime = null
+
     }
 }
