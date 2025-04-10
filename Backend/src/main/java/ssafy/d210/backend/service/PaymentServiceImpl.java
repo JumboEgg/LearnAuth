@@ -1,22 +1,16 @@
 package ssafy.d210.backend.service;
-//
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.web3j.crypto.Credentials;
-import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.utils.Convert;
 import ssafy.d210.backend.blockchain.AccountManager;
 import ssafy.d210.backend.blockchain.ContractServiceFactory;
 import ssafy.d210.backend.blockchain.RelayerAccount;
 import ssafy.d210.backend.contracts.CATToken;
-import ssafy.d210.backend.contracts.LectureForwarder;
 import ssafy.d210.backend.contracts.LectureSystem;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
-import ssafy.d210.backend.dto.request.transaction.SignedRequest;
-
 import java.math.BigInteger;
 import java.util.concurrent.CompletableFuture;
 
@@ -35,7 +29,7 @@ public class PaymentServiceImpl implements PaymentService{
         try {
             CompletableFuture<TransactionReceipt> tx = depositToken(userId, quantity);
             TransactionReceipt receipt = tx.get();
-            log.info("Token deposit transaction success : {}", receipt);
+            log.info("Token deposit transaction success : {}", receipt.getTransactionHash());
             res = new ResponseSuccessDto<>(true);
         } catch (Exception e) {
             log.info("Token deposit transaction failed. userId: {}, quantity: {}", userId, quantity);
@@ -54,10 +48,11 @@ public class PaymentServiceImpl implements PaymentService{
     public CompletableFuture<TransactionReceipt> depositToken(Long userId, BigInteger amount) {
         RelayerAccount account = null;
         try {
-            account = accountManager.acquireAccount(AccountManager.OperationType.TOKEN_DISTRIBUTION);
+            account = accountManager.acquireAccount();
             CATToken catToken = contractServiceFactory.createCATToken(account);
             LectureSystem lectureSystem = contractServiceFactory.createLectureSystem(account);
 
+            log.info("🚀 트랜잭션 보내는 relayer address: {}", account.getAddress());
             log.info("Depositing {} tokens to user {}", amount, userId);
 
             // LectureSystem 컨트랙트에 토큰 사용 승인
@@ -81,7 +76,7 @@ public class PaymentServiceImpl implements PaymentService{
             log.error("Error in depositToken: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to deposit token", e);
         } finally {
-            accountManager.releaseAccount(account, AccountManager.OperationType.TOKEN_DISTRIBUTION);
+            accountManager.releaseAccount(account);
         }
     }
 }

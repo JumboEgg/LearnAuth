@@ -2,15 +2,8 @@ package ssafy.d210.backend.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.web3j.crypto.Credentials;
-import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.tx.RawTransactionManager;
-import org.web3j.tx.TransactionManager;
 import org.springframework.stereotype.Service;
-import org.web3j.tx.gas.ContractGasProvider;
-import org.web3j.tx.response.PollingTransactionReceiptProcessor;
 import org.web3j.utils.Numeric;
 import ssafy.d210.backend.blockchain.AccountManager;
 import ssafy.d210.backend.blockchain.ContractServiceFactory;
@@ -19,7 +12,6 @@ import ssafy.d210.backend.contracts.LectureForwarder;
 import ssafy.d210.backend.dto.request.transaction.ForwardRequest;
 import ssafy.d210.backend.dto.request.transaction.SignedRequest;
 import ssafy.d210.backend.exception.service.BlockchainException;
-
 import java.math.BigInteger;
 import java.util.List;
 
@@ -35,7 +27,7 @@ public class MetaTransactionServiceImpl implements MetaTransactionService{
     public boolean executeMetaTxs(SignedRequest approveRequest, SignedRequest purchaseRequest) {
         RelayerAccount account = null;
         try {
-            account = accountManager.acquireAccount(AccountManager.OperationType.LECTURE_PURCHASE);
+            account = accountManager.acquireAccount();
             LectureForwarder forwarder = contractServiceFactory.createLectureForwarder(account);
 
             log.info("🚀 트랜잭션 보내는 relayer address: {}", account.getAddress());
@@ -46,7 +38,7 @@ public class MetaTransactionServiceImpl implements MetaTransactionService{
         } catch (Exception e) {
             log.error("Transaction failed : ", e);
         } finally {
-            accountManager.releaseAccount(account, AccountManager.OperationType.LECTURE_PURCHASE);
+            accountManager.releaseAccount(account);
         }
         return false;
     }

@@ -90,7 +90,7 @@ public class UserServiceImpl implements UserService {
     private TransactionReceipt addUserToContract(Long userId, String userAddress) {
         RelayerAccount account = null;
         try {
-            account = accountManager.acquireAccount(AccountManager.OperationType.REGISTRATION);
+            account = accountManager.acquireAccount();
             LectureSystem lectureSystem = contractServiceFactory.createLectureSystem(account);
 
             log.info("Adding user with userId {} and wallet address {} to blockchain", userId, userAddress);
@@ -108,7 +108,7 @@ public class UserServiceImpl implements UserService {
             log.error("Transaction failed : ", e);
             throw new BlockchainException("블록체인 사용자 등록 실패", e);
         } finally {
-            accountManager.releaseAccount(account, AccountManager.OperationType.REGISTRATION);
+            accountManager.releaseAccount(account);
         }
     }
 }
