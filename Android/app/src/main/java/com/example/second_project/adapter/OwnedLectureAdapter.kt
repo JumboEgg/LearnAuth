@@ -28,7 +28,7 @@ class OwnedLectureAdapter(
             binding.lectureTitle.text = item.title
 //            binding.learningRate.text = "학습률 ${item.learningRate}%"
             // 이어보기 버튼: isLecturer에 따라 텍스트를 다르게 설정합니다.
-            binding.lectureButton.text = if (item.recentId != null) "이어서 보기" else "수강하기"
+//            binding.lectureButton.text = if (item.recentId != null) "이어서 보기" else "수강하기"
             Log.d(TAG, "bind: 야옹야옹 ${item.title}, ${item.recentId}")
             
             // 썸네일 로딩
