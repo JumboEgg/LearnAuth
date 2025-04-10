@@ -145,7 +145,7 @@ class RegisterQuizFragment : Fragment(), RegisterStepSavable {
                     (parentFragment as? RegisterMainFragment)?.hideGlobalLoading()
                     Toast.makeText(
                         requireContext(),
-                        "파일 업로드 실패: ${state.message}",
+                        "파일 업로드 실패",
                         Toast.LENGTH_SHORT
                     ).show()
                 }

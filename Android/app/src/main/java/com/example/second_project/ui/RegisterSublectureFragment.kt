@@ -77,7 +77,7 @@ class RegisterSublectureFragment: Fragment(), RegisterStepSavable {
 
                         },
                         onError = { message ->
-                            Toast.makeText(requireContext(), "유튜브 정보 불러오기 실패: $message", Toast.LENGTH_SHORT).show()
+//                            Toast.makeText(requireContext(), "유튜브 정보 불러오기 실패: $message", Toast.LENGTH_SHORT).show()
                         }
                     )
                 } else {

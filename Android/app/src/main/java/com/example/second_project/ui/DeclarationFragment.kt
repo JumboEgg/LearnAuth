@@ -106,7 +106,7 @@ class DeclarationFragment : Fragment() {
                     } else {
                         Toast.makeText(
                             requireContext(),
-                            "신고 상세정보 불러오기 실패: ${response.message()}",
+                            "신고 상세정보 불러오기 실패에 실패했습니다.",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
