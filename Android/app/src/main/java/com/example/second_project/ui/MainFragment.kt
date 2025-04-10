@@ -132,6 +132,7 @@ class MainFragment : Fragment() {
                 recommendedAdapter.submitList(emptyList())
             } else {
                 recommendedAdapter.submitList(lectureList)
+                recommendedAdapter.notifyDataSetChanged()
             }
         }
 
@@ -141,6 +142,7 @@ class MainFragment : Fragment() {
                 recentAdapter.submitList(emptyList())
             } else {
                 recentAdapter.submitList(lectureList)
+                recentAdapter.notifyDataSetChanged()
             }
         }
 

@@ -1,5 +1,5 @@
 package com.example.second_project.ui
-
+import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -39,6 +39,7 @@ import com.example.second_project.utils.YoutubeUtil
 import com.example.second_project.viewmodel.LectureDetailViewModel
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Call
@@ -49,11 +50,12 @@ import java.math.BigInteger
 private const val TAG = "LectureDetailFragment_야옹"
 
 class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
-
     private var _binding: FragmentLectureDetailBinding? = null
     private val binding get() = _binding!!
     private var isOverlayVisible = false
     private var isDialogShowing = false  // 다이얼로그 표시 중인지 여부
+    private var currentLectureId: Int = 0 // 현재 보고 있는 강의 ID
+
     private val viewModel: LectureDetailViewModel by viewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -77,9 +79,14 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentLectureDetailBinding.bind(view)
-
         binding.lectureDetailList.layoutManager = LinearLayoutManager(requireContext())
         binding.lectureDetailName.isSelected = true
+
+        // 고양이 이미지 설정 (GIF)
+        Glide.with(this)
+            .asGif()
+            .load(R.raw.loadingimg2)
+            .into(binding.catImageView)
 
         Log.d(TAG, "onViewCreated: 뷰 생성됨.")
 
@@ -93,16 +100,25 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
             Log.e(TAG, "lectureId 값이 없음.")
             return
         }
+
+        currentLectureId = lectureId
         val userId = userId
         Log.d(TAG, "lectureId: $lectureId, userId: $userId")
 
         viewModel.fetchLectureDetail(lectureId, userId)
         binding.loadingProgressBar.visibility = View.VISIBLE
 
+        // 구매 상태에 따라 버튼 UI 업데이트
+        updateBuyButtonState()
+
+        // 구매 상태 주기적 확인 시작
+        startPurchaseStatusCheck()
+
         viewModel.lectureDetail.observe(viewLifecycleOwner) { detail ->
             detail?.let {
                 binding.loadingProgressBar.visibility = View.GONE
                 Log.d(TAG, "onViewCreated: 강의 상세 정보 수신 - $it")
+
                 binding.lectureDetailName.text = it.data.title
                 binding.lectureDetailCategory.text = it.data.categoryName
                 binding.lectureDetailTeacher.text = it.data.lecturer ?: "강의자 미정"
@@ -136,6 +152,12 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                 // 구매 버튼 클릭 이벤트 설정
                 val lectureData = it.data
                 binding.buyBtn.setOnClickListener { _ ->
+                    // 이미 구매 중이면 클릭 무시
+                    if (UserSession.isLecturePurchasing(lectureData.lectureId)) {
+                        Toast.makeText(requireContext(), "강의 구매가 진행 중입니다", Toast.LENGTH_SHORT).show()
+                        return@setOnClickListener
+                    }
+
                     Log.d(TAG, "구매 버튼 클릭됨 - 강의ID: ${lectureData.lectureId}")
                     if (!isDialogShowing) {  // 다이얼로그가 표시 중이 아닐 때만 실행
                         handleLecturePurchase(
@@ -146,6 +168,9 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                     }
                 }
 
+                // 버튼 상태 업데이트
+                updateBuyButtonState()
+
             } ?: run {
                 binding.loadingProgressBar.visibility = View.GONE
                 Log.e(TAG, "강의 상세 정보를 가져오지 못했습니다.")
@@ -154,12 +179,45 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
         }
     }
 
+    /**
+     * 구매 버튼 상태를 업데이트합니다.
+     * 구매 중인 경우 "구매 중..."으로 변경하고 비활성화합니다.
+     */
+    private fun updateBuyButtonState() {
+        if (currentLectureId <= 0) return
+
+        val isPurchasing = UserSession.isLecturePurchasing(currentLectureId)
+        Log.d(TAG, "updateBuyButtonState: lectureId=$currentLectureId, isPurchasing=$isPurchasing")
+
+        binding.buyBtn.apply {
+            if (isPurchasing) {
+                text = "구매 중..."
+                isEnabled = false
+                alpha = 0.7f
+            } else {
+                text = "구매하기"
+                isEnabled = true
+                alpha = 1.0f
+            }
+        }
+    }
+
+    /**
+     * 주기적으로 구매 상태를 확인하고 버튼 상태를 업데이트합니다.
+     */
+    private fun startPurchaseStatusCheck() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            while (true) {
+                updateBuyButtonState()
+                delay(1000) // 1초마다 확인
+            }
+        }
+    }
+
     // 구매 버튼 클릭 이벤트 처리 함수
     fun handleLecturePurchase(lectureId: Int, price: Int, lectureTitle: String) {
-
         try {
             Log.d(TAG, "강의 구매 시작 - 강의ID: $lectureId, 가격: $price, 제목: $lectureTitle")
-
             val purchaseStartTime = System.currentTimeMillis()
 
             val chainManager = UserSession.getBlockchainManagerIfAvailable(requireContext())
@@ -168,11 +226,17 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                 Toast.makeText(requireContext(), "블록체인 연결이 필요합니다.", Toast.LENGTH_SHORT).show()
                 return
             }
+
             Log.d(TAG, "블록체인 매니저 준비 완료.")
 
             showPaymentConfirmDialog(BigInteger.valueOf(price.toLong())) {
+                // 구매 상태 설정 (구매 시작)
+                UserSession.setLecturePurchasing(lectureId, true)
+                updateBuyButtonState()
+
                 // 로딩 시작
                 showLoadingOverlay()
+
                 lifecycleScope.launch {
                     try {
                         Log.d(TAG, "구매 트랜잭션 준비 시작")
@@ -181,18 +245,19 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                         val forwarder = chainManager.forwarder
                         val lectureSystem = chainManager.lectureEventMonitor
                         val catToken = chainManager.catToken
-
                         val userAddress = credentials.address
+
                         Log.d(TAG, "사용자 주소: $userAddress")
 
                         // 표시용 가격 (사용자에게 보여줄 값) - 일반 단위
                         val displayPrice = BigInteger.valueOf(price.toLong())
                         // 표시용 가격 (사용자에게 보여줄 값) 및 거래에 사용할 가격 (wei 단위 그대로 사용)
                         val requiredAmount = displayPrice.multiply(BigInteger.TEN.pow(18))
+
                         Log.d(TAG, "표시 가격: $displayPrice")
                         Log.d(TAG, "트랜잭션 가격(wei): $requiredAmount")
 
-                        // 토큰 잔액 확인 (이미 wei 단위)
+                        // 토큰 잔액 확인 (이미 wei 단위) -> 여기부터
                         val balance = withContext(Dispatchers.IO) {
                             catToken.balanceOf(userAddress).send()
                         }
@@ -204,12 +269,14 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                             Log.e(TAG, "잔액 부족: 부족액(wei): $shortfall")
                             withContext(Dispatchers.Main) {
                                 hideLoadingOverlay()
+                                // 구매 상태 해제
+                                UserSession.setLecturePurchasing(lectureId, false)
+                                updateBuyButtonState()
                                 // 부족액을 원래 wei 단위 그대로 표시
                                 showNotEnoughDialog(shortfall)
                             }
                             return@launch
                         }
-
 
                         // 현재 allowance 확인
                         Log.d(TAG, "현재 allowance 확인 시작")
@@ -233,10 +300,8 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                         Log.d(TAG, "데드라인: $deadline")
 
                         var approveRequestDto: SignedRequestDto
-
                         // 수정된 변수 생성 - 백엔드 트랜잭션이 성공했는지 여부
                         var approveSuccess = true
-
 
                         if (currentAllowance < requiredAmount) {
                             Log.d(TAG, "allowance 부족 -> approve 트랜잭션 진행")
@@ -462,8 +527,14 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                                         val purchaseEndTime = System.currentTimeMillis()
                                         val elapsedTime = purchaseEndTime - purchaseStartTime
                                         Log.d(TAG, "강의 구매 성공! 소요 시간: $elapsedTime ms")
+
                                         // 로딩 끄기
                                         hideLoadingOverlay()
+
+                                        // 구매 상태 해제
+                                        UserSession.setLecturePurchasing(lectureId, false)
+
+                                        // 구매 완료 후 화면 이동
                                         findNavController().navigate(
                                             R.id.ownedLectureDetailFragment,
                                             bundleOf("lectureId" to lectureId),
@@ -471,6 +542,7 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                                                 .setPopUpTo(R.id.lectureDetailFragment, true)
                                                 .build()
                                         )
+
                                         Log.d(TAG, "🎉 강의 구매 성공")
                                         Toast.makeText(
                                             requireContext(),
@@ -480,6 +552,12 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
                                     } else {
                                         Log.e(TAG, "서버 오류: ${response.code()}")
                                         Log.e(TAG, "서버 응답 바디: ${response.errorBody()?.string()}")
+
+                                        // 구매 상태 해제
+                                        UserSession.setLecturePurchasing(lectureId, false)
+
+                                        // 로딩 끄기
+                                        hideLoadingOverlay()
 
                                         Toast.makeText(
                                             requireContext(),
@@ -491,6 +569,13 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
 
                                 override fun onFailure(call: Call<Void>, t: Throwable) {
                                     Log.e(TAG, "🚨 전송 실패", t)
+
+                                    // 구매 상태 해제
+                                    UserSession.setLecturePurchasing(lectureId, false)
+
+                                    // 로딩 끄기
+                                    hideLoadingOverlay()
+
                                     Toast.makeText(
                                         requireContext(),
                                         "전송 실패: ${t.localizedMessage}",
@@ -600,12 +685,17 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
     private fun showLoadingOverlay() {
         isOverlayVisible = true
         binding.loadingOverlay.visibility = View.VISIBLE
+        // 고양이 이미지 애니메이션 시작
+        val rotation = ObjectAnimator.ofFloat(binding.catImageView, "rotation", 0f, 360f)
+        rotation.duration = 2000
+        rotation.repeatCount = ObjectAnimator.INFINITE
+        rotation.start()
     }
 
     private fun hideLoadingOverlay() {
         isOverlayVisible = false
-        // 애니메이션 정지
-        binding.catImageView.clearAnimation()
+        // 고양이 이미지 애니메이션 중지
+        binding.catImageView.animate().cancel()
         // 오버레이 숨기기
         binding.loadingOverlay.visibility = View.GONE
     }

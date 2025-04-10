@@ -73,7 +73,7 @@
             android:id="@+id/eachWatchBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="이어보기"
+            android:text="시청하기"
             app:layout_constraintEnd_toStartOf="@id/goIcon"
             app:layout_constraintTop_toTopOf="@id/goIcon"
             app:layout_constraintBottom_toBottomOf="@id/goIcon"
