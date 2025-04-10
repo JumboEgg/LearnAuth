@@ -34,13 +34,10 @@ class ChargeFragment : Fragment() {
     private var _binding: FragmentChargeBinding? = null
     private val binding get() = _binding!!
 
-    // 기본 금액(단위: CAT, 예: 5000)은 Int로 보관 (UI에 그대로 보여짐)
     private var selectedBaseAmount: Int = 5000
 
-    // currentBalance는 이미 wei 단위로 관리 (10^18 단위)
     private var currentBalance: BigInteger = BigInteger.ZERO
 
-    // 상태를 UserSession으로 이동하여 Fragment 생명주기와 독립적으로 유지
     companion object {
         // 정적 변수로 충전 상태 관리
         var isChargingInProgress: Boolean
@@ -61,13 +58,10 @@ class ChargeFragment : Fragment() {
         return binding.root
     }
 
-    // ---------------------------------------------
-    // onViewCreated
-    // ---------------------------------------------
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 2) 기본 값 세팅
+        // 기본 값 세팅
         selectedBaseAmount = getBaseAmountFromRadioButton()
         binding.chargeInput.setText(selectedBaseAmount.toString())
 
@@ -77,16 +71,17 @@ class ChargeFragment : Fragment() {
             "지갑: ${UserSession.walletFilePath}, pw=${UserSession.walletPassword != null}"
         )
 
+        // 앱이 재시작된 경우 충전 상태 확인 및 검증
+        validateChargingStateOnRestart()
+
         // 충전 상태에 따라 UI 복원
         restoreChargingState()
 
         binding.root.post {
-            // 지갑 파일 처리는 Dispatchers.IO에서 실행하여 메인 스레드 차단 없이 진행
             viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
                 handleWalletFile()
             }
 
-            // 잔액 조회도 코루틴을 통해 백그라운드에서 진행 (loadCurrentBalance() 내부도 이미 코루틴 사용)
             loadCurrentBalance()
         }
 
@@ -100,12 +95,106 @@ class ChargeFragment : Fragment() {
         // 결제 버튼
         binding.purchaseBtn.setOnClickListener {
             showLoadingOverlay()
-            handlePurchase()  // 결제 로직
+            handlePurchase()
         }
 
         // 닫기 버튼
         binding.purchaseCancel.setOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
+    }
+
+    private fun validateChargingStateOnRestart() {
+        // 앱이 재시작되었을 때 충전 상태 확인
+        if (isChargingInProgress) {
+            Log.d("ChargeFragment", "앱 재시작 감지, 충전 상태 검증 중...")
+
+            // 앱이 재시작된 경우, 충전 상태를 검증
+            val pendingAmount = UserSession.pendingChargeAmount
+            val manager = UserSession.getBlockchainManagerIfAvailable(requireContext())
+
+            if (manager != null && pendingAmount != null) {
+                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                    try {
+                        // 현재 토큰 잔액 조회
+                        val currentTokenBalance = manager.getMyCatTokenBalance()
+                        val lastKnownBalance = UserSession.lastKnownBalance
+
+                        // 잔액이 증가했거나, 이전 잔액보다 크거나 같으면 충전이 완료된 것으로 간주
+                        if (lastKnownBalance != null && currentTokenBalance >= lastKnownBalance) {
+                            Log.d("ChargeFragment", "잔액 확인 결과, 충전이 완료된 것으로 판단됨")
+                            // 충전 상태 초기화
+                            isChargingInProgress = false
+                            UserSession.pendingChargeAmount = null
+                            UserSession.pendingChargeAmountBase = null
+                            UserSession.lastKnownBalance = currentTokenBalance
+
+                            // UI 업데이트는 메인 스레드에서
+                            launch(Dispatchers.Main) {
+                                if (_binding != null && isAdded) {
+                                    binding.purchaseBtn.isEnabled = true
+                                    binding.purchaseBtn.text = "충전하기"
+                                    hideLoadingOverlay()
+                                    Toast.makeText(
+                                        requireContext(),
+                                        "이전 충전이 완료되었습니다.",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        } else {
+                            // 잔액에 변화가 없다면, 일정 시간이 지났을 경우 충전 상태 초기화
+                            val chargingStartTime = UserSession.chargingStartTime ?: 0
+                            val currentTime = System.currentTimeMillis()
+
+                            // 충전 시작 후 10분 이상 지났다면 타임아웃으로 간주
+                            if (currentTime - chargingStartTime > 10 * 60 * 1000) { // 10분
+                                Log.d("ChargeFragment", "충전 타임아웃으로 상태 초기화")
+                                isChargingInProgress = false
+                                UserSession.pendingChargeAmount = null
+                                UserSession.pendingChargeAmountBase = null
+                                UserSession.chargingStartTime = null
+
+                                // UI 업데이트
+                                launch(Dispatchers.Main) {
+                                    if (_binding != null && isAdded) {
+                                        binding.purchaseBtn.isEnabled = true
+                                        binding.purchaseBtn.text = "충전하기"
+                                        hideLoadingOverlay()
+                                        Toast.makeText(
+                                            requireContext(),
+                                            "이전 충전 상태가 초기화되었습니다.",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.e("ChargeFragment", "충전 상태 검증 중 오류: ${e.message}")
+                        // 오류 발생 시 안전하게 충전 상태 초기화
+                        isChargingInProgress = false
+                        UserSession.pendingChargeAmount = null
+                        UserSession.pendingChargeAmountBase = null
+                        UserSession.chargingStartTime = null
+
+                        launch(Dispatchers.Main) {
+                            if (_binding != null && isAdded) {
+                                binding.purchaseBtn.isEnabled = true
+                                binding.purchaseBtn.text = "충전하기"
+                                hideLoadingOverlay()
+                            }
+                        }
+                    }
+                }
+            } else {
+                // 필요한 정보가 없으면 충전 상태 초기화
+                Log.d("ChargeFragment", "필요한 정보 없음, 충전 상태 초기화")
+                isChargingInProgress = false
+                UserSession.pendingChargeAmount = null
+                UserSession.pendingChargeAmountBase = null
+                UserSession.chargingStartTime = null
+            }
         }
     }
 
@@ -293,9 +382,6 @@ class ChargeFragment : Fragment() {
         // 충전할 금액 (wei 단위)
         val depositAmountWei = BigInteger.valueOf(inputBase.toLong()).multiply(tokenUnit)
 
-        Log.d("ChargeFragment", "충전 요청 금액(CAT): $inputBase")
-        Log.d("ChargeFragment", "충전 요청 금액(wei): $depositAmountWei")
-
         // 총액 검증
         val total = currentBalance.add(depositAmountWei)
         if (total > limit) {
@@ -315,6 +401,8 @@ class ChargeFragment : Fragment() {
         // 충전할 금액도 UserSession에 저장 (필요시 복원용)
         UserSession.pendingChargeAmount = depositAmountWei
         UserSession.pendingChargeAmountBase = inputBase
+
+        UserSession.chargingStartTime = System.currentTimeMillis()
 
         // DepositRequest에 quantity는 wei 단위로 전송
         val request = DepositRequest(
@@ -603,10 +691,10 @@ class ChargeFragment : Fragment() {
         // Fragment가 파괴되어도 충전 상태는 유지하지만,
         // 충전이 완료된 뒤 Fragment가 소멸하면 UI 상태 초기화에 문제가 생길 수 있으므로
         // 일정 시간 후 강제로 상태 초기화
-        if (isChargingInProgress) {
-            // 5분(300000ms) 후에 상태 초기화
+        if (isChargingInProgress && !requireActivity().isFinishing) {
+            // 5초 후에 상태 초기화
             UserSession.applicationScope.launch {
-                delay(30 * 1000)
+                delay(5 * 1000)
                 if (isChargingInProgress) {
                     // 잔액 업데이트 다시 시도
                     val manager =
@@ -619,10 +707,10 @@ class ChargeFragment : Fragment() {
                             Log.e("ChargeFragment", "지연된 잔액 업데이트 실패: ${e.message}")
                         }
                     }
-                    // 어쨌든 상태 초기화
                     isChargingInProgress = false
                     UserSession.pendingChargeAmount = null
                     UserSession.pendingChargeAmountBase = null
+                    UserSession.chargingStartTime = null
                 }
             }
         }

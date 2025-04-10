@@ -21,6 +21,10 @@ import org.web3j.tx.TransactionManager
 import org.web3j.tx.gas.ContractGasProvider
 import java.io.File
 import java.math.BigInteger
+import java.util.concurrent.CompletableFuture
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 private const val TAG = "BlockChainManager_야옹"
 
@@ -60,12 +64,19 @@ class BlockChainManager(
     val catToken: CATToken
     val forwarder: LectureForwarder
 
+
+    private var cachedBalance: BigInteger? = null
+    private var lastBalanceCheckTime: Long = 0
+    private val BALANCE_CACHE_DURATION = 3000L  // 3초 캐싱
+
+    private var initializationTime: Long = 0
+
     init {
         // 실제 배포 주소 (예시는 가짜)
         val addresses = mapOf(
             "LectureForwarder" to "0x6C8dB305b62f8b2C25d89EB8cBcD34f04A1b18Da",
-            "CATToken"         to "0xBbA194679E8C86c722Ea5423e26f47D18d0f7633",
-            "LectureSystem"    to "0x967a5f3B77949DE8b7ebf7392fF2B63dc1a5add0"
+            "CATToken" to "0xBbA194679E8C86c722Ea5423e26f47D18d0f7633",
+            "LectureSystem" to "0x967a5f3B77949DE8b7ebf7392fF2B63dc1a5add0"
         )
 
         lectureEventMonitor = LectureEventMonitor.load(
@@ -270,11 +281,155 @@ class BlockChainManager(
     }
 
     fun getMyCatTokenBalance(): BigInteger {
-        val address = credentials.address
-        return catToken.balanceOf(address).sendAsync().get()
+        val currentTime = System.currentTimeMillis()
+
+        // 캐시 확인: 유효 기간(3초) 내에 조회된 값이 있으면 재사용
+        if (cachedBalance != null && currentTime - lastBalanceCheckTime < BALANCE_CACHE_DURATION) {
+            Log.d(TAG, "💰 캐시된 잔액 반환: $cachedBalance")
+            return cachedBalance!!
+        }
+
+        // 캐시가 없거나 만료된 경우 블록체인에서 새로 조회
+        try {
+            val address = credentials.address
+            val startTime = System.currentTimeMillis()
+
+            // 동기 호출 대신 비동기 호출 후 결과 대기 (타임아웃 적용)
+            val balanceFuture = catToken.balanceOf(address).sendAsync()
+
+            // 최대 5초 대기 (원래는 무한정 대기할 수 있음)
+            val balance = balanceFuture.get()
+
+            val elapsed = System.currentTimeMillis() - startTime
+            Log.d(TAG, "💰 잔액 조회 완료: $balance (소요시간: ${elapsed}ms)")
+
+            // 결과 캐싱
+            cachedBalance = balance
+            lastBalanceCheckTime = currentTime
+
+            return balance
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ 잔액 조회 실패: ${e.message}")
+
+            // 오류 발생 시 캐시된 값이 있으면 그것이라도 반환
+            cachedBalance?.let {
+                Log.d(TAG, "💰 오류 발생, 캐시된 값으로 대체: $it")
+                return it
+            }
+
+            // 아무것도 없으면 예외 발생
+            throw e
+        }
     }
 
+    suspend fun getMyCatTokenBalanceAsync(): BigInteger = withContext(Dispatchers.IO) {
+        val currentTime = System.currentTimeMillis()
+
+        // 캐시 확인
+        if (cachedBalance != null && currentTime - lastBalanceCheckTime < BALANCE_CACHE_DURATION) {
+            Log.d(TAG, "💰 캐시된 잔액 반환 (async): $cachedBalance")
+            return@withContext cachedBalance!!
+        }
+
+        // 블록체인에서 새로 조회 (코루틴 방식)
+        try {
+            val address = credentials.address
+            val startTime = System.currentTimeMillis()
+
+            // suspendCoroutine을 사용하여 코루틴으로 변환
+            val balance = suspendCoroutine<BigInteger> { continuation ->
+                val future = catToken.balanceOf(address).sendAsync()
+
+                future.whenComplete { result, error ->
+                    if (error != null) {
+                        continuation.resumeWithException(error)
+                    } else {
+                        continuation.resume(result)
+                    }
+                }
+            }
+
+            val elapsed = System.currentTimeMillis() - startTime
+            Log.d(TAG, "💰 잔액 조회 완료 (async): $balance (소요시간: ${elapsed}ms)")
+
+            // 결과 캐싱
+            cachedBalance = balance
+            lastBalanceCheckTime = currentTime
+
+            return@withContext balance
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ 잔액 조회 실패 (async): ${e.message}")
+
+            // 오류 발생 시 캐시된 값이 있으면 반환
+            cachedBalance?.let {
+                Log.d(TAG, "💰 오류 발생, 캐시된 값으로 대체 (async): $it")
+                return@withContext it
+            }
+
+            throw e
+        }
+    }
+
+    fun preloadBalanceInBackground(): CompletableFuture<BigInteger> {
+        val future = CompletableFuture<BigInteger>()
+
+        Thread {
+            try {
+                val address = credentials.address
+                val balance = catToken.balanceOf(address).send()
+
+                // 결과 캐싱
+                cachedBalance = balance
+                lastBalanceCheckTime = System.currentTimeMillis()
+
+                Log.d(TAG, "💰 잔액 백그라운드 로드 완료: $balance")
+                future.complete(balance)
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ 잔액 백그라운드 로드 실패: ${e.message}")
+                future.completeExceptionally(e)
+            }
+        }.start()
+
+        return future
+    }
+
+    /**
+     * 잔액 강제 갱신 메소드
+     * - 캐시를 무시하고 항상 새로운 값을 조회
+     * - 충전 등 잔액 변경 후 즉시 반영이 필요할 때 사용
+     */
+    fun forceRefreshBalance(): BigInteger {
+        try {
+            // 캐시 초기화
+            cachedBalance = null
+            lastBalanceCheckTime = 0
+
+            val address = credentials.address
+            val startTime = System.currentTimeMillis()
+
+            // 동기 호출 사용 (중요한 업데이트이므로)
+            val balance = catToken.balanceOf(address).send()
+
+            val elapsed = System.currentTimeMillis() - startTime
+            Log.d(TAG, "💰 잔액 강제 갱신 완료: $balance (소요시간: ${elapsed}ms)")
+
+            // 결과 캐싱
+            cachedBalance = balance
+            lastBalanceCheckTime = System.currentTimeMillis()
+
+            return balance
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ 잔액 강제 갱신 실패: ${e.message}")
+            throw e
+        }
+    }
+    private var cachedAddress: String? = null
+
     fun getMyWalletAddress(): String {
-        return credentials.address
+        // 주소는 변경되지 않으므로 한 번만 계산하면 됨
+        if (cachedAddress == null) {
+            cachedAddress = credentials.address
+        }
+        return cachedAddress!!
     }
 }
