@@ -89,7 +89,7 @@
                 android:id="@+id/lectureButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="이어보기"
+                android:text="시청하기"
                 style="@style/heading4"
                 android:textSize="14sp"
                 android:textColor="@color/primary_color"

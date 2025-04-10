@@ -47,7 +47,7 @@ class OwnedLectureDetailAdapter(
             }
 
             // 강의 상태에 따라 버튼 텍스트 설정
-            updateButtonText(subLecture)
+//            updateButtonText(subLecture)
 
             binding.root.setOnClickListener {
                 onItemClick(subLecture)
@@ -55,18 +55,18 @@ class OwnedLectureDetailAdapter(
         }
         
         // 강의 상태에 따라 버튼 텍스트 업데이트
-        private fun updateButtonText(subLecture: SubLecture) {
-            if(subLecture.endFlag == true) {
-                // 완강한 경우
-                binding.eachWatchBtn.text = "다시보기"
-            } else if (subLecture.continueWatching > 0) {
-                // 0초 넘게 시청한 경우
-                binding.eachWatchBtn.text = "이어보기"
-            } else {
-                // 시청하지 않은 경우
-                binding.eachWatchBtn.text = "수강하기"
-            }
-        }
+//        private fun updateButtonText(subLecture: SubLecture) {
+//            if(subLecture.endFlag == true) {
+//                // 완강한 경우
+//                binding.eachWatchBtn.text = "다시보기"
+//            } else if (subLecture.continueWatching > 0) {
+//                // 0초 넘게 시청한 경우
+//                binding.eachWatchBtn.text = "이어보기"
+//            } else {
+//                // 시청하지 않은 경우
+//                binding.eachWatchBtn.text = "수강하기"
+//            }
+//        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LectureViewHolder {
