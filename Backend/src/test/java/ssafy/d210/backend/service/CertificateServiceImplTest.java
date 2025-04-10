@@ -1,12 +1,12 @@
-//package ssafy.d210.backend.service;
+package ssafy.d210.backend.service;
 //
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.DisplayName;
 //import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 //import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 //import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 //import ssafy.d210.backend.dto.response.certificate.CertificateDetailResponse;
 //import ssafy.d210.backend.dto.response.certificate.CertificateResponse;
@@ -24,8 +24,8 @@
 //import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 //import static org.mockito.Mockito.*;
 //
-//@ExtendWith(MockitoExtension.class)
-//class CertificateServiceImplTest {
+@ExtendWith(MockitoExtension.class)
+class CertificateServiceImplTest {
 //
 //    @Mock
 //    private UserLectureRepository userLectureRepository;
@@ -138,4 +138,4 @@
 //
 //        assertThat(result.getData()).isEqualTo(false);
 //    }
-//}
+}

@@ -1,13 +1,13 @@
-//package ssafy.d210.backend.service;
+package ssafy.d210.backend.service;
 //
 //import org.assertj.core.api.Assertions;
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.DisplayName;
 //import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 //import org.mockito.InjectMocks;
 //import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 //import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 //import org.springframework.context.annotation.Profile;
 //import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -33,9 +33,9 @@
 //import static org.mockito.BDDMockito.given;
 //import static org.mockito.Mockito.*;
 //
-//@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockitoExtension.class)
 //@ConditionalOnExpression("'${spring.profiles.active}' != 'dev'")
-//class UserServiceImplTest {
+class UserServiceImplTest {
 //
 //    @Mock
 //    private UserRepository userRepository;
@@ -200,4 +200,4 @@
 //        verify(userRepository, times(1)).existsByNickname(anyString()); // 첫 번째 스레드만 닉네임 체크
 //        verify(userRepository, times(1)).save(any(User.class)); // 첫 번째 스레드만 저장
 //    }
-//}
+}
