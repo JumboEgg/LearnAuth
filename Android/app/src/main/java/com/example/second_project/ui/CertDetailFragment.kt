@@ -29,6 +29,8 @@ import com.example.second_project.utils.IpfsUtils
 import com.example.second_project.utils.QrCodeUtils
 import com.example.second_project.viewmodel.CertDetailViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Call
@@ -53,18 +55,22 @@ import androidx.core.content.res.ResourcesCompat
 import android.graphics.Bitmap
 import com.example.second_project.network.ErrorResponse
 import android.animation.ObjectAnimator
+import java.lang.ref.WeakReference
 
 private const val TAG = "CertDetailFragment_야옹"
 private const val IPFS_GATEWAY_URL = "https://j12d210.p.ssafy.io/ipfs"
+
 //private const val IPFS_GATEWAY_URL = "https://gateway.pinata.cloud/ipfs"
 class CertDetailFragment : Fragment() {
 
     private var _binding: FragmentCertDetailBinding? = null
-    private val binding get() = _binding!!
+    private val binding get() = _binding ?: throw IllegalStateException("Fragment binding is null")
     private val viewModel: CertDetailViewModel by viewModels()
     private val args: CertDetailFragmentArgs by navArgs()
     private var isCertificateIssued = false
     private var currentCid: String? = null
+    private var issueCertificateJob: Job? = null
+    private var fragmentActive = true
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -76,6 +82,7 @@ class CertDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        fragmentActive = true
 
         // Safe Args를 통해 전달받은 userId와 lectureId 사용
         val userId = args.userId
@@ -99,11 +106,13 @@ class CertDetailFragment : Fragment() {
         // 관찰: API 응답이 오면 UI에 데이터 바인딩
         viewModel.certificateDetail.observe(viewLifecycleOwner) { response ->
             // 로딩 인디케이터 숨기기
+            if (!isAdded || _binding == null) return@observe
+
             binding.loadingProgressBar.visibility = View.GONE
 
             if (response != null && response.data != null) {
                 val detail = response.data
-                
+
                 // 강의 제목 설정
                 binding.textLectureTitle.text = detail.title ?: ""
 
@@ -188,59 +197,68 @@ class CertDetailFragment : Fragment() {
     // 수료증 발급 여부 확인
     private fun checkCertificateIssued(userId: Int, lectureId: Int) {
         val certificateApiService = ApiClient.retrofit.create(CertificateApiService::class.java)
-        certificateApiService.getCertificates(userId).enqueue(object : Callback<CertificateResponse> {
-            override fun onResponse(
-                call: Call<CertificateResponse>,
-                response: Response<CertificateResponse>
-            ) {
-                if (response.isSuccessful && response.body() != null) {
-                    val certificates = response.body()!!.data
-                    Log.d(TAG, "수료증 목록 조회 성공: 총 ${certificates.size}개")
+        certificateApiService.getCertificates(userId)
+            .enqueue(object : Callback<CertificateResponse> {
+                override fun onResponse(
+                    call: Call<CertificateResponse>,
+                    response: Response<CertificateResponse>
+                ) {
+                    if (!isAdded || _binding == null) return
 
-                    // 해당 강의의 수료증이 발급되었는지 확인
-                    val certificate = certificates.find { it.lectureId == lectureId }
-                    // certificate 값이 null이거나 0인 경우 발급되지 않은 것으로 처리
-                    isCertificateIssued = certificate?.certificate != null && certificate.certificate != 0
+                    if (response.isSuccessful && response.body() != null) {
+                        val certificates = response.body()!!.data
+                        Log.d(TAG, "수료증 목록 조회 성공: 총 ${certificates.size}개")
 
-                    // 로그 출력
-                    Log.d(TAG, "수료증 발급 여부 확인: userId=$userId, lectureId=$lectureId")
-                    Log.d(TAG, "수료증 발급 여부: ${if (isCertificateIssued) "발급됨" else "발급되지 않음"}")
+                        // 해당 강의의 수료증이 발급되었는지 확인
+                        val certificate = certificates.find { it.lectureId == lectureId }
+                        // certificate 값이 null이거나 0인 경우 발급되지 않은 것으로 처리
+                        isCertificateIssued =
+                            certificate?.certificate != null && certificate.certificate != 0
 
-                    if (certificate != null) {
-                        Log.d(TAG, "수료증 정보: lectureId=${certificate.lectureId}, title=${certificate.title}, " +
-                                "categoryName=${certificate.categoryName}, certificate=${certificate.certificate}, " +
-                                "certificateDate=${certificate.certificateDate}")
+                        // 로그 출력
+                        Log.d(TAG, "수료증 발급 여부 확인: userId=$userId, lectureId=$lectureId")
+                        Log.d(TAG, "수료증 발급 여부: ${if (isCertificateIssued) "발급됨" else "발급되지 않음"}")
 
-                        // 수료증이 발급된 경우 CID 값 저장 및 QR 코드 생성
-                        if (isCertificateIssued && certificate.certificate != null) {
-                            // 여기서는 detail.certificate 값을 사용하지 않고, IPFS에서 직접 CID를 가져오도록 수정
-                            // currentCid = certificate.certificate.toString()
-                            // Log.d(TAG, "CID 값 저장: $currentCid")
+                        if (certificate != null) {
+                            Log.d(
+                                TAG,
+                                "수료증 정보: lectureId=${certificate.lectureId}, title=${certificate.title}, " +
+                                        "categoryName=${certificate.categoryName}, certificate=${certificate.certificate}, " +
+                                        "certificateDate=${certificate.certificateDate}"
+                            )
 
-                            // QR 코드 생성은 IPFS 업로드 후 직접 생성하도록 수정
-                            // generateQrCodeFromCid(currentCid!!)
+                            // 수료증이 발급된 경우 CID 값 저장 및 QR 코드 생성
+                            if (isCertificateIssued && certificate.certificate != null) {
+                                // 여기서는 detail.certificate 값을 사용하지 않고, IPFS에서 직접 CID를 가져오도록 수정
+                                // currentCid = certificate.certificate.toString()
+                                // Log.d(TAG, "CID 값 저장: $currentCid")
+
+                                // QR 코드 생성은 IPFS 업로드 후 직접 생성하도록 수정
+                                // generateQrCodeFromCid(currentCid!!)
+                            } else {
+                                Log.e(TAG, "certificate 값이 없어 CID를 저장할 수 없습니다.")
+                            }
                         } else {
-                            Log.e(TAG, "certificate 값이 없어 CID를 저장할 수 없습니다.")
+                            Log.d(TAG, "해당 강의(lectureId=$lectureId)의 수료증 정보가 없습니다.")
                         }
+
+                        // UI 업데이트
+                        updateUIForCertificateStatus()
                     } else {
-                        Log.d(TAG, "해당 강의(lectureId=$lectureId)의 수료증 정보가 없습니다.")
+                        Log.e(TAG, "수료증 목록 조회 실패: ${response.code()} - ${response.message()}")
                     }
-
-                    // UI 업데이트
-                    updateUIForCertificateStatus()
-                } else {
-                    Log.e(TAG, "수료증 목록 조회 실패: ${response.code()} - ${response.message()}")
                 }
-            }
 
-            override fun onFailure(call: Call<CertificateResponse>, t: Throwable) {
-                Log.e(TAG, "수료증 목록 조회 실패: ${t.message}")
-            }
-        })
+                override fun onFailure(call: Call<CertificateResponse>, t: Throwable) {
+                    Log.e(TAG, "수료증 목록 조회 실패: ${t.message}")
+                }
+            })
     }
 
     // 수료증 상태에 따라 UI 업데이트
     private fun updateUIForCertificateStatus() {
+        if (!isAdded || _binding == null) return
+
         if (isCertificateIssued) {
             binding.textTitleCertDetail.text = "수료증"
             binding.msgOnCert.visibility = View.GONE
@@ -258,6 +276,8 @@ class CertDetailFragment : Fragment() {
 
     // QR 코드 다이얼로그 표시 함수
     private fun showQrCodeDialog(qrCodeUrl: String) {
+        if (!isAdded) return
+
         val dialogBinding = DialogQrCodeBinding.inflate(layoutInflater)
         val dialog = AlertDialog.Builder(requireContext())
             .setView(dialogBinding.root)
@@ -279,7 +299,8 @@ class CertDetailFragment : Fragment() {
                     Log.d(TAG, "QR 코드 다이얼로그에 이미지 설정 성공")
                 } ?: run {
                     Log.e(TAG, "showQrCodeDialog: QR코드 생성 실패")
-                    Toast.makeText(requireContext(), "QR 코드를 생성할 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "QR 코드를 생성할 수 없습니다.", Toast.LENGTH_SHORT)
+                        .show()
                 }
             } else {
                 // qrCodeUrl이 직접 CID인 경우
@@ -289,7 +310,8 @@ class CertDetailFragment : Fragment() {
                     Log.d(TAG, "QR 코드 다이얼로그에 이미지 설정 성공 (직접 CID)")
                 } ?: run {
                     Log.e(TAG, "showQrCodeDialog: QR코드 생성 실패")
-                    Toast.makeText(requireContext(), "QR 코드를 생성할 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "QR 코드를 생성할 수 없습니다.", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
         } catch (e: Exception) {
@@ -333,6 +355,8 @@ class CertDetailFragment : Fragment() {
     }
 
     private fun showConfirmDialog(userId: Int, lectureId: Int) {
+        if (!isAdded) return
+
         val dialogBinding = DialogCertConfirmBinding.inflate(layoutInflater)
         val dialog = AlertDialog.Builder(requireContext())
             .setView(dialogBinding.root)
@@ -356,8 +380,20 @@ class CertDetailFragment : Fragment() {
 
     // NFT 수료증 발급받는 로직
     private fun issueCertificate(userId: Int, lectureId: Int) {
-        lifecycleScope.launch {
+        // 이전 작업이 실행 중이면 취소
+        issueCertificateJob?.cancel()
+
+        // Fragment의 WeakReference 생성 (메모리 누수 방지)
+        val fragmentRef = WeakReference(this)
+
+        issueCertificateJob = lifecycleScope.launch {
             try {
+                // Fragment가 detach됐는지 확인
+                if (!isActive || !fragmentRef.get()?.isAdded!! == true || fragmentRef.get()?._binding == null) {
+                    Log.d(TAG, "issueCertificate: Fragment is not active or binding is null")
+                    return@launch
+                }
+
                 // 수료증 발급 시 로딩 오버레이 표시
                 binding.loadingOverlay.visibility = View.VISIBLE
                 binding.btnCertSave.isEnabled = false
@@ -384,7 +420,8 @@ class CertDetailFragment : Fragment() {
                 var category = " " // 기본값
 
                 // 수료증 목록에서 카테고리 정보 가져오기
-                val certificateApiService = ApiClient.retrofit.create(CertificateApiService::class.java)
+                val certificateApiService =
+                    ApiClient.retrofit.create(CertificateApiService::class.java)
                 val certificateResponse = withContext(Dispatchers.IO) {
                     try {
                         certificateApiService.getCertificates(userId).execute()
@@ -392,6 +429,15 @@ class CertDetailFragment : Fragment() {
                         Log.e(TAG, "카테고리 정보 가져오기 실패: ${e.message}")
                         null
                     }
+                }
+
+                // Fragment가 여전히 활성 상태인지 확인
+                if (!isActive || !fragmentRef.get()?.isAdded!! == true || fragmentRef.get()?._binding == null) {
+                    Log.d(
+                        TAG,
+                        "issueCertificate: Fragment is not active or binding is null after category fetch"
+                    )
+                    return@launch
                 }
 
                 // 해당 강의의 카테고리 정보 찾기
@@ -405,7 +451,10 @@ class CertDetailFragment : Fragment() {
                         Log.e(TAG, "해당 강의의 카테고리 정보를 찾을 수 없습니다.")
                     }
                 } else {
-                    Log.e(TAG, "카테고리 정보 가져오기 실패: ${certificateResponse?.code()} - ${certificateResponse?.message()}")
+                    Log.e(
+                        TAG,
+                        "카테고리 정보 가져오기 실패: ${certificateResponse?.code()} - ${certificateResponse?.message()}"
+                    )
                 }
 
                 // IPFS에 업로드할 JSON 데이터 생성
@@ -422,6 +471,15 @@ class CertDetailFragment : Fragment() {
                 // IPFS에 JSON 데이터 업로드
                 val cid = withContext(Dispatchers.IO) {
                     IpfsUtils.uploadJsonToIpfs(jsonData)
+                }
+
+                // Fragment가 여전히 활성 상태인지 확인
+                if (!isActive || !fragmentRef.get()?.isAdded!! == true || fragmentRef.get()?._binding == null) {
+                    Log.d(
+                        TAG,
+                        "issueCertificate: Fragment is not active or binding is null after IPFS upload"
+                    )
+                    return@launch
                 }
 
                 if (cid != null) {
@@ -450,46 +508,22 @@ class CertDetailFragment : Fragment() {
                             Log.d(TAG, "응답 메시지: ${response.message()}")
                             Log.d(TAG, "응답 헤더: ${response.headers()}")
 
-                            if (response.isSuccessful) {
-                                Log.d(TAG, "응답 본문: ${response.body()}")
-                                response.body()?.let { issueResponse ->
-                                    if (issueResponse.code == 200) {
-                                        // 성공적으로 인증서가 발급됨
-                                        requireActivity().runOnUiThread {
-                                            Toast.makeText(requireContext(), "인증서가 성공적으로 발급되었습니다.", Toast.LENGTH_SHORT).show()
-                                            // 인증서 상세 정보 다시 로드
-                                            loadCertificateDetail()
-                                        }
-                                    } else {
-                                        requireActivity().runOnUiThread {
-                                            Toast.makeText(requireContext(), "인증서 발급에 실패했습니다.", Toast.LENGTH_SHORT).show()
-                                        }
-                                    }
-                                }
-                            } else {
-                                val errorBody = response.errorBody()?.string()
-                                Log.e(TAG, "오류 응답 본문: $errorBody")
-
-                                // 오류 응답 파싱 시도
-                                try {
-                                    val errorResponse = ApiClient.gson.fromJson<ErrorResponse>(errorBody, ErrorResponse::class.java)
-                                    Log.e(TAG, "파싱된 오류 응답: $errorResponse")
-
-                                    // 오류 메시지가 있는 경우 표시
-                                    errorResponse.message?.let { message ->
-                                        Log.e(TAG, "서버 오류 메시지: $message")
-                                    }
-                                } catch (e: Exception) {
-                                    Log.e(TAG, "오류 응답 파싱 실패: ${e.message}")
-                                }
-                            }
-
                             response
                         } catch (e: Exception) {
                             Log.e(TAG, "API 호출 중 예외 발생: ${e.message}")
                             Log.e(TAG, "예외 스택 트레이스: ${e.stackTraceToString()}")
                             throw e
                         }
+                    }
+
+                    // Fragment가 여전히 활성 상태인지 확인
+                    val fragment = fragmentRef.get()
+                    if (!isActive || fragment == null || !fragment.isAdded || fragment._binding == null) {
+                        Log.d(
+                            TAG,
+                            "issueCertificate: Fragment is not active or binding is null after API call"
+                        )
+                        return@launch
                     }
 
                     if (certResponse.isSuccessful && certResponse.body() != null) {
@@ -503,7 +537,9 @@ class CertDetailFragment : Fragment() {
                         isCertificateIssued = true
                         updateUIForCertificateStatus()
 
-                        Toast.makeText(requireContext(), "NFT 수료증이 발급되었습니다.", Toast.LENGTH_SHORT).show()
+                        activity?.let {
+                            Toast.makeText(it, "NFT 수료증이 발급되었습니다.", Toast.LENGTH_SHORT).show()
+                        }
                     } else {
                         val errorBody = certResponse.errorBody()?.string()
                         Log.e(TAG, "수료증 발급 실패: ${certResponse.code()} - ${certResponse.message()}")
@@ -519,28 +555,41 @@ class CertDetailFragment : Fragment() {
                             else -> "수료증 발급에 실패했습니다. (코드: ${certResponse.code()})"
                         }
 
-                        Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
+                        activity?.let {
+                            Toast.makeText(it, errorMessage, Toast.LENGTH_SHORT).show()
+                        }
                     }
                 } else {
                     Log.e(TAG, "IPFS 업로드 실패")
-                    Toast.makeText(requireContext(), "IPFS 업로드에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    activity?.let {
+                        Toast.makeText(it, "IPFS 업로드에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "수료증 발급 중 오류 발생: ${e.message}")
                 Log.e(TAG, "오류 스택 트레이스: ${e.stackTraceToString()}")
-                Toast.makeText(requireContext(), "오류가 발생했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
+                fragmentRef.get()?.activity?.let {
+                    Toast.makeText(it, "오류가 발생했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
             } finally {
-                // 로딩 오버레이 숨기기
-                binding.loadingOverlay.visibility = View.GONE
-                binding.btnCertSave.isEnabled = true
-                // 고양이 이미지 애니메이션 중지
-                binding.catImageView.animate().cancel()
+                // Fragment가 여전히 활성 상태인지 확인
+                fragmentRef.get()?.let { fragment ->
+                    if (fragment.isAdded && fragment._binding != null) {
+                        // 로딩 오버레이 숨기기
+                        fragment.binding.loadingOverlay.visibility = View.GONE
+                        fragment.binding.btnCertSave.isEnabled = true
+                        // 고양이 이미지 애니메이션 중지
+                        fragment.binding.catImageView.animate().cancel()
+                    }
+                }
             }
         }
     }
 
     // CID를 QR 코드로 변환하는 함수
     private fun generateQrCodeFromCid(cid: String) {
+        if (!isAdded || _binding == null) return
+
         try {
             // QR 코드에 사용할 URL 생성 (CID를 포함)
             val qrCodeUrl = IpfsUtils.createQrCodeUrl(cid)
@@ -605,7 +654,8 @@ class CertDetailFragment : Fragment() {
             val canvas = page.canvas
 
             // 배경 이미지 그리기
-            val backgroundDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.img_cert_frame)
+            val backgroundDrawable =
+                ContextCompat.getDrawable(requireContext(), R.drawable.img_cert_frame)
             backgroundDrawable?.let { drawable ->
                 // 103% 비율로 확대하기 위한 계산
                 val scale = 1.03f
@@ -613,7 +663,7 @@ class CertDetailFragment : Fragment() {
                 val scaledHeight = (pageInfo.pageHeight * scale).toInt()
                 val offsetX = (pageInfo.pageWidth - scaledWidth) / 2
                 val offsetY = (pageInfo.pageHeight - scaledHeight) / 2
-                
+
                 drawable.setBounds(offsetX, offsetY, offsetX + scaledWidth, offsetY + scaledHeight)
                 drawable.draw(canvas)
             }
@@ -658,28 +708,29 @@ class CertDetailFragment : Fragment() {
             val lectureTitle = binding.textLectureTitle.text.toString()
 
             // 한글 기준 14글자 제한
-            val limitedTitle = if (lectureTitle.count { "[가-힣]".toRegex().matches(it.toString()) } > 14) {
-                // 한글 글자 수 계산
-                var koreanCount = 0
-                var result = ""
+            val limitedTitle =
+                if (lectureTitle.count { "[가-힣]".toRegex().matches(it.toString()) } > 14) {
+                    // 한글 글자 수 계산
+                    var koreanCount = 0
+                    var result = ""
 
-                for (char in lectureTitle) {
-                    if ("[가-힣]".toRegex().matches(char.toString())) {
-                        koreanCount++
-                        if (koreanCount <= 14) {
-                            result += char
+                    for (char in lectureTitle) {
+                        if ("[가-힣]".toRegex().matches(char.toString())) {
+                            koreanCount++
+                            if (koreanCount <= 14) {
+                                result += char
+                            } else {
+                                break
+                            }
                         } else {
-                            break
+                            result += char
                         }
-                    } else {
-                        result += char
                     }
-                }
 
-                result + "..."
-            } else {
-                lectureTitle
-            }
+                    result + "..."
+                } else {
+                    lectureTitle
+                }
 
             // 긴 제목은 줄바꿈 처리
             val maxWidth = pageInfo.pageWidth * 0.8f
@@ -695,25 +746,26 @@ class CertDetailFragment : Fragment() {
             // 수료자 정보 (하단 좌측)
             val studentName = binding.textNameStudent.text.toString()
             // 수료자 이름 한글 기준 4글자 제한
-            val limitedStudentName = if (studentName.count { "[가-힣]".toRegex().matches(it.toString()) } > 4) {
-                var koreanCount = 0
-                var result = ""
-                for (char in studentName) {
-                    if ("[가-힣]".toRegex().matches(char.toString())) {
-                        koreanCount++
-                        if (koreanCount <= 4) {
-                            result += char
+            val limitedStudentName =
+                if (studentName.count { "[가-힣]".toRegex().matches(it.toString()) } > 4) {
+                    var koreanCount = 0
+                    var result = ""
+                    for (char in studentName) {
+                        if ("[가-힣]".toRegex().matches(char.toString())) {
+                            koreanCount++
+                            if (koreanCount <= 4) {
+                                result += char
+                            } else {
+                                break
+                            }
                         } else {
-                            break
+                            result += char
                         }
-                    } else {
-                        result += char
                     }
+                    result + "..."
+                } else {
+                    studentName
                 }
-                result + "..."
-            } else {
-                studentName
-            }
 
             val studentX = pageInfo.pageWidth * 0.30f
             val studentY = pageInfo.pageHeight * 0.75f
@@ -727,25 +779,26 @@ class CertDetailFragment : Fragment() {
             // 강의자 정보 (하단 우측)
             val teacherName = binding.textNameLecturer.text.toString()
             // 강의자 이름 한글 기준 4글자 제한
-            val limitedTeacherName = if (teacherName.count { "[가-힣]".toRegex().matches(it.toString()) } > 4) {
-                var koreanCount = 0
-                var result = ""
-                for (char in teacherName) {
-                    if ("[가-힣]".toRegex().matches(char.toString())) {
-                        koreanCount++
-                        if (koreanCount <= 4) {
-                            result += char
+            val limitedTeacherName =
+                if (teacherName.count { "[가-힣]".toRegex().matches(it.toString()) } > 4) {
+                    var koreanCount = 0
+                    var result = ""
+                    for (char in teacherName) {
+                        if ("[가-힣]".toRegex().matches(char.toString())) {
+                            koreanCount++
+                            if (koreanCount <= 4) {
+                                result += char
+                            } else {
+                                break
+                            }
                         } else {
-                            break
+                            result += char
                         }
-                    } else {
-                        result += char
                     }
+                    result + "..."
+                } else {
+                    teacherName
                 }
-                result + "..."
-            } else {
-                teacherName
-            }
 
             val teacherX = pageInfo.pageWidth * 0.65f
             val teacherY = pageInfo.pageHeight * 0.75f
@@ -778,7 +831,10 @@ class CertDetailFragment : Fragment() {
 
             // PDF 파일 저장 - 다운로드 폴더에 저장
             val fileName = "수료증_${binding.textLectureTitle.text}_${System.currentTimeMillis()}.pdf"
-            val filePath = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName)
+            val filePath = File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                fileName
+            )
 
             FileOutputStream(filePath).use { outputStream ->
                 document.writeTo(outputStream)
