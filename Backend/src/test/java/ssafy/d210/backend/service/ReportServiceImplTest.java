@@ -1,11 +1,11 @@
-//package ssafy.d210.backend.service;
+package ssafy.d210.backend.service;
 //
 //import org.junit.jupiter.api.DisplayName;
 //import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 //import org.mockito.InjectMocks;
 //import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 //import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 //import ssafy.d210.backend.dto.response.report.ReportDetailResponse;
 //import ssafy.d210.backend.dto.response.report.ReportResponse;
@@ -28,8 +28,8 @@
 //import static org.mockito.ArgumentMatchers.eq;
 //import static org.mockito.Mockito.when;
 //
-//@ExtendWith(MockitoExtension.class)
-//class ReportServiceImplTest {
+@ExtendWith(MockitoExtension.class)
+class ReportServiceImplTest {
 //
 //    @Mock private ReportRepository reportRepository;
 //    @Mock private UserRepository userRepository;
@@ -116,4 +116,4 @@
 //    }
 //
 //
-//}
+}
