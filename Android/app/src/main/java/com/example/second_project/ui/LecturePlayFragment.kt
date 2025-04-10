@@ -24,6 +24,9 @@ import com.bumptech.glide.Glide
 import com.example.second_project.UserSession.userId
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 private const val TAG = "LecturePlayFragment_야옹"
 class LecturePlayFragment: Fragment() {
@@ -48,8 +51,9 @@ class LecturePlayFragment: Fragment() {
     private val autoSaveHandler = Handler(Looper.getMainLooper())
     private val autoSaveRunnable = object : Runnable {
         override fun run() {
+            Log.d(TAG, "자동 저장 실행: subLectureId=$currentSubLectureId")
             saveCurrentWatchTime(currentSubLectureId)
-            autoSaveHandler.postDelayed(this, 4000) // 5초마다 실행
+            autoSaveHandler.postDelayed(this, 4000) // 4초마다 실행
         }
     }
 
@@ -322,33 +326,29 @@ class LecturePlayFragment: Fragment() {
         val subLecture = lectureData.subLectures.find { it.subLectureId == forSubLectureId } ?: return
         val lectureLength = subLecture.lectureLength
 
-        // watchTimeMap에서 forSubLectureId에 해당하는 시청 시간을 가져옵니다.
-        // 현재 재생 중인 sublecture인 경우 watchTimeMap의 값을 우선적으로 사용하고, 없으면 lastKnownSecondWatched를 사용합니다.
         val currentTimeSec = if (forSubLectureId == playingSubLectureId) {
-            // watchTimeMap에 값이 있으면 그 값을 사용하고, 없으면 lastKnownSecondWatched를 사용합니다.
             watchTimeMap[forSubLectureId] ?: lastKnownSecondWatched
         } else {
             watchTimeMap[forSubLectureId] ?: subLecture.continueWatching
         }
         
-        // 현재 시간이 0이면 이전에 저장된 시간을 사용합니다.
         val finalTimeSec = if (currentTimeSec == 0 && forSubLectureId == playingSubLectureId) {
             subLecture.continueWatching
         } else {
             currentTimeSec
         }
         
-        // 완강 여부 판단 (강의 길이의 98% 이상 시청 시 완강으로 간주)
         val endFlag = finalTimeSec >= lectureLength * 0.80
         
-        // 완강 여부 로그 추가
-        Log.d(TAG, "완강 여부 판단: subLectureId=$forSubLectureId, 시간=${finalTimeSec}초, 강의길이=${lectureLength}초, 완강여부=$endFlag")
-
-        Log.d(TAG, "재생 시간 저장: subLectureId=$forSubLectureId, 시간=${finalTimeSec}초, 완강여부=$endFlag, lastKnownSecondWatched=$lastKnownSecondWatched, watchTimeMap=${watchTimeMap[forSubLectureId]}")
+        Log.d(TAG, "진도 저장 시도: subLectureId=$forSubLectureId, 시간=${finalTimeSec}초, 완강여부=$endFlag")
 
         // 서버에 저장 요청
         viewModel.saveWatchTime(userLectureId, forSubLectureId, finalTimeSec, endFlag)
+        Log.d(TAG, "진도 저장 API 호출 완료: subLectureId=$forSubLectureId, 시간=$finalTimeSec")
+        
+        // 마지막 시청 강의 업데이트
         viewModel.updateLastViewedLecture(userLectureId, forSubLectureId)
+        Log.d(TAG, "마지막 시청 강의 업데이트 API 호출 완료: subLectureId=$forSubLectureId")
         
         // 로컬에서 sublecture 상태 업데이트
         var needUpdate = false
@@ -372,7 +372,6 @@ class LecturePlayFragment: Fragment() {
         
         // watchTimeMap이 업데이트되었으므로 UI 갱신
         if (needUpdate || finalTimeSec > 0) {
-            // RecyclerView 어댑터 갱신
             (binding.playLectureList.adapter as? OwnedLectureDetailAdapter)?.updateSubLectureList(allSubLectures)
             Log.d(TAG, "sublecture 리스트 갱신: subLectureId=$forSubLectureId, 시간=${finalTimeSec}초")
         }
