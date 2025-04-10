@@ -591,6 +591,7 @@ class LectureDetailFragment : Fragment(R.layout.fragment_lecture_detail) {
         super.onDestroyView()
         _binding = null
         Log.d(TAG, "onDestroyView 호출됨.")
+        isDialogShowing = false
     }
 
     // ---------------------------------------------
