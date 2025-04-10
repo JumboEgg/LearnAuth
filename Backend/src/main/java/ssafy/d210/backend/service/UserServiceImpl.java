@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    @Transactional(rollbackFor = {Exception.class, PasswordIsNotAllowed.class, BlockchainException.class})
+    @Transactional(rollbackFor = {Exception.class, PasswordIsNotAllowed.class, BlockchainException.class, Throwable.class})
     @DistributedLock(key = "#userSignupRequest.email")
     public ResponseSuccessDto<SignupResponse> signup(SignupRequest userSignupRequest) throws Exception {
 

@@ -75,7 +75,7 @@ public class QuizServiceImpl implements QuizService{
 
     @Override
     @DistributedLock(key = "#submitQuiz")
-    @Transactional
+    @Transactional(rollbackFor = Throwable.class)
     public ResponseSuccessDto<Boolean> submitQuiz(Long lectureId, Long userId, QuizResultRequest request) {
 
         UserLecture userLecture = findUserLecture(lectureId, userId);
