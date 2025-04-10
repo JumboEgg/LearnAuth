@@ -24,6 +24,10 @@ class SearchViewModel : ViewModel() {
     private val _lectures = MutableLiveData<List<Lecture>>()
     val lectures: LiveData<List<Lecture>> get() = _lectures
 
+
+    val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> get() = _isLoading
+
     // 누적 저장할 리스트 & 페이지 정보
     private val loadedLectures = mutableListOf<Lecture>()
     private var currentLecturePage = 1
@@ -43,6 +47,7 @@ class SearchViewModel : ViewModel() {
         isLectureLoading = false
         isLectureLastPage = false
         _lectures.value = emptyList()
+//        _lectures.postValue(emptyList())
 
         Log.d(TAG, "강의 목록 초기화됨")
     }
@@ -57,12 +62,12 @@ class SearchViewModel : ViewModel() {
             // 카테고리가 변경되면 데이터 초기화
             resetLectures()
             currentCategoryId = categoryId
-
-            Log.d(TAG, "카테고리 변경됨: $categoryId")
         }
 
         if (isLectureLoading || isLectureLastPage) return
+
         isLectureLoading = true
+        _isLoading.value = true  // 로딩 시작
 
         // 현재 요청에 대한 카테고리 ID 저장 (클로저에서 사용)
         val requestCategoryId = categoryId
@@ -73,6 +78,7 @@ class SearchViewModel : ViewModel() {
             if (requestCategoryId != currentCategoryId) {
                 Log.d(TAG, "카테고리 불일치로 결과 무시: 요청=$requestCategoryId, 현재=$currentCategoryId")
                 isLectureLoading = false
+                _isLoading.value = false  // 여기에 로딩 종료 추가
                 return@observeOnce
             }
 
@@ -86,7 +92,9 @@ class SearchViewModel : ViewModel() {
                 isLectureLastPage = true
                 Log.d(TAG, "더 이상 로드할 강의 없음 (마지막 페이지)")
             }
+
             isLectureLoading = false
+            _isLoading.value = false  // 로딩 종료
         }
     }
 
@@ -117,6 +125,7 @@ class SearchViewModel : ViewModel() {
         lastSearchKeyword = ""
         lastSearchCategory = "전체"
         _searchResults.value = emptyList()
+//        _searchResults.postValue(emptyList())
 
         // 요청 토큰 증가 (이전 요청 무효화)
         searchRequestToken++
@@ -128,59 +137,74 @@ class SearchViewModel : ViewModel() {
      * 검색어와 카테고리에 따라 강의를 페이지 단위로 조회하고,
      * 가져온 데이터를 누적해서 _searchResults에 넣습니다.
      */
+// SearchViewModel.kt - searchLectures 함수 수정
+// SearchViewModel.kt의 searchLectures 함수 수정
     fun searchLectures(keyword: String, category: String) {
-        // 이전 검색과 다르면 초기화 (keyword, category가 변경된 경우)
+        // 이전 검색과 다르면 초기화
         if (keyword != lastSearchKeyword || category != lastSearchCategory) {
             resetSearchResults()
             lastSearchKeyword = keyword
             lastSearchCategory = category
-
-            Log.d(TAG, "검색 조건 변경: 키워드='$keyword', 카테고리='$category'")
         }
 
         if (isSearchLoading || isSearchLastPage) return
-        isSearchLoading = true
 
-        // 현재 요청에 대한 토큰 캡처 (클로저에서 사용)
+        isSearchLoading = true
+        _isLoading.value = true
+
         val currentToken = searchRequestToken
-        Log.d(
-            TAG,
-            "검색 요청 시작: 키워드='$keyword', 카테고리='$category', 토큰=$currentToken, 페이지=$currentSearchPage"
-        )
 
         searchRepository.searchLectures(keyword, currentSearchPage).observeOnce { searchData ->
-            // 요청 토큰이 변경되었으면 결과 무시 (새로운 검색이 시작됨)
+            // 요청 토큰 확인
             if (currentToken != searchRequestToken) {
-                Log.d(TAG, "토큰 불일치로 결과 무시: 요청=$currentToken, 현재=$searchRequestToken")
                 isSearchLoading = false
+                _isLoading.value = false  // 이 부분 추가
                 return@observeOnce
             }
 
             val results = searchData?.searchResults ?: emptyList()
-            if (results.isNotEmpty()) {
-                // "전체"가 아니라면 필터링
+
+            // 여기서 중요한 변경: 결과가 없을 때 처리
+            if (results.isEmpty() && currentSearchPage == 1) {
+                // 첫 페이지에서 결과가 없으면 빈 결과로 설정
+                loadedSearchResults.clear()
+                _searchResults.value = emptyList()
+                isSearchLastPage = true
+            } else if (results.isNotEmpty()) {
+                // 카테고리 필터링
                 val filtered = if (category != "전체") {
                     results.filter { it.categoryName == category }
                 } else {
                     results
                 }
 
-                loadedSearchResults.addAll(filtered)
-                _searchResults.value = loadedSearchResults.toList()
-                currentSearchPage++
+                // 필터링 결과가 있을 때만 처리
+                if (filtered.isNotEmpty()) {
+                    loadedSearchResults.addAll(filtered)
+                    _searchResults.value = loadedSearchResults.toList()
+                    currentSearchPage++
+                } else if (currentSearchPage == 1) {
+                    // 첫 페이지인데 필터링 후 결과가 없는 경우
+                    loadedSearchResults.clear()
+                    _searchResults.value = emptyList()
+                }
 
-                Log.d(
-                    TAG,
-                    "검색 결과 로드 성공: 원본=${results.size}개, 필터링 후=${filtered.size}개, 총=${loadedSearchResults.size}개"
-                )
+                // 원본 결과가 있지만 필터링 후 결과가 없으면 다음 페이지 요청
+                if (filtered.isEmpty() && !isSearchLastPage) {
+                    currentSearchPage++
+                    isSearchLoading = false
+                    // 재귀 호출 전에 _isLoading 값을 유지 (true로 유지)
+                    searchLectures(keyword, category) // 재귀 호출로 다음 페이지 검색
+                    return@observeOnce  // 여기서 함수 종료 (로딩 상태 유지)
+                }
             } else {
                 isSearchLastPage = true
-                Log.d(TAG, "더 이상 검색 결과 없음 (마지막 페이지)")
             }
+
             isSearchLoading = false
+            _isLoading.value = false
         }
     }
-
     // -----------------------------
     // (3) 강의 상세 정보
     // -----------------------------
