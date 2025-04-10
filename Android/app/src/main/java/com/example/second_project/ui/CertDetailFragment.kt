@@ -569,7 +569,7 @@ class CertDetailFragment : Fragment() {
                 Log.e(TAG, "수료증 발급 중 오류 발생: ${e.message}")
                 Log.e(TAG, "오류 스택 트레이스: ${e.stackTraceToString()}")
                 fragmentRef.get()?.activity?.let {
-                    Toast.makeText(it, "오류가 발생했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(it, "오류가 발생했습니다", Toast.LENGTH_SHORT).show()
                 }
             } finally {
                 // Fragment가 여전히 활성 상태인지 확인

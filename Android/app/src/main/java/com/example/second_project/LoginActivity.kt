@@ -119,7 +119,7 @@ class LoginActivity : AppCompatActivity() {
                     showLoading(false)
                     Toast.makeText(
                         this@LoginActivity,
-                        "로그인 실패: ${response.message()}",
+                        "로그인 실패에 실패했습니다.",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -129,8 +129,8 @@ class LoginActivity : AppCompatActivity() {
                 // 네트워크 오류 - 상태 초기화
                 isLoggingIn = false
                 showLoading(false)
-                Toast.makeText(this@LoginActivity, "네트워크 오류: ${t.message}", Toast.LENGTH_SHORT)
-                    .show()
+//                Toast.makeText(this@LoginActivity, "네트워크 오류: ${t.message}", Toast.LENGTH_SHORT)
+//                    .show()
             }
         })
     }
@@ -333,7 +333,7 @@ class LoginActivity : AppCompatActivity() {
             updateWalletInfoToServer(walletAddress)
         } catch (e: Exception) {
             Log.e("LoginActivity", "지갑 생성 오류", e)
-            Toast.makeText(this, "지갑 생성 오류: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "지갑 생성에 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
         }
     }
 

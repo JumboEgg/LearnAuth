@@ -278,7 +278,7 @@ class ProfileFragment : Fragment() {
                         // 이전 잔액이 있으면 표시 유지, 없으면 오류 메시지
                         if (UserSession.lastKnownBalance == null) {
                             binding.moneyCount.text = "잔액 조회 실패"
-                            Toast.makeText(context, "잔액 조회 실패: ${e.message}", Toast.LENGTH_SHORT)
+                            Toast.makeText(context, "잔액 조회 실패", Toast.LENGTH_SHORT)
                                 .show()
                         }
                     }
@@ -359,7 +359,7 @@ class ProfileFragment : Fragment() {
             Log.e(TAG, "잔액 조회 실패", e)
             withContext(Dispatchers.Main) {
                 if (isAdded && _binding != null) {
-                    Toast.makeText(context, "잔액 조회 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "잔액 조회 실패", Toast.LENGTH_SHORT).show()
                 }
             }
         }

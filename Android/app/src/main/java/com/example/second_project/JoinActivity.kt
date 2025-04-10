@@ -246,7 +246,7 @@ class JoinActivity : AppCompatActivity() {
                         Log.e(TAG, "지갑 생성 실패: $e")
                         Toast.makeText(
                             this@JoinActivity,
-                            "Wallet 생성 실패: ${e.message}",
+                            "지갑 생성 실패",
                             Toast.LENGTH_SHORT
                         ).show()
 
