@@ -85,9 +85,10 @@ public class ReportServiceImpl implements ReportService{
 
     @Override
     @DistributedLock(key = "#createReport")
+    @Transactional(rollbackFor = Throwable.class)
     public ResponseSuccessDto<Void> createReport(ReportRequest request, Long userId) {
 
-        Optional<UserLecture> userLecture = userLectureRepository.findByUserIdAndLectureId(userId, request.getLectureId());
+        Optional<UserLecture> userLecture = findByUserIdAndLectureId(userId, request.getLectureId());
         userLecture.get().setReport(1);
         userLectureRepository.save(userLecture.get());
 
@@ -105,6 +106,10 @@ public class ReportServiceImpl implements ReportService{
         reportRepository.saveAll(reports);
 
         return responseUtil.successResponse(null, HereStatus.SUCCESS_REPORT_CREATED);
+    }
+    @Transactional(readOnly = true)
+    protected Optional<UserLecture> findByUserIdAndLectureId(Long userId, Long lectureId) {
+        return userLectureRepository.findByUserIdAndLectureId(userId, lectureId);
     }
 
     @Transactional(readOnly = true)

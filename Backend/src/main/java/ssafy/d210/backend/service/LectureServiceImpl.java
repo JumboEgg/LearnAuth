@@ -38,7 +38,7 @@ public class LectureServiceImpl implements LectureService{
 
     @Override
     @Transactional
-    @Cacheable(value = "lectureCategory", key = "T(String).valueOf(#p0) + '-' + T(String).valueOf(#p1)", cacheManager = "redisCacheManager")
+//    @Cacheable(value = "lectureCategory", key = "T(String).valueOf(#p0) + '-' + T(String).valueOf(#p1)", cacheManager = "redisCacheManager")
     public ResponseSuccessDto<List<LectureInfoListResponse>> getLecturesByCategory(int categoryId, int page) {
         // 카테고리별 강의 목록 조회
         int offset = (page - 1) * 12;
@@ -84,7 +84,7 @@ public class LectureServiceImpl implements LectureService{
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "lectureMostCompleted", cacheManager = "redisCacheManager")
+//    @Cacheable(value = "lectureMostCompleted", cacheManager = "redisCacheManager")
     public ResponseSuccessDto<List<LectureInfoListResponse>> getMostCompletedLectures() {
         List<LectureInfoListResponse> mostCompletedLectures = lectureRepository.getMostFinishedLectures();
         return responseUtil.successResponse(mostCompletedLectures, HereStatus.SUCCESS_LECTURE);
@@ -99,7 +99,7 @@ public class LectureServiceImpl implements LectureService{
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "lectureRecent", cacheManager = "redisCacheManager")
+//    @Cacheable(value = "lectureRecent", cacheManager = "redisCacheManager")
     public ResponseSuccessDto<List<LectureInfoListResponse>> getMostRecentLectures() {
         List<LectureInfoListResponse> newestLectures = lectureRepository.getNewestLectures();
         return responseUtil.successResponse(newestLectures, HereStatus.SUCCESS_LECTURE);
