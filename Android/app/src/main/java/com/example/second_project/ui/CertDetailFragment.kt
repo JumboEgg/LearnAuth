@@ -104,7 +104,7 @@ class CertDetailFragment : Fragment() {
                     isCertificateIssued = true
                     
                     // QR 코드 URL이 있는 경우 (CID 값)
-                    if (detail.qrCode.isNotEmpty()) {
+                    if (!detail.qrCode?.isNullOrEmpty()!!) {
                         // CID를 사용하여 QR 코드 생성
                         generateQrCodeFromCid(detail.qrCode)
                     } else {
