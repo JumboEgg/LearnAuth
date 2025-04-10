@@ -12,8 +12,6 @@ import ssafy.d210.backend.blockchain.RelayerAccount;
 import ssafy.d210.backend.contracts.LectureSystem;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.request.lecture.LectureRegisterRequest;
-import ssafy.d210.backend.dto.request.lecture.SubLectureRequest;
-import ssafy.d210.backend.dto.request.payment.RatioRequest;
 import ssafy.d210.backend.dto.request.quiz.QuizOptionRequest;
 import ssafy.d210.backend.dto.request.quiz.QuizRequest;
 import ssafy.d210.backend.entity.*;
@@ -22,9 +20,7 @@ import ssafy.d210.backend.enumeration.response.HereStatus;
 import ssafy.d210.backend.exception.service.*;
 import ssafy.d210.backend.redis.DistributedLock;
 import ssafy.d210.backend.repository.*;
-import ssafy.d210.backend.util.AES256Util;
 import ssafy.d210.backend.util.ResponseUtil;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -176,8 +172,10 @@ public class LectureManagementServiceImpl implements LectureManagementService {
         // 블록체인에 강의를 등록하는 기능. 필요에 의해 앞쪽에 삽입될 수도 있습니다.
         RelayerAccount account = null;
         try {
-            account = accountManager.acquireAccount(AccountManager.OperationType.REGISTRATION);
+            account = accountManager.acquireAccount();
             LectureSystem lectureSystem = contractServiceFactory.createLectureSystem(account);
+
+            log.info("🚀 트랜잭션 보내는 relayer address: {}", account.getAddress());
 
             List<LectureSystem.Participant> participants = paymentRatios.stream().map(
                     paymentRatio -> new LectureSystem.Participant(
@@ -200,7 +198,7 @@ public class LectureManagementServiceImpl implements LectureManagementService {
                 throw new BlockchainException("블록체인 이슈로 강의등록 실패, 트랜잭션 롤백");
             }
         } finally {
-            accountManager.releaseAccount(account, AccountManager.OperationType.REGISTRATION);
+            accountManager.releaseAccount(account);
         }
 
         return responseUtil.successResponse(true, HereStatus.SUCCESS_LECTURE_REGISTERED);

@@ -1,43 +1,26 @@
 package ssafy.d210.backend.service;
-//
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.web3j.crypto.Credentials;
-import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.utils.Convert;
 import ssafy.d210.backend.blockchain.AccountManager;
 import ssafy.d210.backend.blockchain.ContractServiceFactory;
 import ssafy.d210.backend.blockchain.RelayerAccount;
-import ssafy.d210.backend.contracts.CATToken;
-import ssafy.d210.backend.contracts.LectureForwarder;
 import ssafy.d210.backend.contracts.LectureSystem;
 import ssafy.d210.backend.dto.common.ResponseSuccessDto;
 import ssafy.d210.backend.dto.response.certificate.CertificateDetailResponse;
 import ssafy.d210.backend.dto.response.certificate.CertificateResponse;
 import ssafy.d210.backend.dto.response.certificate.CertificateToken;
-import ssafy.d210.backend.entity.Lecture;
-import ssafy.d210.backend.entity.PaymentRatio;
-import ssafy.d210.backend.entity.User;
 import ssafy.d210.backend.entity.UserLecture;
 import ssafy.d210.backend.enumeration.response.HereStatus;
-import ssafy.d210.backend.exception.DefaultException;
 import ssafy.d210.backend.exception.service.BlockchainException;
 import ssafy.d210.backend.exception.service.EntityIsNullException;
-import ssafy.d210.backend.repository.LectureRepository;
-import ssafy.d210.backend.repository.PaymentRatioRepository;
 import ssafy.d210.backend.repository.UserLectureRepository;
-import ssafy.d210.backend.repository.UserRepository;
 import ssafy.d210.backend.util.ResponseUtil;
-
-import javax.swing.text.html.Option;
 import java.math.BigInteger;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -146,8 +129,10 @@ public class CertificateServiceImpl implements CertificateService{
     public CompletableFuture<TransactionReceipt> issueCertificateToContract(Long userId, String cid) {
         RelayerAccount account = null;
         try {
-            account = accountManager.acquireAccount(AccountManager.OperationType.REGISTRATION);
+            account = accountManager.acquireAccount();
             LectureSystem lectureSystem = contractServiceFactory.createLectureSystem(account);
+
+            log.info("🚀 트랜잭션 보내는 relayer address: {}", account.getAddress());
             log.info("Issue NFT to userId {} with cid {}", userId, cid);
             // NFT 생성
             log.info("Executing issueCertificate");
@@ -165,7 +150,7 @@ public class CertificateServiceImpl implements CertificateService{
             log.error("Error in depositToken: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to deposit token", e);
         } finally {
-            accountManager.releaseAccount(account, AccountManager.OperationType.REGISTRATION);
+            accountManager.releaseAccount(account);
         }
     }
 

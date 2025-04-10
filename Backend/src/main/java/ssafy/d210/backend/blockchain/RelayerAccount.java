@@ -10,23 +10,17 @@ public class RelayerAccount {
     private final String privateKey;
     private final int index;
     private final Credentials credentials;
+    @Getter
     private volatile boolean inUse = false;
     @Getter
-    private long lastActivityTime = 0;
+    private long lastActivityTime;
     private BigInteger lastKnownNonce = BigInteger.valueOf(-1);
 
     public RelayerAccount(String privateKey, int index) {
         this.privateKey = privateKey;
         this.index = index;
         this.credentials = Credentials.create(privateKey);
-    }
-
-    public String getPrivateKey() {
-        return privateKey;
-    }
-
-    public int getIndex() {
-        return index;
+        this.lastActivityTime = System.currentTimeMillis();
     }
 
     public Credentials getCredentials() {
@@ -38,31 +32,16 @@ public class RelayerAccount {
     }
 
     public void markInUse() {
+        markInUse(System.currentTimeMillis());
+    }
+
+    public void markInUse(long timestamp) {
         this.inUse = true;
+        this.lastActivityTime = timestamp;
     }
 
     public void markAvailable() {
         this.inUse = false;
-    }
-
-    public boolean isInUse() {
-        return inUse;
-    }
-
-    public synchronized BigInteger getAndIncrementNonce(Web3j web3j) {
-        try {
-            if (lastKnownNonce.compareTo(BigInteger.valueOf(-1)) == 0) {
-                // Initialize nonce from blockchain
-                lastKnownNonce = web3j.ethGetTransactionCount(
-                        credentials.getAddress(), org.web3j.protocol.core.DefaultBlockParameterName.PENDING
-                ).send().getTransactionCount();
-            } else {
-                // Increment the last known nonce
-                lastKnownNonce = lastKnownNonce.add(BigInteger.ONE);
-            }
-            return lastKnownNonce;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to get nonce for account: " + credentials.getAddress(), e);
-        }
+        this.lastActivityTime = System.currentTimeMillis();
     }
 }
