@@ -52,6 +52,7 @@ import java.util.regex.Pattern
 import androidx.core.content.res.ResourcesCompat
 import android.graphics.Bitmap
 import com.example.second_project.network.ErrorResponse
+import android.animation.ObjectAnimator
 
 private const val TAG = "CertDetailFragment_야옹"
 private const val IPFS_GATEWAY_URL = "https://j12d210.p.ssafy.io/ipfs"
@@ -80,14 +81,26 @@ class CertDetailFragment : Fragment() {
         val userId = args.userId
         val lectureId = args.lectureId
 
+        // 고양이 이미지 설정 (GIF)
+        Glide.with(this)
+            .asGif()
+            .load(R.raw.loadingimg2)
+            .into(binding.catImageView)
+
         // 수료증 발급 여부 확인
         checkCertificateIssued(userId, lectureId)
+
+        // API 호출 전 로딩 인디케이터 표시
+        binding.loadingProgressBar.visibility = View.VISIBLE
 
         // API 호출: CertDetailViewModel에서 수료증 상세 데이터를 받아옴
         viewModel.fetchCertificateDetail(userId, lectureId)
 
         // 관찰: API 응답이 오면 UI에 데이터 바인딩
         viewModel.certificateDetail.observe(viewLifecycleOwner) { response ->
+            // 로딩 인디케이터 숨기기
+            binding.loadingProgressBar.visibility = View.GONE
+
             if (response != null && response.data != null) {
                 val detail = response.data
                 
@@ -345,8 +358,14 @@ class CertDetailFragment : Fragment() {
     private fun issueCertificate(userId: Int, lectureId: Int) {
         lifecycleScope.launch {
             try {
-                // 프로그레스바 표시
-                binding.loadingProgressBar.visibility = View.VISIBLE
+                // 수료증 발급 시 로딩 오버레이 표시
+                binding.loadingOverlay.visibility = View.VISIBLE
+                binding.btnCertSave.isEnabled = false
+                // 고양이 이미지 애니메이션 시작
+                val rotation = ObjectAnimator.ofFloat(binding.catImageView, "rotation", 0f, 360f)
+                rotation.duration = 2000
+                rotation.repeatCount = ObjectAnimator.INFINITE
+                rotation.start()
 
                 // 수료일 가져오기 (퀴즈 다 푼 날짜)
                 val certificateDate = viewModel.certificateDetail.value?.data?.certificateDate
@@ -511,8 +530,11 @@ class CertDetailFragment : Fragment() {
                 Log.e(TAG, "오류 스택 트레이스: ${e.stackTraceToString()}")
                 Toast.makeText(requireContext(), "오류가 발생했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
             } finally {
-                // 프로그레스바 숨기기
-                binding.loadingProgressBar.visibility = View.GONE
+                // 로딩 오버레이 숨기기
+                binding.loadingOverlay.visibility = View.GONE
+                binding.btnCertSave.isEnabled = true
+                // 고양이 이미지 애니메이션 중지
+                binding.catImageView.animate().cancel()
             }
         }
     }
@@ -585,7 +607,14 @@ class CertDetailFragment : Fragment() {
             // 배경 이미지 그리기
             val backgroundDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.img_cert_frame)
             backgroundDrawable?.let { drawable ->
-                drawable.setBounds(0, 0, pageInfo.pageWidth, pageInfo.pageHeight)
+                // 103% 비율로 확대하기 위한 계산
+                val scale = 1.03f
+                val scaledWidth = (pageInfo.pageWidth * scale).toInt()
+                val scaledHeight = (pageInfo.pageHeight * scale).toInt()
+                val offsetX = (pageInfo.pageWidth - scaledWidth) / 2
+                val offsetY = (pageInfo.pageHeight - scaledHeight) / 2
+                
+                drawable.setBounds(offsetX, offsetY, offsetX + scaledWidth, offsetY + scaledHeight)
                 drawable.draw(canvas)
             }
 
@@ -596,7 +625,7 @@ class CertDetailFragment : Fragment() {
             // 강의 제목 스타일 설정 (파란색, 큰 글씨)
             val titlePaint = Paint().apply {
                 color = ContextCompat.getColor(requireContext(), R.color.primary_color)
-                textSize = 60f  // 24f에서 60f로 증가 (2.5배)
+                textSize = 60f
                 typeface = ResourcesCompat.getFont(requireContext(), R.font.pretendard_black)
                 textAlign = Paint.Align.CENTER
             }
@@ -604,7 +633,7 @@ class CertDetailFragment : Fragment() {
             // 이름 스타일 설정 (검정색, 중간 크기)
             val namePaint = Paint().apply {
                 color = Color.BLACK
-                textSize = 40f  // 18f에서 45f로 증가 (2.5배)
+                textSize = 40f
                 typeface = ResourcesCompat.getFont(requireContext(), R.font.pretendard_bold)
                 textAlign = Paint.Align.CENTER
             }
@@ -612,7 +641,7 @@ class CertDetailFragment : Fragment() {
             // 라벨 스타일 설정 (파란색/검정색, 작은 글씨)
             val labelPaint = Paint().apply {
                 color = ContextCompat.getColor(requireContext(), R.color.primary_color)
-                textSize = 30f  // 14f에서 35f로 증가 (2.5배)
+                textSize = 30f
                 typeface = ResourcesCompat.getFont(requireContext(), R.font.pretendard_bold)
                 textAlign = Paint.Align.CENTER
             }
@@ -620,7 +649,7 @@ class CertDetailFragment : Fragment() {
             // 강의자 라벨 스타일 (검정색)
             val teacherLabelPaint = Paint().apply {
                 color = Color.BLACK
-                textSize = 30f  // 14f에서 35f로 증가 (2.5배)
+                textSize = 30f
                 typeface = ResourcesCompat.getFont(requireContext(), R.font.pretendard_bold)
                 textAlign = Paint.Align.CENTER
             }
@@ -653,34 +682,76 @@ class CertDetailFragment : Fragment() {
             }
 
             // 긴 제목은 줄바꿈 처리
-            val maxWidth = pageInfo.pageWidth * 0.8f // 페이지 너비의 80%까지만 사용
+            val maxWidth = pageInfo.pageWidth * 0.8f
             val titleLines = splitTextIntoLines(limitedTitle, titlePaint, maxWidth)
 
             // 제목 그리기 (여러 줄일 경우 중앙 정렬, 살짝 왼쪽으로)
             val titleStartY = centerY - (titleLines.size * titlePaint.textSize) / 2
-            val titleX = centerX - 20f // 중앙에서 20픽셀 왼쪽으로
+            val titleX = centerX - 20f
             titleLines.forEachIndexed { index, line ->
                 canvas.drawText(line, titleX, titleStartY + index * titlePaint.textSize, titlePaint)
             }
 
             // 수료자 정보 (하단 좌측)
             val studentName = binding.textNameStudent.text.toString()
-            val studentX = pageInfo.pageWidth * 0.30f // 25%에서 35%로 변경 (중앙에 더 가깝게)
-            val studentY = pageInfo.pageHeight * 0.75f // 페이지 높이의 75% 지점
+            // 수료자 이름 한글 기준 4글자 제한
+            val limitedStudentName = if (studentName.count { "[가-힣]".toRegex().matches(it.toString()) } > 4) {
+                var koreanCount = 0
+                var result = ""
+                for (char in studentName) {
+                    if ("[가-힣]".toRegex().matches(char.toString())) {
+                        koreanCount++
+                        if (koreanCount <= 4) {
+                            result += char
+                        } else {
+                            break
+                        }
+                    } else {
+                        result += char
+                    }
+                }
+                result + "..."
+            } else {
+                studentName
+            }
+
+            val studentX = pageInfo.pageWidth * 0.30f
+            val studentY = pageInfo.pageHeight * 0.75f
 
             // 수료자 이름
-            canvas.drawText(studentName, studentX, studentY, namePaint)
+            canvas.drawText(limitedStudentName, studentX, studentY, namePaint)
 
             // "수료자" 라벨
             canvas.drawText("수료자", studentX, studentY + namePaint.textSize + 10, labelPaint)
 
             // 강의자 정보 (하단 우측)
             val teacherName = binding.textNameLecturer.text.toString()
-            val teacherX = pageInfo.pageWidth * 0.65f // 75%에서 65%로 변경 (중앙에 더 가깝게)
-            val teacherY = pageInfo.pageHeight * 0.75f // 페이지 높이의 75% 지점
+            // 강의자 이름 한글 기준 4글자 제한
+            val limitedTeacherName = if (teacherName.count { "[가-힣]".toRegex().matches(it.toString()) } > 4) {
+                var koreanCount = 0
+                var result = ""
+                for (char in teacherName) {
+                    if ("[가-힣]".toRegex().matches(char.toString())) {
+                        koreanCount++
+                        if (koreanCount <= 4) {
+                            result += char
+                        } else {
+                            break
+                        }
+                    } else {
+                        result += char
+                    }
+                }
+                result + "..."
+            } else {
+                teacherName
+            }
+
+            val teacherX = pageInfo.pageWidth * 0.65f
+            val teacherY = pageInfo.pageHeight * 0.75f
 
             // 강의자 이름
-            canvas.drawText(teacherName, teacherX, teacherY, namePaint)
+            canvas.drawText(limitedTeacherName, teacherX, teacherY, namePaint)
 
             // "강의자" 라벨
             canvas.drawText("강의자", teacherX, teacherY + namePaint.textSize + 10, teacherLabelPaint)
