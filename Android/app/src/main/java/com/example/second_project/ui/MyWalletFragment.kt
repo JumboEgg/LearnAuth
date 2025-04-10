@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.second_project.R
 import com.example.second_project.UserSession
 import com.example.second_project.adapter.TransactionAdapter
@@ -34,6 +35,8 @@ import java.util.Date
 import java.util.Locale
 
 class MyWalletFragment : Fragment() {
+
+
     private var _binding: FragmentMywalletBinding? = null
     private val binding get() = _binding!!
     private lateinit var transactionAdapter: TransactionAdapter
@@ -97,7 +100,7 @@ class MyWalletFragment : Fragment() {
                 } else {
                     // 로딩 중이 아니면 정상적으로 뒤로가기 동작 수행
                     this.remove() // 현재 콜백 제거
-                    requireActivity().onBackPressed() // 뒤로가기 동작 수행
+                    findNavController().popBackStack()
                 }
             }
         }
@@ -870,15 +873,22 @@ class MyWalletFragment : Fragment() {
         if (_binding != null) {
             if (loading) {
                 binding.transactionList.visibility = View.INVISIBLE
-                binding.loadingSpinner.visibility = View.VISIBLE
-                binding.loadingText.visibility = View.VISIBLE
-                binding.blockTouchOverlay.visibility = View.VISIBLE
+
+//                binding.loadingSpinner.visibility = View.VISIBLE
+//                binding.loadingText.visibility = View.VISIBLE
+//                binding.blockTouchOverlay.visibility = View.VISIBLE
+                showLoadingOverlay()
+                startCatAnimation()
+
                 binding.chargeBtn.isEnabled = false
             } else {
                 binding.transactionList.visibility = View.VISIBLE
-                binding.loadingSpinner.visibility = View.GONE
-                binding.loadingText.visibility = View.GONE
-                binding.blockTouchOverlay.visibility = View.GONE
+
+//                binding.loadingSpinner.visibility = View.GONE
+//                binding.loadingText.visibility = View.GONE
+//                binding.blockTouchOverlay.visibility = View.GONE
+                hideLoadingOverlay()
+
                 binding.chargeBtn.isEnabled = true
             }
         } else {
@@ -912,6 +922,30 @@ class MyWalletFragment : Fragment() {
 
         super.onDestroyView()
         _binding = null
+    }
+
+    // 로딩 페이지 만들기 (임시)
+    private fun showLoadingOverlay() {
+        binding.loadingOverlay.visibility = View.VISIBLE
+        Glide.with(this).load(R.raw.loadingimg2).override(560, 560).into(binding.catImageView)
+    }
+
+    private fun hideLoadingOverlay() {
+        // 애니메이션 정지
+        binding.catImageView.clearAnimation()
+        // 오버레이 숨기기
+        binding.loadingOverlay.visibility = View.GONE
+    }
+
+    /**
+     * 고양이 ImageView를 "화면 왼쪽→오른쪽"으로만 계속 달리게 하는 메서드
+     * (한 번 달린 후 애니메이션 끝나면, 다시 왼쪽으로 복귀 후 반복)
+     */
+    // 고양이 이미지의 랜덤 이동 애니메이션 시작 함수
+    private fun startCatAnimation() {
+        binding.loadingOverlay.post {
+//            doSingleRun()
+        }
     }
 }
 
