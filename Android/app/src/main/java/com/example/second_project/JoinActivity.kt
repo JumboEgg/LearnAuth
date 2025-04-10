@@ -17,7 +17,9 @@ import com.example.second_project.data.model.dto.response.SignupResponse
 import com.example.second_project.databinding.ActivityJoinBinding
 import com.example.second_project.network.ApiClient
 import com.example.second_project.network.SignupApiService
+import com.example.second_project.utils.disableEmojis
 import com.example.second_project.utils.isKoreanOrEnglishOnly
+import com.example.second_project.utils.setEnterLimit
 import org.json.JSONObject
 import org.web3j.crypto.WalletUtils
 import retrofit2.Call
@@ -51,6 +53,21 @@ class JoinActivity : AppCompatActivity() {
         // 비밀번호 보이기 토글
         binding.joinPwShow.setOnClickListener { changePasswordVisibility() }
         binding.joinPwShow2.setOnClickListener { changePassword2Visibility() }
+
+        binding.joinName.disableEmojis()
+        binding.joinName.setEnterLimit(0)
+
+        binding.joinEmail.disableEmojis()
+        binding.joinEmail.setEnterLimit(0)
+
+        binding.joinPw.disableEmojis()
+        binding.joinPw.setEnterLimit(0)
+
+        binding.joinPw2.disableEmojis()
+        binding.joinPw2.setEnterLimit(0)
+
+        binding.joinNickname.disableEmojis()
+        binding.joinNickname.setEnterLimit(0)
 
         val editTextList = listOf(
             binding.joinName,

@@ -17,6 +17,9 @@ import com.example.second_project.data.model.dto.response.LoginResponse
 import com.example.second_project.databinding.ActivityLoginBinding
 import com.example.second_project.network.ApiClient
 import com.example.second_project.network.LoginApiService
+import com.example.second_project.utils.disableEmojis
+import com.example.second_project.utils.getEmojiFilter
+import com.example.second_project.utils.setEnterLimit
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -45,6 +48,11 @@ class LoginActivity : AppCompatActivity() {
             finish()
             return
         }
+        binding.loginId.disableEmojis()
+        binding.loginId.setEnterLimit(0)
+
+        binding.loginPw.disableEmojis()
+        binding.loginPw.setEnterLimit(0)
 
         binding.loginToJoinBtn.setOnClickListener {
             val intent = Intent(this, JoinActivity::class.java)

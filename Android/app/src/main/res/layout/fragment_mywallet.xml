@@ -194,7 +194,7 @@
         android:layout_marginTop="16dp"
         android:elevation="100dp"
         android:text="로딩중입니다... 잠시만 기다려주세요!"
-        android:textColor="@color/primary_color"
+        android:textColor="@color/sub_color"
         android:textSize="16sp"
         android:visibility="gone"
 
