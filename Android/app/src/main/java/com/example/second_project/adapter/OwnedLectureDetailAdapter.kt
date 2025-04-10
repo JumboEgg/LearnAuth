@@ -60,7 +60,7 @@ class OwnedLectureDetailAdapter(
                 // 완강한 경우
                 binding.eachWatchBtn.text = "다시보기"
             } else if (subLecture.continueWatching > 0) {
-                // 5초 이상 시청한 경우
+                // 0초 넘게 시청한 경우
                 binding.eachWatchBtn.text = "이어보기"
             } else {
                 // 시청하지 않은 경우
