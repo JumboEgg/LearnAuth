@@ -100,6 +100,7 @@ class SearchFragment : Fragment() {
 
             }
         }
+        categoryAdapter.notifyDataSetChanged()
 
         binding.categoryRecyclerView.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
