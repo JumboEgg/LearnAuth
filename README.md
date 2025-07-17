@@ -62,4 +62,21 @@
 <br>
 
 # ⚒️ 시스템 아키텍처
-<img width="2058" height="1730" alt="image" src="https://github.com/user-attachments/assets/c4319292-1c91-45fd-8170-bd959b754bd4" />
+<img height="400" alt="image" src="https://github.com/user-attachments/assets/c4319292-1c91-45fd-8170-bd959b754bd4" />
+
+<br>
+
+# 🗂️ ERD
+<img width="3340" height="1432" alt="image" src="https://github.com/user-attachments/assets/3b84fa84-4275-406c-81fb-7b9f07cfa484" />
+
+<br>
+
+# 👤 팀원 소개
+
+|[이서현](https://github.com/kizizip)|[박진현](https://github.com/PJinhyeon)|[이호정](https://github.com/HoJungL) |[이한나](https://github.com/mathnobi)|[조성윤](https://github.com/SeongyunGit)|[허정은](https://github.com/JumboEgg)|
+|:------:|:---:|:---:|:---:|:---:|:------:|
+|<img src="https://avatars.githubusercontent.com/kizizip" width="120" />|<img src="https://avatars.githubusercontent.com/PJinhyeon" width="120" />|<img src="https://avatars.githubusercontent.com/HoJungL" width="120" />|<img src="https://avatars.githubusercontent.com/mathnobi" width="120" />|<img src="https://avatars.githubusercontent.com/SeongyunGit" width="120" />|<img src="https://avatars.githubusercontent.com/JumboEgg" width="120" />|
+|팀장<br>안드로이드<br>블록체인<br>IPFS 로직 처리<br>수료증 발급 기능<br>강의 재생 및 자료 다운|안드로이드 팀장<br>인프라<br>디자인<br>강의 재생 기능<br>강의 등록 기능|안드로이드<br>블록체인<br>클라이언트 서명 로직<br>블록체인 접근 로직<br>블록체인/UI 최적화|백엔드 팀장<br>강의 등록 기능<br>신고 기능<br>백엔드-블록체인 테스트 케이스|인프라 팀장<br>백엔드<br>쿼리 최적화<br>캐싱 처리<br>배포 자동화|블록체인 팀장<br>백엔드<br>Smart Contract 개발 및 배포<br>Meta Transaction 기능 적용<br>강의 및 수료증 조회 기능<br>블록체인 연동 API|
+
+
+
